@@ -1,0 +1,25 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>InteractiveROSETTA - Fixed Backbone Design</title>
+</head>
+
+<body>
+<h2><em>InteractiveROSETTA - Fixed Backbone Design</em></h2>
+<hr />
+<p><strong>Abstract: </strong>The aim of the fixed backbone panel is to provide the user with easy-to-use tools to set up a fixed backbone design run in Rosetta. Only one model can be designed at a time so if the user attempts to add residue positions from multiple models, the new model will overwrite the previous model's data.</p>
+<p><img src="fixbb_figure1.png" width="396" height="490" /></p>
+<p><strong>Figure 1: </strong>Schematic of the fixed backbone design panel</p>
+<p><strong>A:</strong> <em>Residue Add Options</em> - This region contains toggle-able buttons for indicating which amino acids will be available at added positions. Only the red residues will be added. The &quot;X&quot; button easily selects all residue types or deselects all residue types. If nothing is selected, added positions will default to only select wildtype at that position. In Figure 1, all added designed positions will allow any amino acid except C and P.</p>
+<p><strong>B:</strong> <em>Position Add Options </em>- Buttons to control adding and removing designable positions to the resfile. &quot;Add&quot; adds the current selection from the sequence viewer defaulting to the options specified in the residue add options panel. &quot;Remove&quot; removes the selected residues from the resfile. &quot;Restrict&quot; causes the resfile to include only the selected residues and remove all other positions. &quot;All&quot; adds every position on the current selected model to the resfile. &quot;Clear&quot; removes everything from the resfile.</p>
+<p><strong>C:</strong> <em>Position List</em> - A list containing all positions in the resfile. Select a position in this list to alter the list of available amino acid types at this position. Alternatively, you may click on the resfile directly to select positions.</p>
+<p><strong>D:</strong> <em>Apply Selection</em> - Change the selected resfile position to use the list of amino acids currently specified in the residue add options</p>
+<p><strong>E:</strong> <em>Scoretype Menu</em> - Specify the scoretype by which to color residues after completion of a design.</p>
+<p><strong>F:</strong> <em>Resfile</em> - A table showing which positions will be designed along with the list of amino acids available at each position. After design, the positions will be colored proportionately according to Rosetta scores and the labels will indicate which amino acid was selected (e.g. V5 will become V5W if position 5 was mutated from V to W). The table is clickable to easily view and select resfile positions.</p>
+<p><strong>G:</strong> <em>Load Resfile</em> - Easily populate the resfile table with information from a saved resfile.</p>
+<p><strong>H:</strong> <em>Save Resfile</em> - Save the current resfile data to a file for easy access at a later time.</p>
+<p><strong>I:</strong> <em>Default Button</em> - Click this button to toggle between &quot;NATRO&quot; and &quot;NATAA.&quot; The option of this button defines the behavior of all residues not specified in the resfile. NATRO indicates that these positions will not be touched at all. NATAA indicates that these unspecified positions cannot change amino acid type but can change rotamers.</p>
+<p><strong>J:</strong> <em>Design/Finalize Button</em> - Click this button to start the fixed backbone design job. After a design is completed, this button becomes the Finalize button to either accept or reject the output of the design.</p>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>InteractiveROSETTA - Kinematic Closure</title>
+</head>
+
+<body>
+<h2><em>InteractiveROSETTA - Kinematic Closure</em></h2>
+<hr />
+<p><strong>Abstract: </strong>Kinematic closure (KIC) provides an easy-to-use set of controls to either remodel existing protein loops using the KIC protocol or design new loops <em>de novo</em>. The user is able to supply a <em>de novo</em> loop sequence for new loops.</p>
+<p><img src="kic_figure1.png" width="397" height="517" /></p>
+<p><strong>Figure 1: </strong>Schematic of the KIC panel</p>
+<p><strong>A:</strong><em> Model Menu</em> - Use this menu to select the protein model that will undergo loop modeling</p>
+<p><strong>B:</strong> <em>Remodeling Type </em>- Select the type of loop modeling to perform. &quot;Refine&quot; simply performs high-resolution KIC modeling on the indicated loop. &quot;Reconstruct&quot; attempts to rebuild the indicated loop using the whole KIC protocol, so the loop is first modeling coarsely and then refined in high-resolution mode. &quot;De Novo&quot; allows you to generate a new loop given a primary sequence.</p>
+<p><strong>C:</strong> <em>Loop Begin</em> - Use this menu to indicate the N-terminal anchor of the loop that will be modeled. </p>
+<p><strong>D:</strong><em> Loop End</em> - Use this menu to indicate the C-terminal anchor of the loop that will be modeled. </p>
+<p><strong>E:</strong> <em>Loop Sequence</em> - For <em>de novo</em> loop models, indicate the primary sequence of the new loop using this text control.</p>
+<p><strong>F:</strong> <em>Advanced KIC Modeling Type</em> - If performing a reconstruction or a <em>de novo</em> loop build, you may opt to only perform the coarse simulation followed by a rotamer repack. Select the &quot;Centroid, Fullatom&quot; option if this is what you need.</p>
+<p><strong>G:</strong> <em>Pivot Residue</em> - Specify which residue in the loop will serve as the pivot residue. This option defaults to a loop anchor.</p>
+<p><strong>H:</strong> <em>Number of Structures</em> - Indicate a value greater than 1 if you wish to generate multiple loop models. The extra models will be saved to the directory specified by the &quot;output directory.&quot;</p>
+<p><strong>I:</strong> <em>Output Directory</em> - Specify the location to which extra models will be saved. If NStruct=1, then this option is ignored and the outputted structure will be loaded into PyMOL as usual.</p>
+<p><strong>J: </strong><em>Scoretype Menu</em> - Select the specific scoretype term by which to color the residues in PyMOL.</p>
+<p><strong>K: </strong><em>Loop Structure Menu</em> - After a KIC modeling job, this menu becomes populated with the individual residues in the new loop for easy viewing access.</p>
+<p><strong>L: </strong><em>KIC/Finalize Button </em> - Use this button to start a KIC job or accept/reject a completed KIC job.</p>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>InteractiveROSETTA - Installation</title>
+</head>
+
+<body>
+<h2><em><strong>InteractiveROSETTA - Installation</strong></em></h2>
+<hr />
+<h3>Windows 7/8</h3>
+<p>A Windows installer is provided in the &quot;win_install&quot; directory. Simply double click on &quot;install.exe&quot; to launch an installer that will guide you through the process.</p>
+<p><em>Manual Installation</em></p>
+<p>If the automatic installer fails, you can always install all the necessary components manually. First, you need a Python2.7 installation, which Windows does not have by default. We recommend using the Miniconda Python2.7 package because it contains a package manager called &quot;conda&quot; that makes installing 64bit Python modules simple. Miniconda can be downloaded and installed from here: <a href="http://conda.pydata.org/miniconda.html" title="Miniconda Link" target="_blank">http://conda.pydata.org/miniconda.html</a>. Select the Python2.7 download. You can check whether you are running a 32 or 64bit Windows by going to Start Menu-&gt;Control Panel-&gt;System and Security-&gt;System and looking at the value for &quot;System Type.&quot;</p>
+<p>Next, you need to install some Python packages by using the conda package manager. This can be accomplished from the command line. Go to the Start Menu, type &quot;cmd&quot; in the search box, and hit ENTER to open a terminal. Type the following lines, followed by pressing ENTER to submit them:</p>
+<p>conda install pip</p>
+<p>conda install numpy</p>
+<p>conda install poster</p>
+<p>Enter &quot;y&quot; when asked if you really want to install these modules</p>
+<p>Now you need to install wxPython, which is the module that draws all the graphics. It can be downloaded from here: <a href="http://www.wxpython.org/download.php" title="wxPython Link" target="_blank">http://www.wxpython.org/download.php</a>. Again, you want the py27 version for either 32 or 64bit Windows, whichever you are running.</p>
+<p>Next, you need to install some extra Python modules for BioPython, PyMOL, and OpenBabel. The links are here: <a href="http://www.lfd.uci.edu/~gohlke/pythonlibs/#biopython" title="BioPython Link" target="_blank">http://www.lfd.uci.edu/~gohlke/pythonlibs/#biopython</a>, <a href="http://www.lfd.uci.edu/~gohlke/pythonlibs/#pymol" title="PyMOL Link" target="_blank">http://www.lfd.uci.edu/~gohlke/pythonlibs/#pymol</a>, and <a href="http://www.lfd.uci.edu/~gohlke/pythonlibs/#openbabel" title="OpenBabel Link" target="_blank">http://www.lfd.uci.edu/~gohlke/pythonlibs/#openbabel</a>.</p>
+<p>These are &quot;wheel&quot; files, and you need to download the appropriate file for Python2.7 (not 26, 33, or 34) and either the win32 or win_amd64 file. Save them to a place that is easy to access, such as the Downloads folder. You need to use pip to install these wheel files, so again open a command prompt by typing &quot;cmd&quot; in the search box of the Start Menu. Go to the directory where the wheel files are saved. Assuming you saved them to the Downloads folder:</p>
+<p>cd Downloads</p>
+<p>If you are having trouble getting to the directory, then open the folder to which you saved them and copy them to your home folder at C:\Users\Username since the command prompt puts you in this folder by default. Then install them by doing the following:</p>
+<p>pip install biopython-1.65-cp27-none-win_amd64.whl</p>
+<p>pip install pymol-1.7.2.1-cp27-none-win_amd64.whl</p>
+<p>pip install openbabel-1.8.1-cp27-none-win_amd64.whl</p>
+<p>The above assumes you are on a 64bit machine. Replace the filenames with the 32bit version if this is not the case.</p>
+<p>Now you have to install OpenBabel proper, which installs some important files that the Python version of OpenBabel requires. You can download it here: <a href="http://openbabel.org/wiki/Category:Installation" title="OpenBabel GUI Link" target="_blank">http://openbabel.org/wiki/Category:Installation</a>.</p>
+<p>Finally, you need to get a copy of PyRosetta from the Gray lab. The download page is here: <a href="http://www.pyrosetta.org/dow" title="PyRosetta Link" target="_blank">http://www.pyrosetta.org/dow</a>. This requires obtaining an academic or commercial license.</p>
+<p>Once all of this is completed, you can run InteractiveROSETTA by double clicking on the &quot;InteractiveROSETTA.py&quot; file in the main folder. Right-click on it and select the option to add a shortcut if you wish to have a link to it on your desktop or in the Start Menu.</p>
+<h3>OSX</h3>
+<p>Coming soon...</p>
+<h3>Linux</h3>
+<p>A bash installer is provided to easily install all of the packages. Run it from a terminal to use it.</p>
+<p><em>Manual Installation</em></p>
+<p>To install manually, you need to have a Python2.7 install which can be installed from your package manager. Older versions of Python may work but they have not been tested. Make sure to install the following packages using pip or easy_install: biopython, psutil, poster, glob, and numpy.</p>
+<p>Make sure that wxPython is installed. It is available in your package manager. For yum users, it is called &quot;wxPython&quot;. For apt-get users, it is called &quot;wxgtk-2.8&quot; or something similar. Also, you need to install the open-source version of PyMOL which is also available in your package manager.</p>
+<p>Installing OpenBabel is optional (it makes creating residues and ligands easier). For Debian distros, you can install it from apt-get. The package you need is called &quot;python-openbabel&quot;. OpenBabel is available in yum but does not seem to install properly. So you need to compile it from source. This requires installing cmake and gcc. Download the source here: <a href="http://open-babel.readthedocs.org/en/latest/Installation/install.html#compiling-open-babel" title="OpenBabel Source Link" target="_blank">http://open-babel.readthedocs.org/en/latest/Installation/install.html#compiling-open-babel</a>. Don't forget to add the -DPYTHON_BINDINGS flag to the cmake call or you won't get the Python bindings.</p>
+<p>Finally, download PyRosetta from <a href="http://www.pyrosetta.org/dow" title="PyRosetta Link" target="_blank">http://www.pyrosetta.org/dow</a>. This requires obtaining an academic or commercial license. You can unpack the PyRosetta directory anywhere you like (/usr/local seems to be the default global location). There is a script in the main PyRosetta directory called &quot;SetPyRosettaEnvironment.sh&quot; that needs to be sourced before you use PyRosetta, so add a line to your .bashrc file to source that script.</p>
+<p>If you are using the Ubuntu version, you need to change the name of the main PyRosetta directory to eliminate the &quot;:&quot;, otherwise your PYTHONPATH environment variable will not be interpreted correctly. You also need to move the two boost_python SO files to the &quot;rosetta&quot; directory. The ScientificLinux PyRosetta package is fine the way it is.</p>
+<p>If PyRosetta is installed in a root-privileged directory, run python as root and perform a simple scoring routine to generate the Dunbrack library binary file to greatly speed up future PyRosetta calculations. Do the following:</p>
+<p>sudo python</p>
+<p>&gt;&gt;&gt; from rosetta import *</p>
+<p>&gt;&gt;&gt; init(extra_options=&quot;-ignore_unrecognized_res&quot;)</p>
+<p>&gt;&gt;&gt; pose = pose_from_pdb(&quot;/path/to/valid/pdbfile&quot;)</p>
+<p>&gt;&gt;&gt; scorefxn = create_score_function(&quot;talaris2013&quot;)</p>
+<p>&gt;&gt;&gt; scorefxn(pose)</p>
+<p>&gt;&gt;&gt; quit()</p>
+<p>Now you can run InteractiveROSETTA by executing &quot;python InteractiveROSETTA.py&quot; from a terminal.</p>
+</body>
+</html>

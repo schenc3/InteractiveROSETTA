@@ -1,0 +1,28 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>InteractiveROSETTA - Sequence Window</title>
+</head>
+
+<body>
+<h2><em>InteractiveROSETTA - Using the Sequence Window</em></h2>
+<hr />
+<p><img src="sequencewindow_figure.png" width="1229" height="308" /><strong>Figure 1:</strong> Schematic of the typical contents of the sequence window.</p>
+<p><strong>A:</strong> <em>Load PDBs Button</em> - Click on this button to search for and load PDB files into the sequence window and PyMOL viewer. If your PDB cannot be loaded, then check the integrity of the file to make sure that there are not residues that are missing large amounts of atoms. Another possible problem could be if you have defined a new residue type and gave it a 3 letter code that is being used to represent a different kind of residue in the PDB file you are trying to load. You can remove residue types by going to your home directory/InteractiveROSETTA/params and deleting the entries that you want to remove.</p>
+<p><strong>B:</strong> <em>RCSB PDB Code</em> - Enter a four letter RCSB PDB identifier to search for and download via the Internet.</p>
+<p><strong>C:</strong> <em>Fetch PDB Button</em> - Download the indicated PDB code from RCSB. You will be prompted for whether you wish to desire to save the PDB file locally before loading it into PyRosetta.</p>
+<p><strong>D:</strong> <em>Close Button</em> - Close the selected chains and remove them from PyMOL and the sequence window. If nothing is selected, this button defaults to closing everything.</p>
+<p><strong>E:</strong> <em>Save PDB Button</em> - Save the currently selected PDBs. If nothing is selected, this button defaults to saving all loaded PDBs.</p>
+<p><strong>F: </strong><em>Save Image Button</em> - Save the current PyMOL view as a PNG image file.</p>
+<p><strong>G: </strong><em>Join Chain Button</em> - Join two selected chains into a single chain.</p>
+<p><strong>H: </strong><em>Renumber Button</em> - Given a selection of a single amino acid, renumber that chain from 1, starting at the selected residue, making the selected residue the new N-terminus.</p>
+<p><strong>I:</strong> <em>Chain IDs</em> - This left column of the sequence viewer indicates the identity of the PDB the sequence is coming from and the chain identifier. Double click on an entry over in this column to select the entire row.</p>
+<p><strong>J:</strong> <em>Sequence Viewer</em> - This grid contains the primary sequences of all loaded chains. You can click and drag to select residues which will then be automatically selected when you enter the PyMOL window. You need to click and drag to select residues (so that there is a light blue highlight); just getting the black box outline is not enough to select things. You may also selected residues and press the &quot;DELETE&quot; key to delete the selected residues.</p>
+<p><strong>K:</strong> <em>Numbering Button</em> - Click this button to choose between different numbering schemes. &quot;From 1&quot; numbers the grid starting at 1. &quot;PDB #&quot; causes the labels of the columns to reflect the numbering from the PDB files and possibly insert gaps if multiple chains are loaded and there are gaps in different chains. &quot;Align&quot; becomes available after a multiple-sequence alignment from the superimposition protocol. Numbering is from 1 but chains are aligned and contains gaps. Clicking on &quot;Align&quot; will return the numbering to &quot;From 1&quot; and remove the alignment.</p>
+<p><strong>L:</strong> <em>Sequence Coloring Button</em> - Click this button to toggle between different coloring schemes for the residues in the Sequence Viewer. The default is no coloring, but you may also choose to color by secondary structure or B-factor.</p>
+<p><strong>M:</strong> <em>Stereo Toggle Button</em> - Click this button to turn the PyMOL stereo view on and off.</p>
+<p><strong>N:</strong> <em>Background Coloring Button</em> - Click this button to select a new color for the background in PyMOL.</p>
+
+</body>
+</html>

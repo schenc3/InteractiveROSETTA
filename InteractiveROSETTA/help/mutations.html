@@ -1,0 +1,26 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>InteractiveROSETTA - Point Mutations</title>
+</head>
+
+<body>
+<h2><em>InteractiveROSETTA - Point Mutations</em></h2>
+<hr />
+<p><strong>Abstract:</strong> The point mutations panel is designed to simplify the process of manually designing a protein one residue at a time. The user can easily mutate individual amino acids to new amino acid types and explore the rotamers available for these amino acids in the Dunbrack rotamer library provided by Rosetta.</p>
+<p><img src="mutations_figure1.png" width="396" height="414" /></p>
+<p><strong>Figure 1: </strong>Schematic of the point mutations panel before searching rotamers</p>
+<p><strong>A:</strong> <em>Model</em> - Specify the model onto which the point mutation will be made. Specifying a model causes the current scores of all residues on this model to be calculated.</p>
+<p><strong>B:</strong> <em>Residue Position </em>- Specify the position that will be mutated.</p>
+<p><strong>C:</strong> <em>Residue Type</em> - New amino acid type to mutate onto the sequence.</p>
+<p><strong>D:</strong> <em>Search Rotamers</em> - Search all the rotamers for the indicated residue type at the selected position.</p>
+<p><strong>E:</strong> <em>Scoretype Menu</em> - Specify the scoretype by which to color residues.</p>
+<p><strong>F:</strong> <em>Residue Energies</em> - A table showing the per residue scores colored by score (blue is the lowest score, red is the highest). This table is clickable to easily select new residue positions.</p>
+<p><img src="mutations_figure2.png" width="378" height="403" /></p>
+<p><strong>Figure 2: </strong>Schematic of the point mutation panel after searching rotamers.</p>
+<p><strong>G:</strong> <em>Rotamer Energies</em> - A table showing the per rotamer scores for the selected residue type, colored by score (blue is the lowest score, red is the highest). Rotamers are sorted according to increasing score. This table is clickable to easily view what the rotamer would look like in PyMOL.</p>
+<p><strong>H:</strong> <em>Current Rotamer</em> - The rotamer that is currently displayed in PyMOL. Click on the arrow buttons to navigate the table, or click directly on the table to change rotamers.</p>
+<p><strong>I:</strong> <em>Mutate Button</em> - Click this button to confirm the selection of mutated rotamer, which will then update the PyMOL structure and the sequence.</p>
+</body>
+</html>

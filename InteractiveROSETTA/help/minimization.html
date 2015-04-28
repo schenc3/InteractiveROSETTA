@@ -1,0 +1,27 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>InteractiveROSETTA - Energy Minimization</title>
+</head>
+
+<body>
+<h2><em>InteractiveROSETTA - Energy Minimization</em></h2>
+<hr />
+<p><img src="minimization_figure.png" width="408" height="465" /></p>
+<p><strong>Figure 1: </strong>Schematic of a typical energy minimization panel</p>
+<p><strong>A:</strong> <em>Minimize BB</em> - Click this button to make all additions to the minimization map default to minimize the backbone only.</p>
+<p><strong>B:</strong> <em>Minimize Chi </em>- Click this button to make all additions to the minimization map default to minimize the sidechains only.</p>
+<p><strong>C:</strong> <em>Minimize BB</em>+Chi - Click this button to make all additions to the minimization map default to minimize both the backbone and the sidechains.</p>
+<p><strong>D:</strong> <em>Minimization Map Controls</em> - <strong>Add:</strong> Add the selected residues to the minimization map with the settings indicated by A-C, <strong>Remove:</strong> Remove the selected residues from the minimization map, <strong>Restrict:</strong> Restrict the minimization map to only include the selected residues with the settings indicated by A-C, <strong>All:</strong> Add all loaded positions to the minimization map with the settings indicated by A-C, <strong>Clear:</strong> Remove everything from the minimization map.</p>
+<p><strong>E: </strong>Minimization Map Editor - Use this menu to select entries in the minimization map to view and edit. After a minimization, the view will show the neighborhood of the selected position with residues colored according to energy (blue is the lowest energy, red is the highest), with the original pre-minimized structure shown in green for comparison. The residue is also labeled with the specific energy. </p>
+<p><img src="minimization_pymol_figure.png" width="454" height="429" /></p>
+<p><strong>Figure 2:</strong> An example of K106 viewed after a minimization. K106 is red, indicating it had one of the highest energies in the structure. The original structure is shown in green.</p>
+<p><strong>F: </strong><em>Minimization Editor Controls</em> - Click these buttons to change the type of minimization for the selected residue position.</p>
+<p><strong>G:</strong> <em>Scoretype Menu</em> - Select the specific scoretype term by which to color the residues in PyMOL.</p>
+<p><strong>H:</strong> <em>Minimization Map</em> - A table showing the residues that will be minimized and their settings. After a minimization, these settings become colored by the scoretype selected to make it easy to see which residues have good/bad energies</p>
+<p><strong>I:</strong> <em>Minimization Map Elements</em> - Click on individual elements in the minimization map to select and view them. The minimization map editor (E) will be updated with the selection.</p>
+<p><strong>J:</strong> <em>Minimization Type</em> - Click on this button to toggle the minimization type between torsion and Cartesian space.</p>
+<p><strong>K:</strong> <em>Minimize/Finalize Button</em> - Click on this button to start an energy minimization. After minimization, click on it to either accept or reject the outcome. Changes are not saved to the structures in PyMOL until they are accepted with this button.</p>
+</body>
+</html>

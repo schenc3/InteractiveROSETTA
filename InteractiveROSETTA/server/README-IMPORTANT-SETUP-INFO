@@ -1,0 +1,128 @@
+==========================================================================================
+|                      InteractiveROSETTA Remote Server Setup                            |
+|                                                                                        |
+|                             Requires C++ UNIX Rosetta                                  |
+==========================================================================================
+
+==========================================================================================
+PURPOSE
+==========================================================================================
+1. Speed up PyRosetta calculations on Windows:
+
+Most of PyRosetta's protocols require reading the Dunbrack rotamer library.  The first
+time this occurs, it takes about 30 seconds to read all the data from text files. After
+this load, PyRosetta attempts to write out a binary file of the data.  Next time, instead
+of reading the text files, PyRosetta reads the binary file, which completes in about 0.5
+seconds.  Unfortunately, there is a bug in Windows PyRosetta that prevents it from writing
+the binary file properly, so InteractiveROSETTA is slowed down because PyRosetta is always
+reading the rotamers from text files.  The remote server will accept these calculations
+from InteractiveROSETTA, and since the server is running in a UNIX environment it does not
+have this bug and can perform calculations much faster.  The server will speed up use of
+InteractiveROSETTA in Windows.
+
+Windows PyRosetta also consumes massive amounts of memory, so this also helps slower
+computers with less memory run InteractiveROSETTA more efficiently.
+
+Using the server to offload PyRosetta calculations is not necessary for Mac and Linux 
+because they can read and write the binary file appropriately.  They also consume less
+memory because there are namespace builds available for Mac and Linux.
+
+2. Provide access to Rosetta applications not wrapped in PyRosetta
+
+Many useful applications are not wrapped in PyRosetta, so you cannot use them in the 
+InteractiveROSETTA client directly.  However, InteractiveROSETTA can still generate all of
+the input files for these protocols easily, and then send these files over to the remote
+server that has the capability of running C++ Rosetta directly.  InteractiveROSETTA listens
+for the output to be uploaded to a URL and downloads the results into the client GUI as
+soon as they are available.
+
+==========================================================================================
+SETTING UP THE SERVER
+==========================================================================================
+
+1. Obtain a license for Rosetta AND PyRosetta
+
+   Rosetta: https://www.rosettacommons.org/software/license-and-download
+   PyRosetta: http://www.pyrosetta.org/dow
+   
+   You absolutely need to have PyRosetta.  Rosetta is optional if you want to run C++
+   Rosetta only applications.  The script daemon_server.py uses PyRosetta which is why
+   it is necessary, even if you don't plan to use the Windows speed-up.
+
+2. Download and install both Rosetta and PyRosetta.  PyRosetta is available as a pre-
+   compiled binary, so it is easy to install (just unpack it where you want it and source
+   the "SetPyRosettaEnvironment.sh" script in your .bashrc file).  Rosetta is a bit more
+   complicated because you have to compile it.  Unpack the Rosetta package somewhere easy
+   to access (I prefer /usr/local).  Go into the source directory and there should be a
+   file called "scons.py."  You will need to have GCC and MPICC install:
+   
+   sudo yum install gcc; sudo yum install openmpi (RedHat distros)
+   sudo apt-get install gcc; sudo apt-get install openmpi (Debian distros)
+   
+   To build single processor applications: sudo ./scons.py bin mode=release
+   To build MPI applications: sudo ./scons.py bin extras=mpi mode=release
+   
+   Then wait a long time for Rosetta to install...
+
+3. Generate the binary rotamer files for Rosetta and PyRosetta.
+
+   If you installed Rosetta/PyRosetta globally (probably did, because it's the default and
+   most obvious thing to do), then you need to make the directory that holds the binary
+   rotamer library writable and then generate it.
+   
+   $ROSETTA = location of the Rosetta main directory
+   $PYROSETTA = location of the PyRosetta main directory
+   
+   sudo chmod 777 $ROSETTA/rosetta_database/rotamer/ExtendedOpt1-5
+   sudo chmod 777 $ROSETTA/rosetta_database/rotamer/ExtendedOpt1-5
+   
+   Then run a simple scoring application to generate the binary library
+   
+   For Rosetta, create a file called "flags" with this information:
+   -in
+     -file
+       -s <a pdb file>
+     -path
+       -database $ROSETTA/rosetta_database
+   -ignore_unrecognized_res
+   
+   Replace <a pdb file> with the name of a valid PDB file
+   Then run: $ROSETTA/rosetta_source/bin/score.default.linuxgccrelease @flags
+   Then: sudo chmod 755 $ROSETTA/rosetta_database/rotamer/ExtendedOpt1-5
+   
+   For PyRosetta:
+   python
+   >>> from rosetta import *
+   >>> init(extra_options="-ignore_unrecognized_res")
+   >>> pose = pose_from_pdb("<a pdb file>")
+   >>> scorefxn = create_score_function("talaris2013")
+   >>> scorefxn(pose)
+   >>> quit()
+   
+   Then: sudo chmod 755 $PYROSETTA/rosetta_database/rotamer/ExtendedOpt1-5
+   
+4. Setup Apache so the client GUI can interact with the server through HTTP
+
+   Here is a good tutorial for Apache: http://www.cyberciti.biz/faq/linux-install-and-start-apache-httpd/
+   
+   You also need to go into your router and configure it to open port 80 for HTTP traffic and redirect
+   it to the computer running Apache.  The method for doing this varies by router manufacturer
+   so see their instructions.
+   
+   If this is successful, you should be able to see the Apache welcome page when connected to your network
+   
+   To get the Apache computer's IP address: ifconfig
+   The "inet" field is the IP address.  Ignore entires for lo and virbr0
+   
+   Then, in a web browser, navigate to http://<IP Address> where <IP Address> is the inet field.
+   You should see the welcome screen.
+
+5. Copy the contents of this folder ("InteractiveROSETTA/server") to the Apache web base, which is
+   usually /var/www/html.  Put it in a folder called /var/www/html/InteractiveROSETTA
+
+6. Start running the daemons.  
+
+   Run maintain.csh every minute in a crontab job.
+   It needs to cd to /var/www/html/InteractiveROSETTA before running
+   This will make sure that daemon_server.py is always running
+   

@@ -1,0 +1,47 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>InteractiveROSETTA - Multi-State Design</title>
+</head>
+
+<body>
+<h2><em>InteractiveROSETTA - Multi-State Design</em></h2>
+<hr />
+<p><strong>Abstract: </strong>The aim of the multi-state design (MSD) panel is to provide an easy-to-use interface for setting up MSD simulations. Please note that PyRosetta does not have MSD bindings, so you must have a server that is capable of running MSD through vanilla C++ Rosetta. Even if Python bindings existed for MSD, you need to be using a parallel-computing environment to run MSD efficiently.</p>
+<p><img src="msd_figure1.png" width="411" height="434" /></p>
+<p><strong>Figure 1: </strong>Schematic of the MSD panel, viewing the entity resfile controls</p>
+<p>An entity resfile defines which &quot;abstract positions&quot; (numbered from 1) are designable. Each of these positions has a palette of amino acids to choose from, along with correspondences that specify what this abstract position really is in each of the structures in the MSD.</p>
+<p><strong>A:</strong> <em>Amino Acid Palette</em> - Click on amino acids to add them to the design palette. When you add extra designable positions, the set of amino acid choices will default to the red residues. In the example given above, the palette will default to all amino acids except C and P in all subsequent additions.</p>
+<p><strong>B:</strong> <em>Add Entry </em>- Add another designable position to the Entity Resfile.</p>
+<p><strong>C:</strong><em> Position Menu </em>- Select an abstract designable entity resfile position. Alternatively, you may select an element in the Entity Resfile directly by clicking on a cell.</p>
+<p><strong>D:</strong> <em>Remove Position</em> - Removes the current position in the Position Menu from the Entity Resfile</p>
+<p><strong>E:</strong> <em>Correspondence Menu</em> - Use this menu to select a correspondence. First, click on a cell in the column of the state for which you want to add a correspondence. Then select the appropriate residue position in this state from the Correspondence Menu to add it to the Entity Resfile.</p>
+<p><strong>F:</strong> <em>Entity Resfile</em> - A grid that displays the contents of the Entity Resfile. Click on individual cells to change the correspondences for different states. The states are labeled by column. </p>
+<p>NOTE: Adding correspondences can be tedious. To simplify this process, you may select a list of positions in the sequence viewer and simply right click on a cell in the column for the appropriate state to add this list of positions to the clicked cell and all cells underneath the clicked cell.</p>
+<p><img src="msd_figure2.png" width="377" height="336" /></p>
+<p><strong>Figure 2: </strong>Schematic of the MSD panel, viewing the secondary resfile controls</p>
+<p>There is one secondary resfile for each state in an MSD design. It defines how the residues not specified in the Entity Resfile behave. You may indicate that certain positions have the &quot;NATAA&quot; property which will allow their rotamers to be repacked, but the sidechain will not change amino acid type. If you want to change amino acid type, then it needs to be specified in the Entity Resfile and declare no correspondences except for that one state alone. Secondary resfiles are optional, so you may opt not to specify one for some or all states.</p>
+<p><strong>G:</strong> <em>Model Menu</em> - Select the model for which you will design a secondary resfile.</p>
+<p><strong>H:</strong> <em>Add Controls</em> - Controls for adding and removing elements from the secondary resfile. &quot;Add&quot; will set the NATAA property on the currently selected residues. &quot;Remove&quot; removes the current selection. &quot;Restrict&quot; causes the secondary resfile to be populated only with residues in the current selection. &quot;All&quot; sets all positions for this model to have the NATAA flag set. &quot;Clear&quot; removes all elements from the secondary resfile.</p>
+<p><strong>I:</strong> <em>Secondary Resfile</em> - A grid that displays the information in the secondary resfile for the current model.</p>
+<p><img src="msd_figure3.png" width="378" height="352" /></p>
+<p><strong>Figure 3: </strong>Schematic of the MSD panel, viewing the state definition controls</p>
+<p>MSD allows you to group states together into packages. For instance, you may have multiple conformations of a single backbone that you want to be treated as a single state. These controls allow you to define what state each chain ends up in.</p>
+<p><strong>J:</strong><em> State Definitions</em> - A grid that displays what letter state to which each model and chain belong. You can change the state assignments by clicking on the letters to cycle through all available states.</p>
+<p><strong>K:</strong> <em>State Menu</em> - A menu allowing you to select the states that are currently available to define their state functions.</p>
+<p><strong>L:</strong> <em>State Function</em> - If you have multiple chains in a single state, the score of the state is calculated as either the minimum or maximum score of the members of the state. Click on these buttons to change which function will be used for the state selected in the State Menu.</p>
+<p><img src="msd_figure4.png" width="388" height="261" /></p>
+<p><strong>Figure 4: </strong>Schematic of the MSD panel, viewing the fitness function controls</p>
+<p>MSD needs to calculate a fitness value for all the states under consideration at each natural selection step of the genetic algorithm. The fitness function defines how the scores of all the states are mathematically related to one another. Each state is individually optimized and then the scores of the states are submitted to the fitness function to determine which configurations of the overall system propagate to the next generation.</p>
+<p><strong>M:</strong> <em>Fitness Function</em> - The current fitness function for the MSD. Select portions of the fitness function to edit by clicking the cursor before entities or values, or by dragging and highlighting portions of the fitness function. To remove operators, please note that you have to select the operator AND one of the operands to remove it.</p>
+<p>In this example, the fitness function score is the score of A minus the score of B. Both A and B will be individually optimized. However, the system that has an optimized state A that is as good as possible while simultaneously having an optimized state B that is as bad as possible (because B's score is being subtracted, not added) will be favored.</p>
+<p><strong>N:</strong> <em>State/Literal</em> - Use this text box to replace the yellow-highlighted regions of the fitness function with the given states (letters) or literal values. Illegal values will default to a ?.</p>
+<p><strong>O:</strong> <em>Function/Operation Menu</em> - Use this menu to select new operations or functions to add/remove to the fitness function.</p>
+<p><strong>P:</strong> <em>Function/Operations Controls</em> - Use these buttons to add or remove functions from the fitness function. Adding functions/operations will generate ? entries that need to be specified or removed before MSD can run.</p>
+<p><strong>Q:</strong> <em>Load MSD</em> - Load the setup saved from a previous MSD session.</p>
+<p><strong>R:</strong> <em>Save MSD</em> - Save the current setup in this MSD session for easy access at a later time.</p>
+<p><strong>S:</strong> <em>Run MSD</em> - Run an MSD job with the indicated paramters. Again, please note that you must be running a C++ Rosetta server for MSD to execute. This client GUI interacts with the server through HTTP POST events, so your server needs to be running Apache (local LAN-accessible Apache is fine, it does not have to be world-available) and have the appropriate daemons provided running. The client must have a network connection.</p>
+<p>NOTE: When your job is successfully submitted to the server, it is given an ID. InteractiveROSETTA looks for a URL results link to become available using this ID and will download the results when they become available. You will have to tell InteractiveROSETTA what the URL of your server is to get these results.</p>
+</body>
+</html>

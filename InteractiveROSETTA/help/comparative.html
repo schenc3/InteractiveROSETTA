@@ -1,0 +1,30 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>InteractiveROSETTA - Comparative Structure Prediction</title>
+</head>
+
+<body>
+<h2><em>InteractiveROSETTA - Comparative Structure Prediction</em></h2>
+<hr />
+<p><strong>Abstract: </strong>The purpose of the comparative structure prediction panel is to provide an interface to thread a protein sequence onto an existing homologous template for <em>de novo</em> structure prediction. It currently relies on the Robetta server to generate the fragments. In the future we plan to try to setup the in-house server daemon to be able to run make_fragments.pl locally. Robetta is currently only available for academic use.</p>
+<p><img src="comparative_figure.png" width="392" height="401" /></p>
+<p><strong>Figure 1: </strong>Schematic of the comparative structure prediction panel</p>
+<p><strong>A:</strong> <em>Get Fragments</em> - A button that simply opens the Robetta fragments server web page in your default web browser.</p>
+<p><strong>B:</strong> <em>Job ID  </em>- After you submit a fragments job at Robetta, you will be given an ID which is usually a 5-digit integer. Enter that ID here and click the &quot;watch&quot; button to have InteractiveROSETTA start looking for the fragments file to be generated. One it is available, you will be notified and it will be downloaded.</p>
+<p><strong>C:</strong><em> Watch </em>- Start listening for a fragments file to be generated for the indicated job ID.</p>
+<p><strong>D:</strong> <em>Model Menu</em> - A menu consisting of all currently loaded model. Use this to select which of these models are homologous to the structure being modeled.</p>
+<p><strong>E:</strong> <em>Model Controls</em> - Use these buttons to add and remove models from the list of homologous proteins.</p>
+<p><strong>F:</strong> <em>Homologous Proteins</em> - A list of all structures that are potentially similar to the structure being modeled. Rosetta will attempt to thread the primary sequence onto these structures, modeling in loops in the indel regions.</p>
+<p><strong>G:</strong> <em>Load Fragments</em> - Use this button to specify the location of the fragments file generated from Robetta.</p>
+<p>NOTE: If you download the results manually, it will not be formatted properly. InteractiveROSETTA generates .frag files by reading the data in the uploaded directory to a single file and compressing it into a .gz archive. If you do this manually, you need to start a new text file and add all of the data from the fragments files, the fasta file, the psipred file, and the psipred_ss2 file into this text file. The data from each file should be delimited as follows:</p>
+<p>BEGIN filename.ext</p>
+<p>...</p>
+<p>END filename.ext</p>
+<p>Then compress the text file to a GZ archive. It is recommended to use the Job ID watch so all of this is done automatically.</p>
+<p><strong>H:</strong><em> Scoretype Menu</em> - Specify the scoretype by which to color residues after completion of a design.</p>
+<p><strong>I:</strong><em> View Structure Menu</em> - After comparative modeling, this menu will be populated with the residues in the structure prediction. Select from the menu to easily do a neighborhood view on that residue in the protein.</p>
+<p><strong>J:</strong> <em>Thread/Finalize - </em>Start the comparative modeling job. This button becomes the Finalize button after comparative modeling to allow you to accept or reject the model.</p>
+</body>
+</html>
