@@ -1,32 +1,11 @@
 #!/bin/bash
-set -e
 
 if [ $EUID == 0 ]; then
     echo "Do not run this script as root.  You will be prompted for the root password when necessary."
     exit
 fi
 
-# Ask for global or local install
-while true; do
-    read -p "Will you be installing InteractiveROSETTA globally? (Y/N) " yn
-    case $yn in
-	[Yy]* ) LOCAL=0; break;;
-	[Nn]* ) LOCAL=1; break;;
-	* ) echo "Please answer Y or N";;
-    esac
-done
-
-if [ LOCAL==0 ]; then
-    INSTALLDIR="/usr/local/InteractiveROSETTA"
-    SEARCHDIR="/"
-else
-    SEARCHDIR="~"
-    read -p "Enter the installation location: ~/" input
-    mkdir -p ~/$input
-    INSTALLDIR="~/"$input
-    echo $INSTALLDIR
-fi
-exit
+SEARCHDIR="/"
 
 # Figure out what Linux distro we are on, so we know what the package manager is
 if [ -f /etc/debian_version ]; then
@@ -48,13 +27,17 @@ cd "$SCRIPTDIR"
 
 # Have the user unpackage PyRosetta before doing anything else
 echo "Searching for PyRosetta installation..."
-if [ `find / -name SetPyRosettaEnvironment* 2> /dev/null | wc -l` > 0 ]; then
-    NEWROSETTA=`find / -name SetPyRosettaEnvironment* 2> /dev/null | head -n 1 | awk -F "/SetPyRosetta" '{print $1}' `
+read -p "Enter a directory to search (default: "$SEARCHDIR"): " input
+if [ $input != "" ]; then
+    SEARCHDIR=$input
+fi
+NEWROSETTA=`find $SEARCHDIR -name SetPyRosettaEnvironment* 2> /dev/null | head -n 1 | awk -F "/SetPyRosetta" '{print $1}' `
+if [ $NEWROSETTA != "" ]; then
     # This is obnoxious...there is a colon in the Ubuntu PyRosetta directory name
     # and it messes up : delimited paths, so create an appropriate symlink
     if [[ $ROSETTA_VER == "Ubuntu" ]]; then
-	OLDROSETTA=`find / -name SetPyRosettaEnvironment* 2> /dev/null | head -n 1 | awk -F "/SetPyRosetta" '{print $1}' `
-	NEWROSETTA=`find / -name SetPyRosettaEnvironment* 2> /dev/null | head -n 1 | awk -F "/SetPyRosetta" '{print $1}' | awk -F ":" '{print $1}'`
+	OLDROSETTA=$NEWROSETTA
+	NEWROSETTA=`echo $OLDROSETTA | awk -F "/SetPyRosetta" '{print $1}' | awk -F ":" '{print $1}'`
 	sudo unlink $NEWROSETTA
 	sudo ln -s $OLDROSETTA $NEWROSETTA
 	# Move the so files to rosetta because it cannot find them in PyRosetta root
@@ -68,7 +51,6 @@ if [ `find / -name SetPyRosettaEnvironment* 2> /dev/null | wc -l` > 0 ]; then
 else
     echo "A PyRosetta installation was not detected."
     echo "Please download the package and unpack it."
-    echo "If you already did this, then place it in /usr/local because find is not finding it."
     echo "The PyRosetta version you need is "$ROSETTA_VER
     exit
 fi
@@ -78,7 +60,7 @@ if hash python 2> /dev/null; then
     echo "Python installation detected"
 else
     echo "Installing Python 2.7"
-    sudo $PMGR"python"
+    $PMGR"python"
 fi
 
 PYTHON_MAJOR=`python -c "import sys; print sys.version_info[0]";`
@@ -124,6 +106,15 @@ if [[ $ROSETTA_VER == "Ubuntu" ]]; then
 else
 	$PMGR"openbabel"
 	$PMGR"python-openbabel"
+fi
+
+# Unpack molfile2params if it has not been done yet (i.e. this is the first time this script has been run)
+if [ ! -e "$SCRIPTDIR/scripts/rosetta_py" ]; then
+    cp $ROSETTADIR/toolbox/molfile2params.tar.gz $SCRIPTDIR/scripts
+    tar zxvf $SCRIPTDIR/scripts/molfile2params.tar.gz > /dev/null 2> /dev/null # This throws an error even though it appears to do everything right
+    rm $SCRIPTDIR/scripts/molfile2params.tar.gz
+    mv molfile2params/* $SCRIPTDIR/scripts
+    rm -rf molfile2params
 fi
 
 # Now run a simple PyRosetta script as root so the rotamer binary files get written
