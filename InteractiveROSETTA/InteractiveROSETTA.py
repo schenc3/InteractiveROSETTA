@@ -1,5 +1,5 @@
 # ================================================================================================================
-# DSSP License Agreement
+# DSSP License Agreement (http://swift.cmbi.ru.nl/gv/dssp)
 #
 # Boost Software License - Version 1.0 - August 17th, 2003 Permission is hereby granted, free of charge, 
 # to any person or organization obtaining a copy of the software and accompanying documentation covered 
@@ -18,7 +18,7 @@
 # OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # ================================================================================================================
-# MUSCLE Public Domain Notice
+# MUSCLE Public Domain Notice (http://www.drive5.com/muscle/manual/license.html)
 #
 # The MUSCLE software, including object and source code and documentation, is hereby donated to the public domain. 
 #
@@ -26,7 +26,7 @@
 # THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT 
 # LIMITATION IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 # ================================================================================================================
-# BioPython License
+# BioPython License (http://biopython.org/DIST/LICENSE)
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation with or without modifications and for any purpose and
@@ -46,7 +46,7 @@
 # OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE
 # OR PERFORMANCE OF THIS SOFTWARE.
 # ================================================================================================================
-# wxPython License
+# wxPython License (http://www.wxwidgets.org/about/licence)
 #
 # WXWINDOWS LIBRARY LICENCE 
 # TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION 
