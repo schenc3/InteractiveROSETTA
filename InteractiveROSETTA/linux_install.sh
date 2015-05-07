@@ -98,9 +98,7 @@ echo "Installing poster..."
 sudo easy_install -q poster
 echo "Installing requests..."
 sudo easy_install -q requests
-echo "Downloading OpenBabel..."
-rm -f openbabel-2.3.1.tar.gz
-$PMGR"wget"
+echo "Installing OpenBabel..."
 if [[ $ROSETTA_VER == "Ubuntu" ]]; then
 	$PMGR"python-openbabel"
 else

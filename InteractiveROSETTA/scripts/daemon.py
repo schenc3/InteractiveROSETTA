@@ -59,9 +59,8 @@ except:
 	    raise Exception
 	else:
 	    sys.path.append(rosettapath)
-	    if (platform.system() == "Windows"):
-		olddir = os.getcwd()
-		os.chdir(rosettapath)
+	    olddir = os.getcwd()
+	    os.chdir(rosettapath)
 	    os.environ["PYROSETTA_DATABASE"] = rosettadb
 	    # Try to import Rosetta
 	    from rosetta import *
@@ -74,9 +73,8 @@ except:
 	    import rosetta.protocols.evaluation
 	    from rosetta.protocols.comparative_modeling import *
 	    from rosetta.protocols.jd2 import *
-	    if (platform.system() == "Windows"):
-		olddir = os.getcwd()
-		os.chdir(olddir)
+	    olddir = os.getcwd()
+	    os.chdir(olddir)
 	    print "Found Rosetta at " + rosettapath.strip() + "!"
 	    print "Rosetta Database: " + rosettadb.strip()
     except:
@@ -114,9 +112,8 @@ except:
 	    break
 	if (foundIt):
 	    sys.path.append(rosettapath)
-	    if (platform.system() == "Windows"):
-		olddir = os.getcwd()
-		os.chdir(rosettapath)
+	    olddir = os.getcwd()
+	    os.chdir(rosettapath)
 	    os.environ["PYROSETTA_DATABASE"] = rosettadb
 	    try:
 		# Try to import Rosetta
@@ -145,9 +142,8 @@ except:
 		f.close()
 		print "Found Rosetta at " + rosettapath.strip() + "!"
 		print "Rosetta Database: " + rosettadb.strip()
-		if (platform.system() == "Windows"):
-		    olddir = os.getcwd()
-		    os.chdir(olddir)
+		olddir = os.getcwd()
+		os.chdir(olddir)
 	    except:
 		print "PyRosetta cannot be found on your system!"
 		print "Until you install PyRosetta, you may only use InteractiveROSETTA to visualize structures in PyMOL"
@@ -1408,7 +1404,7 @@ def daemonLoop():
 		else:
 		    # On Unix systems you just have to make sure two instances of python are running
 		    # because there isn't any forking information in the daemon's instance of python
-		    if (len(proc.cmdline()) >= 2 and proc.cmdline()[0].find("python") >= 0 and proc.cmdline()[1].find("InteractiveROSETTA.py") >= 0):
+		    if (len(proc.cmdline()) >= 2 and proc.cmdline()[0].find("python") >= 0 and proc.cmdline()[1].find("InteractiveROSETTA") >= 0):
 			count = count + 1
 	    except:
 		# In Windows it will crash if you try to read process information for the Administrator
@@ -1417,3 +1413,6 @@ def daemonLoop():
 		pass
 	if (platform.system() != "Windows" and count == 2):
 	    stillrunning = True
+	    
+if (__name__ == "__main__"):
+    daemonLoop()

@@ -1517,11 +1517,11 @@ def recolorEnergies(pose, allresidue_E, modelname, selectedScoretype, cmd):
 		    raise Exception
 		if (chain != "" and chain != " " and chain != "_"):
 		    cmd.delete("colorsele")
-		    cmd.select("colorsele", "model " + modelname + " and chain " + chain + " and resi " + str(res))
+		    cmd.select("colorsele", "model " + modelname + " and chain " + chain + " and resi " + str(res) + " and symbol c")
 		    cmd.color("0x%02x%02x%02x" % ((r, g, b)), "colorsele")
 		else:
 		    cmd.delete("colorsele")
-		    cmd.select("colorsele", "model " + modelname + " and resi " + str(res))
+		    cmd.select("colorsele", "model " + modelname + " and resi " + str(res) + " and symbol c")
 		    cmd.color("0x%02x%02x%02x" % ((r, g, b)), "colorsele")
 	    except:
 		# Model not defined yet, but we still want to get the updated b-factors so don't exit
@@ -1722,3 +1722,77 @@ def fixPyMOLSave(pdbfile):
     for aline in data:
 	f.write(aline + "\n")
     f.close()
+    
+def fitGridColumn(grid, col, minsize):
+    # Useful function for taking a grid and resizing the given column to fit overflowing text
+    oldwidth = grid.GetColSize(col)
+    font = grid.GetFont()
+    dc = wx.WindowDC(grid)
+    dc.SetFont(font)
+    width = minsize - 10
+    (w, h) = dc.GetTextExtent(grid.GetColLabelValue(col))
+    if (w > width):
+	width = w
+    for r in range(0, grid.NumberRows):
+	(w, h) = dc.GetTextExtent(grid.GetCellValue(r, col))
+	if (w > width):
+	    width = w
+    if (oldwidth != int(width+10)):
+	grid.SetColSize(col, int(width+10))
+	grid.Refresh()
+	
+def deleteInputFiles():
+    # Useful function for deleting all input/temporary/output files from InteractiveROSETTA HOME
+    # This is useful if a protocol is canceled because if these files are not removed then the daemon
+    # may see them again and start all over
+    goToSandbox()
+    if (os.path.isfile("minimizeinput")):
+	os.remove("minimizeinput")
+    if (os.path.isfile("minimizeoutput")):
+	os.remove("minimizeoutput")
+    if (os.path.isfile("designinput")):
+	os.remove("designinput")
+    if (os.path.isfile("designoutput")):
+	os.remove("designoutput")
+    if (os.path.isfile("scoreinput")):
+	os.remove("scoreinput")
+    if (os.path.isfile("scoreoutput")):
+	os.remove("scoreoutput")
+    if (os.path.isfile("rotamerinput")):
+	os.remove("rotamerinput")
+    if (os.path.isfile("rotameroutput")):
+	os.remove("rotameroutput")
+    if (os.path.isfile("coarsekicinput")):
+	os.remove("coarsekicinput")
+    if (os.path.isfile("coarsekicoutput")):
+	os.remove("coarsekicoutput")
+    if (os.path.isfile("kicoutput")):
+	os.remove("kicoutput")
+    if (os.path.isfile("repackme.pdb")):
+	os.remove("repackme.pdb")
+    if (os.path.isfile("finekicinput")):
+	os.remove("finekicinput")
+    if (os.path.isfile("errreport")):
+	os.remove("errreport")
+    if (os.path.isfile("coarsedockinput")):
+	os.remove("coarsedockinput")
+    if (os.path.isfile("finedockinput")):
+	os.remove("finedockinput")
+    if (os.path.isfile("dockoutput")):
+	os.remove("dockoutput")
+    if (os.path.isfile("dock_progress")):
+	os.remove("dock_progress")
+    if (os.path.isfile("threadinput")):
+	os.remove("threadinput")
+    if (os.path.isfile("threadoutput")):
+	os.remove("threadoutput")
+    tempfiles = glob.glob("*temp")
+    for tempfile in tempfiles:
+	try:
+	    os.remove(tempfile)
+	except:
+	    pass
+    # Remove the sandbox PDBs
+    tempfiles = glob.glob("*.pdb")
+    for tempfile in tempfiles:
+	os.remove(tempfile)

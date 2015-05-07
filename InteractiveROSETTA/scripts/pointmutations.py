@@ -26,7 +26,7 @@ class PointMutationsPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblProt = wx.StaticText(self, -1, "Point Mutations", (25, 15), (270, 25), wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblPointMutations.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
+	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblPointMutations.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
 	else:
 	    self.lblProt = wx.StaticText(self, -1, "Point Mutations", (70, 15), style=wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -34,7 +34,7 @@ class PointMutationsPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.lblProt.SetForegroundColour("#FFFFFF")
 	
 	if (platform.system() == "Darwin"):
-	    self.HelpBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/HelpBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(295, 10), size=(25, 25))
+	    self.HelpBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/HelpBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(295, 10), size=(25, 25))
 	else:
 	    self.HelpBtn = wx.Button(self, id=-1, label="?", pos=(295, 10), size=(25, 25))
 	    self.HelpBtn.SetForegroundColour("#0000FF")
@@ -46,7 +46,7 @@ class PointMutationsPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblInst = wx.StaticText(self, -1, "Select a model, a position, and a new residue\ntype to manually select optimal rotamers.", (0, 45), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblInstPointMutations.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
+	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstPointMutations.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(270, 25))
 	else:
 	    self.lblInst = wx.StaticText(self, -1, "Select a model, a position, and a new residue\ntype to manually select optimal rotamers.", (5, 45), style=wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -57,7 +57,7 @@ class PointMutationsPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblModel = wx.StaticText(self, -1, "Model", (20, 90), (140, 20), wx.ALIGN_CENTRE)
 	    self.lblModel.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblModel = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblModel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 90), size=(140, 20))
+	    self.lblModel = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblModel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 90), size=(140, 20))
 	else:
 	    self.lblModel = wx.StaticText(self, -1, "Model", (20, 90), style=wx.ALIGN_CENTRE)
 	    self.lblModel.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -72,7 +72,7 @@ class PointMutationsPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblPosition = wx.StaticText(self, -1, "Position", (195, 90), (100, 20), wx.ALIGN_CENTRE)
 	    self.lblPosition.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblPosition = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblPosition.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(195, 90), size=(100, 20))
+	    self.lblPosition = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblPosition.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(195, 90), size=(100, 20))
 	else:
 	    self.lblPosition = wx.StaticText(self, -1, "Position", (195, 90), style=wx.ALIGN_CENTRE)
 	    self.lblPosition.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -87,7 +87,7 @@ class PointMutationsPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblResidue = wx.StaticText(self, -1, "Residue Type", (20, 140), (140, 20), wx.ALIGN_CENTRE)
 	    self.lblResidue.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblResidue = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblResidue.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 140), size=(140, 20))
+	    self.lblResidue = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblResidueType.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 140), size=(140, 20))
 	else:
 	    self.lblResidue = wx.StaticText(self, -1, "Residue Type", (20, 140), style=wx.ALIGN_CENTRE)
 	    self.lblResidue.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -98,7 +98,7 @@ class PointMutationsPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.residueMenu = wx.ComboBox(self, pos=(20, 160), size=(140, 25), choices=self.AAlist, style=wx.CB_READONLY)
 	self.residueMenu.SetToolTipString("Amino acid type of the rotamers to be searched")
 	if (platform.system() == "Darwin"):
-	    self.btnSearch = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/btnSearch.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(195, 160), size=(100, 25))
+	    self.btnSearch = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnSearch.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(195, 160), size=(100, 25))
 	else:
 	    self.btnSearch = wx.Button(self, id=-1, label="Search", pos=(195, 160), size=(100, 25))
 	    self.btnSearch.SetForegroundColour("#000000")
@@ -139,13 +139,13 @@ class PointMutationsPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblTotalELabel = wx.StaticText(self, -1, "Total E:", (0, ypos+2), (160, 20), wx.ALIGN_CENTRE)
 	    self.lblTotalELabel.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblTotalELabel = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblTotalELabel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+2), size=(160, 20))
+	    self.lblTotalELabel = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblTotalELabel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+2), size=(160, 20))
 	else:
 	    self.lblTotalELabel = wx.StaticText(self, -1, "Total E:", (0, ypos+2), style=wx.ALIGN_CENTRE)
 	    self.lblTotalELabel.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	    resizeTextControlForUNIX(self.lblTotalELabel, 0, 160)
 	self.lblTotalELabel.SetForegroundColour("#FFFFFF")
-	if (platform.system() == "Windows"):
+	if (platform.system() != "Linux"):
 	    self.lblTotalE = wx.StaticText(self, -1, "", (160, ypos+2), (160, 20), wx.ALIGN_CENTRE)
 	    self.lblTotalE.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	else:
@@ -154,7 +154,7 @@ class PointMutationsPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    resizeTextControlForUNIX(self.lblTotalE, 160, 160)
 	self.lblTotalE.SetForegroundColour("#FFFFFF")
 	#if (platform.system() == "Darwin"):
-	#    self.btnLeft = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/btnLeft.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos), size=(25, 25))
+	#    self.btnLeft = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLeft.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos), size=(25, 25))
 	#else:
 	#    self.btnLeft = wx.Button(self, id=-1, label="<", pos=(0, ypos), size=(25, 25))
 	#    self.btnLeft.SetForegroundColour("#000000")
@@ -162,7 +162,7 @@ class PointMutationsPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	#self.btnLeft.Bind(wx.EVT_BUTTON, self.rotamerLeft)
 	#self.btnLeft.SetToolTipString("View the previous rotamer")
 	#if (platform.system() == "Darwin"):
-	#    self.btnRight = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/btnRight.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(295, ypos), size=(25, 25))
+	#    self.btnRight = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnRight.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(295, ypos), size=(25, 25))
 	#else:
 	#    self.btnRight = wx.Button(self, id=-1, label=">", pos=(295, ypos), size=(25, 25))
 	#    self.btnRight.SetForegroundColour("#000000")
@@ -179,7 +179,7 @@ class PointMutationsPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	#self.lblSelection.SetForegroundColour("#FFFFFF")
 	
 	if (platform.system() == "Darwin"):
-	    self.btnMutate = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/btnMutate.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(100, ypos+30), size=(120, 25))
+	    self.btnMutate = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnMutate.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(100, ypos+30), size=(120, 25))
 	else:
 	    self.btnMutate = wx.Button(self, id=-1, label="Mutate!", pos=(100, ypos+30), size=(120, 25))
 	    self.btnMutate.SetForegroundColour("#000000")
@@ -197,7 +197,15 @@ class PointMutationsPanel(wx.lib.scrolledpanel.ScrolledPanel):
     
     def showHelp(self, event):
 	# Open the help page
-	webbrowser.open(self.parent.parent.scriptdir + "/help/mutations.html")
+	if (platform.system() == "Darwin"):
+	    try:
+		browser = webbrowser.get("Safari")
+	    except:
+		print "Could not load Safari!  The help files are located at " + self.scriptdir + "/help"
+		return
+	    browser.open(self.parent.parent.scriptdir + "/help/mutations.html")
+	else:
+	    webbrowser.open(self.parent.parent.scriptdir + "/help/mutations.html")
     
     def setSeqWin(self, seqWin):
 	self.seqWin = seqWin
@@ -273,6 +281,8 @@ class PointMutationsPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.tmrScore.Start(1000)
 	logInfo("Attempted to calculate scores for this model")
 	self.seqWin.labelMsg.SetLabel("Calculating energies, please be patient...")
+	self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
 	self.seqWin.msgQueue.append("Calculating energies, please be patient...")
 	
     def activate(self):
@@ -463,8 +473,8 @@ class PointMutationsPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.cmd.show("sticks", "mutsele")
 	self.cmd.set_bond("stick_radius", 0.25, "mutsele")
 	# Highlight this residue in PyMOL
-	self.cmd.select("sele", "mutsele")
-	self.cmd.enable("sele")
+	self.cmd.select("seqsele", "mutsele")
+	self.cmd.enable("seqsele")
 	self.cmd.delete("mutsele")
 	self.seqWin.selectUpdate(False)
 
@@ -692,6 +702,8 @@ class PointMutationsPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    self.seqWin.labelMsg.SetLabel(self.seqWin.msgQueue[len(self.seqWin.msgQueue)-1])
 		else:
 		    self.seqWin.labelMsg.SetLabel("")
+		self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+		self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
 		self.btnMutate.Enable()
 		self.btnSearch.Enable()
 		self.parent.GoBtn.Enable()
@@ -716,6 +728,8 @@ class PointMutationsPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.Bind(wx.EVT_TIMER, self.threadSearch, self.tmrSearch)
 	self.tmrSearch.Start(1000)
 	self.seqWin.labelMsg.SetLabel("Performing rotamer search, please be patient...")
+	self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
 	self.seqWin.msgQueue.append("Performing rotamer search, please be patient...")
 	self.parent.GoBtn.Disable()
 	self.btnSearch.Disable()
@@ -878,6 +892,8 @@ class PointMutationsPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		self.seqWin.labelMsg.SetLabel(self.seqWin.msgQueue[len(self.seqWin.msgQueue)-1])
 	    else:
 		self.seqWin.labelMsg.SetLabel("")
+	    self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	    self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
 	else:
 	    self.seqWin.cannotDelete = False
 	    self.parent.GoBtn.Enable()
@@ -892,6 +908,8 @@ class PointMutationsPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		self.seqWin.labelMsg.SetLabel(self.seqWin.msgQueue[len(self.seqWin.msgQueue)-1])
 	    else:
 		self.seqWin.labelMsg.SetLabel("")
+	    self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	    self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
     
     def threadScore(self, event):
 	# Why am I using a Timer?  See the explanation in kic.py
@@ -975,7 +993,8 @@ class PointMutationsPanel(wx.lib.scrolledpanel.ScrolledPanel):
 			self.resIDs.append(aline.split("\t")[1].strip())
 		f.close()
 		self.lblTotalE.SetLabel(totalE)
-		if (platform.system() != "Windows"):
+		self.lblTotalE.SetForegroundColour("#FFFFFF")
+		if (platform.system() == "Linux"):
 		    resizeTextControlForUNIX(self.lblTotalE, 160, 160)
 		# Add the nonzero scoretypes to the energy viewing list from the current score function
 		self.scoretypeMenu.Clear()
@@ -995,6 +1014,8 @@ class PointMutationsPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    self.seqWin.labelMsg.SetLabel(self.seqWin.msgQueue[len(self.seqWin.msgQueue)-1])
 		else:
 		    self.seqWin.labelMsg.SetLabel("")
+		self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+		self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
 		# Set up the grid for displaying energies
 		positions = self.positionMenu.GetItems()
 		for i in range(0, len(positions)):

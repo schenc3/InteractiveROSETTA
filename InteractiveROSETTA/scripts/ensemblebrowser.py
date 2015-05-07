@@ -23,7 +23,7 @@ class EnsembleBrowserPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblProt = wx.StaticText(self, -1, "Ensemble Browser", (25, 15), (270, 25), style=wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblBrowser.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
+	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblBrowser.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
 	else:
 	    self.lblProt = wx.StaticText(self, -1, "Ensemble Browser", pos=(90, 15), style=wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -31,7 +31,7 @@ class EnsembleBrowserPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.lblProt.SetForegroundColour("#FFFFFF")
 	
 	if (platform.system() == "Darwin"):
-	    self.HelpBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/HelpBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(295, 10), size=(25, 25))
+	    self.HelpBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/HelpBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(295, 10), size=(25, 25))
 	else:
 	    self.HelpBtn = wx.Button(self, id=-1, label="?", pos=(295, 10), size=(25, 25))
 	    self.HelpBtn.SetForegroundColour("#0000FF")
@@ -43,7 +43,7 @@ class EnsembleBrowserPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblInst = wx.StaticText(self, -1, "1. Load the desired structures into the\nSequence Window.\n\n2. Superimpose structures if necessary\n\n3. Select regions of the ensembles that\nwill be viewed.", (0, 45), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblInstBrowser.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 120))
+	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstBrowser.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 120))
 	else:
 	    self.lblInst = wx.StaticText(self, -1, "1. Load the desired structures into the\nSequence Window.\n\n2. Superimpose structures if necessary\n\n3. Select regions of the ensembles that\nwill be viewed.", (40, 45), (320, 25), style=wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -54,18 +54,21 @@ class EnsembleBrowserPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblAlways = wx.StaticText(self, -1, "Always Show:", (5, 175), (150, 30), wx.ALIGN_CENTRE)
 	    self.lblAlways.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblAlways = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblAlways.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 175), size=(150, 30))
+	    self.lblAlways = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblAlways.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 175), size=(150, 30))
 	else:
 	    self.lblAlways = wx.StaticText(self, -1, "Always Show:", (25, 175), (150, 30), wx.ALIGN_CENTRE)
 	    self.lblAlways.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	    resizeTextControlForUNIX(self.lblAlways, 5, 150)
 	self.lblAlways.SetForegroundColour("#FFFFFF")
-	self.modelMenu = wx.ComboBox(self, pos=(160, 170), size=(150, 25), choices=[], style=wx.CB_READONLY)
+	if (platform.system() == "Darwin"):
+	    self.modelMenu = wx.ComboBox(self, pos=(160, 175), size=(150, 25), choices=[], style=wx.CB_READONLY)
+	else:
+	    self.modelMenu = wx.ComboBox(self, pos=(160, 170), size=(150, 25), choices=[], style=wx.CB_READONLY)
 	self.modelMenu.SetToolTipString("Model to always display with semi-transparency")
 	self.selectedModels = []
 	
 	if (platform.system() == "Darwin"):
-	    self.btnLeft = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/btnLeft.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 220), size=(25, 25))
+	    self.btnLeft = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLeft.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 220), size=(25, 25))
 	else:
 	    self.btnLeft = wx.Button(self, id=-1, label="<", pos=(5, 220), size=(25, 25))
 	    self.btnLeft.SetForegroundColour("#000000")
@@ -73,19 +76,19 @@ class EnsembleBrowserPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnLeft.Bind(wx.EVT_BUTTON, self.leftClick)
 	self.btnLeft.SetToolTipString("Cycle to previous model")
 	if (platform.system() == "Darwin"):
-	    self.btnRight = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/btnRight.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(290, 220), size=(25, 25))
+	    self.btnRight = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnRight.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(290, 220), size=(25, 25))
 	else:
 	    self.btnRight = wx.Button(self, id=-1, label=">", pos=(290, 220), size=(25, 25))
 	    self.btnRight.SetForegroundColour("#000000")
 	    self.btnRight.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnRight.Bind(wx.EVT_BUTTON, self.rightClick)
 	self.btnRight.SetToolTipString("Cycle to next model")
-	if (platform.system() == "Windows"):
+	if (platform.system() != "Linux"):
 	    self.lblSelected = wx.StaticText(self, -1, "Not Selected", (35, 225), (250, 30), wx.ALIGN_CENTRE)
 	else:
 	    self.lblSelected = wx.StaticText(self, -1, "Not Selected", (35, 225), (250, 30), wx.ALIGN_CENTRE)
-	    self.lblSelected.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	    resizeTextControlForUNIX(self.lblSelected, 35, 250)
+	self.lblSelected.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.lblSelected.SetForegroundColour("#FFFFFF")
 	self.currentModel = -1
 	
@@ -94,7 +97,15 @@ class EnsembleBrowserPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
     def showHelp(self, event):
 	# Open the help page
-	webbrowser.open(self.parent.parent.scriptdir + "/help/browser.html")
+	if (platform.system() == "Darwin"):
+	    try:
+		browser = webbrowser.get("Safari")
+	    except:
+		print "Could not load Safari!  The help files are located at " + self.scriptdir + "/help"
+		return
+	    browser.open(self.parent.parent.scriptdir + "/help/browser.html")
+	else:
+	    webbrowser.open(self.parent.parent.scriptdir + "/help/browser.html")
 
     def setSeqWin(self, seqWin):
 	self.seqWin = seqWin
@@ -120,7 +131,7 @@ class EnsembleBrowserPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		if (self.currentModel >= len(self.selectedModels) or self.currentModel < 0):
 		    self.currentModel = 0
 		self.lblSelected.SetLabel(self.selectedModels[self.currentModel])
-	    if (platform.system() != "Windows"):
+	    if (platform.system() == "Linux"):
 		resizeTextControlForUNIX(self.lblSelected, 35, 250)
 
     def updateView(self):
@@ -130,19 +141,21 @@ class EnsembleBrowserPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	# Why did I use transparency? -> because "hiding" views causes PyMOL to lose the display 
 	# information (i.e. it will forget if you had lines/sticks/spheres shown)
 	# You don't lose this information by fiddling with transparencies
+	if (len(self.selectedModels) == 0):
+	    return
 	model = self.selectedModels[self.currentModel]
 	self.lblSelected.SetLabel(model)
-	if (platform.system() != "Windows"):
+	if (platform.system() == "Linux"):
 	    resizeTextControlForUNIX(self.lblSelected, 35, 250)
-	# The selection "sele" refers to what the user has indicated should be in the ensemble browsing
-	# If it's not in "sele", then it will never be shown by the browser
+	# The selection "seqsele" refers to what the user has indicated should be in the ensemble browsing
+	# If it's not in "seqsele", then it will never be shown by the browser
 	# First make everything transparent and turn off cartoons (the user will have to deal with the
 	# cartoon settings changing)
 	self.cmd.hide("cartoon", "all")
 	self.cmd.set_bond("stick_transparency", 1, "all")
 	self.cmd.set("sphere_transparency", 1, "all") # Use "set" for sphere_transparency
 	# Now define a selection for the intersection of the current model atoms and "sele"
-	self.cmd.select("ensemblesele", "sele and model " + model)
+	self.cmd.select("ensemblesele", "seqsele and model " + model)
 	self.cmd.show("cartoon", "ensemblesele")
 	self.cmd.set_bond("stick_transparency", 0, "ensemblesele")
 	self.cmd.set("sphere_transparency", 0, "ensemblesele") # Use "set" for sphere_transparency
@@ -150,12 +163,12 @@ class EnsembleBrowserPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	alwaysshow = self.modelMenu.GetStringSelection()
 	logInfo("Browser view changed to show " + model + " with Always Show set to " + alwaysshow)
 	if (alwaysshow != "None" and alwaysshow != "" and alwaysshow != model):
-	    self.cmd.select("ensemblesele", "sele and model " + alwaysshow)
+	    self.cmd.select("ensemblesele", "seqsele and model " + alwaysshow)
 	    self.cmd.show("cartoon", "ensemblesele")
 	    self.cmd.set_bond("stick_transparency", 0.7, "ensemblesele") # So you know which one is the "always shown" one
 	    self.cmd.set("sphere_transparency", 0, "ensemblesele") # Use "set" for sphere_transparency
 	self.cmd.delete("ensemblesele") # Clean up
-	self.cmd.disable("sele") # Get rid of those annoying dots so the user can see the model better
+	self.cmd.enable("seqsele") # This is needed otherwise the sequence window removes the selection since it is not enabled
 
     def leftClick(self, event):
 	self.currentModel = self.currentModel - 1

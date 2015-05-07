@@ -165,7 +165,7 @@ class SequenceWin(wx.Frame):
 	self.scroll.SetSize((winw, winh))
 	
 	if (platform.system() == "Darwin"):
-	    self.LoadPDBsBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image("images/osx/LoadPDBsBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 10), size=(100, 25))
+	    self.LoadPDBsBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/LoadPDBsBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 10), size=(100, 25))
 	else:
 	    self.LoadPDBsBtn = wx.Button(self.scroll, id=-1, label="Load PDBs", pos=(10, 10), size=(100, 25))
 	    #self.LoadPDBsBtn.SetBackgroundColour("#000000")
@@ -176,7 +176,7 @@ class SequenceWin(wx.Frame):
 	#self.sizer.Add(self.LoadPDBsBtn, (0, 0), span=(1, 1), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
 	
 	if (platform.system() == "Darwin"):
-	    self.labelRCSB = wx.StaticBitmap(self.scroll, -1, wx.Image("images/osx/labelRSCB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(115, 13), size=(43, 25))
+	    self.labelRCSB = wx.StaticBitmap(self.scroll, -1, wx.Image(self.scriptdir + "/images/osx/labelRSCB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(115, 13), size=(43, 25))
 	else:
 	    self.labelRCSB = wx.StaticText(self.scroll, -1, "RCSB:", (115, 13), (43, 25))
 	    self.labelRCSB.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -186,7 +186,7 @@ class SequenceWin(wx.Frame):
 	self.RCSBTxt.SetToolTipString("Four letter PDB code to search for in the RCSB database")
 	
 	if (platform.system() == "Darwin"):
-	    self.FetchBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image("images/osx/FetchPDBBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(210, 10), size=(100, 25))
+	    self.FetchBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/FetchPDBBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(210, 10), size=(100, 25))
 	else:
 	    self.FetchBtn = wx.Button(self.scroll, id=-1, label="Fetch PDB", pos=(210, 10), size=(100, 25))
 	    self.FetchBtn.SetForegroundColour("#000000")
@@ -195,7 +195,7 @@ class SequenceWin(wx.Frame):
 	self.FetchBtn.SetToolTipString("Fetch PDB code from RCSB")
 	
 	if (platform.system() == "Darwin"):
-	    self.CloseBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image("images/osx/CloseBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(310, 10), size=(100, 25))
+	    self.CloseBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/CloseBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(310, 10), size=(100, 25))
 	else:
 	    self.CloseBtn = wx.Button(self.scroll, id=-1, label="Close", pos=(310, 10), size=(100, 25))
 	    #self.CloseBtn.SetBackgroundColour("#000000")
@@ -206,7 +206,7 @@ class SequenceWin(wx.Frame):
 	#self.sizer.Add(self.CloseBtn, (0, 1), span=(1, 1), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
 	
 	if (platform.system() == "Darwin"):
-	    self.SaveBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image("images/osx/SaveBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(410, 10), size=(100, 25))
+	    self.SaveBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/SaveBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(410, 10), size=(100, 25))
 	else:
 	    self.SaveBtn = wx.Button(self.scroll, id=-1, label="Save PDB", pos=(410, 10), size=(100, 25))
 	    self.SaveBtn.SetForegroundColour("#000000")
@@ -216,7 +216,7 @@ class SequenceWin(wx.Frame):
 	#self.sizer.Add(self.SaveBtn, (0, 2), span=(1, 1), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
 	
 	if (platform.system() == "Darwin"):
-	    self.SaveImageBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image("images/osx/SaveImageBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(510, 10), size=(100, 25))
+	    self.SaveImageBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/SaveImageBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(510, 10), size=(100, 25))
 	else:
 	    self.SaveImageBtn = wx.Button(self.scroll, id=-1, label="Save Image", pos=(510, 10), size=(100, 25))
 	    self.SaveImageBtn.SetForegroundColour("#000000")
@@ -226,7 +226,7 @@ class SequenceWin(wx.Frame):
 	#self.sizer.Add(self.SaveImageBtn, (0, 3), span=(1, 1), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
 	
 	if (platform.system() == "Darwin"):
-	    self.JoinBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image("images/osx/JoinChainsBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(610, 10), size=(100, 25))
+	    self.JoinBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/JoinChainsBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(610, 10), size=(100, 25))
 	else:
 	    self.JoinBtn = wx.Button(self.scroll, id=-1, label="Join Chains", pos=(610, 10), size=(100, 25))
 	    self.JoinBtn.SetForegroundColour("#000000")
@@ -235,7 +235,7 @@ class SequenceWin(wx.Frame):
 	self.JoinBtn.SetToolTipString("Join the selected chains into a single chain")
 	
 	if (platform.system() == "Darwin"):
-	    self.RenumberBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image("images/osx/RenumberBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(710, 10), size=(100, 25))
+	    self.RenumberBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/RenumberBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(710, 10), size=(100, 25))
 	else:
 	    self.RenumberBtn = wx.Button(self.scroll, id=-1, label="Renumber", pos=(710, 10), size=(100, 25))
 	    self.RenumberBtn.SetForegroundColour("#000000")
@@ -244,7 +244,7 @@ class SequenceWin(wx.Frame):
 	self.RenumberBtn.SetToolTipString("Renumber the selected chain from 1, using the selected residue as the new start")
 	
 	if (platform.system() == "Darwin"):
-	    self.ServerBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image("images/osx/ServerBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(max(810, W-445), 10), size=(25, 25))
+	    self.ServerBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/ServerBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(max(810, W-445), 10), size=(25, 25))
 	else:
 	    self.ServerBtn = wx.Button(self.scroll, id=-1, label="S", pos=(max(810, W-445), 10), size=(25, 25))
 	    self.ServerBtn.SetForegroundColour("#000000")
@@ -252,7 +252,7 @@ class SequenceWin(wx.Frame):
 	self.ServerBtn.Bind(wx.EVT_BUTTON, self.configureServer)
 	self.ServerBtn.SetToolTipString("Connect to a remote server running PyRosetta and Rosetta (this is required for some protocols)")
 	if (platform.system() == "Darwin"):
-	    self.HelpBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image("images/osx/HelpBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(self.ServerBtn.GetPosition()[0]+25, 10), size=(25, 25))
+	    self.HelpBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/HelpBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(self.ServerBtn.GetPosition()[0]+25, 10), size=(25, 25))
 	else:
 	    self.HelpBtn = wx.Button(self.scroll, id=-1, label="?", pos=(self.ServerBtn.GetPosition()[0]+25, 10), size=(25, 25))
 	    self.HelpBtn.SetForegroundColour("#0000FF")
@@ -274,11 +274,11 @@ class SequenceWin(wx.Frame):
 	self.cannotDelete = False
 	
 	xpos = self.SeqViewer.GetPosition()[0] + self.SeqViewer.GetSize()[0] + 5
-	self.BGRecolorBtn = wx.BitmapButton(self.scroll, -1, wx.Image("images/colorwheel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (xpos, 50), (70, 35))
+	self.BGRecolorBtn = wx.BitmapButton(self.scroll, -1, wx.Image(self.scriptdir + "/images/colorwheel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (xpos, 50), (70, 35))
 	self.BGRecolorBtn.Bind(wx.EVT_BUTTON, self.bgRecolor)
 	self.BGRecolorBtn.SetToolTipString("Change PyMOL background color")
 	if (platform.system() == "Darwin"):
-	    self.StereoBtn = wx.BitmapButton(self.scroll, -1, wx.Image("images/osx/StereoBtn_Mono.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (xpos, 90), (70, 35))
+	    self.StereoBtn = wx.BitmapButton(self.scroll, -1, wx.Image(self.scriptdir + "/images/osx/StereoBtn_Mono.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (xpos, 90), (70, 35))
 	else:
 	    self.StereoBtn = wx.Button(self.scroll, id=-1, label="Mono", pos=(xpos, 90), size=(70, 35))
 	    self.StereoBtn.SetForegroundColour("#000000")
@@ -286,7 +286,7 @@ class SequenceWin(wx.Frame):
 	self.StereoBtn.Bind(wx.EVT_BUTTON, self.stereoToggle)
 	self.StereoBtn.SetToolTipString("Toggle stereo view on/off")
 	if (platform.system() == "Darwin"):
-	    self.ColoringBtn = wx.BitmapButton(self.scroll, -1, wx.Image("images/osx/ColoringBtn_NoColor.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (xpos, 130), (70, 35))
+	    self.ColoringBtn = wx.BitmapButton(self.scroll, -1, wx.Image(self.scriptdir + "/images/osx/ColoringBtn_NoColor.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (xpos, 130), (70, 35))
 	else:
 	    self.ColoringBtn = wx.Button(self.scroll, id=-1, label="No Color", pos=(xpos, 130), size=(70, 35))
 	    self.ColoringBtn.SetForegroundColour("#000000")
@@ -294,7 +294,7 @@ class SequenceWin(wx.Frame):
 	self.ColoringBtn.Bind(wx.EVT_BUTTON, self.recolorClick)
 	self.ColoringBtn.SetToolTipString("Color primary sequence by secondary structure/B-factor or turn off coloring")
 	if (platform.system() == "Darwin"):
-	    self.AlignBtn = wx.BitmapButton(self.scroll, -1, wx.Image("images/osx/AlignBtn_From1.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (xpos, 170), (70, 35))
+	    self.AlignBtn = wx.BitmapButton(self.scroll, -1, wx.Image(self.scriptdir + "/images/osx/AlignBtn_From1.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (xpos, 170), (70, 35))
 	else:
 	    self.AlignBtn = wx.Button(self.scroll, id=-1, label="From 1", pos=(xpos, 170), size=(70, 35))
 	    self.AlignBtn.SetForegroundColour("#000000")
@@ -375,7 +375,15 @@ class SequenceWin(wx.Frame):
     
     def showHelp(self, event):
 	# Open the help page
-	webbrowser.open(self.scriptdir + "/help/sequence.html")
+	if (platform.system() == "Darwin"):
+	    try:
+		browser = webbrowser.get("Safari")
+	    except:
+		print "Could not load Safari!  The help files are located at " + self.scriptdir + "/help"
+		return
+	    browser.open(self.scriptdir + "/help/sequence.html")
+	else:
+	    webbrowser.open(self.scriptdir + "/help/sequence.html")
 	
     def configureServer(self, event):
 	# This button allows the user to give a name for the remote server
@@ -403,6 +411,9 @@ class SequenceWin(wx.Frame):
 	if (not(self.saveTimer.IsRunning())):
 	    self.saveTimer.Start(5000)
 	event.Skip()
+
+    def setAlignType(self, val):
+	self.alignType = val
 
     def realign(self):
 	if (self.alignType == "Align"):
@@ -621,22 +632,22 @@ class SequenceWin(wx.Frame):
 		    self.updateSeqViewer(r, relabel=True)
 
     def realignToggle(self, event):
-	if (self.AlignBtn.GetLabel() == "From 1"):
+	if (self.alignType == "From 1"):
 	    self.alignType = "PDB #"
 	    if (platform.system() == "Darwin"):
-		self.AlignBtn.SetBitmapLabel(bitmap=wx.Image("images/osx/AlignBtn_PDB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.AlignBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/AlignBtn_PDB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.AlignBtn.SetLabel(self.alignType)
 	    self.regenerateLookupTable()
-	#elif (self.AlignBtn.GetLabel() == "PDB #"):
+	#elif (self.alignType == "PDB #"):
 	#    self.AlignBtn.SetLabel("Align")
 	#    self.regenerateLookupTable()
 	else:
+	    self.alignType = "From 1"
 	    if (platform.system() == "Darwin"):
-		self.AlignBtn.SetBitmapLabel(bitmap=wx.Image("images/osx/AlignBtn_From1.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.AlignBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/AlignBtn_From1.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.AlignBtn.SetLabel(self.alignType)
-	    self.AlignBtn.SetLabel(self.alignType)
 	    self.regenerateLookupTable()
 
     def recoverFromError(self, protocol):
@@ -715,7 +726,10 @@ class SequenceWin(wx.Frame):
 			    wildcard="Frag Files (*.frag)|*.frag",
 			    style=wx.SAVE | wx.CHANGE_DIR)
 			if (dlg.ShowModal() == wx.ID_OK):
-			    paths = dlg.GetPaths()
+			    if (platform.system() == "Darwin"):
+				paths = [dlg.GetPath()]
+			    else:
+				paths = dlg.GetPaths()
 			    # Change cwd to the last opened file
 			    if (platform.system() == "Windows"):
 				lastDirIndx = paths[len(paths)-1].rfind("\\")
@@ -770,7 +784,10 @@ class SequenceWin(wx.Frame):
 			    wildcard="Compressed Files (*.gz)|*.gz",
 			    style=wx.SAVE | wx.CHANGE_DIR)
 			if (dlg.ShowModal() == wx.ID_OK):
-			    paths = dlg.GetPaths()
+			    if (platform.system() == "Darwin"):
+				paths = [dlg.GetPath()]
+			    else:
+				paths = dlg.GetPaths()
 			    # Change cwd to the last opened file
 			    if (platform.system() == "Windows"):
 				lastDirIndx = paths[len(paths)-1].rfind("\\")
@@ -1019,7 +1036,7 @@ class SequenceWin(wx.Frame):
 	    residue.id = (thisID[0], ires, thisID[2])
 	    ires = ires + 1
 	# Change back to numbering from one so we can easily get back the proper sequences and indexes
-	if (self.AlignBtn.GetLabel() != "From 1"):
+	if (self.alignType != "From 1"):
 	    self.realignToggle(None)
 	else:
 	    # Regenerating the lookup table calls the realigner which will regenerate the sequences properly
@@ -1121,7 +1138,7 @@ class SequenceWin(wx.Frame):
 	    self.poses.pop(r)
 	    self.IDs.pop(r)
 	# Change back to numbering from one so we can easily get back the proper sequences and indexes
-	if (self.AlignBtn.GetLabel() != "From 1"):
+	if (self.alignType != "From 1"):
 	    self.realignToggle(None)
 	else:
 	    # Regenerating the lookup table calls the realigner which will regenerate the sequences properly
@@ -1190,7 +1207,7 @@ class SequenceWin(wx.Frame):
 	self.recolorResidues()
 
     def keyPress(self, event):
-	if (int(event.GetKeyCode()) == wx.WXK_DELETE):
+	if (int(event.GetKeyCode()) == wx.WXK_DELETE or (platform.system() == "Darwin" and int(event.GetKeyCode()) == 8)):
 	    if (self.cannotDelete):
 		wx.MessageBox("You cannot perform deletions while a protocol is active!", "Cannot Delete During Protocol", wx.OK|wx.ICON_EXCLAMATION)
 		return
@@ -1245,7 +1262,7 @@ class SequenceWin(wx.Frame):
 			self.deleteChain(r)
 		    else:
 			# Remove this residue from the sequence and pop the indxToSeqPos element
-			if (self.AlignBtn.GetLabel() == "From 1"):
+			if (self.alignType == "From 1"):
 			    self.sequences[r] = self.sequences[r][0:c] + self.sequences[r][c+1:]
 			    resID = self.indxToSeqPos[r].pop(c)
 			else:
@@ -1272,9 +1289,9 @@ class SequenceWin(wx.Frame):
 			self.pdbwriter.set_structure(self.poses[poseloc])
 			self.pdbwriter.save(currID + ".pdb")
 			# Update the SeqViewer to reflect this deletion
-			for i in range(c, len(self.sequences[r])):
+			for i in range(c, len(self.sequences[r])-1):
 			    self.SeqViewer.SetCellValue(r, i, self.SeqViewer.GetCellValue(r, i+1))
-			self.SeqViewer.SetCellValue(r, len(self.sequences[r]), "")
+			self.SeqViewer.SetCellValue(r, len(self.sequences[r])-1, "")
 			# Remove this residue from PyMOL
 			fields = self.IDs[r].split("|")
 			currID = ""
@@ -1544,21 +1561,21 @@ class SequenceWin(wx.Frame):
 	if (self.colorMode == "No Color"):
 	    self.colorMode = "SS"
 	    if (platform.system() == "Darwin"):
-		self.ColoringBtn.SetBitmapLabel(bitmap=wx.Image("images/osx/ColoringBtn_SS.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.ColoringBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/ColoringBtn_SS.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.ColoringBtn.SetLabel(self.colorMode)
 	    logInfo("Colored residues by SS")
 	elif (self.colorMode == "SS"):
 	    self.colorMode = "BFactor"
 	    if (platform.system() == "Darwin"):
-		self.ColoringBtn.SetBitmapLabel(bitmap=wx.Image("images/osx/ColoringBtn_BFactor.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.ColoringBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/ColoringBtn_BFactor.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.ColoringBtn.SetLabel(self.colorMode)
 	    logInfo("Colored residues by B-factor")
 	else:
 	    self.colorMode = "No Color"
 	    if (platform.system() == "Darwin"):
-		self.ColoringBtn.SetBitmapLabel(bitmap=wx.Image("images/osx/ColoringBtn_NoColor.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.ColoringBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/ColoringBtn_NoColor.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.ColoringBtn.SetLabel(self.colorMode)
 	    logInfo("Turned residue coloring off")
@@ -1642,7 +1659,7 @@ class SequenceWin(wx.Frame):
 	if (self.viewMode == "Mono"):
 	    self.viewMode = "Crosseye"
 	    if (platform.system() == "Darwin"):
-		self.StereoBtn.SetBitmapLabel(bitmap=wx.Image("images/osx/StereoBtn_Crosseye.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.StereoBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/StereoBtn_Crosseye.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.StereoBtn.SetLabel(self.viewMode)
 	    self.cmd.stereo("crosseye")
@@ -1650,7 +1667,7 @@ class SequenceWin(wx.Frame):
 	elif (self.viewMode == "Crosseye"):
 	    self.viewMode = "Walleye"
 	    if (platform.system() == "Darwin"):
-		self.StereoBtn.SetBitmapLabel(bitmap=wx.Image("images/osx/StereoBtn_Walleye.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.StereoBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/StereoBtn_Walleye.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.StereoBtn.SetLabel(self.viewMode)
 	    self.cmd.stereo("walleye")
@@ -1658,7 +1675,7 @@ class SequenceWin(wx.Frame):
 	elif (self.viewMode == "Walleye"):
 	    self.viewMode = "Quadbuffer"
 	    if (platform.system() == "Darwin"):
-		self.StereoBtn.SetBitmapLabel(bitmap=wx.Image("images/osx/StereoBtn_Quadbuffer.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.StereoBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/StereoBtn_Quadbuffer.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.StereoBtn.SetLabel(self.viewMode)
 	    self.cmd.stereo("quadbuffer")
@@ -1666,7 +1683,7 @@ class SequenceWin(wx.Frame):
 	else:
 	    self.viewMode = "Mono"
 	    if (platform.system() == "Darwin"):
-		self.StereoBtn.SetBitmapLabel(bitmap=wx.Image("images/osx/StereoBtn_Mono.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.StereoBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/StereoBtn_Mono.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.StereoBtn.SetLabel(self.viewMode)
 	    self.cmd.stereo("off")
@@ -1914,7 +1931,7 @@ class SequenceWin(wx.Frame):
 	    self.SeqViewer.AutoSizeColumns(True)
 	    self.SeqViewer.SetColLabelValue(0, "")
 	    for i in range(0, self.SeqViewer.NumberCols):
-		if (self.AlignBtn.GetLabel() != "PDB #"):
+		if (self.alignType != "PDB #"):
 		    if ((i+1) % 5 == 0):
 			if (i+1 < 100):
 			    self.SeqViewer.SetColLabelValue(i, str(i+1))
@@ -2063,7 +2080,7 @@ class SequenceWin(wx.Frame):
     
     def fetchClick(self, event):
 	# You have to do this on Linux due to the libc bug
-	if (platform.system() != "Windows"):
+	if (platform.system() == "Linux"):
 	    res_init()
 	# Attempt to get a PDB directly from RCSB so the user doesn't have to download it manually
 	pdbCode = str(self.RCSBTxt.GetValue().strip()[0:4])
@@ -2087,6 +2104,8 @@ class SequenceWin(wx.Frame):
 	    f.close()
 	    if (validfile):
 		self.labelMsg.SetLabel("Fetching PDB from RCSB, please be patient...")
+		self.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+		self.labelMsg.SetForegroundColour("#FFFFFF")
 		self.msgQueue.append("Fetching PDB from RCSB, please be patient...")
 		self.Disable()
 		self.protWin.Disable()
@@ -2101,13 +2120,16 @@ class SequenceWin(wx.Frame):
 			    wildcard="PDB Files (*.pdb)|*.pdb",
 			    style=wx.SAVE | wx.CHANGE_DIR)
 			if (dlg2.ShowModal() == wx.ID_OK):
-			    paths = dlg2.GetPaths()
+			    path = dlg2.GetPath()
 			    # Change cwd to the last opened file
-			    lastDirIndx = paths[len(paths)-1].rfind("/")
-			    self.cwd = str(paths[len(paths)-1][0:lastDirIndx])
+			    if (platform.system() == "Windows"):
+				lastDirIndx = path.rfind("\\")
+			    else:
+				lastDirIndx = path.rfind("/")
+			    self.cwd = str(path[0:lastDirIndx])
 			    self.saveWindowData(None)
 			    # Load the PDBs into PyMOL
-			    filename = str(paths[0]).split(".pdb")[0] + ".pdb"
+			    filename = str(path).split(".pdb")[0] + ".pdb"
 			    # Does it exist already?  If so, ask if the user really wants to overwrite it
 			    if (os.path.isfile(filename)):
 				dlg3 = wx.MessageDialog(self, "The file " + filename + " already exists.  Overwrite it?", "Filename Already Exists", wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
@@ -2203,6 +2225,8 @@ class SequenceWin(wx.Frame):
 		    self.labelMsg.SetLabel(self.msgQueue[len(self.msgQueue)-1])
 		else:
 		    self.labelMsg.SetLabel("")
+		self.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+		self.labelMsg.SetForegroundColour("#FFFFFF")
 		self.Enable()
 		self.protWin.Enable()
 		self.recolorResidues()
@@ -2220,6 +2244,8 @@ class SequenceWin(wx.Frame):
     def loadPDBsClick(self, event):
 	logInfo("Clicked Load PDB button")
 	self.labelMsg.SetLabel("Loading PDB into Rosetta, please be patient...")
+	self.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	self.labelMsg.SetForegroundColour("#FFFFFF")
 	self.msgQueue.append("Loading PDB into Rosetta, please be patient...")
 	dlg = wx.FileDialog(
 	    self, message="Choose a File",
@@ -2228,7 +2254,10 @@ class SequenceWin(wx.Frame):
 	    wildcard="PDB Files (*.pdb)|*.pdb",
 	    style=wx.OPEN | wx.CHANGE_DIR | wx.MULTIPLE)
 	if (dlg.ShowModal() == wx.ID_OK):
-	    paths = dlg.GetPaths()
+	    if (platform.system() == "Darwin"):
+		paths = [dlg.GetPath()]
+	    else:
+		paths = dlg.GetPaths()
 	    # Change cwd to the last opened file
 	    if (platform.system() == "Windows"):
 		lastDirIndx = paths[len(paths)-1].rfind("\\")
@@ -2321,6 +2350,8 @@ class SequenceWin(wx.Frame):
 			self.labelMsg.SetLabel(self.msgQueue[len(self.msgQueue)-1])
 		    else:
 			self.labelMsg.SetLabel("")
+		    self.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+		    self.labelMsg.SetForegroundColour("#FFFFFF")
 		    self.Enable()
 		    self.protWin.Enable()
 		    self.recolorResidues()
@@ -2336,6 +2367,8 @@ class SequenceWin(wx.Frame):
 		self.labelMsg.SetLabel(self.msgQueue[len(self.msgQueue)-1])
 	    else:
 		self.labelMsg.SetLabel("")
+	    self.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	    self.labelMsg.SetForegroundColour("#FFFFFF")
 	    logInfo("Cancelled out of Load PDB")
     
     def deleteChain(self, currRow):
@@ -2468,16 +2501,16 @@ class SequenceWin(wx.Frame):
 		wildcard="PDB Files (*.pdb)|*.pdb",
 		style=wx.SAVE | wx.CHANGE_DIR)
 	    if (dlg.ShowModal() == wx.ID_OK):
-		paths = dlg.GetPaths()
+		path = dlg.GetPath()
 		# Change cwd to the last opened file
 		if (platform.system() == "Windows"):
-		    lastDirIndx = paths[len(paths)-1].rfind("\\")
+		    lastDirIndx = path.rfind("\\")
 		else:
-		    lastDirIndx = paths[len(paths)-1].rfind("/")
-		self.cwd = str(paths[len(paths)-1][0:lastDirIndx])
+		    lastDirIndx = path.rfind("/")
+		self.cwd = str(path[0:lastDirIndx])
 		self.saveWindowData(None)
 		# Load the PDBs into PyMOL
-		filename = str(paths[0]).split(".pdb")[0] + ".pdb"
+		filename = str(path).split(".pdb")[0] + ".pdb"
 		# Does it exist already?  If so, ask if the user really wants to overwrite it
 		if (os.path.isfile(filename)):
 		    dlg2 = wx.MessageDialog(self, "The file " + filename + " already exists.  Overwrite it?", "Filename Already Exists", wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
@@ -2499,7 +2532,7 @@ class SequenceWin(wx.Frame):
 		# Take those out
 		fixPyMOLSave(filename.strip())
 		# Update the IDs of this model in both the sequence window and in PyMOL
-		newmodel = str(paths[len(paths)-1][lastDirIndx+1:]).split(".pdb")[0]
+		newmodel = str(path[lastDirIndx+1:]).split(".pdb")[0]
 		self.cmd.set_name(model, newmodel)
 		# Now we have to save it in the sandbox otherwise the protocols will be looking for a file with the new
 		# name and will not find it
@@ -2522,7 +2555,10 @@ class SequenceWin(wx.Frame):
 	    wildcard="PNG Images (*.png)|*.png",
 	    style=wx.SAVE | wx.CHANGE_DIR)
 	if (dlg.ShowModal() == wx.ID_OK):
-	    filename = str(dlg.GetPaths()[0])
+	    if (platform.system() == "Darwin"):
+		filename = str(dlg.GetPath())
+	    else:
+		filename = str(dlg.GetPaths()[0])
 	    if (platform.system() == "Windows"):
 		# Have to double the number of "\" otherwise the filename can get garbled when
 		# PyMOL interprets things like \t as tabs...
@@ -2647,6 +2683,8 @@ class SequenceWin(wx.Frame):
 	    dlg = wx.MessageDialog(self, msg, "Close PDBs", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 	    if (dlg.ShowModal() == wx.ID_OK):
 		self.labelMsg.SetLabel("")
+		self.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+		self.labelMsg.SetForegroundColour("#FFFFFF")
 		self.Enable()
 		self.protWin.Enable()
 		return
@@ -2735,11 +2773,15 @@ class SequenceWin(wx.Frame):
 	    # Things get messed up if loading a PDB when in PDB# or Align mode, so turn these off
 	    # Turn off Align for good and require the user to use superimposition again to get it back
 	    # For PDB#, turn it back on after loading this whole structure to get the right alignment
-	    if (self.AlignBtn.GetLabel() == "Align"):
+	    if (self.alignType == "Align"):
 		retoggle = True
-	    elif (self.AlignBtn.GetLabel() == "PDB #"):
+	    elif (self.alignType == "PDB #"):
 		retoggle = True
-		self.AlignBtn.SetLabel("From 1")
+		self.alignType = "From 1"
+		if (platform.system() == "Darwin"):
+		    self.AlignBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/AlignBtn_From1.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		else:
+		    self.AlignBtn.SetLabel(self.alignType)
 	    else:
 		retoggle = False
 	    for c in biopdb[0]:

@@ -2,6 +2,7 @@ import wx
 import os
 import os.path
 import platform
+import subprocess
 import multiprocessing
 import psutil
 from daemon import daemonLoop
@@ -45,6 +46,8 @@ class ProtocolsPanel(wx.Panel):
 	if (platform.system() == "Windows"):
 	    self.label = wx.StaticText(self, -1, "Protocols", (5, 5), (340, 25), wx.ALIGN_CENTRE)
 	    self.label.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	elif (platform.system() == "Darwin"):
+	    self.label = wx.StaticBitmap(self, -1, wx.Image(self.parent.scriptdir + "/images/osx/lblProtocols.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 5), size=(340, 25))
 	else:
 	    self.label = wx.StaticText(self, -1, "Protocols", style=wx.ALIGN_CENTRE)
 	    self.label.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -60,7 +63,7 @@ class ProtocolsPanel(wx.Panel):
 	self.protMenu.SetToolTipString("List of currently available protocols")
 	
 	if (platform.system() == "Darwin"):
-	    self.GoBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/GoBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(240, 30), size=(100, 25))
+	    self.GoBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/GoBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(240, 30), size=(100, 25))
 	else:
 	    self.GoBtn = wx.Button(self, id=-1, label="Go!", pos=(240, 30), size=(100, 25))
 	    self.GoBtn.SetForegroundColour("#000000")
@@ -255,7 +258,10 @@ class ProtocolsPanel(wx.Panel):
 
 class ProtocolsWin(wx.Frame):
     def __init__(self, W, H, scriptdir):
-	winx = 0; winy = 0
+	if (platform.system() == "Darwin"):
+	    winx = 0; winy = 24
+	else:
+	    winx = 0; winy = 0
 	winw = 370; winh = H-40
 	self.scriptdir = scriptdir
 	homedir = os.path.expanduser("~")
@@ -340,6 +346,9 @@ class ProtocolsWin(wx.Frame):
 	    stillrunning = True
 	if (not(stillrunning)):
 	    print "Starting Rosetta protocol daemon..."
+	    #if (platform.system() == "Darwin"):
+		#self.daemon_process = subprocess.Popen(args=["/usr/bin/python", self.scriptdir + "/scripts/daemon.py"], shell=False)
+	    #else:
 	    self.daemon_process = multiprocessing.Process(target=daemonLoop)
 	    self.daemon_process.start()
 	

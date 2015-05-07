@@ -27,7 +27,7 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblProt = wx.StaticText(self, -1, "Comparative Modeling", (25, 15), (270, 25), wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblCompModel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
+	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblCompModel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
 	else:
 	    self.lblProt = wx.StaticText(self, -1, "Comparative Modeling", (70, 15), style=wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -35,7 +35,7 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.lblProt.SetForegroundColour("#FFFFFF")
 	
 	if (platform.system() == "Darwin"):
-	    self.HelpBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/HelpBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(295, 10), size=(25, 25))
+	    self.HelpBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/HelpBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(295, 10), size=(25, 25))
 	else:
 	    self.HelpBtn = wx.Button(self, id=-1, label="?", pos=(295, 10), size=(25, 25))
 	    self.HelpBtn.SetForegroundColour("#0000FF")
@@ -47,7 +47,7 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblInst = wx.StaticText(self, -1, "Model a structure ab initio using an existing\nstructure as a template.\nFirst generate fragment files using Robetta.\nRegistration with Robetta is required to do this.", (0, 45), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblInstCompModel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 80))
+	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstCompModel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 80))
 	else:
 	    self.lblInst = wx.StaticText(self, -1, "Model a structure ab initio using an existing\nstructure as a template.\nFirst generate fragment files using Robetta.\nRegistration with Robetta is required to do this.", (5, 45), style=wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -58,14 +58,14 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblVisit = wx.StaticText(self, -1, "Visit Robetta", (0, 130), (155, 20), wx.ALIGN_CENTRE)
 	    self.lblVisit.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblVisit = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblVisit.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 130), size=(155, 20))
+	    self.lblVisit = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblVisit.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 130), size=(155, 20))
 	else:
 	    self.lblVisit = wx.StaticText(self, -1, "Visit Robetta", (0, 130), style=wx.ALIGN_CENTRE)
 	    self.lblVisit.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	    resizeTextControlForUNIX(self.lblVisit, 0, 155)
 	self.lblVisit.SetForegroundColour("#FFFFFF")
 	if (platform.system() == "Darwin"):
-	    self.btnFragGen = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/btnFragments.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(175, 125), size=(120, 25))
+	    self.btnFragGen = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnFragments.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(175, 125), size=(120, 25))
 	else:
 	    self.btnFragGen = wx.Button(self, id=-1, label="Get Fragments", pos=(175, 125), size=(120, 25))
 	    self.btnFragGen.SetForegroundColour("#000000")
@@ -77,7 +77,7 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblJobID = wx.StaticText(self, -1, "Job ID:", (0, 163), (100, 20), wx.ALIGN_CENTRE)
 	    self.lblJobID.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblJobID = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblJobID.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 163), size=(100, 20))
+	    self.lblJobID = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblJobID.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 163), size=(100, 20))
 	else:
 	    self.lblJobID = wx.StaticText(self, -1, "Job ID:", (0, 163), style=wx.ALIGN_CENTRE)
 	    self.lblJobID.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -87,7 +87,7 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.txtJobID.SetValue("")
 	self.txtJobID.SetToolTipString("Job ID for submitted Robetta fragment job.")
 	if (platform.system() == "Darwin"):
-	    self.btnWatch = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/btnWatch.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(220, 160), size=(100, 25))
+	    self.btnWatch = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnWatch.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(220, 160), size=(100, 25))
 	else:
 	    self.btnWatch = wx.Button(self, id=-1, label="Watch", pos=(220, 160), size=(100, 25))
 	    self.btnWatch.SetForegroundColour("#000000")
@@ -99,7 +99,7 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblModel = wx.StaticText(self, -1, "Templates", (0, 190), (155, 20), wx.ALIGN_CENTRE)
 	    self.lblModel.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblModel = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblModelCompModel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 190), size=(155, 20))
+	    self.lblModel = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblModelCompModel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 190), size=(155, 20))
 	else:
 	    self.lblModel = wx.StaticText(self, -1, "Templates", (0, 190), style=wx.ALIGN_CENTRE)
 	    self.lblModel.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -111,7 +111,7 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.templates = []
 	
 	if (platform.system() == "Darwin"):
-	    self.btnAddTemplate = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/btnAddTemplate.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(165, 210), size=(77, 25))
+	    self.btnAddTemplate = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAddFragments.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(165, 210), size=(77, 25))
 	else:
 	    self.btnAddTemplate = wx.Button(self, id=-1, label="Add", pos=(165, 210), size=(77, 25))
 	    self.btnAddTemplate.SetForegroundColour("#000000")
@@ -119,7 +119,7 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnAddTemplate.Bind(wx.EVT_BUTTON, self.addModel)
 	self.btnAddTemplate.SetToolTipString("Add model to the list of templates")
 	if (platform.system() == "Darwin"):
-	    self.btnRemoveTemplate = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/btnRemoveTemplate.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(242, 210), size=(78, 25))
+	    self.btnRemoveTemplate = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnRemoveFragments.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(242, 210), size=(78, 25))
 	else:
 	    self.btnRemoveTemplate = wx.Button(self, id=-1, label="Remove", pos=(242, 210), size=(78, 25))
 	    self.btnRemoveTemplate.SetForegroundColour("#000000")
@@ -140,11 +140,11 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	
 	self.lblFrag = wx.StaticText(self, -1, "None Uploaded", pos=(10, 403), size=(180, 25), style=wx.ALIGN_CENTRE)
 	self.lblFrag.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-	if (platform.system() != "Windows"):
+	if (platform.system() == "Linux"):
 	    resizeTextControlForUNIX(self.lblFrag, 10, 180)
 	self.lblFrag.SetForegroundColour("#FFFFFF")
 	if (platform.system() == "Darwin"):
-	    self.btnLoad = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/btnLoadFrag.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(200, 400), size=(110, 25))
+	    self.btnLoad = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLoadFrag.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(200, 400), size=(110, 25))
 	else:
 	    self.btnLoad = wx.Button(self, id=-1, label="Load Frag", pos=(200, 400), size=(110, 25))
 	    self.btnLoad.SetForegroundColour("#000000")
@@ -165,7 +165,7 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblModelView = wx.StaticText(self, -1, "View Structure:", (20, 463), (120, 20), wx.ALIGN_CENTRE)
 	    self.lblModelView.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblModelView = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblModelView.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 463), size=(120, 20))
+	    self.lblModelView = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblModelView.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 463), size=(120, 20))
 	else:
 	    self.lblModelView = wx.StaticText(self, -1, "View Structure:", (20, 463), style=wx.ALIGN_CENTRE)
 	    self.lblModelView.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -177,7 +177,7 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.viewMenu.SetToolTipString("Select model positions to view in PyMOL")
 	
 	if (platform.system() == "Darwin"):
-	    self.btnThread = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/btnThread.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(110, 490), size=(100, 25))
+	    self.btnThread = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnThread.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(110, 490), size=(100, 25))
 	else:
 	    self.btnThread = wx.Button(self, id=-1, label="Thread!", pos=(110, 490), size=(100, 25))
 	    self.btnThread.SetForegroundColour("#000000")
@@ -191,7 +191,15 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
     
     def showHelp(self, event):
 	# Open the help page
-	webbrowser.open(self.parent.parent.scriptdir + "/help/comparative.html")
+	if (platform.system() == "Darwin"):
+	    try:
+		browser = webbrowser.get("Safari")
+	    except:
+		print "Could not load Safari!  The help files are located at " + self.scriptdir + "/help"
+		return
+	    browser.open(self.parent.parent.scriptdir + "/help/comparative.html")
+	else:
+	    webbrowser.open(self.parent.parent.scriptdir + "/help/comparative.html")
     
     def setSeqWin(self, seqWin):
 	self.seqWin = seqWin
@@ -377,6 +385,7 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.loadedfile = filename
 	    localfilename = filename[lastDirIndx+1:]
 	    self.lblFrag.SetLabel(localfilename)
+	    self.lblFrag.SetForegroundColour("#FFFFFF")
 	else:
 	    logInfo("Load PDB operation cancelled")
 	
@@ -445,6 +454,8 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		wx.MessageBox("Please indicate a FRAG file generated from the FASTA sequence that will be modeled.  Use Robetta to generate this if you have not done so already.", "Movable Chain Required", wx.OK|wx.ICON_EXCLAMATION)
 		return
 	    self.seqWin.labelMsg.SetLabel("Performing protein threading, please be patient...")
+	    self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	    self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
 	    self.seqWin.msgQueue.append("Performing protein threading, please be patient...")
 	    self.seqWin.cannotDelete = True
 	    self.parent.GoBtn.Disable()
@@ -479,7 +490,7 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.btnRemoveTemplate.Enable()
 	    self.btnLoad.Enable()
 	    if (platform.system() == "Darwin"):
-		self.btnThread.SetBitmapLabel(bitmap=wx.Image("images/osx/btnThread.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnThread.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnThread.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnThread.SetLabel("Finalize!")
 	    self.buttonState = "Thread!"
@@ -547,6 +558,8 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.seqWin.labelMsg.SetLabel(self.seqWin.msgQueue[len(self.seqWin.msgQueue)-1])
 	else:
 	    self.seqWin.labelMsg.SetLabel("")
+	self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
     
     def threadThread(self, event):
 	# Dump a file with the loop modeling parameters for the daemon to pick up
@@ -634,6 +647,8 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    self.seqWin.labelMsg.SetLabel(self.seqWin.msgQueue[len(self.seqWin.msgQueue)-1])
 		else:
 		    self.seqWin.labelMsg.SetLabel("")
+		self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+		self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
 		# Add these loop residues to the view menu so the user can look at the new loop
 		viewoptions = ["Whole View"]
 		ires = 1
@@ -662,7 +677,7 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		self.parent.GoBtn.Enable()
 		self.btnThread.Enable()
 		if (platform.system() == "Darwin"):
-		    self.btnThread.SetBitmapLabel(bitmap=wx.Image("images/osx/btnThread_Finalize.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		    self.btnThread.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnThread_Finalize.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		else:
 		    self.btnThread.SetLabel("Finalize!")
 		self.buttonState = "Finalize!"

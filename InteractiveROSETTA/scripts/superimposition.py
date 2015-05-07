@@ -23,7 +23,7 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblProt = wx.StaticText(self, -1, "Superimposition", (25, 15), (270, 25), style=wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblSuperimposition.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
+	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblSuperimposition.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
 	else:
 	    self.lblProt = wx.StaticText(self, -1, "Superimposition", pos=(90, 15), style=wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -31,7 +31,7 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.lblProt.SetForegroundColour("#FFFFFF")
 	
 	if (platform.system() == "Darwin"):
-	    self.HelpBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/HelpBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(295, 10), size=(25, 25))
+	    self.HelpBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/HelpBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(295, 10), size=(25, 25))
 	else:
 	    self.HelpBtn = wx.Button(self, id=-1, label="?", pos=(295, 10), size=(25, 25))
 	    self.HelpBtn.SetForegroundColour("#0000FF")
@@ -43,7 +43,7 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblInst = wx.StaticText(self, -1, "Pre-select models/residues to superimpose", (0, 45), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblInstSuperimposition.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 25))
+	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstSuperimposition.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 25))
 	else:
 	    self.lblInst = wx.StaticText(self, -1, "Pre-select models/residues to superimpose", pos=(20, 45), style=wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -54,7 +54,7 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblBase = wx.StaticText(self, -1, "Superimposition\nBase Model:", (0, 78), (175, 30), wx.ALIGN_CENTRE)
 	    self.lblBase.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblBase = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblBase.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 78), size=(175, 40))
+	    self.lblBase = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblBase.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 78), size=(175, 40))
 	else:
 	    self.lblBase = wx.StaticText(self, -1, "Superimposition\nBase Model:", pos=(30, 78), style=wx.ALIGN_CENTRE)
 	    self.lblBase.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -64,7 +64,7 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.modelMenu.SetToolTipString("Model to be used as the immovable reference structure")
 	
 	if (platform.system() == "Darwin"):
-	    self.btnByModel = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/btnByModel_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 120), size=(120, 25))
+	    self.btnByModel = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnByModel_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 120), size=(120, 25))
 	else:
 	    self.btnByModel = wx.Button(self, id=-1, label="By Model", pos=(20, 120), size=(120, 25))
 	    self.btnByModel.SetForegroundColour("#FF0000")
@@ -72,7 +72,7 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnByModel.Bind(wx.EVT_BUTTON, self.modelClick)
 	self.btnByModel.SetToolTipString("Superimpose whole structures")
 	if (platform.system() == "Darwin"):
-	    self.btnByResidues = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/btnByResidues.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(170, 120), size=(120, 25))
+	    self.btnByResidues = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnByResidues.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(170, 120), size=(120, 25))
 	else:
 	    self.btnByResidues = wx.Button(self, id=-1, label="By Residues", pos=(170, 120), size=(120, 25))
 	    self.btnByResidues.SetForegroundColour("#000000")
@@ -82,7 +82,7 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.alignBy = "Model"
 	
 	if (platform.system() == "Darwin"):
-	    self.btnCARMSD = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/btnCARMSD_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 155), size=(120, 25))
+	    self.btnCARMSD = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnCARMSD_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 155), size=(120, 25))
 	else:
 	    self.btnCARMSD = wx.Button(self, id=-1, label="CA RMSD", pos=(20, 155), size=(120, 25))
 	    self.btnCARMSD.SetForegroundColour("#FF0000")
@@ -90,7 +90,7 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnCARMSD.Bind(wx.EVT_BUTTON, self.CAclick)
 	self.btnCARMSD.SetToolTipString("Superimpose by CA atoms only")
 	if (platform.system() == "Darwin"):
-	    self.btnBBRMSD = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/btnBBRMSD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(170, 155), size=(120, 25))
+	    self.btnBBRMSD = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnBBRMSD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(170, 155), size=(120, 25))
 	else:
 	    self.btnBBRMSD = wx.Button(self, id=-1, label="BB RMSD", pos=(170, 155), size=(120, 25))
 	    self.btnBBRMSD.SetForegroundColour("#000000")
@@ -115,7 +115,7 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	
 	ypos = self.grdRMSDResults.GetPosition()[1] + self.grdRMSDResults.GetSize()[1] + 10
 	if (platform.system() == "Darwin"):
-	    self.btnSuperimpose = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/btnSuperimpose.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(80, ypos), size=(150, 25))
+	    self.btnSuperimpose = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnSuperimpose.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(80, ypos), size=(150, 25))
 	else:
 	    self.btnSuperimpose = wx.Button(self, id=-1, label="Superimpose!", pos=(80, ypos), size=(150, 25))
 	    self.btnSuperimpose.SetForegroundColour("#000000")
@@ -129,7 +129,15 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
     def showHelp(self, event):
 	# Open the help page
-	webbrowser.open(self.parent.parent.scriptdir + "/help/superimposition.html")
+	if (platform.system() == "Darwin"):
+	    try:
+		browser = webbrowser.get("Safari")
+	    except:
+		print "Could not load Safari!  The help files are located at " + self.scriptdir + "/help"
+		return
+	    browser.open(self.parent.parent.scriptdir + "/help/superimposition.html")
+	else:
+	    webbrowser.open(self.parent.parent.scriptdir + "/help/superimposition.html")
 
     def setSeqWin(self, seqWin):
 	self.seqWin = seqWin
@@ -178,8 +186,8 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def modelClick(self, event):
 	self.alignBy = "Model"
 	if (platform.system() == "Darwin"):
-	    self.btnByModel.SetBitmapLabel(bitmap=wx.Image("images/osx/btnByModel_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-	    self.btnByResidues.SetBitmapLabel(bitmap=wx.Image("images/osx/btnByResidues.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnByModel.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnByModel_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnByResidues.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnByResidues.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	else:
 	    self.btnByModel.SetForegroundColour("#FF0000")
 	    self.btnByResidues.SetForegroundColour("#000000")
@@ -188,8 +196,8 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def residuesClick(self, event):
 	self.alignBy = "Residues"
 	if (platform.system() == "Darwin"):
-	    self.btnByModel.SetBitmapLabel(bitmap=wx.Image("images/osx/btnByModel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-	    self.btnByResidues.SetBitmapLabel(bitmap=wx.Image("images/osx/btnByResidues_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnByModel.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnByModel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnByResidues.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnByResidues_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	else:
 	    self.btnByModel.SetForegroundColour("#000000")
 	    self.btnByResidues.SetForegroundColour("#FF0000")
@@ -198,8 +206,8 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def CAclick(self, event):
 	self.RMSDtype = "CA"
 	if (platform.system() == "Darwin"):
-	    self.btnCARMSD.SetBitmapLabel(bitmap=wx.Image("images/osx/btnCARMSD_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-	    self.btnBBRMSD.SetBitmapLabel(bitmap=wx.Image("images/osx/btnBBRMSD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnCARMSD.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnCARMSD_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnBBRMSD.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnBBRMSD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	else:
 	    self.btnCARMSD.SetForegroundColour("#FF0000")
 	    self.btnBBRMSD.SetForegroundColour("#000000")
@@ -208,8 +216,8 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def BBclick(self, event):
 	self.RMSDtype = "BB"
 	if (platform.system() == "Darwin"):
-	    self.btnCARMSD.SetBitmapLabel(bitmap=wx.Image("images/osx/btnCARMSD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-	    self.btnBBRMSD.SetBitmapLabel(bitmap=wx.Image("images/osx/btnBBRMSD_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnCARMSD.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnCARMSD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnBBRMSD.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnBBRMSD_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	else:
 	    self.btnCARMSD.SetForegroundColour("#000000")
 	    self.btnBBRMSD.SetForegroundColour("#FF0000")
@@ -221,11 +229,18 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.baseModel = str(self.modelMenu.GetValue())
 	if (self.baseModel != "" and len(self.models) > 1):
 	    self.seqWin.labelMsg.SetLabel("Performing superimposition, please be patient...")
+	    self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	    self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
 	    self.seqWin.msgQueue.append("Performing superimposition, please be patient...")
 	    self.btnSuperimpose.Disable()
 	    self.parent.GoBtn.Disable()
 	    self.seqWin.cannotDelete = True
-	    self.seqWin.AlignBtn.SetLabel("Align")
+	    self.seqWin.setAlignType("Align")
+	    #self.seqWin.alignType = "Align"
+	    if (platform.system() == "Darwin"):
+		self.seqWin.AlignBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/AlignBtn_Align.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    else:
+		self.seqWin.AlignBtn.SetLabel("Align")
 	    self.seqWin.regenerateLookupTable() # To get a MUSCLE alignment in the sequence window
 	    logInfo("Superimposition started using " + self.baseModel + " as the base model")
 	    thrSuperimpose = Thread(target=self.doSuperimposition, args=())
@@ -315,6 +330,8 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.seqWin.labelMsg.SetLabel(self.seqWin.msgQueue[len(self.seqWin.msgQueue)-1])
 	else:
 	    self.seqWin.labelMsg.SetLabel("")
+	self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
 	self.btnSuperimpose.Enable()
 	self.parent.GoBtn.Enable()
 	self.grdRMSDResults.Refresh()

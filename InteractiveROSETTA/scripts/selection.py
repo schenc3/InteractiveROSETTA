@@ -41,7 +41,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.labelAtoms.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
 	    self.weightsfile = os.getenv("PYROSETTA_DATABASE") + "/scoring/weights/talaris2013.wts"
-	    self.labelAtoms = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/labelAtoms.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 5), size=(70, 20))
+	    self.labelAtoms = wx.StaticBitmap(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/labelAtoms.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 5), size=(70, 20))
 	else:
 	    self.weightsfile = os.getenv("PYROSETTA_DATABASE") + "/scoring/weights/talaris2013.wts"
 	    self.labelAtoms = wx.StaticText(self, -1, "Atoms", pos=(13, 5), style=wx.ALIGN_CENTRE)
@@ -50,7 +50,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.labelAtoms.SetForegroundColour("#FFFFFF")
 	
 	if (platform.system() == "Darwin"):
-	    self.AtomOffBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/AtomOffBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 30), size=(35, 35))
+	    self.AtomOffBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/AtomOffBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 30), size=(35, 35))
 	else:
 	    self.AtomOffBtn = wx.Button(self, id=-1, label="X", pos=(5, 30), size=(35, 35))
 	    #self.AtomOffBtn.SetBackgroundColour("#000000")
@@ -59,38 +59,38 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.AtomOffBtn.Bind(wx.EVT_BUTTON, self.atomOff)
 	self.AtomOffBtn.SetToolTipString("Hide selected atoms")
 	
-	self.AtomLinesBtn = wx.BitmapButton(self, -1, wx.Image("images/lines.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(40, 30), size=(35, 35))
+	self.AtomLinesBtn = wx.BitmapButton(self, -1, wx.Image(self.parent.scriptdir + "/images/lines.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(40, 30), size=(35, 35))
 	#self.AtomLinesBtn.SetBackgroundColour("#000000")
 	self.AtomLinesBtn.Bind(wx.EVT_BUTTON, self.atomLines)
 	self.AtomLinesBtn.SetToolTipString("Apply thin bond-line view to selection")
 	
-	self.AtomBallsLinesBtn = wx.BitmapButton(self, -1, wx.Image("images/balls_lines.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 65), size=(35, 35))
+	self.AtomBallsLinesBtn = wx.BitmapButton(self, -1, wx.Image(self.parent.scriptdir + "/images/balls_lines.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 65), size=(35, 35))
 	#self.AtomVDWBtn.SetBackgroundColour("#000000")
 	self.AtomBallsLinesBtn.Bind(wx.EVT_BUTTON, self.atomBallsLines)
 	self.AtomBallsLinesBtn.SetToolTipString("Apply thin bond-line-with-spheres view to selection")
 	
-	self.AtomSticksBtn = wx.BitmapButton(self, -1, wx.Image("images/sticks.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(40, 65), size=(35, 35))
+	self.AtomSticksBtn = wx.BitmapButton(self, -1, wx.Image(self.parent.scriptdir + "/images/sticks.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(40, 65), size=(35, 35))
 	#self.AtomSticksBtn.SetBackgroundColour("#000000")
 	self.AtomSticksBtn.Bind(wx.EVT_BUTTON, self.atomSticks)
 	self.AtomSticksBtn.SetToolTipString("Apply thick bond-line view to selection")
 	
-	self.AtomBallsSticksBtn = wx.BitmapButton(self, -1, wx.Image("images/balls_sticks.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 100), size=(35, 35))
+	self.AtomBallsSticksBtn = wx.BitmapButton(self, -1, wx.Image(self.parent.scriptdir + "/images/balls_sticks.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 100), size=(35, 35))
 	#self.AtomSticksBtn.SetBackgroundColour("#000000")
 	self.AtomBallsSticksBtn.Bind(wx.EVT_BUTTON, self.atomBallsSticks)
 	self.AtomBallsSticksBtn.SetToolTipString("Apply thick bond-line-with-spheres view to selection")
 	
-	self.AtomVDWBtn = wx.BitmapButton(self, -1, wx.Image("images/VDW.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(40, 100), size=(35, 35))
+	self.AtomVDWBtn = wx.BitmapButton(self, -1, wx.Image(self.parent.scriptdir + "/images/VDW.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(40, 100), size=(35, 35))
 	#self.AtomVDWBtn.SetBackgroundColour("#000000")
 	self.AtomVDWBtn.Bind(wx.EVT_BUTTON, self.atomVDW)
 	self.AtomVDWBtn.SetToolTipString("Apply VDW spheres view to selection")
 	
-	self.AtomRecolorBtn = wx.BitmapButton(self, -1, wx.Image("images/colorwheel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (5, 135), (70, 35))
+	self.AtomRecolorBtn = wx.BitmapButton(self, -1, wx.Image(self.parent.scriptdir + "/images/colorwheel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (5, 135), (70, 35))
 	#self.AtomWhiteBtn.SetBackgroundColour("#000000")
 	self.AtomRecolorBtn.Bind(wx.EVT_BUTTON, self.atomRecolor)
 	self.AtomRecolorBtn.SetToolTipString("Change the color of the selected atoms")
 	
 	if (platform.system() == "Darwin"):
-	    self.AtomStandardBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/AtomStandardBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 169), size=(70, 20))
+	    self.AtomStandardBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/AtomStandardBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 169), size=(70, 20))
 	else:
 	    self.AtomStandardBtn = wx.Button(self, id=-1, label="Default", pos=(5, 169), size=(70, 20))
 	    #self.AtomStandardBtn.SetBackgroundColour("#000000")
@@ -100,7 +100,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.AtomStandardBtn.SetToolTipString("Change to default colors for selected atoms")
 	
 	if (platform.system() == "Darwin"):
-	    self.AtomChainBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/AtomChainBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 189), size=(70, 20))
+	    self.AtomChainBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/AtomChainBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 189), size=(70, 20))
 	else:
 	    self.AtomChainBtn = wx.Button(self, id=-1, label="Chain", pos=(5, 189), size=(70, 20))
 	    self.AtomChainBtn.SetForegroundColour("#000000")
@@ -109,7 +109,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.AtomChainBtn.SetToolTipString("Color selected atoms by chain")
 	
 	if (platform.system() == "Darwin"):
-	    self.LabelOffBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/LabelOffBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 209), size=(35, 20))
+	    self.LabelOffBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/LabelOffBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 209), size=(35, 20))
 	else:
 	    self.LabelOffBtn = wx.Button(self, id=-1, label="X", pos=(5, 209), size=(35, 20))
 	    self.LabelOffBtn.SetForegroundColour("#000000")
@@ -117,7 +117,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.LabelOffBtn.Bind(wx.EVT_BUTTON, self.labelsOff)
 	self.LabelOffBtn.SetToolTipString("Turn labels off on the selected residues")
 	if (platform.system() == "Darwin"):
-	    self.LabelOnBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/LabelOnBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(40, 209), size=(35, 20))
+	    self.LabelOnBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/LabelOnBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(40, 209), size=(35, 20))
 	else:
 	    self.LabelOnBtn = wx.Button(self, id=-1, label="Lbl", pos=(40, 209), size=(35, 20))
 	    self.LabelOnBtn.SetForegroundColour("#000000")
@@ -129,7 +129,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.labelRibbons = wx.StaticText(self, -1, "Ribbons", (85, 5), (70, 20), wx.ALIGN_CENTRE)
 	    self.labelRibbons.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.labelRibbons = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/labelRibbons.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(85, 5), size=(70, 20))
+	    self.labelRibbons = wx.StaticBitmap(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/labelRibbons.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(85, 5), size=(70, 20))
 	else:
 	    self.labelRibbons = wx.StaticText(self, -1, "Ribbons", pos=(85, 5), style=wx.ALIGN_CENTRE)
 	    self.labelRibbons.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -137,7 +137,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.labelRibbons.SetForegroundColour("#FFFFFF")
 	
 	if (platform.system() == "Darwin"):
-	    self.RibbonOffBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/RibbonOffBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(85, 30), size=(70, 35))
+	    self.RibbonOffBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/RibbonOffBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(85, 30), size=(70, 35))
 	else:
 	    self.RibbonOffBtn = wx.Button(self, id=-1, label="X", pos=(85, 30), size=(70, 35))
 	    #self.RibbonOffBtn.SetBackgroundColour("#000000")
@@ -146,23 +146,23 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.RibbonOffBtn.Bind(wx.EVT_BUTTON, self.ribbonsOff)
 	self.RibbonOffBtn.SetToolTipString("Hide ribbon view for selected atoms")
 	
-	self.RibbonRibbonBtn = wx.BitmapButton(self, -1, wx.Image("images/ribbons.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(85, 65), size=(70, 35))
+	self.RibbonRibbonBtn = wx.BitmapButton(self, -1, wx.Image(self.parent.scriptdir + "/images/ribbons.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(85, 65), size=(70, 35))
 	#self.RibbonOnBtn.SetBackgroundColour("#000000")
 	self.RibbonRibbonBtn.Bind(wx.EVT_BUTTON, self.ribbonsRibbon)
 	self.RibbonRibbonBtn.SetToolTipString("Apply thin string view to selected ribbon")
 	
-	self.RibbonCartoonBtn = wx.BitmapButton(self, -1, wx.Image("images/cartoons.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(85, 100), size=(70, 35))
+	self.RibbonCartoonBtn = wx.BitmapButton(self, -1, wx.Image(self.parent.scriptdir + "/images/cartoons.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(85, 100), size=(70, 35))
 	#self.RibbonOnBtn.SetBackgroundColour("#000000")
 	self.RibbonCartoonBtn.Bind(wx.EVT_BUTTON, self.ribbonsCartoon)
 	self.RibbonCartoonBtn.SetToolTipString("Apply cartoon view to selected ribbon")
 	
-	self.RibbonRecolorBtn = wx.BitmapButton(self, -1, wx.Image("images/colorwheel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (85, 135), (70, 35))
+	self.RibbonRecolorBtn = wx.BitmapButton(self, -1, wx.Image(self.parent.scriptdir + "/images/colorwheel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (85, 135), (70, 35))
 	#self.RibbonWhiteBtn.SetBackgroundColour("#000000")
 	self.RibbonRecolorBtn.Bind(wx.EVT_BUTTON, self.ribbonRecolor)
 	self.RibbonRecolorBtn.SetToolTipString("Change the color of the selected ribbons")
 	
 	if (platform.system() == "Darwin"):
-	    self.RibbonStandardBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/RibbonStandardBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(85, 169), size=(70, 20))
+	    self.RibbonStandardBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/AtomStandardBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(85, 169), size=(70, 20))
 	else:
 	    self.RibbonStandardBtn = wx.Button(self, id=-1, label="Default", pos=(85, 169), size=(70, 20))
 	    #self.RibbonStandardBtn.SetBackgroundColour("#000000")
@@ -172,7 +172,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.RibbonStandardBtn.SetToolTipString("Color selected ribbons by standard secondary structure coloring")
 	
 	if (platform.system() == "Darwin"):
-	    self.RibbonChainBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/RibbonChainBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(85, 189), size=(70, 20))
+	    self.RibbonChainBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/AtomChainBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(85, 189), size=(70, 20))
 	else:
 	    self.RibbonChainBtn = wx.Button(self, id=-1, label="Chain", pos=(85, 189), size=(70, 20))
 	    #self.RibbonChainBtn.SetBackgroundColour("#000000")
@@ -185,7 +185,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.labelSelection = wx.StaticText(self, -1, "Selection", (175, 5), (140, 20), wx.ALIGN_CENTRE)
 	    self.labelSelection.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.labelSelection = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/labelSelection.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(175, 5), size=(140, 20))
+	    self.labelSelection = wx.StaticBitmap(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/labelSelection.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(175, 5), size=(140, 20))
 	else:
 	    self.labelSelection = wx.StaticText(self, -1, "Selection", pos=(205, 5), style=wx.ALIGN_CENTRE)
 	    self.labelSelection.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -193,7 +193,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.labelSelection.SetForegroundColour("#FFFFFF")
 	
 	if (platform.system() == "Darwin"):
-	    self.HelpBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/HelpBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(315, 0), size=(25, 25))
+	    self.HelpBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/HelpBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(315, 0), size=(25, 25))
 	else:
 	    self.HelpBtn = wx.Button(self, id=-1, label="?", pos=(315, 0), size=(25, 25))
 	    self.HelpBtn.SetForegroundColour("#0000FF")
@@ -204,7 +204,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.SelectPanel = wx.Panel(self, id=-1, pos=(160, 25), size=(170, 185)) 
 	self.SelectPanel.SetBackgroundColour("#333333")
 	if (platform.system() == "Darwin"):
-	    self.SelectAllBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image("images/osx/SelectAllBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 5), size=(32, 30))
+	    self.SelectAllBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/SelectAllBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 5), size=(32, 30))
 	else:
 	    self.SelectAllBtn = wx.Button(self.SelectPanel, id=-1, label="All", pos=(5, 5), size=(32, 30))
 	    self.SelectAllBtn.SetForegroundColour("#000000")
@@ -212,7 +212,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.SelectAllBtn.Bind(wx.EVT_BUTTON, self.selectAll)
 	self.SelectAllBtn.SetToolTipString("Select all atoms")
 	if (platform.system() == "Darwin"):
-	    self.SelectInvertBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image("images/osx/SelectInvertBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(37, 5), size=(32, 30))
+	    self.SelectInvertBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/SelectInvertBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(37, 5), size=(32, 30))
 	else:
 	    self.SelectInvertBtn = wx.Button(self.SelectPanel, id=-1, label="Inv", pos=(37, 5), size=(32, 30))
 	    self.SelectInvertBtn.SetForegroundColour("#000000")
@@ -220,7 +220,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.SelectInvertBtn.Bind(wx.EVT_BUTTON, self.selectInvert)
 	self.SelectInvertBtn.SetToolTipString("Select all atoms not currently selected")
 	if (platform.system() == "Darwin"):
-	    self.SelectVisibleBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image("images/osx/SelectVisibleBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(69, 5), size=(32, 30))
+	    self.SelectVisibleBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/SelectVisibleBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(69, 5), size=(32, 30))
 	else:
 	    self.SelectVisibleBtn = wx.Button(self.SelectPanel, id=-1, label="Vis", pos=(69, 5), size=(32, 30))
 	    self.SelectVisibleBtn.SetForegroundColour("#000000")
@@ -228,7 +228,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.SelectVisibleBtn.Bind(wx.EVT_BUTTON, self.selectVisible)
 	self.SelectVisibleBtn.SetToolTipString("Select all visible atoms")
 	if (platform.system() == "Darwin"):
-	    self.SelectBackboneBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image("images/osx/SelectBBBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(101, 5), size=(32, 30))
+	    self.SelectBackboneBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/SelectBBBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(101, 5), size=(32, 30))
 	else:
 	    self.SelectBackboneBtn = wx.Button(self.SelectPanel, id=-1, label="BB", pos=(101, 5), size=(32, 30))
 	    self.SelectBackboneBtn.SetForegroundColour("#000000")
@@ -236,7 +236,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.SelectBackboneBtn.Bind(wx.EVT_BUTTON, self.selectBB)
 	self.SelectBackboneBtn.SetToolTipString("Select all backbone atoms")
 	if (platform.system() == "Darwin"):
-	    self.SelectSidechainsBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image("images/osx/SelectSCBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(133, 5), size=(32, 30))
+	    self.SelectSidechainsBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/SelectSCBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(133, 5), size=(32, 30))
 	else:
 	    self.SelectSidechainsBtn = wx.Button(self.SelectPanel, id=-1, label="SC", pos=(133, 5), size=(32, 30))
 	    self.SelectSidechainsBtn.SetForegroundColour("#000000")
@@ -245,7 +245,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.SelectSidechainsBtn.SetToolTipString("Select all sidechain atoms")
 	
 	if (platform.system() == "Darwin"):
-	    self.SelectHBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image("images/osx/SelectHBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 35), size=(32, 30))
+	    self.SelectHBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/SelectHBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 35), size=(32, 30))
 	else:
 	    self.SelectHBtn = wx.Button(self.SelectPanel, id=-1, label="H", pos=(5, 35), size=(32, 30))
 	    self.SelectHBtn.SetForegroundColour("#000000")
@@ -253,7 +253,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.SelectHBtn.Bind(wx.EVT_BUTTON, self.selectH)
 	self.SelectHBtn.SetToolTipString("Select all hydrogen atoms")
 	if (platform.system() == "Darwin"):
-	    self.SelectCBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image("images/osx/SelectCBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(37, 35), size=(32, 30))
+	    self.SelectCBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/SelectCBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(37, 35), size=(32, 30))
 	else:
 	    self.SelectCBtn = wx.Button(self.SelectPanel, id=-1, label="C", pos=(37, 35), size=(32, 30))
 	    self.SelectCBtn.SetForegroundColour("#000000")
@@ -261,7 +261,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.SelectCBtn.Bind(wx.EVT_BUTTON, self.selectC)
 	self.SelectCBtn.SetToolTipString("Select all carbon atoms")
 	if (platform.system() == "Darwin"):
-	    self.SelectNBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image("images/osx/SelectNBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(69, 35), size=(32, 30))
+	    self.SelectNBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/SelectNBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(69, 35), size=(32, 30))
 	else:
 	    self.SelectNBtn = wx.Button(self.SelectPanel, id=-1, label="N", pos=(69, 35), size=(32, 30))
 	    self.SelectNBtn.SetForegroundColour("#000000")
@@ -269,7 +269,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.SelectNBtn.Bind(wx.EVT_BUTTON, self.selectN)
 	self.SelectNBtn.SetToolTipString("Select all nitrogen atoms")
 	if (platform.system() == "Darwin"):
-	    self.SelectOBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image("images/osx/SelectOBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(101, 35), size=(32, 30))
+	    self.SelectOBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/SelectOBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(101, 35), size=(32, 30))
 	else:
 	    self.SelectOBtn = wx.Button(self.SelectPanel, id=-1, label="O", pos=(101, 35), size=(32, 30))
 	    self.SelectOBtn.SetForegroundColour("#000000")
@@ -277,7 +277,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.SelectOBtn.Bind(wx.EVT_BUTTON, self.selectO)
 	self.SelectOBtn.SetToolTipString("Select all oxygen atoms")
 	if (platform.system() == "Darwin"):
-	    self.SelectSolventBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image("images/osx/SelectSolventBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(133, 35), size=(32, 30))
+	    self.SelectSolventBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/SelectSolventBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(133, 35), size=(32, 30))
 	else:
 	    self.SelectSolventBtn = wx.Button(self.SelectPanel, id=-1, label="Sol", pos=(133, 35), size=(32, 30))
 	    self.SelectSolventBtn.SetForegroundColour("#000000")
@@ -286,7 +286,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.SelectSolventBtn.SetToolTipString("Select all solvent atoms")
 	
 	if (platform.system() == "Darwin"):
-	    self.SelectExtendBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image("images/osx/SelectExtendBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 65), size=(110, 30))
+	    self.SelectExtendBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/SelectExtendBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 65), size=(110, 30))
 	else:
 	    self.SelectExtendBtn = wx.Button(self.SelectPanel, id=-1, label="Extend", pos=(5, 65), size=(110, 30))
 	    #self.SelectExtendBtn.SetBackgroundColour("#000000")
@@ -300,14 +300,14 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.ExtendValueTxt.SetToolTipString("Radius in Angstroms of selection expansion")
 	
 	if (platform.system() == "Darwin"):
-	    self.labelExtendA = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image("images/osx/labelAngstroms.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(142, 70), size=(25, 25))
+	    self.labelExtendA = wx.StaticBitmap(self.SelectPanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/labelAngstrom.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(142, 70), size=(25, 25))
 	else:
-	    self.labelExtendA = wx.StaticText(self.SelectPanel, -1, "A", (142, 70), (25, 25))
+	    self.labelExtendA = wx.StaticText(self.SelectPanel, -1, "A", (140, 68), (25, 25))
 	    self.labelExtendA.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	    self.labelExtendA.SetForegroundColour("#FFFFFF")
 	
 	if (platform.system() == "Darwin"):
-	    self.SelectZoomBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image("images/osx/SelectZoomBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 95), size=(80, 30))
+	    self.SelectZoomBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/SelectZoomBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 95), size=(80, 30))
 	else:
 	    self.SelectZoomBtn = wx.Button(self.SelectPanel, id=-1, label="Zoom", pos=(5, 95), size=(80, 30))
 	    self.SelectZoomBtn.SetForegroundColour("#000000")
@@ -315,7 +315,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.SelectZoomBtn.Bind(wx.EVT_BUTTON, self.zoomSelection)
 	self.SelectZoomBtn.SetToolTipString("Zoom in on the current selection")
 	if (platform.system() == "Darwin"):
-	    self.CenterBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image("images/osx/CenterBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(85, 95), size=(80, 30))
+	    self.CenterBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/CenterBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(85, 95), size=(80, 30))
 	else:
 	    self.CenterBtn = wx.Button(self.SelectPanel, id=-1, label="Center", pos=(85, 95), size=(80, 30))
 	    self.CenterBtn.SetForegroundColour("#000000")
@@ -324,7 +324,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.CenterBtn.SetToolTipString("Center the origin of rotation in current selection")
 	
 	if (platform.system() == "Darwin"):
-	    self.SelectENeighborhoodBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image("images/osx/SelectNeighborhoodBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 125), size=(110, 30))
+	    self.SelectNeighborhoodBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/SelectNeighborhoodBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 125), size=(110, 30))
 	else:
 	    self.SelectNeighborhoodBtn = wx.Button(self.SelectPanel, id=-1, label="Neighborhood", pos=(5, 125), size=(110, 30))
 	    #self.SelectNeighborhoodBtn.SetBackgroundColour("#000000")
@@ -338,36 +338,40 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.NeighborhoodValueTxt.SetToolTipString("Radius of neighborhood view")
 	
 	if (platform.system() == "Darwin"):
-	    self.labelNeighborhoodA = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image("images/osx/labelAngstroms.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(142, 130), size=(25, 25))
+	    self.labelNeighborhoodA = wx.StaticBitmap(self.SelectPanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/labelAngstrom.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(142, 130), size=(25, 25))
 	else:
-	    self.labelNeighborhoodA = wx.StaticText(self.SelectPanel, -1, "A", (142, 130), (25, 25))
+	    self.labelNeighborhoodA = wx.StaticText(self.SelectPanel, -1, "A", (140, 128), (25, 25))
 	    self.labelNeighborhoodA.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	    self.labelNeighborhoodA.SetForegroundColour("#FFFFFF")
 	
 	if (platform.system() == "Darwin"):
-	    self.labelSF = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image("images/osx/labelSF.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(55, 155), size=(50, 25))
+	    self.labelSF = wx.StaticBitmap(self.SelectPanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/labelSF.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 155), size=(50, 25))
 	else:
 	    self.labelSF = wx.StaticText(self.SelectPanel, -1, "SFXN:", (5, 159), (50, 25))
 	    self.labelSF.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	    self.labelSF.SetForegroundColour("#FFFFFF")
 	
-	self.SelectScorefxnBtn = wx.Button(self.SelectPanel, id=-1, label="talaris2013", pos=(55, 155), size=(85, 25))
+	if (platform.system() == "Darwin"):
+	    self.SelectScorefxnBtn = wx.Button(self.SelectPanel, id=-1, label="talaris2013", pos=(55, 155), size=(80, 25))
+	else:
+	    self.SelectScorefxnBtn = wx.Button(self.SelectPanel, id=-1, label="talaris2013", pos=(55, 155), size=(85, 25))
 	self.SelectScorefxnBtn.SetForegroundColour("#000000")
 	self.SelectScorefxnBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	self.SelectScorefxnBtn.Bind(wx.EVT_BUTTON, self.changeSF)
 	self.SelectScorefxnBtn.SetToolTipString("Select the Rosetta scoring function")
 	
 	if (platform.system() == "Darwin"):
-	    self.SelectPanelToggleBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image("images/osx/SelectPanelFlipBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(140, 155), size=(25, 25))
+	    self.SelectPanelToggleBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/SelectPanelFlipBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(140, 155), size=(25, 25))
 	else:
 	    self.SelectPanelToggleBtn = wx.Button(self.SelectPanel, id=-1, label="+", pos=(140, 155), size=(25, 25))
 	    self.SelectPanelToggleBtn.SetForegroundColour("#000000")
 	    self.SelectPanelToggleBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.SelectPanelToggleBtn.SetToolTipString("Switch to manipulation mode")
 	self.SelectPanelToggleBtn.Bind(wx.EVT_LEFT_DOWN, self.panelToggle)
+	self.panelMode = "Selection"
 	
 	self.ManipulatePanel = wx.Panel(self, id=-1, pos=(160, 25), size=(180, 205))
-	self.XYPlane = wx.StaticBitmap(self.ManipulatePanel, -1, wx.Image("images/plane.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(15, 15), size=(150, 150))
+	self.XYPlane = wx.StaticBitmap(self.ManipulatePanel, -1, wx.Image(self.parent.scriptdir + "/images/plane.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(15, 15), size=(150, 150))
 	self.XYPlane.Bind(wx.EVT_MOTION, self.xyMotion)
 	self.XYPlane.Bind(wx.EVT_LEFT_UP, self.xyUp)
 	self.ManipulatePanel.Bind(wx.EVT_LEFT_UP, self.xyUp)
@@ -377,7 +381,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.leftDown = False
 	
 	if (platform.system() == "Darwin"):
-	    self.UpBtn = wx.BitmapButton(self.ManipulatePanel, id=-1, bitmap=wx.Image("images/osx/UpBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(60, 0), size=(60, 15))
+	    self.UpBtn = wx.BitmapButton(self.ManipulatePanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/UpBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(60, 0), size=(60, 15))
 	else:
 	    self.UpBtn = wx.Button(self.ManipulatePanel, id=-1, label="", pos=(60, 0), size=(60, 15))
 	    self.UpBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
@@ -385,7 +389,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.UpBtn.Bind(wx.EVT_BUTTON, self.nudgeUp)
 	self.UpBtn.SetToolTipString("Nudge up")
 	if (platform.system() == "Darwin"):
-	    self.DownBtn = wx.BitmapButton(self.ManipulatePanel, id=-1, bitmap=wx.Image("images/osx/UpBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(60, 165), size=(60, 15))
+	    self.DownBtn = wx.BitmapButton(self.ManipulatePanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/UpBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(60, 160), size=(60, 15))
 	else:
 	    self.DownBtn = wx.Button(self.ManipulatePanel, id=-1, label="", pos=(60, 165), size=(60, 15))
 	    self.DownBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
@@ -393,7 +397,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.DownBtn.Bind(wx.EVT_BUTTON, self.nudgeDown)
 	self.DownBtn.SetToolTipString("Nudge down")
 	if (platform.system() == "Darwin"):
-	    self.LeftBtn = wx.BitmapButton(self.ManipulatePanel, id=-1, bitmap=wx.Image("images/osx/LeftBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 60), size=(15, 60))
+	    self.LeftBtn = wx.BitmapButton(self.ManipulatePanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/LeftBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 60), size=(15, 60))
 	else:
 	    self.LeftBtn = wx.Button(self.ManipulatePanel, id=-1, label="", pos=(0, 60), size=(15, 60))
 	    self.LeftBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
@@ -401,7 +405,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.LeftBtn.Bind(wx.EVT_BUTTON, self.nudgeLeft)
 	self.LeftBtn.SetToolTipString("Nudge left")
 	if (platform.system() == "Darwin"):
-	    self.RightBtn = wx.BitmapButton(self.ManipulatePanel, id=-1, bitmap=wx.Image("images/osx/LeftBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(165, 60), size=(15, 60))
+	    self.RightBtn = wx.BitmapButton(self.ManipulatePanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/LeftBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(165, 60), size=(15, 60))
 	else:
 	    self.RightBtn = wx.Button(self.ManipulatePanel, id=-1, label="", pos=(165, 60), size=(15, 60))
 	    self.RightBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
@@ -409,7 +413,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.RightBtn.Bind(wx.EVT_BUTTON, self.nudgeRight)
 	self.RightBtn.SetToolTipString("Nudge right")
 	if (platform.system() == "Darwin"):
-	    self.LeftUpBtn = wx.BitmapButton(self.ManipulatePanel, id=-1, bitmap=wx.Image("images/osx/CornerBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 0), size=(30, 30))
+	    self.LeftUpBtn = wx.BitmapButton(self.ManipulatePanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/CornerBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 0), size=(30, 30))
 	else:
 	    self.LeftUpBtn = wx.Button(self.ManipulatePanel, id=-1, label="", pos=(0, 0), size=(30, 30))
 	    self.LeftUpBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
@@ -417,7 +421,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.LeftUpBtn.Bind(wx.EVT_BUTTON, self.nudgeLeftUp)
 	self.LeftUpBtn.SetToolTipString("Nudge left up")
 	if (platform.system() == "Darwin"):
-	    self.RightUpBtn = wx.BitmapButton(self.ManipulatePanel, id=-1, bitmap=wx.Image("images/osx/CornerBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(150, 0), size=(30, 30))
+	    self.RightUpBtn = wx.BitmapButton(self.ManipulatePanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/CornerBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(150, 0), size=(30, 30))
 	else:
 	    self.RightUpBtn = wx.Button(self.ManipulatePanel, id=-1, label="", pos=(150, 0), size=(30, 30))
 	    self.RightUpBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
@@ -425,7 +429,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.RightUpBtn.Bind(wx.EVT_BUTTON, self.nudgeRightUp)
 	self.RightUpBtn.SetToolTipString("Nudge right up")
 	if (platform.system() == "Darwin"):
-	    self.LeftDownBtn = wx.BitmapButton(self.ManipulatePanel, id=-1, bitmap=wx.Image("images/osx/CornerBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 150), size=(30, 30))
+	    self.LeftDownBtn = wx.BitmapButton(self.ManipulatePanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/CornerBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 150), size=(30, 30))
 	else:
 	    self.LeftDownBtn = wx.Button(self.ManipulatePanel, id=-1, label="", pos=(0, 150), size=(30, 30))
 	    self.LeftDownBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
@@ -433,7 +437,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.LeftDownBtn.Bind(wx.EVT_BUTTON, self.nudgeLeftDown)
 	self.LeftDownBtn.SetToolTipString("Nudge left down")
 	if (platform.system() == "Darwin"):
-	    self.RightDownBtn = wx.BitmapButton(self.ManipulatePanel, id=-1, bitmap=wx.Image("images/osx/CornerBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(150, 150), size=(30, 30))
+	    self.RightDownBtn = wx.BitmapButton(self.ManipulatePanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/CornerBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(150, 150), size=(30, 30))
 	else:
 	    self.RightDownBtn = wx.Button(self.ManipulatePanel, id=-1, label="", pos=(150, 150), size=(30, 30))
 	    self.RightDownBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
@@ -442,7 +446,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.RightDownBtn.SetToolTipString("Nudge right down")
 	
 	if (platform.system() == "Darwin"):
-	    self.RotateBtn = wx.BitmapButton(self.ManipulatePanel, id=-1, bitmap=wx.Image("images/osx/RotateBtn_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 0), size=(70, 25))
+	    self.RotateBtn = wx.BitmapButton(self.ManipulatePanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/RotateBtn_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 180), size=(70, 25))
 	else:
 	    self.RotateBtn = wx.Button(self.ManipulatePanel, id=-1, label="Rotate", pos=(0, 180), size=(70, 25))
 	    self.RotateBtn.SetForegroundColour("#FF0000")
@@ -450,7 +454,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.RotateBtn.Bind(wx.EVT_BUTTON, self.toggleRotate)
 	self.RotateBtn.SetToolTipString("Enter PyMOL object rotation mode")
 	if (platform.system() == "Darwin"):
-	    self.TranslateBtn = wx.BitmapButton(self.ManipulatePanel, id=-1, bitmap=wx.Image("images/osx/TranslateBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(75, 180), size=(70, 25))
+	    self.TranslateBtn = wx.BitmapButton(self.ManipulatePanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/TranslateBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(75, 180), size=(70, 25))
 	else:
 	    self.TranslateBtn = wx.Button(self.ManipulatePanel, id=-1, label="Translate", pos=(75, 180), size=(70, 25))
 	    self.TranslateBtn.SetForegroundColour("#000000")
@@ -458,7 +462,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.TranslateBtn.Bind(wx.EVT_BUTTON, self.toggleTranslate)
 	self.TranslateBtn.SetToolTipString("Enter PyMOL object translation mode")
 	if (platform.system() == "Darwin"):
-	    self.ManipulatePanelToggleBtn = wx.BitmapButton(self.ManipulatePanel, id=-1, bitmap=wx.Image("images/osx/SelectPanelFlipBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(150, 180), size=(30, 25))
+	    self.ManipulatePanelToggleBtn = wx.BitmapButton(self.ManipulatePanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/SelectPanelFlipBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(150, 180), size=(30, 25))
 	else:
 	    self.ManipulatePanelToggleBtn = wx.Button(self.ManipulatePanel, id=-1, label="+", pos=(150, 180), size=(30, 25))
 	    self.ManipulatePanelToggleBtn.SetForegroundColour("#000000")
@@ -478,7 +482,15 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
     
     def showHelp(self, event):
 	# Open the help page
-	webbrowser.open(self.parent.scriptdir + "/help/selection.html")
+	if (platform.system() == "Darwin"):
+	    try:
+		browser = webbrowser.get("Safari")
+	    except:
+		print "Could not load Safari!  The help files are located at " + self.scriptdir + "/help"
+		return
+	    browser.open(self.parent.scriptdir + "/help/selection.html")
+	else:
+	    webbrowser.open(self.parent.scriptdir + "/help/selection.html")
     
     def focusEvent(self, event):
 	self.inFocus = event.GetActive()
@@ -492,8 +504,8 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def toggleRotate(self, event):
 	self.manipType = "Rotate"
 	if (platform.system() == "Darwin"):
-	    self.RotateBtn.SetBitmapLabel(bitmap=wx.Image("images/osx/RotateBtn_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-	    self.TranslateBtn.SetBitmapLabel(bitmap=wx.Image("images/osx/TranslateBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.RotateBtn.SetBitmapLabel(bitmap=wx.Image(self.parent.scriptdir + "/images/osx/RotateBtn_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.TranslateBtn.SetBitmapLabel(bitmap=wx.Image(self.parent.scriptdir + "/images/osx/TranslateBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	else:
 	    self.RotateBtn.SetForegroundColour("#FF0000")
 	    self.TranslateBtn.SetForegroundColour("#000000")
@@ -501,8 +513,8 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def toggleTranslate(self, event):
 	self.manipType = "Translate"
 	if (platform.system() == "Darwin"):
-	    self.RotateBtn.SetBitmapLabel(bitmap=wx.Image("images/osx/RotateBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-	    self.TranslateBtn.SetBitmapLabel(bitmap=wx.Image("images/osx/TranslateBtn_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.RotateBtn.SetBitmapLabel(bitmap=wx.Image(self.parent.scriptdir + "/images/osx/RotateBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.TranslateBtn.SetBitmapLabel(bitmap=wx.Image(self.parent.scriptdir + "/images/osx/TranslateBtn_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	else:
 	    self.RotateBtn.SetForegroundColour("#000000")
 	    self.TranslateBtn.SetForegroundColour("#FF0000")
@@ -668,17 +680,24 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	event.Skip()
     
     def panelToggle(self, event):
-	if (self.labelSelection.GetLabel() == "Selection"):
-	    self.labelSelection.SetLabel("Manipulation")
+	if (self.panelMode == "Selection"):
+	    if (platform.system() == "Darwin"):
+		self.labelSelection.SetBitmap(bitmap=wx.Image(self.parent.scriptdir + "/images/osx/labelManipulation.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    else:
+		self.labelSelection.SetLabel("Manipulation")
+	    self.panelMode = "Manipulation"
 	    self.SelectPanel.Hide()
 	    self.ManipulatePanel.Show()
 	else:
-	    self.labelSelection.SetLabel("Selection")
+	    if (platform.system() == "Darwin"):
+		self.labelSelection.SetBitmap(bitmap=wx.Image(self.parent.scriptdir + "/images/osx/labelSelection.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    else:
+		self.labelSelection.SetLabel("Selection")
+	    self.panelMode = "Selection"
 	    self.SelectPanel.Show()
 	    self.ManipulatePanel.Hide()
-	if (platform.system() != "Windows"):
+	if (platform.system() == "Linux"):
 	    resizeTextControlForUNIX(self.labelSelection, 165, 160)
-	event.Skip()
     
     def atomOff(self, event):
 	try:

@@ -25,7 +25,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblProt = wx.StaticText(self, -1, "Kinematic Closure", (25, 15), (270, 25), wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
+	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
 	else:
 	    self.lblProt = wx.StaticText(self, -1, "Kinematic Closure", (70, 15), style=wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -33,7 +33,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.lblProt.SetForegroundColour("#FFFFFF")
 	
 	if (platform.system() == "Darwin"):
-	    self.HelpBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/HelpBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(295, 10), size=(25, 25))
+	    self.HelpBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/HelpBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(295, 10), size=(25, 25))
 	else:
 	    self.HelpBtn = wx.Button(self, id=-1, label="?", pos=(295, 10), size=(25, 25))
 	    self.HelpBtn.SetForegroundColour("#0000FF")
@@ -45,7 +45,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblInst = wx.StaticText(self, -1, "Remodel existing loops or generate loops de novo", (0, 45), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblInstKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 25))
+	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 25))
 	else:
 	    self.lblInst = wx.StaticText(self, -1, "Remodel existing loops or generate loops de novo", (5, 45), style=wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -56,7 +56,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblModel = wx.StaticText(self, -1, "Model", (7, 90), (153, 20), wx.ALIGN_CENTRE)
 	    self.lblModel.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblModel = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblModelKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(7, 90), size=(153, 20))
+	    self.lblModel = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblModelKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(7, 90), size=(153, 20))
 	else:
 	    self.lblModel = wx.StaticText(self, -1, "Model", (7, 90), style=wx.ALIGN_CENTRE)
 	    self.lblModel.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -70,14 +70,14 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblLoopType = wx.StaticText(self, -1, "Remodel Type", (195, 90), (100, 20), wx.ALIGN_CENTRE)
 	    self.lblLoopType.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblLoopType = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblLoopType.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(195, 90), size=(100, 20))
+	    self.lblLoopType = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblRemodelType.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(195, 90), size=(100, 20))
 	else:
 	    self.lblLoopType = wx.StaticText(self, -1, "Remodel Type", (195, 90), style=wx.ALIGN_CENTRE)
 	    self.lblLoopType.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	    resizeTextControlForUNIX(self.lblLoopType, 195, 100)
 	self.lblLoopType.SetForegroundColour("#FFFFFF")
 	if (platform.system() == "Darwin"):
-	    self.btnLoopType = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/btnLoopType_Refine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(175, 110), size=(140, 25))
+	    self.btnLoopType = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLoopType_Refine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(175, 110), size=(140, 25))
 	else:
 	    self.btnLoopType = wx.Button(self, id=-1, label="Refine", pos=(175, 110), size=(140, 25))
 	    self.btnLoopType.SetForegroundColour("#000000")
@@ -90,7 +90,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblBegin = wx.StaticText(self, -1, "Loop Begin", (20, 140), (120, 20), wx.ALIGN_CENTRE)
 	    self.lblBegin.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblBegin = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblBegin.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 140), size=(120, 20))
+	    self.lblBegin = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblBegin.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 140), size=(120, 20))
 	else:
 	    self.lblBegin = wx.StaticText(self, -1, "Loop Begin", (20, 140), style=wx.ALIGN_CENTRE)
 	    self.lblBegin.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -105,7 +105,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblEnd = wx.StaticText(self, -1, "Loop End", (175, 140), (120, 20), wx.ALIGN_CENTRE)
 	    self.lblEnd.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblEnd = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblEnd.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(175, 140), size=(120, 20))
+	    self.lblEnd = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblEnd.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(175, 140), size=(120, 20))
 	else:
 	    self.lblEnd = wx.StaticText(self, -1, "Loop End", (175, 140), style=wx.ALIGN_CENTRE)
 	    self.lblEnd.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -120,7 +120,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblSequence = wx.StaticText(self, -1, "Loop Sequence:", (20, 198), (100, 20), wx.ALIGN_CENTRE)
 	    self.lblSequence.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblSequence = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblSequence.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 198), size=(100, 20))
+	    self.lblSequence = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblSequence.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 198), size=(100, 20))
 	else:
 	    self.lblSequence = wx.StaticText(self, -1, "Loop Sequence:", (20, 198), style=wx.ALIGN_CENTRE)
 	    self.lblSequence.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -135,7 +135,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblAdvanced = wx.StaticText(self, -1, "Advanced Options", (0, 230), (320, 20), wx.ALIGN_CENTRE)
 	    self.lblAdvanced.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblAdvanced = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblAdvanced.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 230), size=(320, 20))
+	    self.lblAdvanced = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblAdvanced.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 230), size=(320, 20))
 	else:
 	    self.lblAdvanced = wx.StaticText(self, -1, "Advanced Options", (0, 230), style=wx.ALIGN_CENTRE)
 	    self.lblAdvanced.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -146,14 +146,14 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblPerturb = wx.StaticText(self, -1, "KIC Type:", (10, 263), (100, 20), wx.ALIGN_CENTRE)
 	    self.lblPerturb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblPerturb = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblPerturb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 263), size=(100, 20))
+	    self.lblPerturb = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblPerturb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 263), size=(100, 20))
 	else:
 	    self.lblPerturb = wx.StaticText(self, -1, "KIC Type:", (10, 263), style=wx.ALIGN_CENTRE)
 	    self.lblPerturb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	    resizeTextControlForUNIX(self.lblPerturb, 10, 100)
 	self.lblPerturb.SetForegroundColour("#FFFFFF")
 	if (platform.system() == "Darwin"):
-	    self.btnPerturb = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/btnPerturb_Refine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(120, 260), size=(200, 25))
+	    self.btnPerturb = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnPerturb_Refine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(120, 260), size=(200, 25))
 	else:
 	    self.btnPerturb = wx.Button(self, id=-1, label="Perturb+Refine", pos=(120, 260), size=(200, 25))
 	    self.btnPerturb.SetForegroundColour("#000000")
@@ -167,7 +167,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblPivot = wx.StaticText(self, -1, "Pivot Residue:", (20, 293), (120, 20), wx.ALIGN_CENTRE)
 	    self.lblPivot.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblPivot = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblPivot.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 293), size=(120, 20))
+	    self.lblPivot = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblPivot.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 293), size=(120, 20))
 	else:
 	    self.lblPivot = wx.StaticText(self, -1, "Pivot Residue:", (20, 293), style=wx.ALIGN_CENTRE)
 	    self.lblPivot.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -182,7 +182,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblNStruct = wx.StaticText(self, -1, "NStruct:", (20, 323), (100, 20), wx.ALIGN_CENTRE)
 	    self.lblNStruct.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblNStruct = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblNStruct.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 323), size=(100, 20))
+	    self.lblNStruct = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblNStruct.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 323), size=(100, 20))
 	else:
 	    self.lblNStruct = wx.StaticText(self, -1, "NStruct:", (20, 323), style=wx.ALIGN_CENTRE)
 	    self.lblNStruct.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -194,12 +194,12 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.txtNStruct.Disable()
 	
 	if (platform.system() == "Darwin"):
-	    self.btnOutputDir = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/btnOutputDir.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 350), size=(100, 25))
+	    self.btnOutputDir = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnOutputDir.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 350), size=(100, 25))
 	else:
 	    self.btnOutputDir = wx.Button(self, id=-1, label="Output Dir", pos=(20, 350), size=(100, 25))
 	    self.btnOutputDir.SetForegroundColour("#000000")
 	    self.btnOutputDir.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-	    self.btnOutputDir.Bind(wx.EVT_BUTTON, self.setOutputDir)
+	self.btnOutputDir.Bind(wx.EVT_BUTTON, self.setOutputDir)
 	self.btnOutputDir.SetToolTipString("Set the directory to which outputted structures will be written, if NStruct > 1")
 	self.btnOutputDir.Disable()
 	if (platform.system() == "Windows"):
@@ -216,7 +216,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblLine = wx.StaticText(self, -1, "==========================", (0, 380), (320, 20), wx.ALIGN_CENTRE)
 	    self.lblLine.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblLine = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblLine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 380), size=(320, 20))
+	    self.lblLine = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblLine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 380), size=(320, 20))
 	else:
 	    self.lblLine = wx.StaticText(self, -1, "==========================", (0, 380), style=wx.ALIGN_CENTRE)
 	    self.lblLine.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
@@ -227,7 +227,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblPostKIC = wx.StaticText(self, -1, "Post-Loop Modeling", (0, 405), (320, 20), wx.ALIGN_CENTRE)
 	    self.lblPostKIC.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblPostKIC = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblPostKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 405), size=(320, 20))
+	    self.lblPostKIC = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblPostKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 405), size=(320, 20))
 	else:
 	    self.lblPostKIC = wx.StaticText(self, -1, "Post-Loop Modeling", (0, 405), style=wx.ALIGN_CENTRE)
 	    self.lblPostKIC.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -246,7 +246,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblModelView = wx.StaticText(self, -1, "View Structure:", (20, 473), (120, 20), wx.ALIGN_CENTRE)
 	    self.lblModelView.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblModelView = wx.StaticBitmap(self, -1, wx.Image("images/osx/lblModelView.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 473), size=(120, 20))
+	    self.lblModelView = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblModelView.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 473), size=(120, 20))
 	else:
 	    self.lblModelView = wx.StaticText(self, -1, "View Structure:", (20, 473), style=wx.ALIGN_CENTRE)
 	    self.lblModelView.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -258,7 +258,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.viewMenu.SetToolTipString("Select loop positions to view in PyMOL")
 	
 	if (platform.system() == "Darwin"):
-	    self.btnKIC = wx.BitmapButton(self, id=-1, bitmap=wx.Image("images/osx/btnKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(100, 505), size=(120, 25))
+	    self.btnKIC = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(100, 505), size=(120, 25))
 	else:
 	    self.btnKIC = wx.Button(self, id=-1, label="KIC!", pos=(100, 505), size=(120, 25))
 	    self.btnKIC.SetForegroundColour("#000000")
@@ -272,7 +272,15 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
     
     def showHelp(self, event):
 	# Open the help page
-	webbrowser.open(self.parent.parent.scriptdir + "/help/kic.html")
+	if (platform.system() == "Darwin"):
+	    try:
+		browser = webbrowser.get("Safari")
+	    except:
+		print "Could not load Safari!  The help files are located at " + self.scriptdir + "/help"
+		return
+	    browser.open(self.parent.parent.scriptdir + "/help/kic.html")
+	else:
+	    webbrowser.open(self.parent.parent.scriptdir + "/help/kic.html")
     
     def setSeqWin(self, seqWin):
 	self.seqWin = seqWin
@@ -360,7 +368,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	if (self.loopType == "Refine"):
 	    self.loopType = "Reconstruct"
 	    if (platform.system() == "Darwin"):
-		self.btnLoopType.SetBitmapLabel(bitmap=wx.Image("images/osx/btnLoopType_Reconstruct.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnLoopType.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLoopType_Reconstruct.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnLoopType.SetLabel(self.loopType)
 	    self.btnLoopType.SetToolTipString("Reconstruct the current loop using the wildtype sequence")
@@ -370,7 +378,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	elif (self.loopType == "Reconstruct"):
 	    self.loopType = "De Novo"
 	    if (platform.system() == "Darwin"):
-		self.btnLoopType.SetBitmapLabel(bitmap=wx.Image("images/osx/btnLoopType_DeNovo.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnLoopType.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLoopType_DeNovo.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnLoopType.SetLabel(self.loopType)
 	    self.btnLoopType.SetToolTipString("Construct a new loop with a new sequence")
@@ -378,7 +386,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	else:
 	    self.loopType = "Refine"
 	    if (platform.system() == "Darwin"):
-		self.btnLoopType.SetBitmapLabel(bitmap=wx.Image("images/osx/btnLoopType_Refine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnLoopType.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLoopType_Refine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnLoopType.SetLabel(self.loopType)
 	    self.btnLoopType.SetToolTipString("Refine a pre-existing loop using the high resolution KIC remodeler only")
@@ -392,7 +400,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	if (self.perturbType == "Perturb+Refine"):
 	    self.perturbType = "Perturb Only, Fullatom"
 	    if (platform.system() == "Darwin"):
-		self.btnPerturb.SetBitmapLabel(bitmap=wx.Image("images/osx/btnPerturb_Fullatom.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnPerturb.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnPerturb_Fullatom.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnPerturb.SetLabel(self.perturbType)
 	    self.btnPerturb.SetToolTipString("Perform only KIC coarse perturbations but convert outputted models to repacked fullatom PDBs")
@@ -402,7 +410,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	else:
 	    self.perturbType = "Perturb+Refine"
 	    if (platform.system() == "Darwin"):
-		self.btnPerturb.SetBitmapLabel(bitmap=wx.Image("images/osx/btnPerturb_Refine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnPerturb.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnPerturb_Refine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnPerturb.SetLabel(self.perturbType)
 	    self.btnPerturb.SetToolTipString("Perform KIC coarse perturbation followed by high resolution refinement")
@@ -421,7 +429,8 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.seqWin.cwd = self.outputdir
 	    self.seqWin.saveWindowData(None)
 	    self.lblDir.SetLabel(self.outputdir)
-	    if (platform.system() != "Windows"):
+	    self.lblDir.SetForegroundColour("#FFFFFF")
+	    if (platform.system() == "Linux"):
 		resizeTextControlForUNIX(self.lblDir, 130, 190)
 	    logInfo("Set output directory as " + self.outputdir)
 	else:
@@ -569,7 +578,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.cmd.show("sticks", "viewsele")
 	self.cmd.set_bond("stick_radius", 0.25, "viewsele")
 	# Highlight this residue in PyMOL
-	self.cmd.select("sele", "viewsele")
+	self.cmd.select("seqsele", "viewsele")
 	if (newmodel):
 	    # If this is after a protocol, also show the original structure in green for comparison
 	    self.cmd.select("oldsele", "model " + origmodel + " and symbol c")
@@ -593,7 +602,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		#self.cmd.select("viewsele", "resi " + seqpos + " and model " + origmodel + " and chain " + chain)
 	    #self.cmd.show("sticks", "viewsele")
 	    #self.cmd.set_bond("stick_radius", 0.25, "viewsele")
-	self.cmd.enable("sele")
+	self.cmd.enable("seqsele")
 	self.cmd.delete("viewsele")
 	self.cmd.select("exviewsele", "solvent")
 	self.cmd.hide("everything", "exviewsele")
@@ -637,11 +646,12 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	if (self.loopType == "De Novo"):
 	    self.txtSequence.Enable()
 	if (platform.system() == "Darwin"):
-	    self.btnKIC.SetBitmapLabel(bitmap=wx.Image("images/osx/btnKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnKIC.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	else:
 	    self.btnKIC.SetLabel("KIC!")
 	self.buttonState = "KIC!"
 	self.btnKIC.SetToolTipString("Perform KIC simulation with selected parameters")
+	deleteInputFiles()
 	self.parent.parent.restartDaemon()
 	self.parent.GoBtn.Enable()
 	# Get rid of the messages
@@ -661,6 +671,8 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.seqWin.labelMsg.SetLabel(self.seqWin.msgQueue[len(self.seqWin.msgQueue)-1])
 	else:
 	    self.seqWin.labelMsg.SetLabel("")
+	self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
     
     def KICClick(self, event):
 	# This is also the "Finalize!" button
@@ -691,6 +703,8 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		wx.MessageBox("If you want to generate more than one structure, you need to indicate a directory to which all these structures will be outputted.", "Specify an Output Directory", wx.OK|wx.ICON_EXCLAMATION)
 		return
 	    self.seqWin.labelMsg.SetLabel("Performing KIC loop modeling, please be patient...")
+	    self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	    self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
 	    self.seqWin.msgQueue.append("Performing KIC loop modeling, please be patient...")
 	    self.seqWin.cannotDelete = True
 	    self.parent.GoBtn.Disable()
@@ -700,7 +714,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.endMenu.Disable()
 	    self.txtSequence.Disable()
 	    if (platform.system() == "Darwin"):
-		self.btnKIC.SetBitmapLabel(bitmap=wx.Image("images/osx/btnKIC_Cancel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnKIC.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnKIC_Cancel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnKIC.SetLabel("Cancel!")
 	    self.buttonState = "Cancel!"
@@ -744,7 +758,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    if (self.loopType == "De Novo"):
 		self.txtSequence.Enable()
 	    if (platform.system() == "Darwin"):
-		self.btnKIC.SetBitmapLabel(bitmap=wx.Image("images/osx/btnKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnKIC.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnKIC.SetLabel("KIC!")
 	    self.buttonState = "KIC!"
@@ -811,7 +825,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.txtSequence.Enable()
 	self.btnKIC.Enable()
 	if (platform.system() == "Darwin"):
-	    self.btnKIC.SetBitmapLabel(bitmap=wx.Image("images/osx/btnKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnKIC.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	else:
 	    self.btnKIC.SetLabel("KIC!")
 	self.buttonState = "KIC!"
@@ -832,6 +846,8 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.seqWin.labelMsg.SetLabel(self.seqWin.msgQueue[len(self.seqWin.msgQueue)-1])
 	else:
 	    self.seqWin.labelMsg.SetLabel("")
+	self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
     
     def threadKIC(self, event):
 	# Why am I doing this ridiculous timer thing for this KIC protocol?
@@ -915,6 +931,8 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 			self.seqWin.msgQueue.pop(i)
 			break
 		self.seqWin.labelMsg.SetLabel("Performing rotamer repacking, please be patient...")
+		self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+		self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
 		self.seqWin.msgQueue.append("Performing rotamer repacking, please be patient...")
 		self.parent.parent.restartDaemon()
 		for decoy in range(0, self.nstruct):
@@ -952,6 +970,8 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 			self.seqWin.msgQueue.pop(i)
 			break
 		self.seqWin.labelMsg.SetLabel("Performing refined KIC loop modeling, please be patient...")
+		self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+		self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
 		self.seqWin.msgQueue.append("Performing refined KIC loop modeling, please be patient...")
 		self.parent.parent.restartDaemon()
 		os.rename("finekicinputtemp", "finekicinput") # So the new daemon sees it
@@ -1044,6 +1064,8 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    self.seqWin.labelMsg.SetLabel(self.seqWin.msgQueue[len(self.seqWin.msgQueue)-1])
 		else:
 		    self.seqWin.labelMsg.SetLabel("")
+		self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+		self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
 		# Add these loop residues to the view menu so the user can look at the new loop
 		viewoptions = []
 		i = 1
@@ -1064,7 +1086,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		#self.enableControls()
 		#self.selectedModel = ""
 		if (platform.system() == "Darwin"):
-		    self.btnKIC.SetBitmapLabel(bitmap=wx.Image("images/osx/btnKIC_Finalize.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		    self.btnKIC.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnKIC_Finalize.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		else:
 		    self.btnKIC.SetLabel("Finalize!")
 		self.buttonState = "Finalize!"
