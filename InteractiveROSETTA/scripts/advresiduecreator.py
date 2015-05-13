@@ -459,6 +459,10 @@ class ResidueCreatorPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	try:
 	    if (os.path.isfile("LG.params")):
 		os.remove("LG.params")
+	    if (os.path.isfile("LG.fa.params")):
+		os.remove("LG.fa.params")
+	    if (os.path.isfile("LG.cen.params")):
+		os.remove("LG.cen.params")
 	    #molfile_to_params.main(["params.mol2", "--no-pdb", "--keep-names"])
 	    molfile_to_params.main(["params.mol2", "--no-pdb", "--keep-names", "-c"])
 	except:
