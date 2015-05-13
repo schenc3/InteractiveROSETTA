@@ -33,6 +33,7 @@ from pointmutations import PointMutationsPanel
 from kic import KICPanel
 from docking import DockingPanel
 from msd import MSDPanel
+from pmutscan import PointMutantScanPanel 
 
 class ProtocolsPanel(wx.Panel):
     def __init__(self, parent, W, H):
@@ -54,7 +55,7 @@ class ProtocolsPanel(wx.Panel):
 	    resizeTextControlForUNIX(self.label, 0, self.GetSize()[0])
 	self.label.SetForegroundColour("#FFFFFF")
 	
-	self.protocols = ["Docking", "Energy Minimization", "Ensemble Browser", "Loop Modeling (KIC)", "Point Mutations", "Protein Design (Fixbb)", "Protein Design (MSD)", "Residue/Ligand Creator", "Structure Prediction (Comparative Modeling)", "Superimposition"]
+	self.protocols = ["Docking", "Energy Minimization", "Ensemble Browser", "Loop Modeling (KIC)", "Point Mutant Scan", "Point Mutations", "Protein Design (Fixbb)", "Protein Design (MSD)", "Residue/Ligand Creator", "Structure Prediction (Comparative Modeling)", "Superimposition"]
 	if (platform.system() == "Darwin"):
 	    self.protMenu = wx.ComboBox(self, pos=(5, 30), size=(230, 25), choices=self.protocols, style=wx.CB_READONLY)
 	else:
@@ -141,6 +142,9 @@ class ProtocolsPanel(wx.Panel):
 		    pass
 		self.protPanel.Destroy()
 		del self.protPanel
+	    elif (self.currentProtocol == "Point Mutant Scan"):
+		self.protPanel.Destroy()
+		del self.protPanel
 	    elif (self.currentProtocol == "Loop Modeling (KIC)"):
 		# Check to see if the user has accepted the loop model
 		# If not, ask if they really want to proceed
@@ -220,6 +224,9 @@ class ProtocolsPanel(wx.Panel):
 		self.protPanel = ResidueCreatorPanel(self, self.W, self.H)
 	    elif (selectedProtocol == "Point Mutations"):
 		self.protPanel = PointMutationsPanel(self, self.W, self.H)
+		self.protPanel.setSelectWin(self.selectWin)
+	    elif (selectedProtocol == "Point Mutant Scan"):
+		self.protPanel = PointMutantScanPanel(self, self.W, self.H)
 		self.protPanel.setSelectWin(self.selectWin)
 	    elif (selectedProtocol == "Loop Modeling (KIC)"):
 		self.protPanel = KICPanel(self, self.W, self.H)

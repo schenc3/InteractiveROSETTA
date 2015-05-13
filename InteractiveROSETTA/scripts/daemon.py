@@ -40,6 +40,7 @@ try:
     from rosetta.protocols.comparative_modeling import *
     from rosetta.protocols.jd2 import *
     from rosetta.core.scoring.constraints import *
+    from rosetta.protocols.pmut_scan import *
 except:
     # If it failed, then try to find Rosetta
     # If this already happened once already, then we should have saved the Rosetta path, so let's try to import from there
@@ -154,7 +155,7 @@ from Bio.Align.Applications import MuscleCommandline
 from tools import goToSandbox
 from tools import AA3to1
 
-def initializeRosetta(addOn=""):
+def initializeRosetta(addOn="", extraMutes=""):
     # Grab the params files in the user's personal directory
     goToSandbox("params")
     faparamsstr = ""
@@ -168,16 +169,18 @@ def initializeRosetta(addOn=""):
     # If the loop is too short, then the maximum number of build attempts will be used
     # A thread is supposed to be reading the standard output to detect that this has happened
     # so if you mute it then it will listen forever
-    init(extra_options=paramsstr + " -mute core.kinematics.AtomTree -ignore_unrecognized_res -ignore_zero_occupancy false " + addOn)
+    init(extra_options=paramsstr + " -mute core.kinematics.AtomTree " + extraMutes + " -ignore_unrecognized_res -ignore_zero_occupancy false " + addOn)
     goToSandbox()
 
 captured_stdout = ""
 stdout_pipe = None    
-def drain_pipe(captured_stdout, stdout_pipe):
+def drain_pipe():
+    global captured_stdout
     while True:
         data = os.read(stdout_pipe[0], 1024)
         if not data:
             break
+	print "mydata: " + data.strip()
         captured_stdout += data
 
 def doMinimization():
@@ -322,7 +325,53 @@ def doFixbb():
     f.close()
     # So the main GUI doesn't attempt to read the file before the daemon finishes writing its contents
     os.rename("designoutputtemp", "designoutput")
-    
+ 
+def doPMutScan():
+    initializeRosetta(extraMutes="basic core")
+    try:
+	f = open("scaninput", "r")
+    except:
+	raise Exception("ERROR: The file \"designinput\" is missing!")
+    # Get the pdbfile, resfile, and scorefxn from the input file
+    for aline in f:
+	if (aline[0:7] == "PDBFILE"):
+	    pdbfile = aline.split("\t")[1].strip()
+	elif (aline[0:4] == "LIST"):
+	    listfile = aline.split("\t")[1].strip()
+	elif (aline[0:8] == "SCOREFXN"):
+	    weightsfile = aline.split("\t")[1].strip()
+	elif (aline.startswith("MUTANTTYPE")):
+	    mutanttype = aline.split("\t")[1].strip()
+    f.close()
+    # Initialize scoring function
+    scorefxn = ScoreFunction()
+    try:
+	scorefxn.add_weights_from_file(weightsfile)
+    except:
+	raise Exception("ERROR: The scoring function weights could not be initialized!")
+    f = open("scanoutputtemp", "w", 1)
+    # Perform the scan using the specified mutants
+    vec = utility.vector1_string()
+    vec.append(pdbfile)
+    if (mutanttype == "DOUBLE"):
+	double = True
+    else:
+	double = False
+    # Capture stdout in the outputfile
+    #stdout = sys.stdout
+    #sys.stdout = f
+    #try:
+    PMS = PointMutScanDriver(vec, double, listfile, False)
+    PMS.go()
+    #except:
+	#f.close()
+	#sys.stdout = stdout
+	#raise Exception("ERROR: The Rosetta PointMutScanDriver failed!")
+    #f.close()
+    #sys.stdout = stdout
+    # So the main GUI doesn't attempt to read the file before the daemon finishes writing its contents
+    os.rename("scanoutputtemp", "scanoutput")
+ 
 def doScore():
     initializeRosetta()
     try:
@@ -1256,6 +1305,30 @@ def daemonLoop():
 		print "The daemon crashed while performing the fixbb job!"
 		writeError(e.message)
 	    os.remove("designinput")
+	elif (os.path.isfile("scaninput")):
+	    print "Daemon starting point mutation scanning job..."
+	    print sys.stdout
+	    stdout_fileno = sys.stdout.fileno()
+	    stdout_save = os.dup(stdout_fileno)
+	    stdout_pipe = os.pipe()
+	    os.dup2(stdout_pipe[1], stdout_fileno)
+	    os.close(stdout_pipe[1])
+	    captured_stdout = ""
+	    t = Thread(target=drain_pipe)
+	    t.start()
+	    try:
+		doPMutScan()
+		print "Daemon completed point mutation scanning job"
+	    except Exception as e:
+		print "The daemon crashed while performing the scanning job!"
+		writeError(e.message)
+	    os.close(stdout_fileno)
+	    t.join()
+	    # Clean up the pipe and restore the original stdout
+	    os.close(stdout_pipe[0])
+	    os.dup2(stdout_save, stdout_fileno)
+	    os.close(stdout_save)
+	    os.remove("scaninput")
 	elif (os.path.isfile("scoreinput")):
 	    print "Daemon starting scoring job..."
 	    try:

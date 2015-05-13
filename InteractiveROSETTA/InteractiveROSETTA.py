@@ -359,7 +359,6 @@ if (__name__ == "__main__"):
     from threading import Thread
     import multiprocessing
     from scripts.tools import goToSandbox
-    importModules(wxpython=True)
     import wx
     import wx.grid
     import wx.lib.scrolledpanel
@@ -397,6 +396,7 @@ if (__name__ == "__main__"):
 	scriptdir = scriptdir + "/" + tempdir
     os.chdir(scriptdir)
     
+    importModules(wxpython=True)
     app = wx.App()
     # Check to see if the License has been accepted
     f = open("InteractiveROSETTA.py", "r")
