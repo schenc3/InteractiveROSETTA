@@ -28,14 +28,113 @@ import glob
 import gzip
 import math
 import subprocess
-from rosetta import *
+import commands
 from threading import Thread
-# Extra imports for KIC
-from rosetta.protocols.loops.loop_mover.perturb import *
-from rosetta.protocols.loops.loop_mover.refine import *
-#from tools import goToSandbox
-#from tools import AA3to1
 import socket
+import shutil
+try:
+    # Try to import Rosetta
+    from rosetta import *
+    # Extra imports for KIC
+    from rosetta.protocols.loops.loop_mover.perturb import *
+    from rosetta.protocols.loops.loop_mover.refine import *
+except:
+    # If it failed, then try to find Rosetta
+    # If this already happened once already, then we should have saved the Rosetta path, so let's try to import from there
+    print "Rosetta could not be imported.  Attempting to locate the PyRosetta install.  Please be patient..."
+    cfgfile = "rosetta.cfg"
+    try:
+	f = open(cfgfile.strip(), "r")
+	rosettadir = "Not Found"
+	rosettadb = "Not Found"
+	for aline in f:
+	    if ("[ROSETTAPATH]" in aline):
+		rosettapath = aline.split("\t")[1].strip()
+	    if ("[ROSETTADB]" in aline):
+		rosettadb = aline.split("\t")[1].strip()
+	f.close()
+	if (rosettapath == "Not Found"):
+	    raise Exception
+	else:
+	    sys.path.append(rosettapath)
+	    olddir = os.getcwd()
+	    os.chdir(rosettapath)
+	    os.environ["PYROSETTA_DATABASE"] = rosettadb
+	    # Try to import Rosetta
+	    from rosetta import *
+	    # Extra imports for KIC
+	    from rosetta.protocols.loops.loop_mover.perturb import *
+	    from rosetta.protocols.loops.loop_mover.refine import *
+	    os.chdir(olddir)
+	    print "Found Rosetta at " + rosettapath.strip() + "!"
+	    print "Rosetta Database: " + rosettadb.strip()
+    except:
+	# The error may have been the Rosetta import, which means the file needs to be closed
+	try:
+	    f.close()
+	except:
+	    pass
+	# Okay, we still didn't get it, so let's traverse the filesystem looking for it...
+	foundIt = False
+	if (platform.system() == "Windows"):
+	    root = "C:\\"
+	else:
+	    root = "/"
+	for dpath, dnames, fnames in os.walk(root):
+	    try:
+		if (platform.system() == "Windows"):
+		    try:
+			indx = fnames.index("rosetta.pyd") # 64bit
+		    except:
+			indx = fnames.index("rosetta.dll") # 32bit
+		else:
+		    indx = dnames.index("rosetta")
+		    files = glob.glob(dpath + "/rosetta/*libmini*")
+		    if (len(files) == 0):
+			raise Exception
+	    except:
+		continue
+	    foundIt = True
+	    rosettapath = dpath
+	    for dname in dnames:
+		if ("database" in dname):
+		    rosettadb = dpath + "/" + dname
+		    break
+	    break
+	if (foundIt):
+	    sys.path.append(rosettapath)
+	    olddir = os.getcwd()
+	    os.chdir(rosettapath)
+	    os.environ["PYROSETTA_DATABASE"] = rosettadb
+	    try:
+		# Try to import Rosetta
+		from rosetta import *
+		# Extra imports for KIC
+		from rosetta.protocols.loops.loop_mover.perturb import *
+		from rosetta.protocols.loops.loop_mover.refine import *
+		# Now let's save these paths so the next time this gets started we don't have to traverse the filesystem again
+		data = []
+		try:
+		    f = open(cfgfile, "r")
+		    for aline in f:
+			if (not("[ROSETTAPATH]" in aline) and not("[ROSETTADB]") in aline):
+			    data.append(aline.strip())
+		    f.close()
+		except:
+		    pass
+		f = open(cfgfile, "w")
+		for aline in data:
+		    f.write(aline + "\n")
+		f.write("[ROSETTAPATH]\t" + rosettapath.strip() + "\n")
+		f.write("[ROSETTADB]\t" + rosettadb.strip() + "\n")
+		f.close()
+		print "Found Rosetta at " + rosettapath.strip() + "!"
+		print "Rosetta Database: " + rosettadb.strip()
+		os.chdir(olddir)
+	    except:
+		print "PyRosetta cannot be found on your system!"
+		print "Until you install PyRosetta, you may only use InteractiveROSETTA to visualize structures in PyMOL"
+		exit()
 
 doKICLocally = True # Set to true because the refined KIC step takes a long time, so just have the user do it for now
 hostname = socket.gethostname()
@@ -336,7 +435,7 @@ def doScore(inputfile):
     f = open(hostname + "-scoreoutputtemp", "w")
     pose = pose_from_pdb(hostname + "-" + pdbfile)
     # Calculate energy
-    scorefxn(pose)
+    total_E = scorefxn(pose)
     # Dump the output
     outputpdb = pdbfile.split(".pdb")[0] + "_S.pdb"
     pose.dump_pdb(hostname + "-" + outputpdb)
@@ -349,6 +448,7 @@ def doScore(inputfile):
     f.write("END PDB DATA\n")
     f2.close()
     os.remove(hostname + "-" + outputpdb)
+    f.write("TOTAL_E\t" + str(total_E) + "\n")
     nonzero_scoretypes = scorefxn.get_nonzero_weighted_scoretypes()
     f.write("ENERGY\ttotal_score")
     for scoretype in nonzero_scoretypes:
@@ -475,7 +575,7 @@ def doRotamerSearch(inputfile):
     try:
 	res_mutate = Residue(rsd_factory.residue(resindx))
 	res_mutate.place(pose.residue(indx), pose.conformation(), True)
-	pose.replace_residue(indx, res_mutate.clone(), False)
+	pose.replace_residue(indx, res_mutate.clone(), True)
     except:
 	raise Exception("ERROR: The new residue could not be mutated onto the structure.")
     # Search all the chi values and score them
@@ -492,6 +592,11 @@ def doRotamerSearch(inputfile):
 	for scoretype in nonzero_scoretypes:
 	    Elist[k].append(emap.get(scoretype))
 	k = k + 1
+	# The following line must be here
+	# Sometimes after doing multiple set_chis the structure gets really messed up (don't know if I am
+	# doing something wrong or if it is a Rosetta bug, it only happens in special occasions) so we have
+	# to revert back to the original structure so errors are not propagated
+	pose.replace_residue(indx, res_mutate.clone(), True)
     # Now sort according to increasing score
     for i in range(0, len(chivals)-1):
 	lowest = i
@@ -716,7 +821,11 @@ def doMSD(inputfile):
     f = open(inputfile, "r")
     ID = inputfile.split("-")[2]
     # Make a new results folder and unpack the data there
-    os.mkdir("results/" + ID)
+    try:
+	os.mkdir("results/" + ID)
+    except:
+	shutil.rmtree("results/" + ID, ignore_errors=True)
+	os.mkdir("results/" + ID)
     os.chdir("results/" + ID)
     readingData = False
     for aline in f:
@@ -740,6 +849,70 @@ def doMSD(inputfile):
     # The Python script will handle everything from here
     # Get back to where we were
     os.chdir("../..")
+    
+def doAntibody(inputfile):
+    # Make a new results folder and unpack the data there
+    try:
+	os.mkdir("results/" + ID)
+    except:
+	shutil.rmtree("results/" + ID, ignore_errors=True)
+	os.mkdir("results/" + ID)
+    os.chdir("results/" + ID)
+    # Move the input file here
+    os.rename("../../" + inputfile, inputfile.split("-")[1])
+    # Submit it to the queue
+    sub = subprocess.Popen(["python", "../../rosetta_submit.py", "antibody", ID])
+    # The Python script will handle everything from here
+    # Get back to where we were
+    os.chdir("../..")
+    
+def doDock(inputfile):
+    # Make a new results folder and unpack the data there
+    try:
+	os.mkdir("results/" + ID)
+    except:
+	shutil.rmtree("results/" + ID, ignore_errors=True)
+	os.mkdir("results/" + ID)
+    os.chdir("results/" + ID)
+    # Move the input file here
+    os.rename("../../" + inputfile, inputfile.split("-")[1])
+    # Submit it to the queue
+    sub = subprocess.Popen(["python", "../../rosetta_submit.py", "dock", ID])
+    # The Python script will handle everything from here
+    # Get back to where we were
+    os.chdir("../..")
+
+def doPMutScan(inputfile):
+    # Make a new results folder and unpack the data there
+    try:
+	os.mkdir("results/" + ID)
+    except:
+	shutil.rmtree("results/" + ID, ignore_errors=True)
+	os.mkdir("results/" + ID)
+    os.chdir("results/" + ID)
+    # Move the input file here
+    os.rename("../../" + inputfile, inputfile.split("-")[1])
+    # Submit it to the queue
+    sub = subprocess.Popen(["python", "../../rosetta_submit.py", "pmutscan", ID])
+    # The Python script will handle everything from here
+    # Get back to where we were
+    os.chdir("../..")
+
+def doBackrub(inputfile):
+    # Make a new results folder and unpack the data there
+    try:
+	os.mkdir("results/" + ID)
+    except:
+	shutil.rmtree("results/" + ID, ignore_errors=True)
+	os.mkdir("results/" + ID)
+    os.chdir("results/" + ID)
+    # Move the input file here
+    os.rename("../../" + inputfile, inputfile.split("-")[1])
+    # Submit it to the queue
+    sub = subprocess.Popen(["python", "../../rosetta_submit.py", "backrub", ID])
+    # The Python script will handle everything from here
+    # Get back to where we were
+    os.chdir("../..")
 
 def writeError(msg, inputfile="None-"):
     # Open a file and write out the error message so the main GUI can tell the user what happened
@@ -758,7 +931,12 @@ begintime = datetime.datetime.now()
 while (True):
     inputfiles = glob.glob("jobfiles/*")
     for inputfile in inputfiles:
+	ID = inputfile.split("-")[len(inputfile.split("-"))-1]
 	if (inputfile.startswith("jobfiles/" + hostname + "-minimizeinput")):
+	    if ("-" in hostname):
+		# If the hostname has - in it, it will screw up the splitting later on, so fix it here
+		os.rename(inputfile, "jobfiles/" + hostname.replace("-", "") + "-minimizeinput-" + ID)
+		inputfile = "jobfiles/" + hostname.replace("-", "") + "-minimizeinput-" + ID
 	    print "Daemon starting minimization job..."
 	    try:
 		doMinimization(inputfile)
@@ -768,6 +946,10 @@ while (True):
 		writeError(e.message, inputfile)
 	    os.remove(inputfile)
 	elif (inputfile.startswith("jobfiles/" + hostname + "-designinput")):
+	    if ("-" in hostname):
+		# If the hostname has - in it, it will screw up the splitting later on, so fix it here
+		os.rename(inputfile, "jobfiles/" + hostname.replace("-", "") + "-designinput-" + ID)
+		inputfile = "jobfiles/" + hostname.replace("-", "") + "-designinput-" + ID
 	    print "Daemon starting fixbb design job..."
 	    try:
 		doFixbb(inputfile)
@@ -777,6 +959,10 @@ while (True):
 		writeError(e.message, inputfile)
 	    os.remove(inputfile)
 	elif (inputfile.startswith("jobfiles/" + hostname + "-scoreinput")):
+	    if ("-" in hostname):
+		# If the hostname has - in it, it will screw up the splitting later on, so fix it here
+		os.rename(inputfile, "jobfiles/" + hostname.replace("-", "") + "-scoreinput-" + ID)
+		inputfile = "jobfiles/" + hostname.replace("-", "") + "-scoreinput-" + ID
 	    print "Daemon starting scoring job..."
 	    try:
 		doScore(inputfile)
@@ -786,6 +972,10 @@ while (True):
 		writeError(e.message, inputfile)
 	    os.remove(inputfile)
 	elif (inputfile.startswith("jobfiles/" + hostname + "-rotamerinput")):
+	    if ("-" in hostname):
+		# If the hostname has - in it, it will screw up the splitting later on, so fix it here
+		os.rename(inputfile, "jobfiles/" + hostname.replace("-", "") + "-rotamerinput-" + ID)
+		inputfile = "jobfiles/" + hostname.replace("-", "") + "-rotamerinput-" + ID
 	    print "Daemon starting rotamer searching job..."
 	    try:
 		doRotamerSearch(inputfile)
@@ -795,6 +985,10 @@ while (True):
 		writeError(e.message, inputfile)
 	    os.remove(inputfile)
 	elif (inputfile.startswith("jobfiles/" + hostname + "-coarsekicinput")):
+	    if ("-" in hostname):
+		# If the hostname has - in it, it will screw up the splitting later on, so fix it here
+		os.rename(inputfile, "jobfiles/" + hostname.replace("-", "") + "-coarsekicinput-" + ID)
+		inputfile = "jobfiles/" + hostname.replace("-", "") + "-coarsekicinput-" + ID
 	    print "Daemon starting coarse KIC loop modeling job..."
 	    # This is code to pipe stdout to a variable called "captured_stdout" so I can
 	    # parse the standard output of the coarse KIC perturber and see if it failed to
@@ -876,11 +1070,53 @@ while (True):
 		    writeError(e.message, inputfile)
 		os.remove(inputfile)
 	elif (inputfile.startswith("jobfiles/" + hostname + "-msdinput")):
+	    if ("-" in hostname):
+		# If the hostname has - in it, it will screw up the splitting later on, so fix it here
+		os.rename(inputfile, "jobfiles/" + hostname.replace("-", "") + "-msdinput-" + ID)
+		inputfile = "jobfiles/" + hostname.replace("-", "") + "-msdinput-" + ID
 	    print "Daemon starting multi-state design job..."
 	    doMSD(inputfile)
 	    os.remove(inputfile)
+	elif (inputfile.startswith("jobfiles/" + hostname + "-antibodyinput")):
+	    if ("-" in hostname):
+		# If the hostname has - in it, it will screw up the splitting later on, so fix it here
+		os.rename(inputfile, "jobfiles/" + hostname.replace("-", "") + "-antibodyinput-" + ID)
+		inputfile = "jobfiles/" + hostname.replace("-", "") + "-antibodyinput-" + ID
+	    print "Daemon starting antibody modeling job..."
+	    doAntibody(inputfile)
+	elif (inputfile.startswith("jobfiles/" + hostname + "-coarsedockinput")):
+	    if ("-" in hostname):
+		# If the hostname has - in it, it will screw up the splitting later on, so fix it here
+		os.rename(inputfile, "jobfiles/" + hostname.replace("-", "") + "-coarsedockinput-" + ID)
+		inputfile = "jobfiles/" + hostname.replace("-", "") + "-coarsedockinput-" + ID
+	    print "Daemon starting docking job..."
+	    doDock(inputfile)
+	elif (inputfile.startswith("jobfiles/" + hostname + "-scaninput")):
+	    if ("-" in hostname):
+		# If the hostname has - in it, it will screw up the splitting later on, so fix it here
+		os.rename(inputfile, "jobfiles/" + hostname.replace("-", "") + "-scaninput-" + ID)
+		inputfile = "jobfiles/" + hostname.replace("-", "") + "-scaninput-" + ID
+	    print "Daemon starting point mutant scanning job..."
+	    doPMutScan(inputfile)
+	elif (inputfile.startswith("jobfiles/" + hostname + "-backrubinput")):
+	    if ("-" in hostname):
+		# If the hostname has - in it, it will screw up the splitting later on, so fix it here
+		os.rename(inputfile, "jobfiles/" + hostname.replace("-", "") + "-backrubinput-" + ID)
+		inputfile = "jobfiles/" + hostname.replace("-", "") + "-backrubinput-" + ID
+	    print "Daemon starting backrubbing job..."
+	    doBackrub(inputfile)
+	elif (inputfile.startswith("jobfiles/" + hostname + "-killinput")):
+	    fin = open(inputfile, "r")
+	    filedata = fin.readlines()
+	    fin.close()
+	    commandline = "python killjob.py " + filedata[1].strip()
+	    res, output = commands.getstatusoutput(commandline)
+	    try:
+		os.remove(inputfile)
+	    except:
+		pass
     time.sleep(1)
     elapsed = datetime.datetime.now() - begintime
-    if (elapsed.total_seconds() >= 60*60*24):
+    if (elapsed.seconds >= 60*60*24):
 	# Restart the daemon to prevent memory from becoming stale
 	break

@@ -7,6 +7,7 @@ from poster.encode import multipart_encode
 from poster.streaminghttp import register_openers
 import urllib2
 import glob
+import socket
 
 register_openers()
 if (platform.system() == "Windows"):
@@ -31,12 +32,30 @@ else:
 
 serverName = [""]
 serverTimeout = 60*10
+primaryRender = ["cartoon", "ribbon"]
 
 def getServerName():
     return serverName[0]
 
 def setServerName(name):
     serverName[0] = name
+    
+def getPrimaryRender():
+    return primaryRender[0]
+    
+def setPrimaryRender(renderType):
+    if (renderType == "cartoon"):
+	primaryRender[0] = "cartoon"
+	primaryRender[1] = "ribbon"
+    else:
+	primaryRender[0] = "ribbon"
+	primaryRender[1] = "cartoon"
+
+colors = ["0xFF0000", "0x0000FF", "0x00FF00", "0xFFFF00", "0xFF00FF", "0x00FFFF", "0xFF9900", "0x6666FF",
+	  "0x800000", "0x000099", "0x006600", "0xFF99FF", "0x33CCCC", "0x663300", "0x00CCFF", "0xCCCC00",
+	  "0x99FF33", "0x99CCFF", "0x660066", "0xFF3399"]
+def getChainColor(row):
+    return colors[row % len(colors)]
 
 # Useful scoretype translations for the user
 scoretypes = {}
@@ -1260,7 +1279,8 @@ def defaultPyMOLView(cmd, model=None):
 	cmd.select("dsele", "model " + model)
 	# Set to a default view
 	cmd.hide("lines", "dsele")
-	cmd.show("cartoon", "dsele")
+	cmd.show(primaryRender[0], "dsele")
+	cmd.hide(primaryRender[1], "dsele")
 	cmd.select("dsele", "metal and model " + model)
 	cmd.show("spheres", "dsele")
 	cmd.select("dsele", "symbol c and model " + model)
@@ -1285,7 +1305,8 @@ def defaultPyMOLView(cmd, model=None):
 	cmd.select("dsele", "all")
 	# Set to a default view
 	cmd.hide("lines", "dsele")
-	cmd.show("cartoon", "dsele")
+	cmd.show(primaryRender[0], "dsele")
+	cmd.hide(primaryRender[1], "dsele")
 	cmd.select("dsele", "metal")
 	cmd.show("spheres", "dsele")
 	cmd.select("dsele", "symbol c")
@@ -1567,6 +1588,7 @@ def appendScorefxnParamsInfoToFile(filename, weightsfile):
 def sendToServer(inputfile):
     # This function attempts to send the inputfile to a server running PyRosetta using HTTP POST
     home = os.path.expanduser("~")
+    serverpath = serverName[0]
     if (inputfile == "testinput"):
 	if (platform.system() == "Windows"):
 	    f = open(home + "\\InteractiveROSETTA\\testinputtemp", "w")
@@ -1574,22 +1596,44 @@ def sendToServer(inputfile):
 	    f = open(home + "/InteractiveROSETTA/testinputtemp", "w")
 	f.write("THIS IS A TEST")
 	f.close()
+    elif (inputfile.startswith("kill")):
+	if (platform.system() == "Windows"):
+	    f = open(home + "\\InteractiveROSETTA\\killinputtemp", "w")
+	else:
+	    f = open(home + "/InteractiveROSETTA/killinputtemp", "w")
+	f.write(inputfile.split("|")[1])
+	serverpath = inputfile.split("|")[2]
+	inputfile = "killinput"
+	f.close()
     if (platform.system() == "Windows"):
 	f = open(home + "\\InteractiveROSETTA\\" + inputfile + "temp", "rb")
     else:
 	f = open(home + "/InteractiveROSETTA/" + inputfile + "temp", "rb")
-    datagen, headers = multipart_encode({inputfile: f})
-    for line in datagen:
-	if (line[0:2] == "--"):
-	    myID = line[2:len(line.strip())-2]
-    try:
-	request = urllib2.Request(serverName[0] + "/cgi-bin/jobupload.cgi", datagen, headers)
-	# Actually do the request, and get the response
-	response = urllib2.urlopen(request).read().strip()
-	f.close()
-    except:
-	f.close()
-	raise Exception("ERROR: Failed to upload protocol inputs to the server")
+    # Added support for a server running on the client's machine, using the keyword "localhost"
+    if (serverpath.lower().strip().startswith("localhost")):
+	serverlocation = serverpath[serverpath.find(":")+1:]
+	myID = "0000000000"
+	try:
+	    if (platform.system() == "Windows"):
+		os.rename(home + "\\InteractiveROSETTA\\" + inputfile + "temp", serverlocation + "\\jobfiles\\" + socket.gethostname() + "-" + inputfile + "-" + myID)
+	    else:
+		os.rename(home + "/InteractiveROSETTA/" + inputfile + "temp", serverlocation + "/jobfiles/" + socket.gethostname() + "-" + inputfile + "-" + myID)
+	    response = "InteractiveROSETTA Upload Successful"
+	except:
+	    response = "Failed"
+    else:
+	datagen, headers = multipart_encode({inputfile: f})
+	for line in datagen:
+	    if (line[0:2] == "--"):
+		myID = line[2:len(line.strip())-2]
+	try:
+	    request = urllib2.Request(serverpath + "/cgi-bin/jobupload.cgi", datagen, headers)
+	    # Actually do the request, and get the response
+	    response = urllib2.urlopen(request).read().strip()
+	    f.close()
+	except:
+	    f.close()
+	    raise Exception("ERROR: Failed to upload protocol inputs to the server")
     if (response == "InteractiveROSETTA Upload Successful"):
 	return myID
     else:
@@ -1602,7 +1646,14 @@ def queryServerForResults(outputfile):
     goToSandbox()
     localfilename = outputfile.split("-")[0]
     try:
-	f = urllib2.urlopen(serverName[0] + "/results/" + outputfile)
+	if (serverName[0].lower().strip().startswith("localhost")):
+	    serverlocation = serverName[0][serverName[0].find(":")+1:]
+	    if (platform.system() == "Windows"):
+		f = open(serverlocation + "\\results\\" + outputfile)
+	    else:
+		f = open(serverlocation + "/results/" + outputfile)
+	else:
+	    f = urllib2.urlopen(serverName[0] + "/results/" + outputfile)
 	f2 = open(localfilename + "temp", "w")
 	for aline in f:
 	    f2.write(aline.strip() + "\n")
@@ -1632,7 +1683,14 @@ def queryServerForResults(outputfile):
     # Maybe there is an error report, let's look for it
     try:
 	ID = outputfile.split("-")[1]
-	f = urllib2.urlopen(serverName[0] + "/results/errreport-" + ID)
+	if (serverName[0].lower().strip().startswith("localhost")):
+	    serverlocation = serverName[0][serverName[0].find(":")+1:]
+	    if (platform.system() == "Windows"):
+		f = open(serverlocation + "\\results\\errreport-" + ID)
+	    else:
+		f = open(serverlocation + "/results/errreport" + ID)
+	else:
+	    f = urllib2.urlopen(serverName[0] + "/results/errreport-" + ID)
 	f2 = open("errreporttemp", "w")
 	for aline in f:
 	    f2.write(aline.strip() + "\n")
@@ -1665,17 +1723,40 @@ def cleanPDB(pdbfile):
     # It will permanently modify the PDB that the user loaded 
     # This shouldn't cause problems for other programs though
     data = []
+    taken_nums = {}
+    num_mapping = {}
+    # Sometimes there are PDBs that have multiple residues with the same residue index
+    # BioPython drops these, but it can lead to all kinds of problems later on
+    # So I will keep a record of the backbone atoms of the current residue and if we encounter
+    # a BB atom with the same residue index, we will assume it's a new residue and renumber the residue
+    lastBBatoms = []
+    altlocs_taken = ""
     f = open(pdbfile.strip(), "r")
     curr_res = "   0"
     for aline in f:
 	if (aline.startswith("ATOM") or aline.startswith("HETATM")):
-	    res = aline[22:27]
-	    if (res != curr_res):
+	    res = aline[22:27] # Includes residue indx + the optional alternate letter
+	    if (res[0:4] != curr_res[0:4]): # New residue indx
+		altlocs_taken = res[4] # Reset the taken altlocs
 		curr_res = res
 		atomtypes = []
+		lastBBatoms = []
+	    # This is only done if this is a new residue, but not a new residue indx
+	    if (aline[22:27] != curr_res or aline[12:16] in lastBBatoms):
+		curr_res = res
+		atomtypes = []
+		lastBBatoms = []
+		# Assign the altloc to whatever the most recent altloc used was
+		for char in " ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+		    if (not(char in altlocs_taken)):
+			altlocs_taken = char + altlocs_taken
+			break
+	    res = res[0:4] + altlocs_taken[0]
 	    atomtype = aline[12:16]
+	    if (atomtype in [" C  ", " CA ", " O  ", " N  "]):
+		lastBBatoms.append(atomtype)
 	    if (atomtype in atomtypes):
-		# Find a new new for this atom
+		# Find a new type for this atom
 		stem = atomtype[0:2]
 		for i in range(1, 100):
 		    if (i < 10):
@@ -1688,9 +1769,26 @@ def cleanPDB(pdbfile):
 		aline = aline[0:12] + newtype + aline[16:]
 	    else:
 		atomtypes.append(atomtype)
-	    data.append(aline.strip())
-	else:
-	    data.append(aline.strip())
+	    # Now check for alternate forms of residues (i.e. 30A, 30B, etc.)
+	    # Rename these so the each have a unique number, the user can delete extras later
+	    chain = aline[21]
+	    if (not(chain in taken_nums.keys())):
+		taken_nums[chain] = []
+	    if (not(res[0:4] in taken_nums[chain])):
+		taken_nums[chain].append(res[0:4])
+		num_mapping[chain+res] = res[0:4]
+	    else:
+		try:
+		    aline = aline[0:22] + num_mapping[chain+res] + " " + aline[27:]
+		except:
+		    # Find a new ID
+		    lastnum = int(taken_nums[chain][len(taken_nums[chain])-1]) + 1
+		    num_mapping[chain+res] = "%4i" % lastnum
+		    taken_nums[chain].append("%4i" % lastnum)
+		    aline = aline[0:22] + num_mapping[chain+res] + " " + aline[27:]
+	    #data.append(aline.strip())
+	#else:
+	data.append(aline.strip())
     f.close()
     # Now write the updated data out
     f = open(pdbfile.strip(), "w")

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # ================================================================================================================
 # DSSP License Agreement (http://swift.cmbi.ru.nl/gv/dssp)
 #
@@ -100,6 +101,18 @@ def cleanUp():
 	os.remove("scoreinput")
     if (os.path.isfile("scoreoutput")):
 	os.remove("scoreoutput")
+    if (os.path.isfile("scaninput")):
+	os.remove("scaninput")
+    if (os.path.isfile("scanoutput")):
+	os.remove("scanoutput")
+    if (os.path.isfile("relaxinput")):
+	os.remove("relaxinput")
+    if (os.path.isfile("relaxoutput")):
+	os.remove("relaxoutput")
+    if (os.path.isfile("backrubinput")):
+	os.remove("backrubinput")
+    if (os.path.isfile("backruboutput")):
+	os.remove("backruboutput")
     if (os.path.isfile("rotamerinput")):
 	os.remove("rotamerinput")
     if (os.path.isfile("rotameroutput")):
@@ -138,6 +151,14 @@ def cleanUp():
     tempfiles = glob.glob("*.pdb")
     for tempfile in tempfiles:
 	os.remove(tempfile)
+    # Remove the progress files
+    tempfiles = glob.glob("*progress")
+    for tempfile in tempfiles:
+	os.remove(tempfile)
+    # Remove the sandbox archives
+    tempfiles = glob.glob("*.ensb")
+    for tempfile in tempfiles:
+	os.remove(tempfile)
 
 def importModules(wxpython=False):
     # This is a function for finding and importing modules
@@ -146,11 +167,14 @@ def importModules(wxpython=False):
     # First let's find out if PYROSETTA_DATABASE is set, and figure out what it should be if not
     if (not(wxpython)):
 	try:
+	    # Is PYROSETTA_DATABASE defined?
+	    # If not, then we don't know where PyRosetta is and have to look for it
 	    s = os.environ["PYROSETTA_DATABASE"]
 	    if (len(s) == 0):
 		raise Exception
 	except:
 	    # Let's find it
+	    # Did we find it already and save it?
 	    cfgfile = os.path.expanduser("~") + "/InteractiveROSETTA/seqwindow.cfg"
 	    try:
 		f = open(cfgfile.strip(), "r")
@@ -163,8 +187,12 @@ def importModules(wxpython=False):
 			rosettadb = aline.split("\t")[1].strip()
 		f.close()
 		if (rosettapath == "Not Found"):
+		    # It wasn't saved there
 		    raise Exception
 		else:
+		    # Let's try this saved path
+		    # On Windows you have to cd to where the folder is to import, because appending to the
+		    # path does not appear to work
 		    sys.path.append(rosettapath)
 		    if (platform.system() == "Windows"):
 			olddir = os.getcwd()
@@ -174,11 +202,13 @@ def importModules(wxpython=False):
 			olddir = os.getcwd()
 			os.chdir(olddir)
 	    except:
+		# We didn't save it or the saved location was bad
 		# The error may have been the Rosetta import, which means the file needs to be closed
 		try:
 		    f.close()
 		except:
 		    pass
+		# Tell the user we're busy looking for PyRosetta
 		import wx
 		busyDlg = wx.BusyInfo("Searching for PyRosetta installation, please be patient...")
 		# Okay, we still didn't get it, so let's traverse the filesystem looking for it...
@@ -186,6 +216,7 @@ def importModules(wxpython=False):
 		if (platform.system() == "Windows"):
 		    roots = ["C:\\"]
 		elif (platform.system() == "Darwin"):
+		    # To avoid long searches on Mac
 		    roots = ["/Users", "/Applications", "/"]
 		else:
 		    roots = ["/"]
@@ -193,17 +224,24 @@ def importModules(wxpython=False):
 		    for dpath, dnames, fnames in os.walk(root):
 			try:
 			    if (platform.system() == "Windows"):
+				# On Windows, we expect the PyRosetta folder to have either rosetta.pyd
+				# or rosetta.dll in the folder
 				try:
 				    indx = fnames.index("rosetta.pyd") # 64bit
 				except:
 				    indx = fnames.index("rosetta.dll") # 32bit
 			    else:
+				# On Mac/Linux, there should be a libmini file in the folder
+				# On Mac, it's libmini.dylib, on Linux it's libmini.so
 				indx = dnames.index("rosetta")
 				files = glob.glob(dpath + "/rosetta/*libmini*")
 				if (len(files) == 0):
 				    raise Exception
 			except:
 			    continue
+			# If we got this far, then we found a candidate PyRosetta folder
+			# Is the database in this folder also?
+			# It is either called "database" or "rosetta_database"
 			foundIt = True
 			rosettapath = dpath
 			for dname in dnames:
@@ -215,6 +253,8 @@ def importModules(wxpython=False):
 			break
 		busyDlg = None
 		if (foundIt):
+		    # Let's try to import what we found
+		    # Remember on Windows we have to cd
 		    sys.path.append(rosettapath)
 		    if (platform.system() == "Windows"):
 			olddir = os.getcwd()
@@ -238,10 +278,15 @@ def importModules(wxpython=False):
 			    olddir = os.getcwd()
 			    os.chdir(olddir)
 		    except:
+			# Can't find it, it's probably not installed or it's in a hidden location
 			print "PyRosetta cannot be found on your system!"
 			print "Until you install PyRosetta, you may only use InteractiveROSETTA to visualize structures in PyMOL"
 			exit()
+    # Attempt to locate other packages that may not be on the PYTHONPATH
     if (platform.system() == "Windows"):
+	# We want to import wxPython a bit earlier than the others, to display graphics for the license agreement
+	# On Windows, everything should already be in the Python package, so don't try to find anything
+	# If there are issues, the user should reinstall InteractiveROSETTA
 	if (wxpython):
 	    import wx
 	else:
@@ -255,13 +300,16 @@ def importModules(wxpython=False):
     else:
 	if (platform.system() == "Darwin"):
 	    # These are the standard locations for some of these things, hopefully we'll get these right away
+	    # These are the paths that are used in the bash installer
 	    sys.path.append("/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages")
 	    sys.path.append("/usr/local/Cellar/open-babel/HEAD/lib/python2.7/site-packages")
+	# Again, here's the option for either importing wx only, or all the modules
 	if (wxpython):
 	    modules = ["wx"]
 	else:
 	    modules = ["numpy", "pymol", "psutil", "requests", "poster", "Bio", "openbabel"]
 	notfound = []
+	# Try to import each of the modules and keep track of which ones throw an error
 	for module in modules:
 	    try:
 		mod = __import__(module)
@@ -279,7 +327,9 @@ def importModules(wxpython=False):
 		    path = aline.split("\t")[1].strip()
 		    break
 	    f.close()
+	    # Add the saved location to the path
 	    sys.path.append(path)
+	    # Try to import again
 	    try:
 		if (path == "N/A"):
 		    raise Exception
@@ -290,8 +340,8 @@ def importModules(wxpython=False):
 		root = "/usr/local"
 		foundIt = False
 		for dpath, dnames, fnames in os.walk(root):
-		    #if ("mylib" in dpath):
-			#print dpath, dnames, fnames
+		    # We're looking for a directory that is the name of the module, on some path that
+		    # includes python
 		    for dname in dnames:
 			if ((module in dname and os.path.isfile(dpath + "/" + dname + "/__init__.py")) or module + ".py" in fnames):
 			    if ("python3" in dpath):
@@ -322,6 +372,7 @@ def importModules(wxpython=False):
 		    if (foundIt):
 			break
 		if (not(foundIt)):
+		    # Explain how to install the packages that are missing
 		    print module + " cannot be found on your system!"
 		    if (module == "Bio"):
 			print "Install it by executing \"sudo easy_install biopython\" in a terminal."
@@ -365,18 +416,24 @@ if (__name__ == "__main__"):
     import wx.lib.dialogs
     
     # Change the directory to the one the InteractiveROSETTA.py script is in
+    # It can be annoying because on Windows directories are delimited by \ instead of /
     homedir = os.path.expanduser("~")
     if (platform.system() == "Windows"):
+	# Create the sandbox if this is the first time running
 	if (not(os.path.exists(homedir + "\\InteractiveROSETTA"))):
 	    os.makedirs(homedir + "\\InteractiveROSETTA")
+	    # Create the main config file
 	    f = open(homedir + "\\InteractiveROSETTA\\seqwindow.cfg", "w")
 	    f.close()
     else:
+	# Create the sandbox if this is the first time running
 	if (not(os.path.exists(homedir + "/InteractiveROSETTA"))):
+	    # Create the main config file
 	    os.makedirs(homedir + "/InteractiveROSETTA")
 	    f = open(homedir + "/InteractiveROSETTA/seqwindow.cfg", "w")
 	    f.close()
-	    
+    
+    # Figure out the location of this script by reading sys.argv[0]
     scriptdir = os.getcwd()
     if (platform.system() == "Windows"):
 	indx = sys.argv[0].rfind("\\")
@@ -386,6 +443,7 @@ if (__name__ == "__main__"):
 	tempdir = sys.argv[0][0:indx]
     else:
 	tempdir = ""
+    # Again, this gets annoying because root is C: on Windows, not /
     if (platform.system() == "Windows" and len(tempdir) > 1 and (tempdir[0:2] == "C:" or tempdir[0] == "\\")):
 	scriptdir = tempdir
     elif ((platform.system() == "Darwin" or platform.system() == "Linux") and len(tempdir) > 0 and tempdir[0] == "/"):
@@ -394,42 +452,53 @@ if (__name__ == "__main__"):
 	scriptdir = scriptdir + "\\" + tempdir
     else:
 	scriptdir = scriptdir + "/" + tempdir
+    # Change to this directory so we can import everything in the scripts directory later on
     os.chdir(scriptdir)
     
+    # Start wxPython in case we're accepting the license
     importModules(wxpython=True)
     app = wx.App()
     # Check to see if the License has been accepted
     f = open("InteractiveROSETTA.py", "r")
     license_accepted = 0
     for aline in f:
+	# When the license gets accepted, the following string gets added to the end of this file
+	# It needs to appear 3 times because the first two will be this next line, and the line that
+	# actually writes it to this script, the 3rd is the line written after accepting
 	if ("### LICENSE ACCEPTED ###" in aline):
 	    license_accepted = license_accepted + 1
     f.close()
     if (license_accepted < 3):
 	# Make sure we are root on OSX/Linux
+	# On Windows, the batch script that starts InteractiveROSETTA makes sure they are the Admin
 	if (platform.system() != "Windows" and os.getuid() != 0 and not(os.access("InteractiveROSETTA.py", os.W_OK))):
 	    print "You have not accepted the license agreement yet."
 	    print "Please run InteractiveROSETTA as root to accept it."
 	    dlg2 = wx.MessageDialog(None, "You have not accepted the license agreement yet.\nPlease run InteractiveROSETTA as root to accept it.\nOpen a terminal and run InteractiveROSETTA as root: sudo python /usr/local/InteractiveROSETTA/InteractiveROSETTA.py", "Run as Root to Accept License", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 	    dlg2.ShowModal()
 	    exit()
+	# Get the license text from the LICENSE file
 	if (platform.system() == "Windows"):
 	    f = open("LICENSE.txt", "r")
 	else:
 	    f = open("LICENSE", "r")
 	licensetext = ""
+	# Print it to stdout
 	for aline in f:
 	    licensetext = licensetext + aline.strip() + "\n"
 	    print aline.strip()
 	f.close()
 	print ""
+	# And display it in a wx text dialog
 	dlg1 = wx.lib.dialogs.ScrolledMessageDialog(None, licensetext, "InteractiveROSETTA License")
 	dlg1.ShowModal()
 	dlg1.Destroy()
+	# Ask for the user to accept
 	dlg = wx.MessageDialog(None, "Do you accept the license agreement?", "InteractiveROSETTA License", wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
 	print "Do you accept the license agreement? (Yes/No)"
 	if (dlg.ShowModal() == wx.ID_YES):
 	    try:
+		# Append the flag to the end of this file
 		f = open("InteractiveROSETTA.py", "a")
 		f.write("### LICENSE ACCEPTED ###")
 		f.close()
@@ -458,16 +527,21 @@ if (__name__ == "__main__"):
 	    # to accept the license
 	    try:
 		if (platform.system() == "Windows"):
+		    # This finds the molfile2params stuff in the PyRosetta folder on Windows
+		    # On Mac/Linux, all you have to do is move and untar a tgz archive
+		    # Since Windows cannot do this without 3rd party software, I wrote a Python script to do it
 		    import molfile
 		    molfile.unpackMolfile()
 	    except:
-		print "There was an error unpacking molfile2params"
-		print "You need to run \"molfile.bat\" as the Administrator"
+		print "We are detecting an error with unpacking molfile2params"
+		print "Check the scripts directory and make sure there is a folder called \"rosetta_py\" in it"
+		print "If not, run molfile.bat as the Administrator"
 		p = input("Press any key to exit: ")
 	    exit()
 	else:
 	    exit()
-	    
+    
+    # Display splash screen
     if (platform.system() == "Windows"):
 	splashImage = wx.Bitmap("images\\splash.png", wx.BITMAP_TYPE_PNG)
     else:
@@ -475,14 +549,22 @@ if (__name__ == "__main__"):
     splash = wx.SplashScreen(splashImage, wx.SPLASH_CENTRE_ON_SCREEN | wx.SPLASH_NO_TIMEOUT, 10000, None, style=wx.FRAME_NO_TASKBAR)
     wx.Yield()
     
+    # Start PyMOL
+    # Depending on the computer, the windows may have sizes and positions that are slightly off, so when
+    # the user resizes/repositions them, their settings get saved and loaded by default the next time
+    # this program is run
     # Import PyMOL with the saved window settings
     screenW = wx.GetDisplaySize()[0]
     screenH = wx.GetDisplaySize()[1]
+    # These defaults get the sizes mostly right
     pymolw = screenW - 370
     pymolh = screenH - 340
     pymolx = 370
     pymoly = 0
     try:
+	# Read the saved offsets and modify the coordinates/sizes as needed
+	# Offsets should be saved instead of absolute sizes so we can attempt to scale the windows
+	# if the screen resolution changes (i.e. for projectors and the like)
 	if (platform.system() == "Windows"):
 	    f = open(homedir + "\\InteractiveROSETTA\\seqwindow.cfg", "r")
 	else:
@@ -497,6 +579,7 @@ if (__name__ == "__main__"):
 	f.close()
     except:
 	pass
+    # Don't use the settings if the Windows are too big
     if (pymolx > screenW - 100):
 	pymolx = 370
     if (pymoly > screenH - 100):
@@ -506,7 +589,10 @@ if (__name__ == "__main__"):
     pymolw = str(pymolw)
     pymolh = str(pymolh)
 
-    __main__.pymol_argv = ["pymol", "-qxi", "-W", pymolw, "-H", pymolh, "-X", pymolx, "-Y", pymoly]
+    # This line starts PyMOL
+    # It would be nice if I could disable right-clicking in the PyMOL window to prevent unexpected behavior
+    __main__.pymol_argv = ["pymol", "-qxhi", "-W", pymolw, "-H", pymolh, "-X", pymolx, "-Y", pymoly]
+    # Import the rest of our modules
     importModules()
     from scripts.sequence import SequenceWin
     from scripts.protocols import *
@@ -515,10 +601,14 @@ if (__name__ == "__main__"):
     
     if (platform.system() == "Windows"):
 	# To get the OpenBabel path for the Residue/Ligand creator
+	# These are the data files for OpenBabel, since I didn't want the user to have to install OpenBabel
+	# Python OpenBabel comes with the package in Windows
+	# On Mac/Linux, it's easy to install OpenBabel so these files get saved to the user's home directory
 	sys.path.append(scriptdir + "\\data\\OpenBabel")
 
     # Check to see if an instance of InteractiveROSETTA is already running
     # If it is, then abort because we should only have one instance (GUI+daemon) running at a time
+    # On Windows, the batch launcher script should also prevent this from happening
     count = 0
     for proc in psutil.process_iter():
 	try:
@@ -527,18 +617,17 @@ if (__name__ == "__main__"):
 	except:
 	    # In Windows it will crash if you try to read process information for the Administrator
 	    # Doesn't matter though since InteractiveROSETTA is run by a non-Administrator
-	    # But we need to catch these errors since we don't know which processes are admin ones
+	    # But we need to catch these errors since we don't know which processes will be admin ones
+	    # as we check them all
 	    pass
     if (count != 1 and False):
+	# Already running, terminate
 	exit()
 
     cwd = homedir
-    if (platform.system() == "Windows"):
-	if (not(os.path.exists(homedir + "\\InteractiveROSETTA"))):
-	    os.makedirs(homedir + "\\InteractiveROSETTA")
-    else:
-	if (not(os.path.exists(homedir + "/InteractiveROSETTA"))):
-	    os.makedirs(homedir + "/InteractiveROSETTA")
+    # Create some more sandbox locations if they don't already exist
+    # We need a params folder for the custom params files
+    # We also need to grab the HOH params file since water is so common a HETATM
     if (platform.system() == "Windows"):
 	if (not(os.path.exists(homedir + "\\InteractiveROSETTA\\params"))):
 	    os.makedirs(homedir + "\\InteractiveROSETTA\\params")
@@ -565,6 +654,10 @@ if (__name__ == "__main__"):
 		f2.write(aline.strip() + "\n")
 	    f2.close()
 	    f.close()
+    # We also need a data directory
+    # The data directory has a file called "residues.pdb" that contains one of each amino acid type
+    # for easily building structures by grabbing the amino acid structures we want
+    # bigPDB.pdb is included for legacy reasons
     if (platform.system() == "Windows"):
 	if (not(os.path.exists(homedir + "\\InteractiveROSETTA\\data"))):
 	    os.makedirs(homedir + "\\InteractiveROSETTA\\data")
@@ -616,16 +709,17 @@ if (__name__ == "__main__"):
     startNewLog()
     os.chdir(olddir)
     
+    # Start all of the windows
     SequenceFrame = SequenceWin(screenW, screenH, cwd, frozen, poses, sequences, IDs, scriptdir)
     ProtocolsFrame = ProtocolsWin(screenW, screenH, scriptdir)
     pymol.finish_launching()
     pymol.cmd.set("label_size", 28)
 
+    # Make all of these windows aware of PyMOL
     SequenceFrame.setPyMOL(pymol)
     ProtocolsFrame.Selection.setPyMOL(pymol)
     ProtocolsFrame.Protocols.setPyMOL(pymol)
     ProtocolsFrame.setSeqWin(SequenceFrame)
     SequenceFrame.setProtWin(ProtocolsFrame)
     splash.Destroy()
-    app.MainLoop()
-    
+    app.MainLoop()### LICENSE ACCEPTED ###

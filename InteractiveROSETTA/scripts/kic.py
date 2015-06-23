@@ -53,33 +53,79 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.lblInst.SetForegroundColour("#FFFFFF")
 	
 	if (platform.system() == "Windows"):
-	    self.lblModel = wx.StaticText(self, -1, "Model", (7, 90), (153, 20), wx.ALIGN_CENTRE)
+	    self.lblModel = wx.StaticText(self, -1, "Model", (10, 90), (140, 20), wx.ALIGN_CENTRE)
 	    self.lblModel.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblModel = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblModelKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(7, 90), size=(153, 20))
+	    self.lblModel = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblModelKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 90), size=(140, 20))
 	else:
-	    self.lblModel = wx.StaticText(self, -1, "Model", (7, 90), style=wx.ALIGN_CENTRE)
+	    self.lblModel = wx.StaticText(self, -1, "Model", (10, 90), style=wx.ALIGN_CENTRE)
 	    self.lblModel.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-	    resizeTextControlForUNIX(self.lblModel, 7, 153)
+	    resizeTextControlForUNIX(self.lblModel, 10, 140)
 	self.lblModel.SetForegroundColour("#FFFFFF")
-	self.modelMenu = wx.ComboBox(self, pos=(7, 110), size=(153, 25), choices=[], style=wx.CB_READONLY)
+	self.modelMenu = wx.ComboBox(self, pos=(10, 110), size=(140, 25), choices=[], style=wx.CB_READONLY)
 	self.modelMenu.Bind(wx.EVT_COMBOBOX, self.modelMenuSelect)
 	self.modelMenu.SetToolTipString("Model on which to perform loop modeling")
 	self.selectedModel = ""
+	
 	if (platform.system() == "Windows"):
-	    self.lblLoopType = wx.StaticText(self, -1, "Remodel Type", (195, 90), (100, 20), wx.ALIGN_CENTRE)
+	    self.lblPivot = wx.StaticText(self, -1, "Pivot Residue", (170, 90), (140, 20), wx.ALIGN_CENTRE)
+	    self.lblPivot.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	elif (platform.system() == "Darwin"):
+	    self.lblPivot = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblPivot.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(170, 90), size=(140, 20))
+	else:
+	    self.lblPivot = wx.StaticText(self, -1, "Pivot Residue", (170, 90), style=wx.ALIGN_CENTRE)
+	    self.lblPivot.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	    resizeTextControlForUNIX(self.lblPivot, 170, 140)
+	self.lblPivot.SetForegroundColour("#FFFFFF")
+	self.menuPivot = wx.ComboBox(self, pos=(170, 110), size=(140, 25), choices=[], style=wx.CB_READONLY)
+	self.menuPivot.Bind(wx.EVT_COMBOBOX, self.viewMenuSelect)
+	self.menuPivot.Disable()
+	self.menuPivot.SetToolTipString("Select the loop residue that will serve as the KIC pivot point")
+	
+	if (platform.system() == "Windows"):
+	    self.lblBegin = wx.StaticText(self, -1, "Loop Begin", (10, 140), (120, 20), wx.ALIGN_CENTRE)
+	    self.lblBegin.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	elif (platform.system() == "Darwin"):
+	    self.lblBegin = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblBegin.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 140), size=(140, 20))
+	else:
+	    self.lblBegin = wx.StaticText(self, -1, "Loop Begin", (10, 140), style=wx.ALIGN_CENTRE)
+	    self.lblBegin.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	    resizeTextControlForUNIX(self.lblBegin, 10, 140)
+	self.lblBegin.SetForegroundColour("#FFFFFF")
+	self.beginMenu = wx.ComboBox(self, pos=(10, 160), size=(140, 25), choices=[], style=wx.CB_READONLY)
+	self.beginMenu.Bind(wx.EVT_COMBOBOX, self.beginMenuSelect)
+	self.beginMenu.SetToolTipString("Loop N-terminus")
+	self.loopBegin = -1
+	
+	if (platform.system() == "Windows"):
+	    self.lblEnd = wx.StaticText(self, -1, "Loop End", (170, 140), (140, 20), wx.ALIGN_CENTRE)
+	    self.lblEnd.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	elif (platform.system() == "Darwin"):
+	    self.lblEnd = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblEnd.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(170, 140), size=(140, 20))
+	else:
+	    self.lblEnd = wx.StaticText(self, -1, "Loop End", (170, 140), style=wx.ALIGN_CENTRE)
+	    self.lblEnd.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	    resizeTextControlForUNIX(self.lblEnd, 170, 140)
+	self.lblEnd.SetForegroundColour("#FFFFFF")
+	self.endMenu = wx.ComboBox(self, pos=(170, 160), size=(140, 25), choices=[], style=wx.CB_READONLY)
+	self.endMenu.Bind(wx.EVT_COMBOBOX, self.endMenuSelect)
+	self.endMenu.SetToolTipString("Loop C-terminus")
+	self.loopEnd = -1
+	
+	if (platform.system() == "Windows"):
+	    self.lblLoopType = wx.StaticText(self, -1, "Remodel Type", (10, 190), (140, 20), wx.ALIGN_CENTRE)
 	    self.lblLoopType.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblLoopType = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblRemodelType.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(195, 90), size=(100, 20))
+	    self.lblLoopType = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblRemodelType.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 190), size=(140, 20))
 	else:
-	    self.lblLoopType = wx.StaticText(self, -1, "Remodel Type", (195, 90), style=wx.ALIGN_CENTRE)
+	    self.lblLoopType = wx.StaticText(self, -1, "Remodel Type", (10, 190), style=wx.ALIGN_CENTRE)
 	    self.lblLoopType.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-	    resizeTextControlForUNIX(self.lblLoopType, 195, 100)
+	    resizeTextControlForUNIX(self.lblLoopType, 10, 140)
 	self.lblLoopType.SetForegroundColour("#FFFFFF")
 	if (platform.system() == "Darwin"):
-	    self.btnLoopType = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLoopType_Refine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(175, 110), size=(140, 25))
+	    self.btnLoopType = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLoopType_Refine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(170, 210), size=(140, 25))
 	else:
-	    self.btnLoopType = wx.Button(self, id=-1, label="Refine", pos=(175, 110), size=(140, 25))
+	    self.btnLoopType = wx.Button(self, id=-1, label="Refine", pos=(10, 210), size=(140, 25))
 	    self.btnLoopType.SetForegroundColour("#000000")
 	    self.btnLoopType.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnLoopType.Bind(wx.EVT_BUTTON, self.changeLoopType)
@@ -87,75 +133,91 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnLoopType.SetToolTipString("Refine a pre-existing loop using the high resolution KIC remodeler only")
 	
 	if (platform.system() == "Windows"):
-	    self.lblBegin = wx.StaticText(self, -1, "Loop Begin", (20, 140), (120, 20), wx.ALIGN_CENTRE)
-	    self.lblBegin.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-	elif (platform.system() == "Darwin"):
-	    self.lblBegin = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblBegin.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 140), size=(120, 20))
-	else:
-	    self.lblBegin = wx.StaticText(self, -1, "Loop Begin", (20, 140), style=wx.ALIGN_CENTRE)
-	    self.lblBegin.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-	    resizeTextControlForUNIX(self.lblBegin, 20, 120)
-	self.lblBegin.SetForegroundColour("#FFFFFF")
-	self.beginMenu = wx.ComboBox(self, pos=(20, 160), size=(120, 25), choices=[], style=wx.CB_READONLY)
-	self.beginMenu.Bind(wx.EVT_COMBOBOX, self.beginMenuSelect)
-	self.beginMenu.SetToolTipString("Loop N-terminus")
-	self.loopBegin = -1
-	
-	if (platform.system() == "Windows"):
-	    self.lblEnd = wx.StaticText(self, -1, "Loop End", (175, 140), (120, 20), wx.ALIGN_CENTRE)
-	    self.lblEnd.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-	elif (platform.system() == "Darwin"):
-	    self.lblEnd = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblEnd.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(175, 140), size=(120, 20))
-	else:
-	    self.lblEnd = wx.StaticText(self, -1, "Loop End", (175, 140), style=wx.ALIGN_CENTRE)
-	    self.lblEnd.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-	    resizeTextControlForUNIX(self.lblEnd, 175, 120)
-	self.lblEnd.SetForegroundColour("#FFFFFF")
-	self.endMenu = wx.ComboBox(self, pos=(175, 160), size=(120, 25), choices=[], style=wx.CB_READONLY)
-	self.endMenu.Bind(wx.EVT_COMBOBOX, self.endMenuSelect)
-	self.endMenu.SetToolTipString("Loop C-terminus")
-	self.loopEnd = -1
-	
-	if (platform.system() == "Windows"):
-	    self.lblSequence = wx.StaticText(self, -1, "Loop Sequence:", (20, 198), (100, 20), wx.ALIGN_CENTRE)
+	    self.lblSequence = wx.StaticText(self, -1, "Loop Sequence", (170, 190), (140, 20), wx.ALIGN_CENTRE)
 	    self.lblSequence.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblSequence = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblSequence.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 198), size=(100, 20))
+	    self.lblSequence = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblSequence.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(170, 190), size=(140, 20))
 	else:
-	    self.lblSequence = wx.StaticText(self, -1, "Loop Sequence:", (20, 198), style=wx.ALIGN_CENTRE)
+	    self.lblSequence = wx.StaticText(self, -1, "Loop Sequence", (170, 190), style=wx.ALIGN_CENTRE)
 	    self.lblSequence.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-	    resizeTextControlForUNIX(self.lblSequence, 20, 100)
+	    resizeTextControlForUNIX(self.lblSequence, 170, 140)
 	self.lblSequence.SetForegroundColour("#FFFFFF")
-	self.txtSequence = wx.TextCtrl(self, -1, pos=(155, 195), size=(140, 25))
+	self.txtSequence = wx.TextCtrl(self, -1, pos=(170, 210), size=(140, 25))
 	self.txtSequence.SetValue("")
 	self.txtSequence.SetToolTipString("Primary sequence for a de novo loop")
 	self.txtSequence.Disable()
 	
+	if (platform.system() == "Darwin"):
+	    self.btnAdd = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAddConstraint.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 240), size=(90, 25))
+	else:
+	    self.btnAdd = wx.Button(self, id=-1, label="Add", pos=(10, 240), size=(90, 25))
+	    self.btnAdd.SetForegroundColour("#000000")
+	    self.btnAdd.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	self.btnAdd.Bind(wx.EVT_BUTTON, self.add)
+	self.btnAdd.SetToolTipString("Add the selected residues to the list of loops")
+	if (platform.system() == "Darwin"):
+	    self.btnRemove = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnRemoveConstraint.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(115, 240), size=(90, 25))
+	else:
+	    self.btnRemove = wx.Button(self, id=-1, label="Remove", pos=(115, 240), size=(90, 25))
+	    self.btnRemove.SetForegroundColour("#000000")
+	    self.btnRemove.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	self.btnRemove.Bind(wx.EVT_BUTTON, self.remove)
+	self.btnRemove.SetToolTipString("Remove the selected residues from the list of loops")
+	if (platform.system() == "Darwin"):
+	    self.btnClear = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnClearConstraints.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(220, 240), size=(90, 25))
+	else:
+	    self.btnClear = wx.Button(self, id=-1, label="Clear", pos=(220, 240), size=(90, 25))
+	    self.btnClear.SetForegroundColour("#000000")
+	    self.btnClear.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	self.btnClear.Bind(wx.EVT_BUTTON, self.clear)
+	self.btnClear.SetToolTipString("Clear the list of loops")
+	
+	self.grdLoops = wx.grid.Grid(self)
+	self.grdLoops.CreateGrid(0, 4)
+	self.grdLoops.SetSize((320, 200))
+	self.grdLoops.SetPosition((0, 270))
+	self.grdLoops.SetLabelFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	self.grdLoops.DisableDragColSize()
+	self.grdLoops.DisableDragRowSize()
+	self.grdLoops.SetColLabelValue(0, "Sequence")
+	self.grdLoops.SetColLabelValue(1, "Start")
+	self.grdLoops.SetColLabelValue(2, "Pivot")
+	self.grdLoops.SetColLabelValue(3, "End")
+	self.grdLoops.SetRowLabelSize(80)
+	self.grdLoops.SetColSize(0, 90)
+	self.grdLoops.SetColSize(1, 50)
+	self.grdLoops.SetColSize(2, 50)
+	self.grdLoops.SetColSize(3, 50)
+	self.grdLoops.Bind(wx.grid.EVT_GRID_CELL_LEFT_CLICK, self.gridClick)
+	self.loops = []
+	self.selectedr = -1
+	ypos = self.grdLoops.GetPosition()[1] + self.grdLoops.GetSize()[1] + 10
+	
 	if (platform.system() == "Windows"):
-	    self.lblAdvanced = wx.StaticText(self, -1, "Advanced Options", (0, 230), (320, 20), wx.ALIGN_CENTRE)
+	    self.lblAdvanced = wx.StaticText(self, -1, "Advanced Options", (0, ypos), (320, 20), wx.ALIGN_CENTRE)
 	    self.lblAdvanced.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblAdvanced = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblAdvanced.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 230), size=(320, 20))
+	    self.lblAdvanced = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblAdvanced.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos), size=(320, 20))
 	else:
-	    self.lblAdvanced = wx.StaticText(self, -1, "Advanced Options", (0, 230), style=wx.ALIGN_CENTRE)
+	    self.lblAdvanced = wx.StaticText(self, -1, "Advanced Options", (0, ypos), style=wx.ALIGN_CENTRE)
 	    self.lblAdvanced.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	    resizeTextControlForUNIX(self.lblAdvanced, 0, 320)
 	self.lblAdvanced.SetForegroundColour("#FFFFFF")
 	
 	if (platform.system() == "Windows"):
-	    self.lblPerturb = wx.StaticText(self, -1, "KIC Type:", (10, 263), (100, 20), wx.ALIGN_CENTRE)
+	    self.lblPerturb = wx.StaticText(self, -1, "KIC Type:", (10, ypos+33), (100, 20), wx.ALIGN_CENTRE)
 	    self.lblPerturb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblPerturb = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblPerturb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 263), size=(100, 20))
+	    self.lblPerturb = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblPerturb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, ypos+33), size=(100, 20))
 	else:
-	    self.lblPerturb = wx.StaticText(self, -1, "KIC Type:", (10, 263), style=wx.ALIGN_CENTRE)
+	    self.lblPerturb = wx.StaticText(self, -1, "KIC Type:", (10, ypos+33), style=wx.ALIGN_CENTRE)
 	    self.lblPerturb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	    resizeTextControlForUNIX(self.lblPerturb, 10, 100)
 	self.lblPerturb.SetForegroundColour("#FFFFFF")
 	if (platform.system() == "Darwin"):
-	    self.btnPerturb = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnPerturb_Refine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(120, 260), size=(200, 25))
+	    self.btnPerturb = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnPerturb_Refine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(120, ypos+30), size=(200, 25))
 	else:
-	    self.btnPerturb = wx.Button(self, id=-1, label="Perturb+Refine", pos=(120, 260), size=(200, 25))
+	    self.btnPerturb = wx.Button(self, id=-1, label="Perturb+Refine", pos=(120, ypos+30), size=(200, 25))
 	    self.btnPerturb.SetForegroundColour("#000000")
 	    self.btnPerturb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnPerturb.Bind(wx.EVT_BUTTON, self.changePerturbType)
@@ -164,103 +226,98 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnPerturb.Disable()
 	
 	if (platform.system() == "Windows"):
-	    self.lblPivot = wx.StaticText(self, -1, "Pivot Residue:", (20, 293), (120, 20), wx.ALIGN_CENTRE)
-	    self.lblPivot.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-	elif (platform.system() == "Darwin"):
-	    self.lblPivot = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblPivot.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 293), size=(120, 20))
-	else:
-	    self.lblPivot = wx.StaticText(self, -1, "Pivot Residue:", (20, 293), style=wx.ALIGN_CENTRE)
-	    self.lblPivot.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-	    resizeTextControlForUNIX(self.lblPivot, 20, 120)
-	self.lblPivot.SetForegroundColour("#FFFFFF")
-	self.menuPivot = wx.ComboBox(self, pos=(175, 290), size=(120, 25), choices=[], style=wx.CB_READONLY)
-	self.menuPivot.Bind(wx.EVT_COMBOBOX, self.viewMenuSelect)
-	self.menuPivot.Disable()
-	self.menuPivot.SetToolTipString("Select the loop residue that will serve as the KIC pivot point")
-	
-	if (platform.system() == "Windows"):
-	    self.lblNStruct = wx.StaticText(self, -1, "NStruct:", (20, 323), (100, 20), wx.ALIGN_CENTRE)
+	    self.lblNStruct = wx.StaticText(self, -1, "NStruct:", (20, ypos+63), (100, 20), wx.ALIGN_CENTRE)
 	    self.lblNStruct.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblNStruct = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblNStruct.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 323), size=(100, 20))
+	    self.lblNStruct = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblNStruct.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, ypos+63), size=(100, 20))
 	else:
-	    self.lblNStruct = wx.StaticText(self, -1, "NStruct:", (20, 323), style=wx.ALIGN_CENTRE)
+	    self.lblNStruct = wx.StaticText(self, -1, "NStruct:", (20, ypos+63), style=wx.ALIGN_CENTRE)
 	    self.lblNStruct.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	    resizeTextControlForUNIX(self.lblNStruct, 20, 100)
 	self.lblNStruct.SetForegroundColour("#FFFFFF")
-	self.txtNStruct = wx.TextCtrl(self, -1, pos=(155, 320), size=(140, 25))
+	self.txtNStruct = wx.TextCtrl(self, -1, pos=(155, ypos+60), size=(140, 25))
 	self.txtNStruct.SetValue("1")
 	self.txtNStruct.SetToolTipString("Number of models to generate (each KIC simulation typically takes 5-10 minutes)")
 	self.txtNStruct.Disable()
 	
-	if (platform.system() == "Darwin"):
-	    self.btnOutputDir = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnOutputDir.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 350), size=(100, 25))
-	else:
-	    self.btnOutputDir = wx.Button(self, id=-1, label="Output Dir", pos=(20, 350), size=(100, 25))
-	    self.btnOutputDir.SetForegroundColour("#000000")
-	    self.btnOutputDir.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-	self.btnOutputDir.Bind(wx.EVT_BUTTON, self.setOutputDir)
-	self.btnOutputDir.SetToolTipString("Set the directory to which outputted structures will be written, if NStruct > 1")
-	self.btnOutputDir.Disable()
-	if (platform.system() == "Windows"):
-	    self.lblDir = wx.StaticText(self, -1, "", (130, 355), (190, 20), wx.ALIGN_CENTRE)
-	    self.lblDir.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
-	else:
-	    self.lblDir = wx.StaticText(self, -1, "", (130, 355), style=wx.ALIGN_CENTRE)
-	    self.lblDir.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
-	    resizeTextControlForUNIX(self.lblDir, 130, 190)
-	self.lblDir.SetForegroundColour("#FFFFFF")
-	self.outputdir = ""
+	#if (platform.system() == "Darwin"):
+	#    self.btnOutputDir = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnOutputDir.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 350), size=(100, 25))
+	#else:
+	#    self.btnOutputDir = wx.Button(self, id=-1, label="Output Dir", pos=(20, 350), size=(100, 25))
+	#    self.btnOutputDir.SetForegroundColour("#000000")
+	#    self.btnOutputDir.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	#self.btnOutputDir.Bind(wx.EVT_BUTTON, self.setOutputDir)
+	#self.btnOutputDir.SetToolTipString("Set the directory to which outputted structures will be written, if NStruct > 1")
+	#self.btnOutputDir.Disable()
+	#if (platform.system() == "Windows"):
+	#    self.lblDir = wx.StaticText(self, -1, "", (130, 355), (190, 20), wx.ALIGN_CENTRE)
+	#    self.lblDir.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
+	#else:
+	#    self.lblDir = wx.StaticText(self, -1, "", (130, 355), style=wx.ALIGN_CENTRE)
+	#    self.lblDir.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
+	#    resizeTextControlForUNIX(self.lblDir, 130, 190)
+	#self.lblDir.SetForegroundColour("#FFFFFF")
+	#self.outputdir = ""
 	
 	if (platform.system() == "Windows"):
-	    self.lblLine = wx.StaticText(self, -1, "==========================", (0, 380), (320, 20), wx.ALIGN_CENTRE)
+	    self.lblLine = wx.StaticText(self, -1, "==========================", (0, ypos+90), (320, 20), wx.ALIGN_CENTRE)
 	    self.lblLine.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblLine = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblLine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 380), size=(320, 20))
+	    self.lblLine = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblLine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+90), size=(320, 20))
 	else:
-	    self.lblLine = wx.StaticText(self, -1, "==========================", (0, 380), style=wx.ALIGN_CENTRE)
+	    self.lblLine = wx.StaticText(self, -1, "==========================", (0, ypos+90), style=wx.ALIGN_CENTRE)
 	    self.lblLine.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
 	    resizeTextControlForUNIX(self.lblLine, 20, 120)
 	self.lblLine.SetForegroundColour("#FFFFFF")
 	
 	if (platform.system() == "Windows"):
-	    self.lblPostKIC = wx.StaticText(self, -1, "Post-Loop Modeling", (0, 405), (320, 20), wx.ALIGN_CENTRE)
+	    self.lblPostKIC = wx.StaticText(self, -1, "Post-Loop Modeling", (0, ypos+115), (320, 20), wx.ALIGN_CENTRE)
 	    self.lblPostKIC.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblPostKIC = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblPostKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 405), size=(320, 20))
+	    self.lblPostKIC = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblPostKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+115), size=(320, 20))
 	else:
-	    self.lblPostKIC = wx.StaticText(self, -1, "Post-Loop Modeling", (0, 405), style=wx.ALIGN_CENTRE)
+	    self.lblPostKIC = wx.StaticText(self, -1, "Post-Loop Modeling", (0, ypos+115), style=wx.ALIGN_CENTRE)
 	    self.lblPostKIC.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	    resizeTextControlForUNIX(self.lblPostKIC, 0, self.GetSize()[0]-20)
 	self.lblPostKIC.SetForegroundColour("#FFFFFF")
 	
 	if (platform.system() == "Darwin"):
-	    self.scoretypeMenu = wx.ComboBox(self, pos=(7, 435), size=(305, 25), choices=[], style=wx.CB_READONLY)
+	    self.scoretypeMenu = wx.ComboBox(self, pos=(7, ypos+145), size=(305, 25), choices=[], style=wx.CB_READONLY)
 	else:
-	    self.scoretypeMenu = wx.ComboBox(self, pos=(7, 435), size=(305, 25), choices=[], style=wx.CB_READONLY | wx.CB_SORT)
+	    self.scoretypeMenu = wx.ComboBox(self, pos=(7, ypos+145), size=(305, 25), choices=[], style=wx.CB_READONLY | wx.CB_SORT)
 	self.scoretypeMenu.Bind(wx.EVT_COMBOBOX, self.scoretypeMenuSelect)
 	self.scoretypeMenu.Disable() # Is only enabled after a design and before accepting it
 	self.scoretypeMenu.SetToolTipString("Scoretype by which PyMOL residues will be colored")
 	
 	if (platform.system() == "Windows"):
-	    self.lblModelView = wx.StaticText(self, -1, "View Structure:", (20, 473), (120, 20), wx.ALIGN_CENTRE)
+	    self.lblModelView = wx.StaticText(self, -1, "View Structure:", (20, ypos+183), (120, 20), wx.ALIGN_CENTRE)
 	    self.lblModelView.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblModelView = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblModelView.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 473), size=(120, 20))
+	    self.lblModelView = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblModelView.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, ypos+183), size=(120, 20))
 	else:
-	    self.lblModelView = wx.StaticText(self, -1, "View Structure:", (20, 473), style=wx.ALIGN_CENTRE)
+	    self.lblModelView = wx.StaticText(self, -1, "View Structure:", (20, ypos+183), style=wx.ALIGN_CENTRE)
 	    self.lblModelView.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	    resizeTextControlForUNIX(self.lblModelView, 20, 120)
 	self.lblModelView.SetForegroundColour("#FFFFFF")
-	self.viewMenu = wx.ComboBox(self, pos=(175, 470), size=(120, 25), choices=[], style=wx.CB_READONLY)
+	self.viewMenu = wx.ComboBox(self, pos=(175, ypos+180), size=(120, 25), choices=[], style=wx.CB_READONLY)
 	self.viewMenu.Bind(wx.EVT_COMBOBOX, self.viewMenuSelect)
 	self.viewMenu.Disable()
 	self.viewMenu.SetToolTipString("Select loop positions to view in PyMOL")
 	
 	if (platform.system() == "Darwin"):
-	    self.btnKIC = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(100, 505), size=(120, 25))
+	    self.btnServerToggle = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnServerOff.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+430), size=(100, 25))
 	else:
-	    self.btnKIC = wx.Button(self, id=-1, label="KIC!", pos=(100, 505), size=(120, 25))
+	    self.btnServerToggle = wx.Button(self, id=-1, label="Server Off", pos=(40, ypos+215), size=(100, 25))
+	    self.btnServerToggle.SetForegroundColour("#000000")
+	    self.btnServerToggle.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	self.btnServerToggle.Bind(wx.EVT_BUTTON, self.serverToggle)
+	self.btnServerToggle.SetToolTipString("Perform KIC simulations locally")
+	self.serverOn = False
+	
+	if (platform.system() == "Darwin"):
+	    self.btnKIC = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(100, ypos+215), size=(120, 25))
+	else:
+	    self.btnKIC = wx.Button(self, id=-1, label="KIC!", pos=(180, ypos+215), size=(100, 25))
 	    self.btnKIC.SetForegroundColour("#000000")
 	    self.btnKIC.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	self.btnKIC.Bind(wx.EVT_BUTTON, self.KICClick)
@@ -313,6 +370,10 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    else:
 		self.modelMenu.SetSelection(0)
 		self.modelMenuSelect(None)
+	    # Did we lose the model for the data in the loops grid?  If so, clear the loops
+	    if (len(self.loops) > 0 and not(self.loops[0][2] in modelList)):
+		self.loops = []
+		self.updateLoops()
 	# If the user was deleting things in the sequence window, the specified begin and end positions might
 	# not be valid anymore so we should erase them
 	poseindx = self.seqWin.getPoseIndexForModel(self.selectedModel)
@@ -325,6 +386,39 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    if (len(self.beginMenu.GetItems()) != naa-1):
 		self.selectedModel = ""
 		self.modelMenuSelect(None)
+    
+    def gridClick(self, event):
+	# Set the selected residue's row to blue so it is easy to see what the selection is
+	self.selectedr = event.GetRow()
+	if (self.selectedr >= self.grdLoops.NumberRows):
+	    self.selectedr = -1
+	for r in range(0, self.grdLoops.NumberRows):
+	    if (r == self.selectedr):
+		for c in range(0, self.grdLoops.NumberCols):
+		    self.grdLoops.SetCellBackgroundColour(r, c, "light blue")
+	    else:
+		for c in range(0, self.grdLoops.NumberCols):
+		    self.grdLoops.SetCellBackgroundColour(r, c, "white")
+	self.grdLoops.Refresh()
+	self.loopBegin = self.loops[self.selectedr][3]
+	self.loopEnd = self.loops[self.selectedr][5]
+	self.populatePivots()
+	# Load this loop's data into the controls and focus it
+	self.modelMenu.SetSelection(self.modelMenu.GetItems().index(self.loops[self.selectedr][2]))
+	chainID, resindx = self.seqWin.getResidueInfo(self.loops[self.selectedr][2], self.loops[self.selectedr][3]+1)
+	if (len(chainID.strip()) == 0):
+	    chainID = "_"
+	self.beginMenu.SetSelection(self.beginMenu.GetItems().index(chainID + ":" + self.seqWin.getResidueTypeFromRosettaIndx(self.loops[self.selectedr][2], self.loops[self.selectedr][3]+1) + str(resindx)))
+	chainID, resindx = self.seqWin.getResidueInfo(self.loops[self.selectedr][2], self.loops[self.selectedr][4]+1)
+	if (len(chainID.strip()) == 0):
+	    chainID = "_"
+	self.menuPivot.SetSelection(self.menuPivot.GetItems().index(chainID + ":" + self.seqWin.getResidueTypeFromRosettaIndx(self.loops[self.selectedr][2], self.loops[self.selectedr][4]+1) + str(resindx)))
+	chainID, resindx = self.seqWin.getResidueInfo(self.loops[self.selectedr][2], self.loops[self.selectedr][5])
+	if (len(chainID.strip()) == 0):
+	    chainID = "_"
+	self.endMenu.SetSelection(self.endMenu.GetItems().index(chainID + ":" + self.seqWin.getResidueTypeFromRosettaIndx(self.loops[self.selectedr][2], self.loops[self.selectedr][5]) + str(resindx)))
+	self.focusView(self.endMenu.GetStringSelection(), self.loops[self.selectedr][2])
+	event.Skip()
     
     def modelMenuSelect(self, event):
 	# Update the list of positions with the new model
@@ -353,7 +447,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.loopBegin = -1
 	else:
 	    self.beginMenu.SetSelection(0)
-	    self.loopBegin = 0
+	    self.loopBegin = 1
 	self.endMenu.Clear()
 	self.endMenu.AppendItems(positions[1:])
 	if (platform.system() == "Windows"):
@@ -361,8 +455,9 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.loopEnd = -1
 	else:
 	    self.endMenu.SetSelection(0)
-	    self.loopEnd = 0
+	    self.loopEnd = 2
 	self.txtNStruct.Enable()
+	self.populatePivots()
     
     def changeLoopType(self, event):
 	if (self.loopType == "Refine"):
@@ -374,7 +469,6 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.btnLoopType.SetToolTipString("Reconstruct the current loop using the wildtype sequence")
 	    self.btnPerturb.Enable()
 	    self.txtNStruct.Enable()
-	    self.btnOutputDir.Enable()
 	elif (self.loopType == "Reconstruct"):
 	    self.loopType = "De Novo"
 	    if (platform.system() == "Darwin"):
@@ -393,7 +487,6 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.txtSequence.Disable()
 	    self.btnPerturb.Disable()
 	    self.txtNStruct.Disable()
-	    self.btnOutputDir.Disable()
 	logInfo("Changed loop type to " + self.loopType)
 	
     def changePerturbType(self, event):
@@ -512,6 +605,87 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    # Probably the user left the field blank, do nothing
 	    pass
 	
+    def updateLoops(self):
+	# Redraw the loops grid with current loop information
+	if (self.grdLoops.NumberRows > 0):
+	    self.grdLoops.DeleteRows(0, self.grdLoops.NumberRows)
+	if (len(self.loops) > 0):
+	    self.grdLoops.AppendRows(len(self.loops))
+	row = 0
+	for [loopType, sequence, model, begin, pivot, end] in self.loops:
+	    self.grdLoops.SetRowLabelValue(row, loopType)
+	    self.grdLoops.SetCellValue(row, 0, sequence)
+	    chainID, resindx = self.seqWin.getResidueInfo(model, begin)
+	    if (len(chainID.strip()) == 0):
+		chainID = "_"
+	    self.grdLoops.SetCellValue(row, 1, chainID + "|" + self.seqWin.getResidueTypeFromRosettaIndx(model, begin) + str(resindx))
+	    chainID, resindx = self.seqWin.getResidueInfo(model, pivot)
+	    if (len(chainID.strip()) == 0):
+		chainID = "_"
+	    self.grdLoops.SetCellValue(row, 2, chainID + "|" + self.seqWin.getResidueTypeFromRosettaIndx(model, pivot) + str(resindx))
+	    chainID, resindx = self.seqWin.getResidueInfo(model, end)
+	    if (len(chainID.strip()) == 0):
+		chainID = "_"
+	    self.grdLoops.SetCellValue(row, 3, chainID + "|" + self.seqWin.getResidueTypeFromRosettaIndx(model, end) + str(resindx))
+	    readOnly = wx.grid.GridCellAttr()
+	    readOnly.SetReadOnly(True)
+	    readOnly.SetAlignment(wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
+	    readOnly.SetBackgroundColour("#FFFFFF")
+	    self.grdLoops.SetRowAttr(row, readOnly)
+	    row += 1
+	
+    def add(self, event):
+	# Is the loop valid?
+	if (self.loopBegin < 0 or self.loopBegin < 0 or self.loopBegin >= self.loopEnd):
+	    dlg = wx.MessageDialog(self, "You do not have a valid loop specified!", "Loop Not Valid", wx.OK | wx.ICON_ERROR | wx.CENTRE)
+	    dlg.ShowModal()
+	    dlg.Destroy()
+	    return
+	# If we're doing a de novo search, is the sequence specified?
+	if (self.loopType == "De Novo"):
+	    for AA in self.txtSequence.GetValue().strip().upper():
+		if (not(AA in "ACDEFGHIKLMNPQRSTVWY")):
+		    wx.MessageBox("The sequence you have provided is invalid.  Please only use canonical amino acids.", "Sequence Invalid", wx.OK|wx.ICON_EXCLAMATION)
+		    return
+	    if (len(self.txtSequence.GetValue().strip().upper()) == 0):
+		wx.MessageBox("You have indicated that you want to design a loop de novo but have not provided the putative sequence of the loop.  Please provide one or switch to use a pre-existing loop.", "No Sequence Indicated", wx.OK|wx.ICON_EXCLAMATION)
+		return
+	# Did the model change?  If yes, and loops is not empty, then tell the user that this
+	# will remove all loops to make room for the new model
+	if (len(self.loops) > 0 and self.modelMenu.GetValue() != self.loops[0][2]):
+	    dlg = wx.MessageDialog(self, "You are attempting to add a loop for a different model.  If you continue, all current loops will be removed.  Is this okay?", "Loop Model Changed", wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
+	    if (dlg.ShowModal() == wx.ID_NO):
+		return
+	    dlg.Destroy()
+	    self.loops = []
+	# Does this loop overlap with a previously-specified loop?  If so, do not add
+	i = 1
+	for loopType, sequence, model, begin, pivot, end in self.loops:
+	    if ((self.loopBegin >= begin and self.loopBegin <= end) or (self.loopEnd >= begin and self.loopEnd <= end)):
+		dlg = wx.MessageDialog(self, "The loop you have indicated overlaps with loop " + str(i) + ".  Either change the current loop or remove loop " + str(i) + ".", "Loop Overlap", wx.OK | wx.ICON_ERROR | wx.CENTRE)
+		dlg.ShowModal()
+		dlg.Destroy()
+		return
+	    i += 1
+	# Add this loop to the list of loops currently active
+	self.loops.append([self.loopType, self.txtSequence.GetValue().strip().upper(), self.modelMenu.GetValue(), self.loopBegin, self.menuPivot.GetSelection() + self.loopBegin, self.loopEnd])
+	self.updateLoops()
+		
+    def remove(self, event):
+	# For this function, remove the indicated loop
+	self.activate()
+	logInfo("Remove button clicked")
+	if (self.selectedr >= 0 and self.selectedr < len(self.loops)):
+	    self.loops.pop(self.selectedr)
+	    self.selectedr = -1
+	self.updateLoops()
+    
+    def clear(self, event):
+	logInfo("Clear button clicked")
+	# Remove everything
+	self.loops = []
+	self.updateLoops()
+	
     def viewMenuSelect(self, event):
 	try:
 	    self.focusView(self.viewMenu.GetStringSelection(), self.selectedModel, "kic_view")
@@ -552,7 +726,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.cmd.select("viewsele", "resi " + seqpos + " and model " + firstmodel + " and chain " + chain)
 	# If the loop is validly defined, let's show the whole loop instead of individual residues
 	if ((self.loopBegin >= 0 and self.loopEnd >= 0 and not(newmodel)) or posID == "Whole Loop"):	
-	    for i in range(self.loopBegin, loopEnd+1):
+	    for i in range(self.loopBegin, loopEnd):
 		if (not(newmodel)):
 		    (chain, seqpos) = self.seqWin.getResidueInfo(self.selectedModel, i)
 		else:
@@ -616,6 +790,18 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	logInfo("Changed scoretype view to " + self.scoretypeMenu.GetStringSelection())
 	recolorEnergies(self.KICView, self.residue_E, "kic_view", self.scoretypeMenu.GetStringSelection(), self.cmd)
 	self.viewMenuSelect(event) # To update all the labels
+    
+    def serverToggle(self, event):
+	if (self.serverOn):
+	    self.serverOn = False
+	    self.btnServerToggle.SetLabel("Server Off")
+	    self.btnServerToggle.SetToolTipString("Perform KIC simulations locally")
+	    logInfo("Turned off KIC server usage")
+	else:
+	    self.serverOn = True
+	    self.btnServerToggle.SetLabel("Server On")
+	    self.btnServerToggle.SetToolTipString("Perform KIC simulations on a remote server")
+	    logInfo("Turned on KIC server usage")
     
     def cancelKIC(self):
 	logInfo("Canceled KIC operation")

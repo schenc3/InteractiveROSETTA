@@ -190,6 +190,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.grdMinMap.SetColSize(0, 150)
 	self.grdMinMap.SetColSize(1, 90)
 	self.grdMinMap.Bind(wx.grid.EVT_GRID_CELL_LEFT_CLICK, self.gridClick)
+	self.selectedr = -1
 	self.sizer.Add(self.grdMinMap, (6, 0), span=(1, 5), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
 	self.minmap = []
 	
@@ -248,6 +249,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.selectWin.setProtPanel(self)
 
     def gridClick(self, event):
+	self.selectedr = event.GetRow()
 	self.minMenu.SetSelection(event.GetRow())
 	self.minMenuSelect(event)
 	event.Skip()
@@ -423,13 +425,16 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.activate()
 	# For each of the selected entries, find out if it is in the minmap and remove it if it is
 	logInfo("Remove button clicked")
-	for i in range(0, len(self.selectedData)):
-	    [indx, r, seqpos, poseindx, chainoffset] = self.selectedData[i]
-	    for j in range(0, len(self.minmap)):
-		[mindx, mr, mseqpos, mposeindx, mchainoffset, mtype] = self.minmap[j]
-		if (r == mr and indx == mindx):
-		    self.minmap.pop(j)
-		    break
+	if (self.selectedr >= 0 and self.selectedr < len(self.minmap)):
+	    self.minmap.pop(self.selectedr)
+	    self.selectedr = -1
+	#for i in range(0, len(self.selectedData)):
+	#    [indx, r, seqpos, poseindx, chainoffset] = self.selectedData[i]
+	#    for j in range(0, len(self.minmap)):
+	#	[mindx, mr, mseqpos, mposeindx, mchainoffset, mtype] = self.minmap[j]
+	#	if (r == mr and indx == mindx):
+	#	    self.minmap.pop(j)
+	#	    break
 	self.updateMinMap()
     
     def restrict(self, event):

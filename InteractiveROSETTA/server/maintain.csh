@@ -23,7 +23,7 @@ foreach HOST (`cat $HOSTFILE`)
             # Output is redirected to /dev/null because if it is saved to a log file the log file will get big fast               
             # If you need to look at the output because of errors, turn this file off by putting exit at the top of the script    
             # and then run the daemon as a user without redirecting stdout to anything so you can watch the output for specific jobs                                                                                                                               
-            cd $IROSETTA_HOME; python daemon_server.py >& /dev/null &
+            cd $IROSETTA_HOME; python daemon_server.py >& $IROSETTA_HOME/daemon_log &
         endif
     else
         set DAEMON_ON = `ssh $HOST "ps aux | grep daemon_server | grep -v grep | wc -l"` # Should be 1 if the daemon is there     
@@ -32,7 +32,7 @@ foreach HOST (`cat $HOSTFILE`)
             # Output is redirected to /dev/null because if it is saved to a log file the log file will get big fast               
             # If you need to look at the output because of errors, turn this file off by putting exit at the top of the script    
             # and then run the daemon as a user without redirecting stdout to anything so you can watch the output for specific jobs                                                                                                                               
-            ssh $HOST "cd $REMOTE_IROSETTA_HOME; python daemon_server.py >& /dev/null &"
+            ssh $HOST "cd $REMOTE_IROSETTA_HOME; python daemon_server.py >& $IROSETTA_HOME/daemon_log &"
         endif
     endif
 end
@@ -52,8 +52,61 @@ end
 foreach OLDFILE (`find $IROSETTA_HOME/*-weights -maxdepth 0 -mmin +20 -type f`)
     rm -f $OLDFILE
 end
-foreach OLDDIR (`find $IROSETTA_HOME/results/*/*.gz -mtime +7 -type f | awk -F "/results.gz" '{print $1}'`)
+foreach OLDDIR (`find $IROSETTA_HOME/results/*/results.ensb -mtime +7 -type f | awk -F "/results.ensb" '{print $1}'`)
     if (`echo $OLDDIR | grep -c "results"` == 1) then
 	rm -fr $OLDDIR
+    endif
+end
+foreach OLDDIR (`find $IROSETTA_HOME/results/*/results.msdar -mtime +7 -type f | awk -F "/results.msdar" '{print $1}'`)
+    if (`echo $OLDDIR | grep -c "results"` == 1) then
+	rm -fr $OLDDIR
+    endif
+end
+foreach OLDDIR (`find $IROSETTA_HOME/results/*/results.scan -mtime +7 -type f | awk -F "/results.scan" '{print $1}'`)
+    if (`echo $OLDDIR | grep -c "results"` == 1) then
+	rm -fr $OLDDIR
+    endif
+end
+# Now let's update the statuses of all the jobs that are running
+foreach DIR (`ls -d -- results/*/`)
+    if (-e $DIR/msd.out) then
+	if (`tac $DIR/msd.out | grep -c "Generation"` == 0) then
+	    echo "Started MSD" > $DIR/status
+	else
+	    set GEN = `tac $DIR/msd.out | grep "Generation" | grep -v "Final" | head -n 1 | awk -F "Generation" '{print $2}' | awk '{print $1}'`
+	    echo "Generation "$GEN" Completed" > $DIR/status
+	endif
+    endif
+    if (-e $DIR/antibodyinput) then
+	if (-e $DIR/antibody.out) then
+	    set MODELS = `ls $DIR/*MYAB*.pdb | wc -l`
+	    echo $MODELS" Models Completed" > $DIR/status
+	else
+	    echo "Pending"
+	endif
+    endif
+    if (-e $DIR/coarsedockinput) then
+	if (-e $DIR/dock.out) then
+	    set R2MODELS = `ls $DIR/*_dock_????_????.pdb | wc -l`
+	    if (-e $DIR/round2) then
+		echo "Completed" > $DIR/status
+	    else if ($R2MODELS == 0) then
+		set MODELS = `ls $DIR/*_dock_????.pdb | wc -l`
+		echo "Round 1, "$MODELS" Models Completed" > $DIR/status
+	    else
+		echo "Round 2, "$R2MODELS" Models Completed" > $DIR/status
+	    endif
+	else
+	    echo "Pending"
+	endif
+    endif
+    if (-e $DIR/backrubinput) then
+	if (-e $DIR/backrub.out) then
+	    set MODELS = `ls $DIR/*.pdb | wc -l`
+	    set MODELS = `expr $MODELS - 1`
+	    echo $MODELS" Models Completed" > $DIR/status
+	else
+	    echo "Pending"
+	endif
     endif
 end

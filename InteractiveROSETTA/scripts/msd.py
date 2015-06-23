@@ -2304,7 +2304,12 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.cmd.save(modelname + ".pdb", "model " + modelname)
 	    fixPyMOLSave(modelname + ".pdb")
 	    f2 = open(modelname + ".pdb", "r")
-	    f.write("BEGIN PDB " + modelname + ".pdb\n")
+	    if (modelname.startswith("msd_output")):
+		# The server daemon expects the output files to start with this string, so change it if
+		# the same string is in the inputs
+		f.write("BEGIN PDB 1" + modelname + ".pdb\n")
+	    else:
+		f.write("BEGIN PDB " + modelname + ".pdb\n")
 	    for aline in f2:
 		f.write(aline.strip() + "\n")
 	    f.write("END PDB " + modelname + ".pdb\n")
@@ -2415,7 +2420,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    try:
 		f = open("downloadwatch", "r")
 		for aline in f:
-		    if (len(aline.split("\t")) >= 2 and aline.split("\t")[0] == "MSD" and aline.split("\t") == self.ID.strip()):
+		    if (len(aline.split("\t")) >= 2 and aline.split("\t")[0] == "MSD" and aline.split("\t")[1] == self.ID.strip()):
 			alreadythere = True
 			break
 		f.close()
@@ -2423,7 +2428,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		pass
 	    if (not(alreadythere)):
 		f = open("downloadwatch", "a")
-		f.write("MSD\t" + self.ID.strip() + "\t" + str(datetime.datetime.now()) + "\n")
+		f.write("MSD\t" + self.ID.strip() + "\t" + str(datetime.datetime.now().strftime("%A, %B %d - %I:%M:%S %p")) + "\t" + getServerName() + "\n")
 		f.close()
 	    dlg = wx.MessageDialog(self, "InteractiveROSETTA is now watching the server for job ID " + self.ID.strip() + ".  You will be notified when the package is available for download.", "Listening for Download", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 	    dlg.ShowModal()

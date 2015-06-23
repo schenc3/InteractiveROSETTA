@@ -27,6 +27,7 @@ import psutil
 import glob
 import gzip
 import math
+from cStringIO import StringIO
 try:
     # Try to import Rosetta
     from rosetta import *
@@ -37,6 +38,7 @@ try:
     import rosetta.protocols.rigid as rigid_moves
     # Extra imports for threading
     import rosetta.protocols.evaluation
+    import rosetta.protocols.backrub
     from rosetta.protocols.comparative_modeling import *
     from rosetta.protocols.jd2 import *
     from rosetta.core.scoring.constraints import *
@@ -47,6 +49,7 @@ except:
     print "Rosetta could not be imported.  Attempting to locate the PyRosetta install.  Please be patient..."
     cfgfile = os.path.expanduser("~") + "/InteractiveROSETTA/seqwindow.cfg"
     try:
+	# The main GUI should have already found PyRosetta, so let's look in the config file first
 	f = open(cfgfile.strip(), "r")
 	rosettadir = "Not Found"
 	rosettadb = "Not Found"
@@ -57,6 +60,7 @@ except:
 		rosettadb = aline.split("\t")[1].strip()
 	f.close()
 	if (rosettapath == "Not Found"):
+	    # Nope, wasn't in there
 	    raise Exception
 	else:
 	    sys.path.append(rosettapath)
@@ -72,10 +76,11 @@ except:
 	    import rosetta.protocols.rigid as rigid_moves
 	    # Extra imports for threading
 	    import rosetta.protocols.evaluation
+	    import rosetta.protocols.backrub
 	    from rosetta.protocols.comparative_modeling import *
 	    from rosetta.protocols.jd2 import *
-	    olddir = os.getcwd()
 	    os.chdir(olddir)
+	    # If we got this far, then we successfully imported PyRosetta
 	    print "Found Rosetta at " + rosettapath.strip() + "!"
 	    print "Rosetta Database: " + rosettadb.strip()
     except:
@@ -86,6 +91,7 @@ except:
 	    pass
 	# Okay, we still didn't get it, so let's traverse the filesystem looking for it...
 	foundIt = False
+	# Remember that root is C: on Windows, not /
 	if (platform.system() == "Windows"):
 	    root = "C:\\"
 	else:
@@ -93,25 +99,33 @@ except:
 	for dpath, dnames, fnames in os.walk(root):
 	    try:
 		if (platform.system() == "Windows"):
+		    # On Windows, we expect the PyRosetta folder to have either rosetta.pyd or rosetta.dll
+		    # in it
 		    try:
 			indx = fnames.index("rosetta.pyd") # 64bit
 		    except:
 			indx = fnames.index("rosetta.dll") # 32bit
 		else:
+		    # On Mac/Linux, there should be a folder called "rosetta" in the PyRosetta folder that
+		    # contains a shared object file called either libmini.dylib or libmini.so
 		    indx = dnames.index("rosetta")
 		    files = glob.glob(dpath + "/rosetta/*libmini*")
 		    if (len(files) == 0):
 			raise Exception
 	    except:
 		continue
+	    # If we got here, then we found a potential import
 	    foundIt = True
 	    rosettapath = dpath
 	    for dname in dnames:
+		# Figure out what the database is called
+		# It will either be "database" or "rosetta_database"
 		if ("database" in dname):
 		    rosettadb = dpath + "/" + dname
 		    break
 	    break
 	if (foundIt):
+	    # Let's try to import it again
 	    sys.path.append(rosettapath)
 	    olddir = os.getcwd()
 	    os.chdir(rosettapath)
@@ -126,15 +140,19 @@ except:
 		import rosetta.protocols.rigid as rigid_moves
 		# Extra imports for threading
 		import rosetta.protocols.evaluation
+		import rosetta.protocols.backrub
 		from rosetta.protocols.comparative_modeling import *
 		from rosetta.protocols.jd2 import *
 		# Now let's save these paths so the next time this gets started we don't have to traverse the filesystem again
 		data = []
-		f = open(cfgfile, "r")
-		for aline in f:
-		    if (not("[ROSETTAPATH]" in aline) and not("[ROSETTADB]") in aline):
-			data.append(aline.strip())
-		f.close()
+		try:
+		    f = open(cfgfile, "r")
+		    for aline in f:
+			if (not("[ROSETTAPATH]" in aline) and not("[ROSETTADB]") in aline):
+			    data.append(aline.strip())
+		    f.close()
+		except:
+		    pass
 		f = open(cfgfile, "w")
 		for aline in data:
 		    f.write(aline + "\n")
@@ -143,9 +161,9 @@ except:
 		f.close()
 		print "Found Rosetta at " + rosettapath.strip() + "!"
 		print "Rosetta Database: " + rosettadb.strip()
-		olddir = os.getcwd()
 		os.chdir(olddir)
 	    except:
+		# Still didn't work, the user will have to figure out what's wrong
 		print "PyRosetta cannot be found on your system!"
 		print "Until you install PyRosetta, you may only use InteractiveROSETTA to visualize structures in PyMOL"
 		exit()
@@ -155,6 +173,7 @@ from Bio.Align.Applications import MuscleCommandline
 from tools import goToSandbox
 from tools import AA3to1
 
+# Function for initializing Rosetta with the parameters files in the params folder in the sandbox
 def initializeRosetta(addOn="", extraMutes=""):
     # Grab the params files in the user's personal directory
     goToSandbox("params")
@@ -172,6 +191,18 @@ def initializeRosetta(addOn="", extraMutes=""):
     init(extra_options=paramsstr + " -mute core.kinematics.AtomTree " + extraMutes + " -ignore_unrecognized_res -ignore_zero_occupancy false " + addOn)
     goToSandbox()
 
+# This class is used to grab standard output from pmutscan, which is the only output of that protocol
+class ScanCapturing(list):
+    def __enter__(self):
+	self._stdout = sys.stdout
+	self.f = open("scanprogress", "w", 1)
+	sys.stdout = self.f #self._stringio = StringIO()
+	return self
+    
+    def __exit__(self, *args):
+	self.f.close()
+	sys.stdout = self._stdout
+
 captured_stdout = ""
 stdout_pipe = None    
 def drain_pipe():
@@ -183,6 +214,7 @@ def drain_pipe():
 	print "mydata: " + data.strip()
         captured_stdout += data
 
+# Function for performing energy minimization
 def doMinimization():
     # Grab the params files in the user's personal directory
     initializeRosetta()
@@ -192,6 +224,12 @@ def doMinimization():
 	raise Exception("ERROR: The file \"minimizeinput\" is missing!")
     jobs = []
     minmap = []
+    # Read the input data
+    # We need:
+    #    JOB: contains the pdbfile, and the range in the minmap that corresponds to that pdbfile
+    #    MINMAP: A list of all the positions that will be minimized for all jobs and whether BB, Chi, or both will be minimized
+    #    MINTYPE: Either minimize in Cartesian or torsion space
+    #    SCOREFXN: The file containing the score function weights
     for aline in f:
 	if (aline[0:3] == "JOB"):
 	    [pdbfile, strstart, strend] = aline.split("\t")[1:]
@@ -204,6 +242,7 @@ def doMinimization():
 	elif (aline[0:8] == "SCOREFXN"):
 	    weightsfile = aline.split("\t")[1].strip()
     f.close()
+    # Initialize the scoring function
     scorefxn = ScoreFunction()
     try:
 	scorefxn.add_weights_from_file(weightsfile)
@@ -211,7 +250,9 @@ def doMinimization():
 	raise Exception("ERROR: The scoring function weights could not be initialized!")
     f = open("minimizeoutputtemp", "w")
     for [pdbfile, minmapstart, minmapend] in jobs:
+	# Get a Rosetta pose of the file
 	minpose = pose_from_pdb(pdbfile)
+	# Create the minmap
 	mm = MoveMap()
 	mm.set_bb(False)
 	mm.set_chi(False)
@@ -220,6 +261,7 @@ def doMinimization():
 		mm.set_bb(indx+1, True)
 	    if (mtype == "Chi" or mtype == "BB+Chi"):
 		mm.set_chi(indx+1, True)
+	# Minimize using dfpmin always
 	minmover = MinMover(mm, scorefxn, "dfpmin", 0.01, True)
 	if (minType == "Cartesian"):
 	    minmover.cartesian(True)
@@ -227,8 +269,11 @@ def doMinimization():
 	    minmover.apply(minpose)
 	except:
 	    raise Exception("ERROR: The Rosetta minimizer failed!")
+	# Dump the pdbfile
 	outputpdb = pdbfile.split(".pdb")[0] + "_M.pdb"
 	minpose.dump_pdb(outputpdb)
+	# Update the output file telling the GUI the name of the minimized file and a list of all the energies
+	# for display by color in PyMOL
 	f.write("OUTPUT\t" + outputpdb + "\n")
 	nonzero_scoretypes = scorefxn.get_nonzero_weighted_scoretypes()
 	f.write("ENERGY\ttotal_score")
@@ -244,7 +289,8 @@ def doMinimization():
     f.close()
     # So the main GUI doesn't attempt to read the file before the daemon finishes writing its contents
     os.rename("minimizeoutputtemp", "minimizeoutput")
-    
+
+# Fixed backbone design protocol
 def doFixbb():
     initializeRosetta()
     try:
@@ -312,6 +358,7 @@ def doFixbb():
     # Now write the output information for the main GUI
     f.write("OUTPUT\t" + outputpdb + "\n")
     nonzero_scoretypes = scorefxn.get_nonzero_weighted_scoretypes()
+    # Write out the energies of all residues so PyMOL can color by energy
     f.write("ENERGY\ttotal_score")
     for scoretype in nonzero_scoretypes:
 	f.write("\t" + str(scoretype))
@@ -325,14 +372,21 @@ def doFixbb():
     f.close()
     # So the main GUI doesn't attempt to read the file before the daemon finishes writing its contents
     os.rename("designoutputtemp", "designoutput")
- 
+
+# Point mutation scanning protocol
 def doPMutScan():
+    # We want to mute basic and core so only the protocols standard output is shown
+    # We need to grab and parse this standard output and muting the other clears up the clutter
     initializeRosetta(extraMutes="basic core")
     try:
 	f = open("scaninput", "r")
     except:
-	raise Exception("ERROR: The file \"designinput\" is missing!")
-    # Get the pdbfile, resfile, and scorefxn from the input file
+	raise Exception("ERROR: The file \"scaninput\" is missing!")
+    # Looking for:
+    #    PDBFILE: The structure to analyze
+    #    LIST: A list of all single or double point mutants to consider
+    #    SCOREFXN: The weights for the scoring function
+    #    MUTANTTYPE: Whether we should do single or double mutants
     for aline in f:
 	if (aline[0:7] == "PDBFILE"):
 	    pdbfile = aline.split("\t")[1].strip()
@@ -349,29 +403,283 @@ def doPMutScan():
 	scorefxn.add_weights_from_file(weightsfile)
     except:
 	raise Exception("ERROR: The scoring function weights could not be initialized!")
-    f = open("scanoutputtemp", "w", 1)
     # Perform the scan using the specified mutants
+    # First repack the structure otherwise we'll get a lot of hits simply because Rosetta liked repacking
+    # the residues into its own energy minimum
+    # We want real mutants so the structure has to be stabilized by Rosetta first
+    pose = pose_from_pdb(pdbfile)
+    design_pack = TaskFactory.create_packer_task(pose)
+    design_pack.restrict_to_repacking()
+    pack_mover = PackRotamersMover(scorefxn, design_pack)
+    pack_mover.apply(pose)
+    pose.dump_pdb(pdbfile)
+    # The point mutant scanner wants the PDB files in a vector1<string> for some reason
     vec = utility.vector1_string()
     vec.append(pdbfile)
     if (mutanttype == "DOUBLE"):
 	double = True
     else:
 	double = False
-    # Capture stdout in the outputfile
-    #stdout = sys.stdout
-    #sys.stdout = f
-    #try:
-    PMS = PointMutScanDriver(vec, double, listfile, False)
-    PMS.go()
-    #except:
-	#f.close()
-	#sys.stdout = stdout
-	#raise Exception("ERROR: The Rosetta PointMutScanDriver failed!")
-    #f.close()
-    #sys.stdout = stdout
+    try:
+	PMS = PointMutScanDriver(vec, double, listfile, False)
+	PMS.go()
+	# Before this function was called, a context manager was started to grab standard output from this
+	# function, which is what we want
+	# It is being saved in scanprogress
+    except:
+	pass
+    # Append the model name to these data so when the report is saved the GUI can remember what model
+    # these data came from
+    f = open("scanprogress", "a")
+    f.write("#MODEL\t" + pdbfile.strip() + "\n")
+    f.close()
     # So the main GUI doesn't attempt to read the file before the daemon finishes writing its contents
-    os.rename("scanoutputtemp", "scanoutput")
- 
+    os.rename("scanprogress", "scanoutput")
+
+# Rosetta relax function for generating mild ensembles
+def doRelax():
+    initializeRosetta()
+    try:
+	f = open("relaxinput", "r")
+    except:
+	raise Exception("ERROR: The file \"relaxinput\" is missing!")
+    # Looking for:
+    #    PDBFILE: The structure for which an ensemble will be generated
+    #    NMODELS: The number of models to generate in the ensemble
+    #    SCOREFXN: The weights for the scoring function
+    for aline in f:
+	if (aline[0:7] == "PDBFILE"):
+	    pdbfile = aline.split("\t")[1].strip()
+	elif (aline[0:7] == "NMODELS"):
+	    nmodels = int(aline.split("\t")[1])
+	elif (aline[0:8] == "SCOREFXN"):
+	    weightsfile = aline.split("\t")[1].strip()
+    f.close()
+    # Initialize scoring function
+    scorefxn = ScoreFunction()
+    try:
+	scorefxn.add_weights_from_file(weightsfile)
+    except:
+	raise Exception("ERROR: The scoring function weights could not be initialized!")
+    # Perform FastRelax for each model
+    inputpose = pose_from_pdb(pdbfile)
+    FR = FastRelax(scorefxn)
+    # Write the results in an ensb file (basically a large gzipped PDB file with multiple models)
+    archive = gzip.open("resultstemp.ensb", "wb")
+    for i in range(0, nmodels):
+	# Update the progress for the GUI
+	f = open("relaxprogress", "w")
+	f.write(str(i) + "\n")
+	f.close()
+	filename = "relax_" + str(i+1) + ".pdb"
+	# Get a copy of the original pose
+	pose = Pose(inputpose)
+	FR.apply(pose)
+	# Now save the coordinates in the archive
+	pose.dump_pdb("temp.pdb")
+	fin = open("temp.pdb", "r")
+	archive.write("BEGIN PDB " + filename.strip() + "\n")
+	for aline in fin:
+	    archive.write(aline)
+	archive.write("END PDB " + filename.strip() + "\n")
+	fin.close()
+    archive.close()
+    # So the main GUI doesn't attempt to read the file before the daemon finishes writing its contents
+    os.rename("resultstemp.ensb", "results.ensb")
+
+# Rosetta backrub protocol for generating more extensive ensembles
+def doBackrub():
+    initializeRosetta()
+    try:
+	f = open("backrubinput", "r")
+    except:
+	raise Exception("ERROR: The file \"relaxinput\" is missing!")
+    # Looking for:
+    #    PDBFILE: The structure for which an ensemble will be generated
+    #    NMODELS: The number of models to generate for the ensemble
+    #    MAXRMSD: The RMSD limit for the ensemble gradient
+    #    SCOREFXN: The weights for the scoring function
+    for aline in f:
+	if (aline[0:7] == "PDBFILE"):
+	    pdbfile = aline.split("\t")[1].strip()
+	elif (aline[0:7] == "NMODELS"):
+	    ntemplates = int(aline.split("\t")[1])
+	elif (aline[0:7] == "MAXRMSD"):
+	    backrubRMSD = int(aline.split("\t")[1])
+	elif (aline[0:8] == "SCOREFXN"):
+	    weightsfile = aline.split("\t")[1].strip()
+    f.close()
+    # Initialize scoring function
+    scorefxn = ScoreFunction()
+    try:
+	scorefxn.add_weights_from_file(weightsfile)
+    except:
+	raise Exception("ERROR: The scoring function weights could not be initialized!")
+    # Save the ensemble in an ensb file
+    archive = gzip.open("resultstemp.ensb", "wb")
+    for teamrank in range(0, ntemplates):
+	# Update the progress for the GUI
+	f = open("backrubprogress", "w")
+	f.write(str(teamrank) + "\n")
+	f.close()
+	# Calculate the target RMSD value for this ensemble member (it is an even gradient between 0
+	# and backrubRMSD)
+	if (ntemplates == 1):
+	    myRMSD = float(backrubRMSD)
+	else:
+	    myRMSD = float(teamrank) * (float(backrubRMSD) / float(ntemplates - 1))
+	# This member will be generated with a constant seed, so we can easily get the same ensemble
+	# given the same input parameters
+	RMSDseed = "%7i" % (myRMSD * 1000) # Truncate the decimal
+	RMSDseed = RMSDseed.strip()
+	addOn = " -constant_seed -seed_offset 0 -use_bicubic_interpolation "
+	initializeRosetta(addOn=addOn)
+	pose = pose_from_pdb(pdbfile)
+	# Allow backrub to potentially pivot all canonical residues
+	BM = protocols.backrub.BackrubMover()
+	pivot_res = utility.vector1_ulong()
+	# Set all canonical AAs to pivot residues
+	three = "ALACYSASPGLUPHEGLYHISILELYSLEUMETASNPROGLNARGSERTHRVALTRPTYR"
+	for i in range(0, pose.n_residue()):
+	    if (three.find(pose.residue(i+1).name()) >= 0):
+		pivot_res.append(i+1)
+	BM.set_pivot_residues(pivot_res)
+	# Now minimize the structure to get to an energy minimum in the selected scoring function
+	# Use this structure as the reference for RMSD calculations
+	mm = MoveMap()
+	mm.set_bb(True)
+	mm.set_chi(True)
+	for i in range(1, pose.n_residue() + 1):
+	    if ("ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR".find(pose.residue(i).name3()) < 0):
+		mm.set_bb(i, False)
+		mm.set_chi(i, False)
+	tol = 0.01
+	scorefxn_min = create_score_function("talaris2013")
+	minmover = MinMover(mm, scorefxn_min, 'lbfgs_armijo_nonmonotone', tol, True)
+	minmover.apply(pose)
+	basepose = Pose(pose)
+	if (teamrank > 0):
+	    # If this is template 1, use the inputted PDB and perform no backrub
+	    attempts = 0
+	    orig_pose = Pose(basepose)
+	    addOn = " -constant_seed -seed_offset 0 "
+	    initializeRosetta(addOn=addOn)
+	    minmover = MinMover(mm, scorefxn_min, 'lbfgs_armijo_nonmonotone', tol, True)
+	    addOn = " -constant_seed -seed_offset " + RMSDseed + " -use_bicubic_interpolation "
+	    initializeRosetta(addOn=addOn)
+	    # myRMSD is the target RMSD for this member
+	    # myRange is how close to the target value it needs to get to quit the following loops
+	    myRMSD = float(teamrank) * (float(backrubRMSD) / float(ntemplates - 1))
+	    myRange = (float(backrubRMSD) / float(ntemplates - 1)) / 2.0
+	    if (myRange < 0.025):
+		myRange = 0.025 # If you're getting stuck at the backrub diversity step, then this value probably needs to be raised
+	    backrubTm = 10.0 ** myRMSD # Initial starting value designed to get the Tm close to where it should be to generate the desired RMSD quickly
+	    Metropolis = rosetta.MonteCarlo(pose, scorefxn, backrubTm)
+	    myLoop = 10
+	    lastRMSD = -1
+	    currRMSD = -1
+	    prev_pose = Pose(orig_pose)
+	    while (True):
+		# Do some backrub moves to generate diversity
+		for i in range(0, myLoop):
+		    BM.apply(pose)
+		    # If the move is rejected, pose is automatically reverted by this function
+		    Metropolis.boltzmann(pose)
+		# Minimize to fix clashes
+		minmover = MinMover(mm, scorefxn_min, 'lbfgs_armijo_nonmonotone', tol, True)
+		minmover.apply(pose)
+		attempts = attempts + 1
+		# If we've been at this backrub temperature for a while, increase it and do more backrub moves
+		if (attempts >= 100):
+		    backrubTm = backrubTm * 2.0
+		    myLoop = myLoop + 10
+		    Metropolis = rosetta.MonteCarlo(pose, scorefxn, backrubTm)
+		    attempts = 0
+		    lastRMSD = -1
+		# If the temperature has gotten too hot or too cold, give up and return the current structure
+		if (backrubTm >= 1000000.0):
+		    print str(teamrank) + " - Too hot", tol
+		    print teamrank, core.scoring.bb_rmsd(pose, orig_pose)
+		    break
+		if ( backrubTm < 0.0001):
+		    print str(teamrank) + " - Too cold", tol
+		    pose = Pose(prev_pose)
+		    print teamrank, core.scoring.bb_rmsd(pose, orig_pose)
+		    break
+		# Calculate the current RMSD to the base pose
+		calpha_superimpose_pose(pose, orig_pose)
+		if (lastRMSD < 0):
+		    lastRMSD = core.scoring.bb_rmsd(pose, orig_pose)
+		else:
+		    currRMSD = core.scoring.bb_rmsd(pose, orig_pose)
+		    # If the RMSD did not really change from the last iteration, increase the temperature
+		    # so we can get more diversity faster
+		    if (currRMSD - lastRMSD == 0 or myRMSD / (currRMSD - lastRMSD) > 10):
+			backrubTm = backrubTm * 2
+			myLoop = myLoop + 10
+			Metropolis = rosetta.MonteCarlo(pose, scorefxn, backrubTm)
+			attempts = 0
+			lastRMSD = -1
+		    else:
+			lastRMSD = currRMSD
+		if (core.scoring.bb_rmsd(pose, orig_pose) >= myRMSD):
+		    # If the actual RMSD is more than halfway towards either of the adjacent templates, then start over and decrease the Tm by a factor of 10
+		    if (math.fabs(core.scoring.bb_rmsd(pose, orig_pose) - myRMSD) < myRange):
+			break
+		    else:
+			backrubTm = backrubTm / 10.0
+			myLoop = int(float(myLoop) / 2.0)
+			# Revert
+			pose = Pose(prev_pose)
+			Metropolis = rosetta.MonteCarlo(pose, scorefxn, backrubTm)
+			lastRMSD = -1
+		else:
+		    if (math.fabs(core.scoring.bb_rmsd(pose, orig_pose) - myRMSD) < myRange):
+			break
+		    prev_pose = Pose(pose)
+	if (teamrank > 0):
+	    # Now do two Cartesian minimizations to fix the backrub distortions
+	    # Extensive backrub moves distort ideal bond geometry
+	    # First, minimize all odd residues, then minimize all even residues, to preserve the RMSD
+	    # as much as possible
+	    mm = MoveMap()
+	    mm.set_bb(True)
+	    mm.set_chi(True)
+	    for i in range(1, pose.n_residue() + 1, 2):
+		if ("ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR".find(pose.residue(i).name3()) < 0):
+		    mm.set_bb(i, False)
+		    mm.set_chi(i, False)
+	    minmover = MinMover(mm, create_score_function("talaris2013_cart"), 'lbfgs_armijo_nonmonotone', 0.01, True)
+	    minmover.cartesian(True)
+	    minmover.apply(pose)
+	    mm.set_bb(True)
+	    mm.set_chi(True)
+	    for i in range(2, pose.n_residue() + 1, 2):
+		if ("ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR".find(pose.residue(i).name3()) < 0):
+		    mm.set_bb(i, False)
+		    mm.set_chi(i, False)
+	    minmover = MinMover(mm, create_score_function("talaris2013_cart"), 'lbfgs_armijo_nonmonotone', 0.01, True)
+	    minmover.cartesian(True)
+	    minmover.apply(pose)
+	if (teamrank == 0):
+	    print "backrub: Backbone 1 Constructed - RMSD(A): 0.0"
+	else:
+	    calpha_superimpose_pose(pose, orig_pose)
+	    currRMSD = core.scoring.bb_rmsd(pose, orig_pose)
+	    print "backrub: Backbone " + str(teamrank+1) + " Constructed - RMSD(A): " + str(currRMSD)
+	filename = pdbfile.split(".pdb")[0] + "_" + str(teamrank+1) + ".pdb"
+	pose.dump_pdb("temp.pdb")
+	# Write the coordinates to the archive
+	fin = open("temp.pdb", "r")
+	archive.write("BEGIN PDB " + filename.strip() + "\n")
+	for aline in fin:
+	    archive.write(aline)
+	archive.write("END PDB " + filename.strip() + "\n")
+	fin.close()
+    archive.close()
+    # So the main GUI doesn't attempt to read the file before the daemon finishes writing its contents
+    os.rename("resultstemp.ensb", "results.ensb")
+
 def doScore():
     initializeRosetta()
     try:
@@ -1160,14 +1468,14 @@ def doThread(scriptdir):
     # These are "extra_options" for PyRosetta initialization
     frag_files = "-loops:frag_files "
     frag_sizes = "-loops:frag_sizes "
-    fasta = "-in:file:fasta ../"
-    psipred = "-in:file:psipred_ss2 ../"
+    fasta = "-in:file:fasta "
+    psipred = "-in:file:psipred_ss2 "
     for aline in f:
 	if (aline[0:5] == "BEGIN"):
 	    filename = aline.split("\t")[1].strip()
 	    f2 = open(aline.split("\t")[1].strip(), "w")
 	    if (filename.endswith(".200_v1_3")):
-		frag_files = frag_files + "../" + filename + " "
+		frag_files = frag_files + filename + " "
 		fragsize = str(int(filename.split("_")[1]))
 		frag_sizes = frag_sizes + fragsize + " "
 	    elif (filename.endswith(".fasta")):
@@ -1212,7 +1520,7 @@ def doThread(scriptdir):
     if (platform.system() == "Windows"):
 	muscleprogram = scriptdir + "\\bin\\muscle.exe"
     else:
-	muscleprogram = scriptdir + "/bin/muscle"
+	muscleprogram = scriptdir + "/bin/muscle_unix"
     muscle_cline = MuscleCommandline(muscleprogram, input="muscle.fasta", out="aligned.fasta")
     muscle_cline()
     # Convert this aligned FASTA file to the "general" format used in Rosetta
@@ -1230,8 +1538,8 @@ def doThread(scriptdir):
     # Initialize scoring function
     initstr = frag_files+frag_sizes+fasta+psipred + "-in:file:template_pdb "
     for template in pdbfiles:
-	initstr = initstr + "../" + template + " " 
-    initstr = initstr + "-in:file:alignment ../align.aln -cm:aln_format general -overwrite"
+	initstr = initstr + template + " " 
+    initstr = initstr + "-in:file:alignment align.aln -cm:aln_format general -overwrite"
     if (not(os.path.exists("temp"))):
 	os.makedirs("temp")
     initializeRosetta(addOn=initstr)
@@ -1244,9 +1552,9 @@ def doThread(scriptdir):
     # Perform protein threading
     LRT = LoopRelaxThreadingMover()
     LRT.setup()
-    os.chdir("temp")
+    #os.chdir("temp")
     JobDistributor.get_instance().go(LRT)
-    os.chdir("..")
+    #os.chdir("..")
     # Get the PDB
     # If the only PDB file in "temp" is the abinitio structure, then we can use glob to get it without knowing 
     # the exact filename
@@ -1307,28 +1615,32 @@ def daemonLoop():
 	    os.remove("designinput")
 	elif (os.path.isfile("scaninput")):
 	    print "Daemon starting point mutation scanning job..."
-	    print sys.stdout
-	    stdout_fileno = sys.stdout.fileno()
-	    stdout_save = os.dup(stdout_fileno)
-	    stdout_pipe = os.pipe()
-	    os.dup2(stdout_pipe[1], stdout_fileno)
-	    os.close(stdout_pipe[1])
-	    captured_stdout = ""
-	    t = Thread(target=drain_pipe)
-	    t.start()
 	    try:
-		doPMutScan()
+		with ScanCapturing() as output:
+		    doPMutScan()
 		print "Daemon completed point mutation scanning job"
 	    except Exception as e:
 		print "The daemon crashed while performing the scanning job!"
 		writeError(e.message)
-	    os.close(stdout_fileno)
-	    t.join()
-	    # Clean up the pipe and restore the original stdout
-	    os.close(stdout_pipe[0])
-	    os.dup2(stdout_save, stdout_fileno)
-	    os.close(stdout_save)
 	    os.remove("scaninput")
+	elif (os.path.isfile("relaxinput")):
+	    print "Daemon starting relaxing job..."
+	    try:
+		doRelax()
+		print "Daemon completed relaxing job"
+	    except Exception as e:
+		print "The daemon crashed while performing the relaxing job!"
+		writeError(e.message)
+	    os.remove("relaxinput")
+	elif (os.path.isfile("backrubinput")):
+	    print "Daemon starting backrubbing job..."
+	    try:
+		doBackrub()
+		print "Daemon completed backrubbing job"
+	    except Exception as e:
+		print "The daemon crashed while performing the backrubbing job!"
+		writeError(e.message)
+	    os.remove("backrubinput")
 	elif (os.path.isfile("scoreinput")):
 	    print "Daemon starting scoring job..."
 	    try:

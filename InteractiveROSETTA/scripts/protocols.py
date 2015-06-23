@@ -34,6 +34,9 @@ from kic import KICPanel
 from docking import DockingPanel
 from msd import MSDPanel
 from pmutscan import PointMutantScanPanel 
+from surfaces import SurfacesPanel
+from antibody import AntibodyPanel
+from ensemblegen import EnsembleGenPanel
 
 class ProtocolsPanel(wx.Panel):
     def __init__(self, parent, W, H):
@@ -55,7 +58,20 @@ class ProtocolsPanel(wx.Panel):
 	    resizeTextControlForUNIX(self.label, 0, self.GetSize()[0])
 	self.label.SetForegroundColour("#FFFFFF")
 	
-	self.protocols = ["Docking", "Energy Minimization", "Ensemble Browser", "Loop Modeling (KIC)", "Point Mutant Scan", "Point Mutations", "Protein Design (Fixbb)", "Protein Design (MSD)", "Residue/Ligand Creator", "Structure Prediction (Comparative Modeling)", "Superimposition"]
+	self.protocols = ["Antibody Modeling", 
+		   "Docking", 
+		   "Energy Minimization", 
+		   "Ensemble Browser", 
+		   "Ensemble Generation",
+		   "Loop Modeling (KIC)",
+		   "Molecular Surfaces", 
+		   "Point Mutant Scan", 
+		   "Point Mutations", 
+		   "Protein Design (Fixbb)", 
+		   "Protein Design (MSD)", 
+		   "Residue/Ligand Creator", 
+		   "Structure Prediction (Comparative Modeling)", 
+		   "Superimposition"]
 	if (platform.system() == "Darwin"):
 	    self.protMenu = wx.ComboBox(self, pos=(5, 30), size=(230, 25), choices=self.protocols, style=wx.CB_READONLY)
 	else:
@@ -104,6 +120,19 @@ class ProtocolsPanel(wx.Panel):
 		self.protPanel.Destroy()
 		del self.protPanel
 	    elif (self.currentProtocol == "Ensemble Browser"):
+		self.protPanel.Destroy()
+		del self.protPanel
+	    elif (self.currentProtocol == "Ensemble Generation"):
+		# Check to see if the user has accepted the design
+		# If not, ask if they really want to proceed
+		if (self.protPanel.buttonState == "Cancel!"):
+		    dlg = wx.MessageDialog(self, "Your ensemble is not finished and the results will be lost if you proceed.  Proceed anyway?", "Design Not Accepted", wx.YES_NO | wx.ICON_EXCLAMATION | wx.CENTRE)
+		    if (dlg.ShowModal() == wx.ID_NO):
+			logInfo("Go cancelled due to unfinished ensemblegen job")
+			dlg.Destroy()
+			return
+		    logInfo("Ensemblegen job rejected")
+		    dlg.Destroy()
 		self.protPanel.Destroy()
 		del self.protPanel
 	    elif (self.currentProtocol == "Protein Design (Fixbb)"):
@@ -167,7 +196,7 @@ class ProtocolsPanel(wx.Panel):
 	    elif (self.currentProtocol == "Docking"):
 		# Check to see if the user has accepted the docking model
 		# If not, ask if they really want to proceed
-		if (self.protPanel.buttonState == "Finalize!"):
+		if (self.protPanel.buttonState != "Dock!"):
 		    dlg = wx.MessageDialog(self, "You have not accepted your docking model and the results will be lost if you proceed.  Proceed anyway?", "Docking Not Accepted", wx.YES_NO | wx.ICON_EXCLAMATION | wx.CENTRE)
 		    if (dlg.ShowModal() == wx.ID_NO):
 			logInfo("Go cancelled due to unaccepted docking job")
@@ -205,6 +234,24 @@ class ProtocolsPanel(wx.Panel):
 	    elif (self.currentProtocol == "Protein Design (MSD)"):
 		self.protPanel.Destroy()
 		del self.protPanel
+	    elif (self.currentProtocol == "Antibody Modeling"):
+		self.protPanel.Destroy()
+		del self.protPanel
+	    elif (self.currentProtocol == "Molecular Surfaces"):
+		try:
+		    self.cmd.delete("curr_surf_recp")
+		except:
+		    pass
+		try:
+		    self.cmd.delete("curr_surf_lig")
+		except:
+		    pass
+		self.cmd.hide("surface", "all")
+		if (self.parent.Selection.showSurf):
+		    self.currentProtocol = "n/a"
+		    self.parent.Selection.displaySurfaces()
+		self.protPanel.Destroy()
+		del self.protPanel
 	    self.currentProtocol = selectedProtocol
 	    self.seqWin.cannotDelete = False
 	    # Restart the Rosetta daemon to clear its memory up
@@ -217,6 +264,9 @@ class ProtocolsPanel(wx.Panel):
 		self.protPanel.setSelectWin(self.selectWin)
 	    elif (selectedProtocol == "Ensemble Browser"):
 		self.protPanel = EnsembleBrowserPanel(self, self.W, self.H)
+	    elif (selectedProtocol == "Ensemble Generation"):
+		self.protPanel = EnsembleGenPanel(self, self.W, self.H)
+		self.protPanel.setSelectWin(self.selectWin)
 	    elif (selectedProtocol == "Protein Design (Fixbb)"):
 		self.protPanel = FixbbPanel(self, self.W, self.H)
 		self.protPanel.setSelectWin(self.selectWin)
@@ -240,6 +290,11 @@ class ProtocolsPanel(wx.Panel):
 	    elif (selectedProtocol == "Protein Design (MSD)"):
 		self.protPanel = MSDPanel(self, self.W, self.H)
 		self.protPanel.setSelectWin(self.selectWin)
+	    elif (selectedProtocol == "Antibody Modeling"):
+		self.protPanel = AntibodyPanel(self, self.W, self.H)
+	    elif (selectedProtocol == "Molecular Surfaces"):
+		self.protPanel = SurfacesPanel(self, self.W, self.H)
+		self.cmd.hide("surface", "all")
 	    self.protPanel.setSeqWin(self.seqWin)
 	    self.protPanel.setPyMOL(self.pymol)
 	    self.protPanel.activate()
@@ -266,10 +321,13 @@ class ProtocolsPanel(wx.Panel):
 class ProtocolsWin(wx.Frame):
     def __init__(self, W, H, scriptdir):
 	if (platform.system() == "Darwin"):
-	    winx = 0; winy = 24
+	    self.stdwinx = 0; self.stdwiny = 24
 	else:
-	    winx = 0; winy = 0
-	winw = 370; winh = H-40
+	    self.stdwinx = 0; self.stdwiny = 0
+	self.stdwinw = 370; self.stdwinh = H-40
+	self.screenH = H; self.screenW = W
+	winx = self.stdwinx; winy = self.stdwiny
+	winw = self.stdwinw; winh = self.stdwinh
 	self.scriptdir = scriptdir
 	homedir = os.path.expanduser("~")
 	# Try to get the save values from the cfg file
@@ -279,17 +337,21 @@ class ProtocolsWin(wx.Frame):
 	    else:
 		f = open(homedir + "/InteractiveROSETTA/protwindow.cfg", "r")
 	    for aline in f:
-		if (aline.find("[POSITION X]") >= 0):
-		    winx = int(aline.split()[len(aline.split())-1])
-		elif (aline.find("[POSITION Y]") >= 0):
-		    winy = int(aline.split()[len(aline.split())-1])
-		elif (aline.find("[WIDTH]") >= 0):
-		    winw = int(aline.split()[len(aline.split())-1])
-		elif (aline.find("[HEIGHT]") >= 0):
-		    winh = int(aline.split()[len(aline.split())-1])
+		if (aline.find("[OFFSET X]") >= 0):
+		    winx = winx + int(aline.split()[len(aline.split())-1])
+		elif (aline.find("[OFFSET Y]") >= 0):
+		    winy = winy + int(aline.split()[len(aline.split())-1])
+		elif (aline.find("[OFFSET WIDTH]") >= 0):
+		    winw = winw + int(aline.split()[len(aline.split())-1])
+		elif (aline.find("[OFFSET HEIGHT]") >= 0):
+		    winh = winh + int(aline.split()[len(aline.split())-1])
 	    f.close()
 	except:
 	    pass
+	if (winx > self.screenW - 100):
+	    winx = self.stdwinx
+	if (winy > self.screenH - 100):
+	    winy = self.stdwiny
 	# Maybe the screen resolution has changed and the saved dimensions put the windows in
 	# weird places, so default them to better positions and the user can change them later
 	#if (winw < 350):
@@ -410,8 +472,6 @@ class ProtocolsWin(wx.Frame):
 	event.Skip()
 	
     def saveWindowData(self, event):
-	self.saveTimer.Stop()
-	return
 	homedir = os.path.expanduser("~")
 	data = []
 	try:
@@ -428,32 +488,32 @@ class ProtocolsWin(wx.Frame):
 	    f = open(homedir + "\\InteractiveROSETTA\\protwindow.cfg", "w")
 	else:
 	    f = open(homedir + "/InteractiveROSETTA/protwindow.cfg", "w")
-	itemsFound = [False, False, False, False] # [X, Y, W, H]
+	itemsFound = [False, False, False, False] # [offX, offY, offW, offH]
 	(x, y) = self.GetPosition()
 	(w, h) = self.GetSize()
 	for aline in data:
-	    if (aline.find("[POSITION X]") >= 0):
+	    if (aline.find("[OFFSET X]") >= 0):
 		itemsFound[0] = True
-		f.write("[POSITION X] " + str(x) + "\n")
-	    elif (aline.find("[POSITION Y]") >= 0):
+		f.write("[OFFSET X] " + str(x-self.stdwinx) + "\n")
+	    elif (aline.find("[OFFSET Y]") >= 0):
 		itemsFound[1] = True
-		f.write("[POSITION Y] " + str(y) + "\n")
-	    elif (aline.find("[WIDTH]") >= 0):
+		f.write("[OFFSET Y] " + str(y-self.stdwiny) + "\n")
+	    elif (aline.find("[OFFSET WIDTH]") >= 0):
 		itemsFound[2] = True
-		f.write("[WIDTH] " + str(w) + "\n")
-	    elif (aline.find("[HEIGHT]") >= 0):
+		f.write("[OFFSET WIDTH] " + str(w-self.stdwinw) + "\n")
+	    elif (aline.find("[OFFSET HEIGHT]") >= 0):
 		itemsFound[3] = True
-		f.write("[HEIGHT] " + str(h) + "\n")
+		f.write("[OFFSET HEIGHT] " + str(h-self.stdwinh) + "\n")
 	    else:
 		f.write(aline)
 	for i in range(0, len(itemsFound)):
 	    if (not(itemsFound[i])):
 		if (i == 0):
-		    f.write("[POSITION X] " + str(x) + "\n")
+		    f.write("[OFFSET X] " + str(x-self.stdwinx) + "\n")
 		elif (i == 1):
-		    f.write("[POSITION Y] " + str(y) + "\n")
+		    f.write("[OFFSET Y] " + str(y-self.stdwiny) + "\n")
 		elif (i == 2):
-		    f.write("[WIDTH] " + str(w) + "\n")
-		else:
-		    f.write("[HEIGHT] " + str(h) + "\n")
+		    f.write("[OFFSET WIDTH] " + str(w-self.stdwinw) + "\n")
+		elif (i == 3):
+		    f.write("[OFFSET HEIGHT] " + str(h-self.stdwinh) + "\n")
 	f.close()

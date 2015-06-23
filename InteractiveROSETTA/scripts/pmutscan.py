@@ -3,15 +3,17 @@ import wx.grid
 import wx.lib.scrolledpanel
 import os
 import os.path
+import sys
 import time
 import platform
 import multiprocessing
 import Bio.PDB
 import webbrowser
+import datetime
 from threading import Thread
 from tools import *
 
-class FixbbPanel(wx.lib.scrolledpanel.ScrolledPanel):
+class PointMutantScanPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def __init__(self, parent, W, H):
 	#if (platform.system() == "Windows"):
 	wx.lib.scrolledpanel.ScrolledPanel.__init__(self, parent, id=-1, pos=(10, 60), size=(340, H-330), name="ProtFixbb")
@@ -23,12 +25,12 @@ class FixbbPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.parent = parent
 	
 	if (platform.system() == "Windows"):
-	    self.lblProt = wx.StaticText(self, -1, "Fixed Backbone Design", (25, 15), (270, 25), wx.ALIGN_CENTRE)
+	    self.lblProt = wx.StaticText(self, -1, "Point Mutant Scan", (25, 15), (270, 25), wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblFixbb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
+	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblPointMutantScan.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
 	else:
-	    self.lblProt = wx.StaticText(self, -1, "Fixed Backbone Design", (70, 15), style=wx.ALIGN_CENTRE)
+	    self.lblProt = wx.StaticText(self, -1, "Point Mutant Scan", (70, 15), style=wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	    resizeTextControlForUNIX(self.lblProt, 0, self.GetSize()[0])
 	self.lblProt.SetForegroundColour("#FFFFFF")
@@ -43,12 +45,12 @@ class FixbbPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.HelpBtn.SetToolTipString("Display the help file for this window")
 	
 	if (platform.system() == "Windows"):
-	    self.lblInst = wx.StaticText(self, -1, "Highlight residues to add/remove to design", (0, 45), (320, 25), wx.ALIGN_CENTRE)
+	    self.lblInst = wx.StaticText(self, -1, "Highlight residues to add/remove to the scan", (0, 45), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstFixbb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 25))
+	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstPointMutantScan.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 25))
 	else:
-	    self.lblInst = wx.StaticText(self, -1, "Highlight residues to add/remove to design", (5, 45), style=wx.ALIGN_CENTRE)
+	    self.lblInst = wx.StaticText(self, -1, "Highlight residues to add/remove to the scan", (5, 45), style=wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	    resizeTextControlForUNIX(self.lblInst, 0, self.GetSize()[0])
 	self.lblInst.SetForegroundColour("#FFFFFF")
@@ -262,21 +264,13 @@ class FixbbPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.AAlist = ["ALA", "CYS", "ASP", "GLU", "PHE", "GLY", "HIS", "ILE", "LYS", "LEU", "MET", "ASN", "PRO", "GLN", "ARG", "SER", "THR", "VAL", "TRP", "TYR"]
 	self.AAlist.sort()
 	
-	if (platform.system() == "Darwin"):
-	    self.scoretypeMenu = wx.ComboBox(self, pos=(7, 220), size=(305, 25), choices=[], style=wx.CB_READONLY)
-	else:
-	    self.scoretypeMenu = wx.ComboBox(self, pos=(7, 220), size=(305, 25), choices=[], style=wx.CB_READONLY | wx.CB_SORT)
-	self.scoretypeMenu.Bind(wx.EVT_COMBOBOX, self.scoretypeMenuSelect)
-	self.scoretypeMenu.Disable() # Is only enabled after a design and before accepting it
-	self.scoretypeMenu.SetToolTipString("Set the scoretype by which the PyMOL residues will be colored")
-	
 	self.grdResfile = wx.grid.Grid(self)
 	self.grdResfile.CreateGrid(0, 2)
 	if (winh-235 > 200):
 	    self.grdResfile.SetSize((320, winh-235))
 	else:
 	    self.grdResfile.SetSize((320, 200))
-	self.grdResfile.SetPosition((0, 250))
+	self.grdResfile.SetPosition((0, 220))
 	self.grdResfile.SetLabelFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.grdResfile.DisableDragColSize()
 	self.grdResfile.DisableDragRowSize()
@@ -293,43 +287,91 @@ class FixbbPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.useDesignedSeq = False 
 	
 	ypos = self.grdResfile.GetPosition()[1] + self.grdResfile.GetSize()[1] + 10
-	if (platform.system() == "Darwin"):
-	    self.btnLoadResfile = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLoadResfile.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, ypos), size=(120, 25))
+	if (platform.system() == "Windows"):
+	    self.lblProtReport = wx.StaticText(self, -1, "Mutant Report", (25, ypos), (270, 25), wx.ALIGN_CENTRE)
+	    self.lblProtReport.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	elif (platform.system() == "Darwin"):
+	    self.lblProtReport = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblReport.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
 	else:
-	    self.btnLoadResfile = wx.Button(self, id=-1, label="Load Resfile", pos=(20, ypos), size=(120, 25))
-	    self.btnLoadResfile.SetForegroundColour("#000000")
-	    self.btnLoadResfile.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-	self.btnLoadResfile.Bind(wx.EVT_BUTTON, self.loadResfile)
-	self.btnLoadResfile.SetToolTipString("Load the data in a premade resfile")
-	if (platform.system() == "Darwin"):
-	    self.btnSaveResfile = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnSaveResfile.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(175, ypos), size=(120, 25))
+	    self.lblProtReport = wx.StaticText(self, -1, "Mutant Report", (70, ypos), style=wx.ALIGN_CENTRE)
+	    self.lblProtReport.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	    resizeTextControlForUNIX(self.lblProtReport, 0, self.GetSize()[0])
+	self.lblProtReport.SetForegroundColour("#FFFFFF")
+	
+	self.grdReport = wx.grid.Grid(self)
+	self.grdReport.CreateGrid(0, 1)
+	if (winh-235 > 200):
+	    self.grdReport.SetSize((320, winh-235))
 	else:
-	    self.btnSaveResfile = wx.Button(self, id=-1, label="Save Resfile", pos=(175, ypos), size=(120, 25))
-	    self.btnSaveResfile.SetForegroundColour("#000000")
-	    self.btnSaveResfile.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-	self.btnSaveResfile.Bind(wx.EVT_BUTTON, self.saveResfile)
-	self.btnSaveResfile.SetToolTipString("Save the current resfile data to a real Rosetta resfile")
+	    self.grdReport.SetSize((320, 200))
+	self.grdReport.SetPosition((0, ypos+30))
+	self.grdReport.SetLabelFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	self.grdReport.DisableDragColSize()
+	self.grdReport.DisableDragRowSize()
+	self.grdReport.SetColLabelValue(0, u"Predicted \u25b3\u25b3G")
+	self.grdReport.SetRowLabelSize(160)
+	self.grdReport.SetColSize(0, 160)
+	self.grdReport.Bind(wx.grid.EVT_GRID_CELL_LEFT_CLICK, self.reportClick)
+	
+	ypos = self.grdReport.GetPosition()[1] + self.grdReport.GetSize()[1] + 10
+	if (platform.system() == "Darwin"):
+	    self.btnLoadReport = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLoadReport.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(40, ypos), size=(100, 25))
+	else:
+	    self.btnLoadReport = wx.Button(self, id=-1, label="Load Report", pos=(40, ypos), size=(100, 25))
+	    self.btnLoadReport.SetForegroundColour("#000000")
+	    self.btnLoadReport.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	self.btnLoadReport.Bind(wx.EVT_BUTTON, self.loadReport)
+	self.btnLoadReport.SetToolTipString("Load previously-saved point mutation scanning data")
+	if (platform.system() == "Darwin"):
+	    self.btnSaveReport = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnSaveReport.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(180, ypos), size=(100, 25))
+	else:
+	    self.btnSaveReport = wx.Button(self, id=-1, label="Save Report", pos=(180, ypos), size=(100, 25))
+	    self.btnSaveReport.SetForegroundColour("#000000")
+	    self.btnSaveReport.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	self.btnSaveReport.Bind(wx.EVT_BUTTON, self.saveReport)
+	self.btnSaveReport.Disable()
+	self.btnSaveReport.SetToolTipString("Save this point mutation scan report for later viewing")
+	
+	if (platform.system() == "Windows"):
+	    self.lblMutantType = wx.StaticText(self, -1, "Mutant Type", (0, ypos+33), (150, 20), wx.ALIGN_CENTRE)
+	    self.lblMutantType.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	elif (platform.system() == "Darwin"):
+	    self.lblMutantType = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblMutantType_Single.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+33), size=(150, 20))
+	else:
+	    self.lblMutantType = wx.StaticText(self, -1, "Mutant Type", (0, ypos+33), style=wx.ALIGN_CENTRE)
+	    self.lblMutantType.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	    resizeTextControlForUNIX(self.lblMutantType, 0, 150)
+	self.lblMutantType.SetForegroundColour("#FFFFFF")
+	self.mutantType = "Single"
+	if (platform.system() == "Darwin"):
+	    self.btnMutantType = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnMutantType_Single.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, ypos+30), size=(120, 25))
+	else:
+	    self.btnMutantType = wx.Button(self, id=-1, label="Single Mutants", pos=(160, ypos+30), size=(150, 25))
+	    self.btnMutantType.SetForegroundColour("#000000")
+	    self.btnMutantType.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	self.btnMutantType.Bind(wx.EVT_BUTTON, self.toggleMutantType)
+	self.btnMutantType.SetToolTipString("Search for stabilizing single point mutations")
 	
 	if (platform.system() == "Darwin"):
-	    self.btnWTType = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnWTType_NATRO.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, ypos+30), size=(120, 25))
+	    self.btnServerToggle = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnServerOff.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+350), size=(100, 25))
 	else:
-	    self.btnWTType = wx.Button(self, id=-1, label="NATRO", pos=(20, ypos+30), size=(120, 25))
-	    self.btnWTType.SetForegroundColour("#000000")
-	    self.btnWTType.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-	self.btnWTType.Bind(wx.EVT_BUTTON, self.changeWTType)
-	self.btnWTType.SetToolTipString("Unspecified residues will select the wildtype rotamer only")
+	    self.btnServerToggle = wx.Button(self, id=-1, label="Server Off", pos=(40, ypos+60), size=(100, 25))
+	    self.btnServerToggle.SetForegroundColour("#000000")
+	    self.btnServerToggle.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	self.btnServerToggle.Bind(wx.EVT_BUTTON, self.serverToggle)
+	self.btnServerToggle.SetToolTipString("Perform point mutation scans locally")
+	self.serverOn = False
 	if (platform.system() == "Darwin"):
-	    self.btnDesign = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnDesign.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(175, ypos+30), size=(120, 25))
+	    self.btnScan = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnScan.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(175, ypos+30), size=(120, 25))
 	else:
-	    self.btnDesign = wx.Button(self, id=-1, label="Design!", pos=(175, ypos+30), size=(120, 25))
-	    self.btnDesign.SetForegroundColour("#000000")
-	    self.btnDesign.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-	self.btnDesign.Bind(wx.EVT_BUTTON, self.designClick)
-	self.btnDesign.SetToolTipString("Perform fixed backbone design")
-	self.buttonState = "Design!"
-	self.WTType = "NATRO"
+	    self.btnScan = wx.Button(self, id=-1, label="Scan!", pos=(180, ypos+60), size=(100, 25))
+	    self.btnScan.SetForegroundColour("#000000")
+	    self.btnScan.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	self.btnScan.Bind(wx.EVT_BUTTON, self.scanClick)
+	self.btnScan.SetToolTipString("Perform a point mutant scan")
+	self.buttonState = "Scan!"
 	
-	self.scrollh = self.btnDesign.GetPosition()[1] + self.btnDesign.GetSize()[1] + 5
+	self.scrollh = self.btnScan.GetPosition()[1] + self.btnScan.GetSize()[1] + 5
 	self.SetScrollbars(1, 1, 320, self.scrollh)
     
     def showHelp(self, event):
@@ -362,6 +404,46 @@ class FixbbPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.selectedr = event.GetRow()
 	self.desMenu.SetSelection(event.GetRow())
 	self.desMenuSelect(event)
+	event.Skip()
+	
+    def reportClick(self, event):
+	# Find the neighborhood view
+	selectedValue = str(self.grdReport.GetRowLabelValue(event.GetRow()))
+	seqpos = selectedValue.split("|")[len(selectedValue.split("|"))-1]
+	seqpos = seqpos.strip()
+	seqpos = seqpos[1:len(seqpos)-1] # The AA is index 0 and the mutation is the last char
+	firstmodel = self.selectedModel
+	chain = selectedValue.split("|")[0]
+	self.cmd.hide("all")
+	if (chain == " " or chain == "_"):
+	    self.cmd.select("repsele", "resi " + seqpos + " and model " + firstmodel)
+	else:
+	    self.cmd.select("repsele", "resi " + seqpos + " and model " + firstmodel + " and chain " + chain)
+	self.cmd.select("repsele", "model " + firstmodel + " within 12 of repsele")
+	self.cmd.show("cartoon", "repsele")
+	self.cmd.hide("ribbon", "repsele")
+	self.cmd.show("sticks", "repsele")
+	self.cmd.set_bond("stick_radius", 0.1, "repsele")
+	self.cmd.zoom("repsele")
+	if (chain == " " or chain == "_"):
+	    self.cmd.select("repsele", "resi " + seqpos + " and model " + firstmodel)
+	else:
+	    self.cmd.select("repsele", "resi " + seqpos + " and model " + firstmodel + " and chain " + chain)
+	self.cmd.show("sticks", "repsele")
+	self.cmd.set_bond("stick_radius", 0.25, "repsele")
+	# Highlight this residue in PyMOL
+	self.cmd.select("seqsele", "repsele")
+	self.cmd.enable("seqsele")
+	self.cmd.delete("repsele")
+	self.seqWin.selectUpdate(False)
+	for r in range(0, self.grdReport.NumberRows):
+	    if (r == event.GetRow()):
+		for c in range(0, self.grdReport.NumberCols):
+		    self.grdReport.SetCellBackgroundColour(r, c, "light blue")
+	    else:
+		for c in range(0, self.grdReport.NumberCols):
+		    self.grdReport.SetCellBackgroundColour(r, c, "white")
+	self.grdReport.Refresh()
 	event.Skip()
 
     def updateResfile(self):
@@ -421,9 +503,6 @@ class FixbbPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	# Resize columns if necessary
 	fitGridColumn(self.grdResfile, 0, 150)
 	fitGridColumn(self.grdResfile, 1, 90)
-	# Update the coloring if after a design
-	if (self.buttonState != "Design!"):
-	    self.recolorGrid(self.designedView, self.residue_E, self.grdResfile, self.scoretypeMenu.GetStringSelection())
 	
     def activate(self):
 	# It's possible that the user could have deleted chains/residues that are currently in the minmap
@@ -1110,15 +1189,6 @@ class FixbbPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    model = model + field + "|"
 	model = model[0:len(model)-1]
 	chain = fields[len(fields)-1][0]
-	if (model != self.selectedModel):
-	    self.selectedModel = model
-	    for i in range(0, len(self.seqWin.IDs)):
-		if (self.seqWin.IDs[i].find(model) >= 0):
-		    if (self.buttonState == "Design!"):
-			pass
-		    else:
-			recolorEnergies(self.designedView, self.residue_E, "designed_view", self.scoretypeMenu.GetStringSelection(), self.cmd)
-		    break
 	# Find the neighborhood view
 	seqpos = selectedValue.split(":")[len(selectedValue.split(":"))-1]
 	seqpos = seqpos.strip()
@@ -1126,10 +1196,7 @@ class FixbbPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	if (self.useDesignedSeq):
 	    # The label has the mutation at the end after a design, so we have to take that out
 	    seqpos = seqpos[0:len(seqpos)-1]
-	if (self.buttonState == "Design!"):
-	    firstmodel = model
-	else:
-	    firstmodel = "designed_view"
+	firstmodel = model
 	self.cmd.hide("all")
 	if (chain == " " or chain == "_"):
 	    self.cmd.select("dessele", "resi " + seqpos + " and model " + firstmodel)
@@ -1140,10 +1207,6 @@ class FixbbPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.cmd.hide("ribbon", "dessele")
 	self.cmd.show("sticks", "dessele")
 	self.cmd.set_bond("stick_radius", 0.1, "dessele")
-	# Display energy labels for designed structures
-	if (self.buttonState == "Finalize!"):
-	    relabelEnergies(self.designedView, self.residue_E, "designed_view", self.scoretypeMenu.GetStringSelection(), self.cmd, seqpos)
-	    self.cmd.label("not dessele", "")
 	self.cmd.zoom("dessele")
 	if (chain == " " or chain == "_"):
 	    self.cmd.select("dessele", "resi " + seqpos + " and model " + firstmodel)
@@ -1153,27 +1216,6 @@ class FixbbPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.cmd.set_bond("stick_radius", 0.25, "dessele")
 	# Highlight this residue in PyMOL
 	self.cmd.select("seqsele", "dessele")
-	if (self.buttonState == "Finalize!"):
-	    # If this is after a design, also show the original structure in green for comparison
-	    self.cmd.select("dessele", "model " + self.selectedModel + " and symbol c")
-	    self.cmd.color("green", "dessele")
-	    self.cmd.set("cartoon_color", "green", "dessele")
-	    if (chain == " " or chain == "_"):
-		self.cmd.select("dessele", "resi " + seqpos + " and model " + self.selectedModel)
-	    else:
-		self.cmd.select("dessele", "resi " + seqpos + " and model " + self.selectedModel + " and chain " + chain)
-	    self.cmd.select("dessele", "model " + self.selectedModel + " within 12 of dessele")
-	    self.cmd.show("cartoon", "dessele")
-	    self.cmd.hide("ribbon", "dessele")
-	    self.cmd.show("sticks", "dessele")
-	    self.cmd.set_bond("stick_radius", 0.1, "dessele")
-	    self.cmd.zoom("dessele")
-	    if (chain == " " or chain == "_"):
-		self.cmd.select("dessele", "resi " + seqpos + " and model " + self.selectedModel)
-	    else:
-		self.cmd.select("dessele", "resi " + seqpos + " and model " + self.selectedModel + " and chain " + chain)
-	    self.cmd.show("sticks", "dessele")
-	    self.cmd.set_bond("stick_radius", 0.25, "dessele")
 	self.cmd.enable("seqsele")
 	self.cmd.delete("dessele")
 	self.seqWin.selectUpdate(False)
@@ -1231,240 +1273,55 @@ class FixbbPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		self.resfile.pop(self.currSelection)
 		self.updateResfile()
     
-    def recolorGrid(self, pose, allresidue_E, grid, selectedScoretype):
-	# Useful function for recoloring the text color of a grid by energy so the user can see all the relative
-	# energies just by looking at the colors in the grid
-	found = False
-	for (scoretypestr, name) in scoretypes.items():
-	    if (name == selectedScoretype or scoretypestr == selectedScoretype):
-		scoretype = scoretypestr
-		found = True
-		break
-	if (found):
-	    sindx = allresidue_E[0].index(scoretype)
-	else:
-	    sindx = 0 # Default to total_score
-	residue_E = []
-	for i in range(1, len(allresidue_E)):
-	    residue_E.append(allresidue_E[i][sindx])
-	residue_E = scale_list(residue_E)
-	for row in range(0, grid.NumberRows):
-	    chain = grid.GetCellValue(row, 1)[len(grid.GetCellValue(row, 1))-1]
-	    if (chain == "_"):
-		chain = " "
-	    seqpos = grid.GetRowLabelValue(row).split()[1]
-	    seqpos = int(seqpos[1:len(seqpos)-1])
-	    # Find the rosetta index
-	    ires = 0
-	    for ch in pose[0]:
-		for residue in ch:
-		    if (ch.id == chain and residue.id[1] == seqpos):
-			break
-		    ires = ires + 1
-	    r = residue_E[ires]
-	    b = 255 - r
-	    g = 0
-	    for c in range(0, grid.NumberCols):
-		grid.SetCellTextColour(row, c, (r, g, b))
-	grid.Refresh()
-    
-    def scoretypeMenuSelect(self, event):
-	# Make sure there is even a PyMOL_Mover pose loaded
-	if (self.selectedModel == ""):
-	    return
-	logInfo("The selected scoretype was set to " + self.scoretypeMenu.GetStringSelection())
-	if (self.buttonState != "Design!"):
-	    recolorEnergies(self.designedView, self.residue_E, "designed_view", self.scoretypeMenu.GetStringSelection(), self.cmd)
-	    self.recolorGrid(self.designedView, self.residue_E, self.grdResfile, self.scoretypeMenu.GetStringSelection())
-	self.desMenuSelect(event) # To update all the labels
-    
-    def loadResfile(self, event):
-	logInfo("Load Resfile button clicked")
-	# Load data from an existing resfile into the resfile window
-	# If there is already data in the graph, notify the user that this data will be erased if they
-	# proceed further
-	if (len(self.resfile) > 0):
-	    dlg = wx.MessageDialog(self, "The data in your current workflow will be lost and replaced with a loaded resfile.  Are you sure you want to proceed?", "Current Resfile Data Will Be Lost", wx.YES_NO | wx.ICON_EXCLAMATION | wx.CENTRE)
-	    if (dlg.ShowModal() == wx.ID_YES):
-		# Don't clear it out until the user actually selects a resfile (instead of cancelling
-		# at the file selection dialog
-		pass
+    def toggleMutantType(self, event):
+	if (self.mutantType == "Single"):
+	    self.mutantType = "Double"
+	    if (platform.system() == "Darwin"):
+		self.btnMutantType.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnMutant_Double.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
-		logInfo("Load Resfile operation cancelled due to data already being in the resfile")
-		return
-	dlg = wx.FileDialog(
-	    self, message="Choose a File",
-	    defaultDir=self.seqWin.cwd,
-	    defaultFile="",
-	    wildcard="Resfiles (*.resfile)|*.resfile",
-	    style=wx.OPEN | wx.CHANGE_DIR)
-	if (dlg.ShowModal() == wx.ID_OK):
-	    paths = dlg.GetPaths()
-	    # Change cwd to the last opened file
-	    if (platform.system() == "Windows"):
-		lastDirIndx = paths[len(paths)-1].rfind("\\")
-	    else:
-		lastDirIndx = paths[len(paths)-1].rfind("/")
-	    self.seqWin.cwd = str(paths[len(paths)-1][0:lastDirIndx])
-	    self.seqWin.saveWindowData(None)
-	    filename = str(paths[0])
-	    # Does it open?  If yes, then erase the resfile data and continue
-	    try:
-		f = open(filename, "r")
-	    except:
-		wx.MessageBox("The file " + filename.strip() + " cannot be opened!", "File Cannot Be Read", wx.OK|wx.ICON_EXCLAMATION)
-		return
-	    logInfo("Loaded data from a resfile", filename)
-	    # Make sure a PDB is loaded otherwise there's nothing to do
-	    if (self.seqWin.SeqViewer.NumberRows == 0):
-		wx.MessageBox("There is no protein loaded!  Load a protein first.", "No Proteins Loaded", wx.OK|wx.ICON_EXCLAMATION)
-		return
-	    self.resfile = []
-	    modelindx = 0
-	    model = self.seqWin.getModelForChain(modelindx)
-	    toAdd = []
-	    alreadystartedwriting = False
-	    for aline in f:
-		if (aline.find("#MODEL") >= 0 and not(alreadystartedwriting)):
-		    try:
-			resfilemodel = aline.split()[1].strip()
-		    except:
-			# This entry is in someway corrupt, skip it
-			continue
-		    # Now see if a model by this name is already loaded
-		    modelexists = False
-		    for i in range(0, self.seqWin.SeqViewer.NumberRows):
-			if (self.seqWin.IDs[i].find(resfilemodel) >= 0):
-			    modelexists = True
-			    modelindx = i
-			    break
-		    if (not(modelexists)):
-			# Tell the user that this resfile is for a different model, but the resfile
-			# will be loaded anyway and invalid positions will be discarded
-			# It defaults to the first model in the SequenceViewer
-			wx.MessageBox("This resfile was created for " + resfilemodel + " which does not appear to be loaded.  The contents of this resfile will be attempted to be applied to the first model you have loaded.", "Resfile Model Not Found", wx.OK|wx.ICON_WARNING)
-		    model = self.seqWin.getModelForChain(modelindx)
-		elif (aline.find("start") >= 0):
-		    alreadystartedwriting = True
-		elif (aline.find("PIKAA") >= 0):
-		    fields = aline.split()
-		    seqpos = fields[0]
-		    chainID = fields[1]
-		    reslist = fields[3]
-		    # Now we have to find the row/column of this entry from the SequenceWindow
-		    found = False
-		    for i in range(0, self.seqWin.SeqViewer.NumberRows):
-			if (self.seqWin.IDs[i].find(model) >= 0 and self.seqWin.IDs[i][len(self.seqWin.IDs[i])-1] == chainID):
-			    if (chainID == "_"):
-				chain = " "
-			    else:
-				chain = chainID
-			    indx = 0
-			    for residue in self.seqWin.poses[self.seqWin.getPoseIndex(i)][0][chain]:
-				if (residue.id[1] == int(seqpos)):
-				    break
-				indx = indx + 1
-			    if (indx < len(self.seqWin.sequences[i])):
-				r = i
-				found = True
-				break
-		    if (not(found)):
-			# The models didn't match and this position is not in the default model
-			continue
-		    # Make sure this is actually a canonical AA, because we shouldn't be designing
-		    # at NCAA positions right now
-		    chain = self.seqWin.IDs[r][len(self.seqWin.IDs[r])-1]
-		    if (chain == "_"):
-			chain = " "
-		    poseindx = self.seqWin.getPoseIndex(r)
-		    if ("ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR ".find(self.seqWin.poses[poseindx][0][chain][self.seqWin.indxToSeqPos[r][indx]].resname) < 0):
-			continue
-		    co = r - modelindx
-		    toAdd.append([indx, r, seqpos, modelindx, chainID, co, reslist])
-	    # Sort the contents of the resfile so they appear in the graph in sequential order
-	    for i in range(0, len(toAdd)-1):
-		lowest = i
-		for j in range(i+1, len(toAdd)):
-		    if (toAdd[j][1] < toAdd[lowest][1]):
-			lowest = j
-		    elif (toAdd[j][1] == toAdd[lowest][1] and toAdd[j][0] < toAdd[lowest][0]):
-			lowest = j
-		temp = toAdd[lowest]
-		toAdd[lowest] = toAdd[i]
-		toAdd[i] = temp
-	    # Add them to the resfile grid
-	    for entry in toAdd:
-		self.resfile.append(entry)
-	    self.updateResfile()
-	    #self.add(event)
-	    #self.selectedData = saveit
-	    f.close()
+		self.btnMutantType.SetLabel("Double Mutants")
+	    self.btnMutantType.SetToolTipString("Search for stabilizing double point mutations")
 	else:
-	    logInfo("Load resfile operation cancelled at the file select window")
+	    self.mutantType = "Single"
+	    if (platform.system() == "Darwin"):
+		self.btnMutantType.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnMutant_Single.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    else:
+		self.btnMutantType.SetLabel("Single Mutants")
+	    self.btnMutantType.SetToolTipString("Search for stabilizing single point mutations")
+	logInfo("Changed default behavior to " + self.mutantType)
     
-    def dumpResfile(self, filename):
+    def dumpMutantList(self, filename):
 	poseindx = self.resfile[0][3]
 	model = self.seqWin.getModelForChain(poseindx)
 	f = open(filename, "w")
 	f.write("#MODEL " + model + "\n")
-	f.write("USE_INPUT_SC\n")
-	f.write(self.WTType + "\n")
-	f.write("\n")
-	f.write("start\n")
-	f.write("\n")
-	for [indx, r, seqpos, poseindx, chainID, co, reslist] in self.resfile:
-	    f.write(str(seqpos) + "\t\t" + chainID + "\tPIKAA " + reslist + " EX 1 EX 2\n")
+	if (self.mutantType == "Single"):
+	    for i in range(0, len(self.resfile)):
+		[indx, r, seqpos, poseindx, chainID, chainoffset, reslist] = self.resfile[i]
+		if (len(chainID.strip()) == 0):
+		    chainID = "_"
+		currtype = self.seqWin.sequences[r][indx]
+		for restype in reslist:
+		    if (restype != currtype):
+			f.write(chainID + " " + currtype + " " + str(seqpos) + " " + restype + "\n")
+	else:
+	    for i in range(0, len(self.resfile)-1):
+		[indx, r, seqpos, poseindx, chainID, chainoffset, reslist] = self.resfile[i]
+		if (len(chainID.strip()) == 0):
+		    chainID = "_"
+		currtype = self.seqWin.sequences[r][indx]
+		for j in range(i+1, len(self.resfile)):
+		    [indx2, r2, seqpos2, poseindx2, chainID2, chainoffset2, reslist2] = self.resfile[j]
+		    if (len(chainID2.strip()) == 0):
+			chainID2 = "_"
+		    currtype2 = self.seqWin.sequences[r2][indx2]
+		    for restype in reslist:
+			if (restype != currtype):
+			    for restype2 in reslist2:
+				if (restype2 != currtype2):
+				    f.write(chainID + " " + currtype + " " + str(seqpos) + " " + restype + " " + chainID2 + " " + currtype2 + " " + str(seqpos2) + " " + restype2 + "\n")
 	f.close()
-	logInfo("Wrote a resfile to " + filename)
-    
-    def saveResfile(self, event):
-	if (len(self.resfile) == 0):
-	    wx.MessageBox("There's nothing to save to a resfile!", "No Resfile", wx.OK|wx.ICON_EXCLAMATION)
-	    return
-	logInfo("Clicked the Save Resfile button")
-	# Save the data in the resfile graph as an actual resfile for the user's convenience
-	dlg = wx.FileDialog(
-	    self, message="Save a Resfile",
-	    defaultDir=self.seqWin.cwd,
-	    defaultFile="",
-	    wildcard="Resfiles (*.resfile)|*.resfile",
-	    style=wx.SAVE | wx.CHANGE_DIR)
-	if (dlg.ShowModal() == wx.ID_OK):
-	    paths = dlg.GetPaths()
-	    # Change cwd to the last opened file
-	    if (platform.system() == "Windows"):
-		lastDirIndx = paths[len(paths)-1].rfind("\\")
-	    else:
-		lastDirIndx = paths[len(paths)-1].rfind("/")
-	    self.seqWin.cwd = str(paths[len(paths)-1][0:lastDirIndx])
-	    self.seqWin.saveWindowData(None)
-	    filename = str(paths[0]).split(".resfile")[0] + ".resfile"
-	    # Does it exist already?  If so, ask if the user really wants to overwrite it
-	    if (os.path.isfile(filename)):
-		dlg2 = wx.MessageDialog(self, "The file " + filename + " already exists.  Overwrite it?", "Filename Already Exists", wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
-		if (dlg2.ShowModal() == wx.ID_NO):
-		    dlg2.Destroy()
-		    logInfo("Canceled save operation due to filename already existing")
-	    self.dumpResfile(filename)
-	else:
-	    logInfo("Cancelled save resfile operation")
-    
-    def changeWTType(self, event):
-	if (self.WTType == "NATRO"):
-	    self.WTType = "NATAA"
-	    if (platform.system() == "Darwin"):
-		self.btnWTType.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnWTType_NATAA.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-	    else:
-		self.btnWTType.SetLabel(self.WTType)
-	    self.btnWTType.SetToolTipString("Unspecified residues will select rotamers from the wildtype amino acid")
-	else:
-	    self.WTType = "NATRO"
-	    if (platform.system() == "Darwin"):
-		self.btnWTType.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnWTType_NATRO.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-	    else:
-		self.btnWTType.SetLabel(self.WTType)
-	    self.btnWTType.SetToolTipString("Unspecified residues will select the wildtype rotamer only")
-	logInfo("Changed default behavior to " + self.WTType)
+	logInfo("Wrote a mutant list file to " + filename)
     
     def enableControls(self, enable=True):
 	if (enable):
@@ -1495,8 +1352,7 @@ class FixbbPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.btnAll.Enable()
 	    self.btnClear.Enable()
 	    self.btnApply.Enable()
-	    self.btnLoadResfile.Enable()
-	    self.btnWTType.Enable()
+	    self.btnMutantType.Enable()
 	else:
 	    self.btnAminoA.Disable()
 	    self.btnAminoC.Disable()
@@ -1525,33 +1381,150 @@ class FixbbPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.btnAll.Disable()
 	    self.btnClear.Disable()
 	    self.btnApply.Disable()
-	    self.btnLoadResfile.Disable()
-	    self.btnWTType.Disable()
+	    self.btnMutantType.Disable()
     
-    def cancelDesign(self):
-	logInfo("Canceled fixbb operation")
+    def saveReport(self, event):
+	logInfo("Clicked the Save Report button")
+	# Save the data in the resfile graph as an actual resfile for the user's convenience
+	dlg = wx.FileDialog(
+	    self, message="Save a Scan File",
+	    defaultDir=self.seqWin.cwd,
+	    defaultFile="",
+	    wildcard="Point Mutant Scan (*.scan)|*.scan",
+	    style=wx.SAVE | wx.CHANGE_DIR)
+	if (dlg.ShowModal() == wx.ID_OK):
+	    paths = dlg.GetPaths()
+	    # Change cwd to the last opened file
+	    if (platform.system() == "Windows"):
+		lastDirIndx = paths[len(paths)-1].rfind("\\")
+	    else:
+		lastDirIndx = paths[len(paths)-1].rfind("/")
+	    self.seqWin.cwd = str(paths[len(paths)-1][0:lastDirIndx])
+	    self.seqWin.saveWindowData(None)
+	    filename = str(paths[0]).split(".scan")[0] + ".scan"
+	    # Does it exist already?  If so, ask if the user really wants to overwrite it
+	    if (os.path.isfile(filename)):
+		dlg2 = wx.MessageDialog(self, "The file " + filename + " already exists.  Overwrite it?", "Filename Already Exists", wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
+		if (dlg2.ShowModal() == wx.ID_NO):
+		    dlg2.Destroy()
+		    logInfo("Canceled save operation due to filename already existing")
+	    goToSandbox()
+	    fin = open("scanoutput", "r")
+	    fout = open(filename, "w")
+	    for aline in fin:
+		fout.write(aline)
+	    fout.close()
+	    fin.close()
+	else:
+	    logInfo("Cancelled save constraints operation")
+    
+    def loadReport(self, event):
+	logInfo("Load Report button clicked")
+	dlg = wx.FileDialog(
+	    self, message="Choose a File",
+	    defaultDir=self.seqWin.cwd,
+	    defaultFile="",
+	    wildcard="Point Mutant Scans (*.scan)|*.scan",
+	    style=wx.OPEN | wx.CHANGE_DIR)
+	if (dlg.ShowModal() == wx.ID_OK):
+	    paths = dlg.GetPaths()
+	    # Change cwd to the last opened file
+	    if (platform.system() == "Windows"):
+		lastDirIndx = paths[len(paths)-1].rfind("\\")
+	    else:
+		lastDirIndx = paths[len(paths)-1].rfind("/")
+	    self.seqWin.cwd = str(paths[len(paths)-1][0:lastDirIndx])
+	    self.seqWin.saveWindowData(None)
+	    filename = str(paths[0])
+	    # Does it open?  If yes, then erase the resfile data and continue
+	    try:
+		f = open(filename, "r")
+	    except:
+		wx.MessageBox("The file " + filename.strip() + " cannot be opened!", "File Cannot Be Read", wx.OK|wx.ICON_EXCLAMATION)
+		return
+	    logInfo("Loaded data from a point mutant scan file", filename)
+	    f = open(filename, "r")
+	    self.ddGData = []
+	    offset = 0
+	    model = "Unknown"
+	    for aline in f:
+		if ("divide_up_pdbs" in aline):
+		    offset = 1
+		if ("go()" in aline or "mutation" in aline or "main()" in aline):
+		    # Header lines, skip it
+		    continue
+		if (aline.startswith("#MODEL")):
+		    model = aline.split("\t")[1].strip()
+		try:
+		    mutation = str(aline.split()[1+offset]).replace("-", "|")
+		    ddG = float(aline.split()[3+offset])
+		except:
+		    continue
+		self.ddGData.append((mutation, ddG))
+	    f.close()
+	    # Sort the data so the most optimal mutations are at the front
+	    for i in range(0, len(self.ddGData)-1):
+		best = i
+		for j in range(i+1, len(self.ddGData)):
+		    if (self.ddGData[j][1] < self.ddGData[best][1]):
+			best = j
+		temp = self.ddGData[best]
+		self.ddGData[best] = self.ddGData[i]
+		self.ddGData[i] = temp
+	    # Load the data into the report grid
+	    if (self.grdReport.NumberRows > 0):
+		self.grdReport.DeleteRows(0, self.grdReport.NumberRows)
+	    self.grdReport.AppendRows(len(self.ddGData)+1)
+	    self.grdReport.SetRowLabelValue(0, "Model:")
+	    self.grdReport.SetCellValue(0, 0, model)
+	    self.grdReport.SetCellAlignment(0, 0, wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
+	    readOnly = wx.grid.GridCellAttr()
+	    readOnly.SetReadOnly(True)
+	    self.grdReport.SetRowAttr(0, readOnly)
+	    for i in range(0, len(self.ddGData)):
+		self.grdReport.SetRowLabelValue(i+1, self.ddGData[i][0])
+		self.grdReport.SetCellValue(i+1, 0, str(self.ddGData[i][1]))
+		self.grdReport.SetCellAlignment(i+1, 0, wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
+		readOnly = wx.grid.GridCellAttr()
+		readOnly.SetReadOnly(True)
+		self.grdReport.SetRowAttr(i+1, readOnly)
+    
+    def serverToggle(self, event):
+	if (self.serverOn):
+	    self.serverOn = False
+	    self.btnServerToggle.SetLabel("Server Off")
+	    self.btnServerToggle.SetToolTipString("Perform point mutation scanning locally")
+	    logInfo("Turned off point mutation scanning server usage")
+	else:
+	    self.serverOn = True
+	    self.btnServerToggle.SetLabel("Server On")
+	    self.btnServerToggle.SetToolTipString("Perform point mutation scanning on a remote server")
+	    logInfo("Turned on point mutation scanning server usage")
+    
+    def cancelScan(self):
+	logInfo("Canceled point mutant scan operation")
 	try:
-	    os.remove("designinput")
+	    os.remove("scaninput")
 	except:
 	    pass
 	try:
-	    os.remove("designinputtemp")
+	    os.remove("scaninputtemp")
 	except:
 	    pass
-	self.tmrDesign.Stop()
+	self.tmrScan.Stop()
 	self.seqWin.cannotDelete = False
 	self.enableControls()
 	if (platform.system() == "Darwin"):
-	    self.btnDesign.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnDesign.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnScan.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnScan.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	else:
-	    self.btnDesign.SetLabel("Design!")
-	self.btnDesign.SetToolTipString("Perform fixed backbone design")
+	    self.btnScan.SetLabel("Scan!")
+	self.btnScan.SetToolTipString("Perform point mutant scan")
 	deleteInputFiles()
 	self.parent.parent.restartDaemon()
 	self.parent.GoBtn.Enable()
 	# Get rid of the messages
 	for i in range(0, len(self.seqWin.msgQueue)):
-	    if (self.seqWin.msgQueue[i].find("Performing protein design") >= 0):
+	    if (self.seqWin.msgQueue[i].find("Performing point mutant scan") >= 0):
 		self.seqWin.msgQueue.pop(i)
 		break
 	if (len(self.seqWin.msgQueue) > 0):
@@ -1560,39 +1533,37 @@ class FixbbPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.seqWin.labelMsg.SetLabel("")
 	self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
-	self.buttonState = "Design!"
+	self.buttonState = "Scan!"
     
-    def designClick(self, event):
+    def scanClick(self, event):
 	# This is also the "Finalize!" button
-	logInfo("Design button clicked")
-	if (self.buttonState == "Design!"):
+	logInfo("Scan button clicked")
+	if (self.buttonState == "Scan!"):
 	    if (len(self.resfile) > 0):
-		self.seqWin.labelMsg.SetLabel("Performing protein design, please be patient...")
+		self.seqWin.labelMsg.SetLabel("Performing point mutant scan, please be patient...")
 		self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 		self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
-		self.seqWin.msgQueue.append("Performing protein design, please be patient...")
+		self.seqWin.msgQueue.append("Performing point mutant scan, please be patient...")
 		self.parent.GoBtn.Disable()
 		self.enableControls(False)
 		self.seqWin.cannotDelete = True
-		#thrDesign = Thread(target=self.threadDesign, args=())
-		#thrDesign.start()
 		self.stage = 1
 		if (platform.system() == "Darwin"):
-		    self.btnDesign.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnDesign_Cancel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		    self.btnScan.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnScan_Cancel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		else:
-		    self.btnDesign.SetLabel("Cancel!")
+		    self.btnScan.SetLabel("Cancel!")
 		self.buttonState = "Cancel!"
-		self.btnDesign.SetToolTipString("Cancel the fixbb simulation")
-		self.tmrDesign = wx.Timer(self)
-		self.Bind(wx.EVT_TIMER, self.threadDesign, self.tmrDesign)
-		self.tmrDesign.Start(1000)
+		self.btnScan.SetToolTipString("Cancel the point mutant scan")
+		self.tmrScan = wx.Timer(self)
+		self.Bind(wx.EVT_TIMER, self.threadScan, self.tmrScan)
+		self.tmrScan.Start(1000)
 	    else:
 		wx.MessageBox("There's nothing to design!", "Nothing to Design", wx.OK|wx.ICON_EXCLAMATION)
 	elif (self.buttonState == "Cancel!"):
-	    dlg = wx.MessageDialog(self, "Are you sure you want to cancel the protein design simulation?  All progress will be lost.", "Cancel Protein Design Simulation", wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
+	    dlg = wx.MessageDialog(self, "Are you sure you want to cancel the point mutant scan?  All progress will be lost.", "Cancel Point Mutant Scan", wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
 	    result = dlg.ShowModal()
 	    if (result == wx.ID_YES):
-		self.cancelDesign()
+		self.cancelScan()
 	    dlg.Destroy()
 	else:
 	    # Finalize button, ask whether the changes will be accepted or rejected
@@ -1671,13 +1642,13 @@ class FixbbPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.parent.GoBtn.Enable()
 	self.enableControls(True)
 	if (platform.system() == "Darwin"):
-	    self.btnDesign.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnDesign.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnScan.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnScan.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	else:
-	    self.btnDesign.SetLabel("Design!")
-	self.buttonState = "Design!"
+	    self.btnScan.SetLabel("Scan!")
+	self.buttonState = "Scan!"
 	# Get rid of the messages
 	for i in range(0, len(self.seqWin.msgQueue)):
-	    if (self.seqWin.msgQueue[i].find("Performing protein design") >= 0):
+	    if (self.seqWin.msgQueue[i].find("Performing point mutant scan") >= 0):
 		self.seqWin.msgQueue.pop(i)
 		break
 	if (len(self.seqWin.msgQueue) > 0):
@@ -1687,21 +1658,62 @@ class FixbbPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
     
-    def threadDesign(self, event):
+    def threadScan(self, event):
 	# Why am I using a Timer?  See the explanation in kic.py
 	# Save the resfile to a temporary location that the daemon can find
 	goToSandbox()
 	if (self.stage == 1):
-	    self.tmrDesign.Stop()
+	    self.tmrScan.Stop()
 	    self.timeoutCount = 0
-	    self.dumpResfile("fixbb.resfile")
-	    f = open("designinputtemp", "w")
+	    self.dumpMutantList("mutant.list")
+	    f = open("scaninputtemp", "w")
 	    r = self.resfile[0][1]
-	    pdbfile = self.seqWin.getModelForChain(r) + ".pdb"
+	    self.selectedModel = self.seqWin.getModelForChain(r)
+	    pdbfile = self.selectedModel + ".pdb"
 	    # Dump the PDB from PyMOL first in case the coordinates were altered by the user
 	    dumpmodel = pdbfile.split(".pdb")[0]
 	    self.cmd.save(pdbfile.strip(), "model " + dumpmodel)
 	    fixPyMOLSave(pdbfile.strip())
+	    # PMutScan does not accept empty chainIDs, so we have to assign one
+	    # Find taken chainIDs
+	    f2 = open(pdbfile.strip(), "r")
+	    pdbdata = []
+	    takenIDs = []
+	    for aline in f2:
+		pdbdata.append(aline.strip())
+		if (aline.startswith("ATOM") or aline.startswith("HETATM")):
+		    if (not(aline[21].strip() in takenIDs)):
+			takenIDs.append(aline[21])
+	    f2.close()
+	    # Find a new one
+	    for chainID in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+		if (not(chainID in takenIDs)):
+		    self.replaceID = chainID
+		    break
+	    # Fix the PDB chainIDs
+	    f2 = open(pdbfile.strip(), "w")
+	    for aline in pdbdata:
+		if ((aline.startswith("ATOM") or aline.startswith("HETATM")) and aline[21] == " "):
+		    aline = aline[0:21] + self.replaceID + aline[22:]
+		f2.write(aline.strip() + "\n")
+	    f2.close()
+	    # Fix the mutant.list file
+	    f2 = open("mutant.list", "r")
+	    mutantdata = []
+	    for aline in f2:
+		mutantdata.append(aline.strip())
+	    f2.close()
+	    f2 = open("mutant.list", "w")
+	    for aline in mutantdata:
+		if (aline[0] == "_"):
+		    aline = self.replaceID + aline[1:]
+		try:
+		    indx = aline.index("_")
+		    aline = aline[0:indx] + self.replaceID + aline[indx+1:]
+		except:
+		    pass
+		f2.write(aline.strip() + "\n")
+	    f2.close()
 	    f.write("PDBFILE\t" + pdbfile.strip() + "\n")
 	    f2 = open(pdbfile, "r")
 	    f.write("BEGIN PDB DATA\n")
@@ -1709,85 +1721,41 @@ class FixbbPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		f.write(aline.strip() + "\n")
 	    f.write("END PDB DATA\n")
 	    f2.close()
-	    f.write("RESFILE\tfixbb.resfile\n")
-	    f2 = open("fixbb.resfile", "r")
-	    f.write("BEGIN RESFILE DATA\n")
+	    f.write("LIST\tmutant.list\n")
+	    f2 = open("mutant.list", "r")
+	    f.write("BEGIN LIST DATA\n")
 	    for aline in f2:
 		f.write(aline.strip() + "\n")
-	    f.write("END RESFILE DATA\n")
+	    f.write("END LIST DATA\n")
 	    f2.close()
+	    f.write("MUTANTTYPE\t" + self.mutantType.upper() + "\n")
 	    f.close()
-	    appendScorefxnParamsInfoToFile("designinputtemp", self.selectWin.weightsfile)
-	    if (useServer):
-		try: 
-		    self.ID = sendToServer("designinput")
-		    self.usingServer = True
-		    logInfo("Design input sent to server daemon with ID " + self.ID)
+	    appendScorefxnParamsInfoToFile("scaninputtemp", self.selectWin.weightsfile)
+	    if (self.serverOn):
+		#try: 
+		self.ID = sendToServer("scaninput")
+		# First make sure this isn't a duplicate
+		alreadythere = False
+		try:
+		    f = open("downloadwatch", "r")
+		    for aline in f:
+			if (len(aline.split("\t")) >= 2 and aline.split("\t")[0] == "PMUTSCAN" and aline.split("\t")[1] == self.ID.strip()):
+			    alreadythere = True
+			    break
+		    f.close()
 		except:
-		    # Something failed, default to the local daemon
-		    os.rename("designinputtemp", "designinput")
-		    self.usingServer = False
-		    logInfo("Server daemon not available, design input uploaded at designinput")
-	    else:
-		os.rename("designinputtemp", "designinput")
-		self.usingServer = False
-		logInfo("Design input uploaded locally at designinput")
-	    self.stage = 2
-	    self.tmrDesign.Start(1000)
-	else:
-	    if (self.usingServer):
-		# See if the file has been uploaded yet and bring it here if so
-		queryServerForResults("designoutput-" + self.ID)
-		self.timeoutCount = self.timeoutCount + 1
-	    if (self.timeoutCount >= serverTimeout):
-		self.tmrDesign.Stop()
-		# If this is taking too long, maybe there's something wrong with the server
-		# Ask the user if they want to continue waiting or use the local daemon instead
-		dlg = wx.MessageDialog(self, "The server is taking a long time to respond.  Continue to wait?  Pressing No will run the calculations locally.", "Delayed Server Response", wx.YES_NO | wx.ICON_EXCLAMATION | wx.CENTRE)
-		if (dlg.ShowModal() == wx.ID_YES):
-		    # Reset the counter
-		    self.timeoutCount = 0
-		else:
-		    self.usingServer = False
-		    self.timeoutCount = 0
-		    os.rename("designinputtemp", "designinput")
-		    logInfo("Server took too long to respond so the local daemon was used")
+		    pass
+		if (not(alreadythere)):
+		    f = open("downloadwatch", "a")
+		    f.write("PMUTSCAN\t" + self.ID.strip() + "\t" + str(datetime.datetime.now().strftime("%A, %B %d - %I:%M:%S %p")) + "\t" + getServerName() + "\n")
+		    f.close()
+		dlg = wx.MessageDialog(self, "InteractiveROSETTA is now watching the server for job ID " + self.ID.strip() + ".  You will be notified when the package is available for download.", "Listening for Download", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		dlg.ShowModal()
 		dlg.Destroy()
-		self.tmrDesign.Start(1000)
-	    # Read the output dumped by the child process
-	    if (os.path.isfile("designoutput")):
-		self.tmrDesign.Stop()
-		self.residue_E = []
-		pdbreader = Bio.PDB.PDBParser()
-		f = open("designoutput", "r")
-		for aline in f:
-		    if (aline[0:6] == "OUTPUT"):
-			pdbfile = aline.split("\t")[1].strip()
-			self.designedView = pdbreader.get_structure(pdbfile.split("_D.pdb")[0], pdbfile)
-			self.desmodel = pdbfile.split("_D.pdb")[0]
-		    elif (aline[0:6] == "ENERGY"):
-			if (aline.split()[1] == "total_score"):
-			    # This is the scoretype line, row 0 in residue_E
-			    self.residue_E.append(aline.split()[1:])
-			else:
-			    self.residue_E.append([])
-			    indx = len(self.residue_E) - 1
-			    for E in aline.split()[1:]:
-				self.residue_E[indx].append(float(E))
-		f.close()
-		logInfo("Found fixbb output at designoutput")
-		# Add the nonzero scoretypes to the energy viewing list from the current score function
-		self.scoretypeMenu.Clear()
-		for scoretype in self.residue_E[0]:
-		    try:
-			toAdd = scoretypes[str(scoretype)]
-		    except:
-			toAdd = str(scoretype)
-		    self.scoretypeMenu.Append(toAdd)
-		self.scoretypeMenu.Enable()
+		# Re-enable everything since we're not waiting for the local daemon to do anything
 		# Pop this message out of the queue
 		for i in range(0, len(self.seqWin.msgQueue)):
-		    if (self.seqWin.msgQueue[i].find("Performing protein design") >= 0):
+		    if (self.seqWin.msgQueue[i].find("Performing point mutant scan") >= 0):
 			self.seqWin.msgQueue.pop(i)
 			break
 		if (len(self.seqWin.msgQueue) > 0):
@@ -1798,25 +1766,174 @@ class FixbbPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
 		self.parent.GoBtn.Enable()
 		self.enableControls()
-		self.selectedModel = ""
 		if (platform.system() == "Darwin"):
-		    self.btnDesign.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnDesign_Finalize.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		    self.btnScan.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnScan.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		else:
-		    self.btnDesign.SetLabel("Finalize!")
-		self.buttonState = "Finalize!"
-		self.btnDesign.SetToolTipString("Accept or reject the results of this protocol")
-		os.remove("designoutput")
-		# Load the designed pose as the "designed_view" model so the user can look at the results
-		self.cmd.load(pdbfile, "designed_view")
-		self.cmd.hide("everything", "model designed_view")
-		self.useDesignedSeq = True
-		self.updateResfile() # To get the new amino acid identities into the resfile
-		self.recolorGrid(self.designedView, self.residue_E, self.grdResfile, self.scoretypeMenu.GetStringSelection())
-		# To get the energy values in the B-factors
-		recolorEnergies(self.designedView, self.residue_E, "designed_view", "Total Energy", self.cmd)
-		self.seqWin.pdbwriter.set_structure(self.designedView)
-		self.seqWin.pdbwriter.save(self.desmodel + "_D.pdb") 
-		self.grdResfile.Refresh()
+		    self.btnScan.SetLabel("Scan!")
+		self.buttonState = "Scan!"
+		self.btnScan.SetToolTipString("Perform a point mutant scan")
+		logInfo("Point mutant scanning input sent to server daemon with ID " + self.ID)
+		return
+		#except:
+		    #dlg = wx.MessageDialog(self, "The server could not be reached!  Ensure that you have specified a valid server and that you have an network connection.", "Server Could Not Be Reached", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		    #dlg.ShowModal()
+		    #dlg.Destroy()
+		    #return
+	    else:
+		os.rename("scaninputtemp", "scaninput")
+		self.usingServer = False
+		logInfo("Scanning input uploaded locally at scaninput")
+	    # Now keep a list of every mutant that will be attempted so we can easily update the progress bar
+	    self.mutants = []
+	    if (self.mutantType.upper() == "DOUBLE"):
+		for i in range(0, self.grdResfile.NumberRows-1):
+		    for j in range(i+1, self.grdResfile.NumberRows):
+			for resi in self.grdResfile.GetCellValue(i, 0):
+			    for resj in self.grdResfile.GetCellValue(j, 0):
+				if (self.grdResfile.GetCellValue(i, 1).split("|")[1] == "_"):
+				    key1 = self.replaceID + "-" + str(self.grdResfile.GetRowLabelValue(i).split()[1]) + str(resi)
+				else:
+				    key1 = str(self.grdResfile.GetCellValue(i, 1).split("|")[1]) + "-" + str(self.grdResfile.GetRowLabelValue(i).split()[1]) + str(resi)
+				if (self.grdResfile.GetCellValue(j, 1).split("|")[1] == "_"):
+				    key2 = self.replaceID + "-" + str(self.grdResfile.GetRowLabelValue(j).split()[1]) + str(resj)
+				else:
+				    key2 = str(self.grdResfile.GetCellValue(j, 1).split("|")[1]) + "-" + str(self.grdResfile.GetRowLabelValue(j).split()[1]) + str(resj)
+				self.mutants.append(key1 + "," + key2)
+	    else:
+		for i in range(0, self.grdResfile.NumberRows):
+		    for resi in self.grdResfile.GetCellValue(i, 0):
+			if (self.grdResfile.GetCellValue(i, 1).split("|")[1] == "_"):
+			    self.mutants.append(self.replaceID + "-" + str(self.grdResfile.GetRowLabelValue(i).split()[1]) + str(resi))
+			else:
+			    self.mutants.append(str(self.grdResfile.GetCellValue(i, 1).split("|")[1]) + "-" + str(self.grdResfile.GetRowLabelValue(i).split()[1]) + str(resi))
+	    self.progress = wx.ProgressDialog("Point Mutation Scan", "Performing a point mutation scan...", len(self.mutants)+1, style=wx.PD_CAN_ABORT | wx.PD_APP_MODAL | wx.PD_ELAPSED_TIME | wx.PD_REMAINING_TIME)
+	    self.stage = 2
+	    self.tmrScan.Start(1000)
+	else:
+	    if (self.usingServer):
+		# See if the file has been uploaded yet and bring it here if so
+		queryServerForResults("scanoutput-" + self.ID)
+		self.timeoutCount = self.timeoutCount + 1
+	    if (self.timeoutCount >= serverTimeout):
+		self.tmrScan.Stop()
+		# If this is taking too long, maybe there's something wrong with the server
+		# Ask the user if they want to continue waiting or use the local daemon instead
+		dlg = wx.MessageDialog(self, "The server is taking a long time to respond.  Continue to wait?  Pressing No will run the calculations locally.", "Delayed Server Response", wx.YES_NO | wx.ICON_EXCLAMATION | wx.CENTRE)
+		if (dlg.ShowModal() == wx.ID_YES):
+		    # Reset the counter
+		    self.timeoutCount = 0
+		else:
+		    self.usingServer = False
+		    self.timeoutCount = 0
+		    os.rename("scaninputtemp", "scaninput")
+		    logInfo("Server took too long to respond so the local daemon was used")
+		dlg.Destroy()
+		self.tmrScan.Start(1000)
+	    # Read the output dumped by the child process
+	    if (os.path.isfile("scanoutput")):
+		try:
+		    self.progress.Destroy()
+		except:
+		    pass
+		self.tmrScan.Stop()
+		self.residue_E = []
+		pdbreader = Bio.PDB.PDBParser()
+		f = open("scanoutput", "r")
+		self.ddGData = []
+		offset = 0
+		model = "Unknown"
+		for aline in f:
+		    if ("go()" in aline or "mutation" in aline or "main()" in aline):
+			# Header lines, skip it
+			continue
+		    if ("divide_up_pdbs" in aline):
+			offset = 1
+		    if (aline.startswith("#MODEL")):
+			model = aline.split("\t")[1].strip()
+		    try:
+			mutation = str(aline.split()[1+offset]).replace("-", "|")
+			if (mutation[0] == self.replaceID):
+			    mutation = "_" + mutation[1:] # Get blank chainIDs back
+			ddG = float(aline.split()[3+offset])
+		    except:
+			continue
+		    self.ddGData.append((mutation, ddG))
+		f.close()
+		# Sort the data so the most optimal mutations are at the front
+		for i in range(0, len(self.ddGData)-1):
+		    best = i
+		    for j in range(i+1, len(self.ddGData)):
+			if (self.ddGData[j][1] < self.ddGData[best][1]):
+			    best = j
+		    temp = self.ddGData[best]
+		    self.ddGData[best] = self.ddGData[i]
+		    self.ddGData[i] = temp
+		# Load the data into the report grid
+		if (self.grdReport.NumberRows > 0):
+		    self.grdReport.DeleteRows(0, self.grdReport.NumberRows)
+		self.grdReport.AppendRows(len(self.ddGData)+1)
+		self.grdReport.SetRowLabelValue(0, "Model:")
+		self.grdReport.SetCellValue(0, 0, model)
+		self.grdReport.SetCellAlignment(0, 0, wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
+		readOnly = wx.grid.GridCellAttr()
+		readOnly.SetReadOnly(True)
+		self.grdReport.SetRowAttr(0, readOnly)
+		for i in range(0, len(self.ddGData)):
+		    self.grdReport.SetRowLabelValue(i+1, self.ddGData[i][0])
+		    self.grdReport.SetCellValue(i+1, 0, str(self.ddGData[i][1]))
+		    self.grdReport.SetCellAlignment(i+1, 0, wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
+		    readOnly = wx.grid.GridCellAttr()
+		    readOnly.SetReadOnly(True)
+		    self.grdReport.SetRowAttr(i+1, readOnly)
+		logInfo("Found point mutation scanning output at scanoutput")
+		# Pop this message out of the queue
+		for i in range(0, len(self.seqWin.msgQueue)):
+		    if (self.seqWin.msgQueue[i].find("Performing point mutant scan") >= 0):
+			self.seqWin.msgQueue.pop(i)
+			break
+		if (len(self.seqWin.msgQueue) > 0):
+		    self.seqWin.labelMsg.SetLabel(self.seqWin.msgQueue[len(self.seqWin.msgQueue)-1])
+		else:
+		    self.seqWin.labelMsg.SetLabel("")
+		self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+		self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
+		self.parent.GoBtn.Enable()
+		self.enableControls()
+		self.btnSaveReport.Enable()
+		if (platform.system() == "Darwin"):
+		    self.btnScan.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnScan.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		else:
+		    self.btnScan.SetLabel("Scan!")
+		self.buttonState = "Scan!"
+		self.btnScan.SetToolTipString("Perform a point mutant scan")
 	    elif (os.path.isfile("errreport")):
-		self.tmrDesign.Stop()
+		self.tmrScan.Stop()
 		self.recoverFromError()
+	    elif (os.path.isfile("scanprogress")):
+		f = open("scanprogress", "r")
+		data = f.readlines()
+		f.close()
+		if (len(data) == 0):
+		    return
+		try:
+		    lastline = data[len(data)-1].strip()
+		    if (self.mutantType.upper() == "DOUBLE"):
+			curpos1 = lastline.split()[1].split(",")[0]
+			curpos2 = lastline.split()[1].split(",")[1]
+			curpos = curpos1 + "," + curpos2
+		    else:
+			curpos = lastline.split()[1].strip()
+		    indx = self.mutants.index(curpos)
+		except:
+		    return
+		if (indx == len(self.mutants)+1):
+		    try:
+			self.progress.Destroy()
+		    except:
+			pass
+		else:
+		    (keepGoing, skip) = self.progress.Update(indx)
+		    if (not(keepGoing)):
+			# User clicked "Cancel" on the progress bar
+			self.cancelScan()
+			self.progress.Destroy()

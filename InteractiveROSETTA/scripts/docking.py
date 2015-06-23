@@ -9,6 +9,9 @@ import math
 import multiprocessing
 import Bio.PDB
 import webbrowser
+import datetime
+import gzip
+import numpy
 from threading import Thread
 from tools import *
 
@@ -198,31 +201,52 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.menuPartners.SetToolTipString("List of potential partners for the selected residue in the constraints list")
 	
 	self.grdConstraints = wx.grid.Grid(self)
-	self.grdConstraints.CreateGrid(0, 6)
+	self.grdConstraints.CreateGrid(0, 7)
 	self.grdConstraints.SetSize((320, 200))
 	self.grdConstraints.SetPosition((0, ypos+220))
 	self.grdConstraints.SetLabelFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.grdConstraints.DisableDragColSize()
 	self.grdConstraints.DisableDragRowSize()
-	self.grdConstraints.SetColLabelValue(0, "Residue")
-	self.grdConstraints.SetColLabelValue(1, "Model")
-	self.grdConstraints.SetColLabelValue(2, "Partner")
-	self.grdConstraints.SetColLabelValue(3, "Model")
-	self.grdConstraints.SetColLabelValue(4, "Function")
-	self.grdConstraints.SetColLabelValue(5, "Arguments")
+	self.grdConstraints.SetColLabelValue(0, "Group")
+	self.grdConstraints.SetColLabelValue(1, "Residue")
+	self.grdConstraints.SetColLabelValue(2, "Model")
+	self.grdConstraints.SetColLabelValue(3, "Partner")
+	self.grdConstraints.SetColLabelValue(4, "Model")
+	self.grdConstraints.SetColLabelValue(5, "Function")
+	self.grdConstraints.SetColLabelValue(6, "Arguments")
 	self.grdConstraints.SetRowLabelSize(80)
-	self.grdConstraints.SetColSize(0, 100)
+	self.grdConstraints.SetColSize(0, 50)
 	self.grdConstraints.SetColSize(1, 100)
 	self.grdConstraints.SetColSize(2, 100)
 	self.grdConstraints.SetColSize(3, 100)
 	self.grdConstraints.SetColSize(4, 100)
-	self.grdConstraints.SetColSize(5, 200)
+	self.grdConstraints.SetColSize(5, 100)
+	self.grdConstraints.SetColSize(6, 200)
+	self.grdConstraints.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.gridChange)
 	self.grdConstraints.Bind(wx.grid.EVT_GRID_CELL_LEFT_CLICK, self.gridClick)
 	self.grdConstraints.Bind(wx.grid.EVT_GRID_CELL_RIGHT_CLICK, self.gridRClick)
 	self.constraints = []
 	self.selectedr = -1
 	
 	ypos = self.grdConstraints.GetPosition()[1] + self.grdConstraints.GetSize()[1] + 10
+	if (platform.system() == "Darwin"):
+	    self.btnLoadCST = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLoadCST.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, ypos), size=(120, 25))
+	else:
+	    self.btnLoadCST = wx.Button(self, id=-1, label="Load CST", pos=(20, ypos), size=(120, 25))
+	    self.btnLoadCST.SetForegroundColour("#000000")
+	    self.btnLoadCST.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	self.btnLoadCST.Bind(wx.EVT_BUTTON, self.loadCST)
+	self.btnLoadCST.SetToolTipString("Load the data in a premade constraints file")
+	if (platform.system() == "Darwin"):
+	    self.btnSaveCST = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnSaveCST.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(175, ypos), size=(120, 25))
+	else:
+	    self.btnSaveCST = wx.Button(self, id=-1, label="Save CST", pos=(175, ypos), size=(120, 25))
+	    self.btnSaveCST.SetForegroundColour("#000000")
+	    self.btnSaveCST.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	self.btnSaveCST.Bind(wx.EVT_BUTTON, self.saveCST)
+	self.btnSaveCST.SetToolTipString("Save the current constraints data to a real Rosetta constraints file")
+	ypos = self.btnSaveCST.GetPosition()[1] + self.btnSaveCST.GetSize()[1] + 10
+	
 	if (platform.system() == "Windows"):
 	    self.lblAdvanced = wx.StaticText(self, -1, "Advanced Options", (0, ypos), (320, 20), wx.ALIGN_CENTRE)
 	    self.lblAdvanced.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -347,81 +371,207 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    resizeTextControlForUNIX(self.lblLine, 20, 120)
 	self.lblLine.SetForegroundColour("#FFFFFF")
 	
+	ypos = self.lblLine.GetPosition()[1] + self.lblLine.GetSize()[1] + 10
 	if (platform.system() == "Windows"):
-	    self.lblCoarse = wx.StaticText(self, -1, "Coarse Models", (0, ypos+240), (155, 20), wx.ALIGN_CENTRE)
+	    self.lblProt3 = wx.StaticText(self, -1, "Ensemble Docking (Optional)", (0, ypos), (320, 25), wx.ALIGN_CENTRE)
+	    self.lblProt3.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	elif (platform.system() == "Darwin"):
+	    self.lblProt3 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblEnsembleDocking.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, ypos), size=(270, 25))
+	else:
+	    self.lblProt3 = wx.StaticText(self, -1, "Ensemble Docking (Optional)", (70, ypos), style=wx.ALIGN_CENTRE)
+	    self.lblProt3.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	    resizeTextControlForUNIX(self.lblProt3, 0, self.GetSize()[0]-20)
+	self.lblProt3.SetForegroundColour("#FFFFFF")
+	
+	if (platform.system() == "Windows"):
+	    self.lblInst3 = wx.StaticText(self, -1, "Rosetta can represent the static and/or moving\nmodels as ensembles rather than single models.\nProvide an ensemble archive (.ensb) as input for\neither structure to activate ensemble docking.", (0, ypos+30), (320, 25), wx.ALIGN_CENTRE)
+	    self.lblInst3.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
+	elif (platform.system() == "Darwin"):
+	    self.lblInst3 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstConstraints.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+30), size=(320, 95))
+	else:
+	    self.lblInst3 = wx.StaticText(self, -1, "Rosetta can represent the static and/or moving\nmodels as ensembles rather than single models.\nProvide an ensemble archive (.ensb) as input for\neither structure to activate ensemble docking.", (5, ypos+30), style=wx.ALIGN_CENTRE)
+	    self.lblInst3.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
+	    resizeTextControlForUNIX(self.lblInst3, 0, self.GetSize()[0]-20)
+	self.lblInst3.SetForegroundColour("#FFFFFF")
+	
+	if (platform.system() == "Windows"):
+	    self.lblStaticEnsb = wx.StaticText(self, -1, "Static Ensemble:", (0, ypos+103), (160, 20), wx.ALIGN_CENTRE)
+	    self.lblStaticEnsb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	elif (platform.system() == "Darwin"):
+	    self.lblStaticEnsb = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblStaticEnsb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+103), size=(160, 20))
+	else:
+	    self.lblStaticEnsb = wx.StaticText(self, -1, "Static Ensemble:", (0, ypos+103), style=wx.ALIGN_CENTRE)
+	    self.lblStaticEnsb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	    resizeTextControlForUNIX(self.lblStaticEnsb, 0, 160)
+	self.lblStaticEnsb.SetForegroundColour("#FFFFFF")
+	if (platform.system() == "Darwin"):
+	    self.btnLoadStaticEnsb = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLoadStaticEnsb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(170, ypos+100), size=(70, 25))
+	else:
+	    self.btnLoadStaticEnsb = wx.Button(self, id=-1, label="Load", pos=(170, ypos+100), size=(70, 25))
+	    self.btnLoadStaticEnsb.SetForegroundColour("#000000")
+	    self.btnLoadStaticEnsb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	self.btnLoadStaticEnsb.Bind(wx.EVT_BUTTON, self.loadStaticEnsb)
+	self.btnLoadStaticEnsb.SetToolTipString("Load an ensemble archive for the static chains")
+	if (platform.system() == "Darwin"):
+	    self.btnDeleteStaticEnsb = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLoadStaticEnsb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(250, ypos+100), size=(70, 25))
+	else:
+	    self.btnDeleteStaticEnsb = wx.Button(self, id=-1, label="Delete", pos=(250, ypos+100), size=(70, 25))
+	    self.btnDeleteStaticEnsb.SetForegroundColour("#000000")
+	    self.btnDeleteStaticEnsb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	self.btnDeleteStaticEnsb.Bind(wx.EVT_BUTTON, self.deleteStaticEnsb)
+	self.btnDeleteStaticEnsb.SetToolTipString("Delete the loaded ensemble archive for the static chains")
+	if (platform.system() == "Windows"):
+	    self.lblSelStaticEnsb = wx.StaticText(self, -1, "No Ensemble Specified", (0, ypos+133), (320, 20), wx.ALIGN_CENTRE)
+	    self.lblSelStaticEnsb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	else:
+	    self.lblSelStaticEnsb = wx.StaticText(self, -1, "No Ensemble Specified", (0, ypos+133), style=wx.ALIGN_CENTRE)
+	    self.lblSelStaticEnsb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	    resizeTextControlForUNIX(self.lblSelStaticEnsb, 0, 320)
+	self.lblSelStaticEnsb.SetForegroundColour("#FFFFFF")
+	
+	if (platform.system() == "Windows"):
+	    self.lblMovingEnsb = wx.StaticText(self, -1, "Moving Ensemble:", (0, ypos+163), (160, 20), wx.ALIGN_CENTRE)
+	    self.lblMovingEnsb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	elif (platform.system() == "Darwin"):
+	    self.lblMovingEnsb = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblMovingEnsb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+163), size=(160, 20))
+	else:
+	    self.lblMovingEnsb = wx.StaticText(self, -1, "Moving Ensemble:", (0, ypos+163), style=wx.ALIGN_CENTRE)
+	    self.lblMovingEnsb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	    resizeTextControlForUNIX(self.lblMovingEnsb, 0, 160)
+	self.lblMovingEnsb.SetForegroundColour("#FFFFFF")
+	if (platform.system() == "Darwin"):
+	    self.btnLoadMovingEnsb = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLoadMovingEnsb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(170, ypos+160), size=(70, 25))
+	else:
+	    self.btnLoadMovingEnsb = wx.Button(self, id=-1, label="Load", pos=(170, ypos+160), size=(70, 25))
+	    self.btnLoadMovingEnsb.SetForegroundColour("#000000")
+	    self.btnLoadMovingEnsb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	self.btnLoadMovingEnsb.Bind(wx.EVT_BUTTON, self.loadMovingEnsb)
+	self.btnLoadMovingEnsb.SetToolTipString("Load an ensemble archive for the moving chains")
+	if (platform.system() == "Darwin"):
+	    self.btnDeleteMovingEnsb = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLoadMovingEnsb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(250, ypos+160), size=(70, 25))
+	else:
+	    self.btnDeleteMovingEnsb = wx.Button(self, id=-1, label="Delete", pos=(250, ypos+160), size=(70, 25))
+	    self.btnDeleteMovingEnsb.SetForegroundColour("#000000")
+	    self.btnDeleteMovingEnsb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	self.btnDeleteMovingEnsb.Bind(wx.EVT_BUTTON, self.deleteMovingEnsb)
+	self.btnDeleteMovingEnsb.SetToolTipString("Delete the loaded ensemble archive for the moving chains")
+	if (platform.system() == "Windows"):
+	    self.lblSelMovingEnsb = wx.StaticText(self, -1, "No Ensemble Specified", (0, ypos+193), (320, 20), wx.ALIGN_CENTRE)
+	    self.lblSelMovingEnsb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	else:
+	    self.lblSelMovingEnsb = wx.StaticText(self, -1, "No Ensemble Specified", (0, ypos+193), style=wx.ALIGN_CENTRE)
+	    self.lblSelMovingEnsb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	    resizeTextControlForUNIX(self.lblSelMovingEnsb, 0, 320)
+	self.lblSelMovingEnsb.SetForegroundColour("#FFFFFF")
+	self.ensemble1 = None
+	self.ensemble2 = None
+	
+	if (platform.system() == "Windows"):
+	    self.lblLine2 = wx.StaticText(self, -1, "==========================", (0, ypos+220), (320, 20), wx.ALIGN_CENTRE)
+	    self.lblLine2.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
+	elif (platform.system() == "Darwin"):
+	    self.lblLine2 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblLine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+220), size=(320, 20))
+	else:
+	    self.lblLine2 = wx.StaticText(self, -1, "==========================", (0, ypos+220), style=wx.ALIGN_CENTRE)
+	    self.lblLine2.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
+	    resizeTextControlForUNIX(self.lblLine2, 20, 120)
+	self.lblLine2.SetForegroundColour("#FFFFFF")
+	
+	if (platform.system() == "Windows"):
+	    self.lblInst4 = wx.StaticText(self, -1, "If you know the interface on the static chains,\nselect it and reorient the interface to point\ntowards the ligand.", (0, ypos+240), (320, 25), wx.ALIGN_CENTRE)
+	    self.lblInst4.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
+	elif (platform.system() == "Darwin"):
+	    self.lblInst4 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstInterface.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+240), size=(320, 95))
+	else:
+	    self.lblInst4 = wx.StaticText(self, -1, "If you know the interface on the static chains,\nselect it and reorient the interface to point\ntowards the ligand.", (5, ypos+240), style=wx.ALIGN_CENTRE)
+	    self.lblInst4.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
+	    resizeTextControlForUNIX(self.lblInst4, 0, self.GetSize()[0]-20)
+	self.lblInst4.SetForegroundColour("#FFFFFF")
+	
+	if (platform.system() == "Darwin"):
+	    self.btnReorient = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnReorient.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(110, ypos+290), size=(100, 25))
+	else:
+	    self.btnReorient = wx.Button(self, id=-1, label="Re-orient Partners", pos=(60, ypos+290), size=(200, 25))
+	    self.btnReorient.SetForegroundColour("#000000")
+	    self.btnReorient.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	self.btnReorient.Bind(wx.EVT_BUTTON, self.reorient)
+	self.btnReorient.SetToolTipString("Reorient the static chain selection to point towards the ligand.  Then use Fix Stat for the docking mode.")
+	
+	if (platform.system() == "Windows"):
+	    self.lblCoarse = wx.StaticText(self, -1, "Coarse Models", (0, ypos+320), (155, 20), wx.ALIGN_CENTRE)
 	    self.lblCoarse.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblCoarse = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblCoarse.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+240), size=(155, 20))
+	    self.lblCoarse = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblCoarse.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+320), size=(155, 20))
 	else:
-	    self.lblCoarse = wx.StaticText(self, -1, "Coarse Models", (0, ypos+240), style=wx.ALIGN_CENTRE)
+	    self.lblCoarse = wx.StaticText(self, -1, "Coarse Models", (0, ypos+320), style=wx.ALIGN_CENTRE)
 	    self.lblCoarse.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	    resizeTextControlForUNIX(self.lblCoarse, 0, 155)
 	self.lblCoarse.SetForegroundColour("#FFFFFF")
-	self.txtCoarse = wx.TextCtrl(self, -1, pos=(0, ypos+260), size=(155, 25))
-	self.txtCoarse.SetValue("100")
+	self.txtCoarse = wx.TextCtrl(self, -1, pos=(0, ypos+340), size=(155, 25))
+	self.txtCoarse.SetValue("1000")
 	self.txtCoarse.SetToolTipString("Number of decoys to generate in the coarse docking simulation")
 	if (platform.system() == "Windows"):
-	    self.lblRefined = wx.StaticText(self, -1, "Refined Models", (165, ypos+240), (155, 20), wx.ALIGN_CENTRE)
+	    self.lblRefined = wx.StaticText(self, -1, "Refined Models", (165, ypos+320), (155, 20), wx.ALIGN_CENTRE)
 	    self.lblRefined.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblRefined = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblRefined.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(165, ypos+240), size=(155, 20))
+	    self.lblRefined = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblRefined.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(165, ypos+320), size=(155, 20))
 	else:
-	    self.lblRefined = wx.StaticText(self, -1, "Refined Models", (165, ypos+240), style=wx.ALIGN_CENTRE)
+	    self.lblRefined = wx.StaticText(self, -1, "Refined Models", (165, ypos+320), style=wx.ALIGN_CENTRE)
 	    self.lblRefined.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	    resizeTextControlForUNIX(self.lblRefined, 165, 155)
 	self.lblRefined.SetForegroundColour("#FFFFFF")
-	self.txtRefined = wx.TextCtrl(self, -1, pos=(165, ypos+260), size=(155, 25))
-	self.txtRefined.SetValue("3")
+	self.txtRefined = wx.TextCtrl(self, -1, pos=(165, ypos+340), size=(155, 25))
+	self.txtRefined.SetValue("10")
 	self.txtRefined.SetToolTipString("Number of decoys to generate in the refined docking simulation that you will be able to view")
 	
 	if (platform.system() == "Windows"):
-	    self.lblPostDock = wx.StaticText(self, -1, "Post-Docking", (0, ypos+290), (320, 20), wx.ALIGN_CENTRE)
+	    self.lblPostDock = wx.StaticText(self, -1, "Post-Docking", (0, ypos+370), (320, 20), wx.ALIGN_CENTRE)
 	    self.lblPostDock.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblPostDock = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblPostDock.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+290), size=(320, 20))
+	    self.lblPostDock = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblPostDock.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+370), size=(320, 20))
 	else:
-	    self.lblPostDock = wx.StaticText(self, -1, "Post-Docking", (0, ypos+290), style=wx.ALIGN_CENTRE)
+	    self.lblPostDock = wx.StaticText(self, -1, "Post-Docking", (0, ypos+370), style=wx.ALIGN_CENTRE)
 	    self.lblPostDock.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	    resizeTextControlForUNIX(self.lblPostDock, 0, self.GetSize()[0]-20)
 	self.lblPostDock.SetForegroundColour("#FFFFFF")
 	
 	if (platform.system() == "Windows"):
-	    self.lblModelView = wx.StaticText(self, -1, "View Structures:", (20, ypos+318), (120, 20), wx.ALIGN_CENTRE)
+	    self.lblModelView = wx.StaticText(self, -1, "View Structures:", (20, ypos+398), (120, 20), wx.ALIGN_CENTRE)
 	    self.lblModelView.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblModelView = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblModelView.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, ypos+318), size=(120, 20))
+	    self.lblModelView = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblModelView.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, ypos+398), size=(120, 20))
 	else:
-	    self.lblModelView = wx.StaticText(self, -1, "View Structures:", (20, ypos+318), style=wx.ALIGN_CENTRE)
+	    self.lblModelView = wx.StaticText(self, -1, "View Structures:", (20, ypos+398), style=wx.ALIGN_CENTRE)
 	    self.lblModelView.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	    resizeTextControlForUNIX(self.lblModelView, 20, 120)
 	self.lblModelView.SetForegroundColour("#FFFFFF")
-	self.viewMenu = wx.ComboBox(self, pos=(175, ypos+315), size=(120, 25), choices=[], style=wx.CB_READONLY)
+	self.viewMenu = wx.ComboBox(self, pos=(175, ypos+395), size=(120, 25), choices=[], style=wx.CB_READONLY)
 	self.viewMenu.Bind(wx.EVT_COMBOBOX, self.viewMenuSelect)
 	self.viewMenu.Disable()
 	self.viewMenu.SetToolTipString("Select docked positions to view in PyMOL")
 	
 	if (platform.system() == "Darwin"):
-	    self.btnSave = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnSaveStruct.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+350), size=(100, 25))
+	    self.btnServerToggle = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnServerOff.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+430), size=(100, 25))
 	else:
-	    self.btnSave = wx.Button(self, id=-1, label="Save Struct", pos=(0, ypos+350), size=(100, 25))
-	    self.btnSave.SetForegroundColour("#000000")
-	    self.btnSave.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-	self.btnSave.Bind(wx.EVT_BUTTON, self.saveClick)
-	self.btnSave.SetToolTipString("Save the currently loaded docked model for later use.")
-	self.btnSave.Disable()
+	    self.btnServerToggle = wx.Button(self, id=-1, label="Server Off", pos=(0, ypos+430), size=(100, 25))
+	    self.btnServerToggle.SetForegroundColour("#000000")
+	    self.btnServerToggle.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	self.btnServerToggle.Bind(wx.EVT_BUTTON, self.serverToggle)
+	self.btnServerToggle.SetToolTipString("Perform docking simulations locally")
+	self.serverOn = False
 	if (platform.system() == "Darwin"):
-	    self.btnStarting = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnStarting_Global.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(110, ypos+350), size=(100, 25))
+	    self.btnStarting = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnStarting_Global.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(110, ypos+430), size=(100, 25))
 	else:
-	    self.btnStarting = wx.Button(self, id=-1, label="Global", pos=(110, ypos+350), size=(100, 25))
+	    self.btnStarting = wx.Button(self, id=-1, label="Global", pos=(110, ypos+430), size=(100, 25))
 	    self.btnStarting.SetForegroundColour("#000000")
 	    self.btnStarting.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	self.btnStarting.Bind(wx.EVT_BUTTON, self.toggleStarting)
 	self.btnStarting.SetToolTipString("Perform a global dock, where the orientations of both partners is unknown")
 	self.startingType = "Global"
 	if (platform.system() == "Darwin"):
-	    self.btnDock = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnDock.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(220, ypos+350), size=(100, 25))
+	    self.btnDock = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnDock.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(220, ypos+430), size=(100, 25))
 	else:
-	    self.btnDock = wx.Button(self, id=-1, label="Dock!", pos=(220, ypos+350), size=(100, 25))
+	    self.btnDock = wx.Button(self, id=-1, label="Dock!", pos=(220, ypos+430), size=(100, 25))
 	    self.btnDock.SetForegroundColour("#000000")
 	    self.btnDock.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	self.btnDock.Bind(wx.EVT_BUTTON, self.dockClick)
@@ -533,7 +683,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def addStatic(self, event):
 	# Add this to the list of chains that will be fixed
 	# If this chain is already in the movable list then we need to take it out of that list and put it as static
-	chain = self.staticMenu.GetStringSelection()
+	chain = str(self.staticMenu.GetStringSelection())
 	if (len(chain.strip()) == 0):
 	    return
 	if (not(chain in self.staticChains)):
@@ -545,6 +695,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	# Update the grid with this new information
 	self.updateGrid()
 	self.pruneConstraints()
+	self.deleteStaticEnsb(None) # Ensemble data is not valid anymore, remove it
 	logInfo("Added " + chain + " to the list of static chains")
 	
     def removeStatic(self, event):
@@ -556,12 +707,13 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	# Update the grid with this new information
 	self.updateGrid()
 	self.pruneConstraints()
+	self.deleteStaticEnsb(None) # Ensemble data is not valid anymore, remove it
 	logInfo("Removed " + chain + " from the list of static chains")
 	    
     def addMoving(self, event):
 	# Add this to the list of chains that will be docked
 	# If this chain is already in the static list then we need to take it out of that list and put it as movable
-	chain = self.movingMenu.GetStringSelection()
+	chain = str(self.movingMenu.GetStringSelection())
 	if (len(chain.strip()) == 0):
 	    return
 	if (not(chain in self.movingChains)):
@@ -573,6 +725,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	# Update the grid with this new information
 	self.updateGrid()
 	self.pruneConstraints()
+	self.deleteMovingEnsb(None) # Ensemble data is not valid anymore, remove it
 	logInfo("Added " + chain + " to the list of moving chains")
     
     def removeMoving(self, event):
@@ -584,6 +737,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	# Update the grid with this new information
 	self.updateGrid()
 	self.pruneConstraints()
+	self.deleteMovingEnsb(None) # Ensemble data is not valid anymore, remove it
 	logInfo("Removed " + chain + " from the list of static chains")
 	
     def toggleAtomPair(self, event):
@@ -635,17 +789,17 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	for i in range(len(self.constraints)-1, -1, -1):
 	    if (self.grdConstraints.GetRowLabelValue(i) == "AtomPair"):
 		# First make sure the chains are still in the right categories
-		if (not(self.grdConstraints.GetCellValue(i, 1) in self.staticChains)):
+		if (not(self.grdConstraints.GetCellValue(i, 2) in self.staticChains)):
 		    self.constraints.pop(i)
 		    continue
-		elif (len(self.grdConstraints.GetCellValue(i, 3).strip()) > 0 and not(self.grdConstraints.GetCellValue(i, 3) in self.movingChains)):
+		elif (len(self.grdConstraints.GetCellValue(i, 4).strip()) > 0 and not(self.grdConstraints.GetCellValue(i, 4) in self.movingChains)):
 		    self.constraints.pop(i)
 		    continue
 		# Now make sure the residues still exist
-		model = self.grdConstraints.GetCellValue(i, 1)
+		model = self.grdConstraints.GetCellValue(i, 2)
 		chain = model[len(model)-1]
 		model = model[0:len(model)-2]
-		seqpos = self.grdConstraints.GetCellValue(i, 0).split(":")[0]
+		seqpos = self.grdConstraints.GetCellValue(i, 1).split(":")[0]
 		seqpos = int(seqpos[0:len(seqpos)-1])
 		if (self.seqWin.doesResidueExist(model, chain, seqpos)):
 		    pass
@@ -653,12 +807,12 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    self.constraints.pop(i)
 		    updateNeeded = True
 		    continue
-		if (len(self.grdConstraints.GetCellValue(i, 2).strip()) == 0):
+		if (len(self.grdConstraints.GetCellValue(i, 3).strip()) == 0):
 		    continue
-		model = self.grdConstraints.GetCellValue(i, 3)
+		model = self.grdConstraints.GetCellValue(i, 4)
 		chain = model[len(model)-1]
 		model = model[0:len(model)-2]
-		seqpos = self.grdConstraints.GetCellValue(i, 2).split(":")[0]
+		seqpos = self.grdConstraints.GetCellValue(i, 3).split(":")[0]
 		seqpos = int(seqpos[0:len(seqpos)-1])
 		if (self.seqWin.doesResidueExist(model, chain, seqpos)):
 		    pass
@@ -670,21 +824,21 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		# First make sure the chains are still in the right categories
 		residueStatic = False
 		residueMoving = False
-		if (self.grdConstraints.GetCellValue(i, 1) in self.staticChains):
+		if (self.grdConstraints.GetCellValue(i, 2) in self.staticChains):
 		    residueStatic = True
-		if (self.grdConstraints.GetCellValue(i, 1) in self.movingChains):
+		if (self.grdConstraints.GetCellValue(i, 2) in self.movingChains):
 		    residueMoving = True
 		if ((residueStatic and residueMoving) or (not(residueStatic) and not(residueMoving))):
 		    self.constraints.pop(i)
-		elif (residueStatic and len(self.grdConstraints.GetCellValue(i, 3)) > 0 and not(self.grdConstraints.GetCellValue(i, 3) in self.movingChains)):
+		elif (residueStatic and len(self.grdConstraints.GetCellValue(i, 4)) > 0 and not(self.grdConstraints.GetCellValue(i, 4) in self.movingChains)):
 		    self.constraints.pop(i)
-		elif (residueMoving and len(self.grdConstraints.GetCellValue(i, 3)) > 0 and not(self.grdConstraints.GetCellValue(i, 3) in self.staticChains)):
+		elif (residueMoving and len(self.grdConstraints.GetCellValue(i, 4)) > 0 and not(self.grdConstraints.GetCellValue(i, 4) in self.staticChains)):
 		    self.constraints.pop(i)
 		# Now make sure the residues still exist
-		model = self.grdConstraints.GetCellValue(i, 1)
+		model = self.grdConstraints.GetCellValue(i, 2)
 		chain = model[len(model)-1]
 		model = model[0:len(model)-2]
-		seqpos = self.grdConstraints.GetCellValue(i, 0).split(":")[0]
+		seqpos = self.grdConstraints.GetCellValue(i, 1).split(":")[0]
 		seqpos = int(seqpos[0:len(seqpos)-1])
 		if (self.seqWin.doesResidueExist(model, chain, seqpos)):
 		    pass
@@ -692,10 +846,10 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    self.constraints.pop(i)
 		    updateNeeded = True
 		    continue
-		if (len(self.grdConstraints.GetCellValue(i, 2).strip()) == 0):
+		if (len(self.grdConstraints.GetCellValue(i, 3).strip()) == 0):
 		    continue
 		# Now check that this chain exists
-		model = self.grdConstraints.GetCellValue(i, 3)
+		model = self.grdConstraints.GetCellValue(i, 4)
 		chain = model[len(model)-1]
 		if (chain == "_"):
 		    chain = " "
@@ -721,7 +875,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	else:
 	    addRows = False
 	row = 0
-	for [constraintType, residue, partner, functionType, functionArgs] in self.constraints:
+	for [constraintType, residue, partner, functionType, functionArgs, group] in self.constraints:
 	    if (addRows):
 		self.grdConstraints.AppendRows(1)
 	    resID = residue.split(":")[0]
@@ -739,12 +893,13 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		partmodel = ""
 		partatom = ""
 	    self.grdConstraints.SetRowLabelValue(row, constraintType)
-	    self.grdConstraints.SetCellValue(row, 0, resatom)
-	    self.grdConstraints.SetCellValue(row, 1, resmodel)
-	    self.grdConstraints.SetCellValue(row, 2, partatom)
-	    self.grdConstraints.SetCellValue(row, 3, partmodel)
-	    self.grdConstraints.SetCellValue(row, 4, functionType)
-	    self.grdConstraints.SetCellValue(row, 5, functionArgs)
+	    self.grdConstraints.SetCellValue(row, 0, group)
+	    self.grdConstraints.SetCellValue(row, 1, resatom)
+	    self.grdConstraints.SetCellValue(row, 2, resmodel)
+	    self.grdConstraints.SetCellValue(row, 3, partatom)
+	    self.grdConstraints.SetCellValue(row, 4, partmodel)
+	    self.grdConstraints.SetCellValue(row, 5, functionType)
+	    self.grdConstraints.SetCellValue(row, 6, functionArgs)
 	    # Very important note: you actually need to create a new GridCellAttr for each new row
 	    # You cannot just declare it outside of the loop and use the same one for each row otherwise you
 	    # get some pretty nasty crashes when you delete rows
@@ -756,12 +911,17 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    # Now update the drop down menu so the user can tweak the settings of individual residues in the minmap
 	    row = row + 1
 	# Resize columns if necessary
-	fitGridColumn(self.grdConstraints, 0, 100)
+	fitGridColumn(self.grdConstraints, 0, 50)
 	fitGridColumn(self.grdConstraints, 1, 100)
 	fitGridColumn(self.grdConstraints, 2, 100)
 	fitGridColumn(self.grdConstraints, 3, 100)
 	fitGridColumn(self.grdConstraints, 4, 100)
-	fitGridColumn(self.grdConstraints, 5, 200)
+	fitGridColumn(self.grdConstraints, 5, 100)
+	fitGridColumn(self.grdConstraints, 6, 200)
+	# Make the group column writable
+	readOnly = wx.grid.GridCellAttr()
+	readOnly.SetReadOnly(False)
+	self.grdConstraints.SetColAttr(0, readOnly)
 	
     def IDtoInt(self, ID):
 	# This function converts a residue atom ID to an integer for sorting purposes
@@ -774,6 +934,27 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	seqpos = ID.split(":")[1]
 	val = val + int(seqpos[0:len(seqpos)-1])
 	return val
+	
+    def insertConstraint(self, constraintType, resID, partID, functionType, functionArgs, group):
+	# Useful function for inserting constraints into the constraint list in the proper ordering
+	if (len(self.constraints) == 0):
+	    # List empty, add new element
+	    self.constraints.append([constraintType, resID, partID, functionType, functionArgs, group])
+	else:
+	    notInYet = True
+	    for i in range(0, len(self.constraints)):
+		# All the AtomPair constraints come first
+		if (constraintType == "AtomPair" and self.constraints[i][0] == "Site"):
+		    self.constraints.insert(i, [constraintType, resID, partID, functionType, functionArgs, group])
+		    notInYet = False
+		    break
+		elif (constraintType == self.constraints[i][0] and self.IDtoInt(resID) <= self.IDtoInt(self.constraints[i][1])):
+		    self.constraints.insert(i, [constraintType, resID, partID, functionType, functionArgs, group])
+		    notInYet = False
+		    break
+	    if (notInYet):
+		# Belongs at the end
+		self.constraints.append([constraintType, resID, partID, functionType, functionArgs, group])
 	
     def add(self, event):
 	#self.activate()
@@ -803,52 +984,37 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		residueAtom = "CB"
 	    thisID = self.seqWin.IDs[r] + ":" + str(seqpos) + self.seqWin.sequences[r][indx] + ":" + residueAtom
 	    alreadyIn = False
-	    for j in range(0, len(self.constraints)):
-		[constraintType, residue, partner, functionType, functionArgs] = self.constraints[j]
-		if (residue == thisID and self.constraintType == constraintType):
-		    alreadyIn = True
-		    break
+	    #for j in range(0, len(self.constraints)):
+		#[constraintType, residue, partner, functionType, functionArgs, group] = self.constraints[j]
+		#if (residue == thisID and self.constraintType == constraintType):
+		#    alreadyIn = True
+		#    break
 	    if (not(alreadyIn)):
 		# Default parameters are added and the user can change these later
 		functionType = "Bounded"
-		functionArgs = "Max: 12, Min: 6, Weight: 1"
-		if (len(self.constraints) == 0):
-		    # List empty, add new element
-		    self.constraints.append([self.constraintType, thisID, "", functionType, functionArgs])
-		else:
-		    notInYet = True
-		    for i in range(0, len(self.constraints)-1):
-			# All the AtomPair constraints come first
-			if (self.constraintType == "AtomPair" and self.constraints[i][0] == "Site"):
-			    self.constraints.insert(i, [self.constraintType, thisID, "", functionType, functionArgs])
-			    notInYet = False
-			    break
-			elif (self.constraintType == self.constraints[i][0] and self.IDtoInt(thisID) <= self.IDtoInt(self.constraints[i][1])):
-			    self.constraints.insert(i, [self.constraintType, thisID, "", functionType, functionArgs])
-			    notInYet = False
-			    break
-		    if (notInYet):
-			# Belongs at the end
-			self.constraints.append([self.constraintType, thisID, "", functionType, functionArgs])
+		functionArgs = "Max: 6, Min: 4, Weight: 1"
+		self.insertConstraint(self.constraintType, thisID, "", functionType, functionArgs, "")
 	self.updateConstraints()
 	
     def remove(self, event):
-	# For this function, remove all constraints involving any of the selected residues either as the main atom 
-	# or the partner atom
+	# For this function, remove the selected constraint
 	self.activate()
 	logInfo("Remove button clicked")
-	for i in range(0, len(self.selectedData)):
-	    [indx, r, seqpos, poseindx, chainID, chainoffset] = self.selectedData[i]
-	    ID = self.seqWin.IDs[r] + ":" + str(seqpos) + self.seqWin.sequences[r][indx]
-	    for j in range(len(self.constraints)-1, -1, -1):
-		[constraintType, residue, partner, functionType, functionArgs] = self.constraints[j]
-		resID = residue.split(":")[0] + ":" + residue.split(":")[1]
-		if (len(partner.strip()) > 0):
-		    partID = partner.split(":")[0] + ":" + partner.split(":")[1]
-		else:
-		    partID = ""
-		if (ID == resID or ID == partID):
-		    self.constraints.pop(j)
+	if (self.selectedr >= 0 and self.selectedr < len(self.constraints)):
+	    self.constraints.pop(self.selectedr)
+	    self.selectedr = -1
+	#for i in range(0, len(self.selectedData)):
+	#    [indx, r, seqpos, poseindx, chainID, chainoffset] = self.selectedData[i]
+	#    ID = self.seqWin.IDs[r] + ":" + str(seqpos) + self.seqWin.sequences[r][indx]
+	#    for j in range(len(self.constraints)-1, -1, -1):
+	#	[constraintType, residue, partner, functionType, functionArgs, group] = self.constraints[j]
+	#	resID = residue.split(":")[0] + ":" + residue.split(":")[1]
+	#	if (len(partner.strip()) > 0):
+	#	    partID = partner.split(":")[0] + ":" + partner.split(":")[1]
+	#	else:
+	#	    partID = ""
+	#	if (ID == resID or ID == partID):
+	#	    self.constraints.pop(j)
 	self.updateConstraints()
 	
     def clear(self, event):
@@ -969,6 +1135,11 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		self.menuPartners.Clear()
 		self.menuPartners.AppendItems(self.staticChains)
 
+    def gridChange(self, event):
+	(r, c) = event.GetRow(), event.GetCol()
+	# Update the group attribute
+	self.constraints[r][5] = self.grdConstraints.GetCellValue(r, c)
+
     def gridClick(self, event):
 	# Set the selected residue's row to blue so it is easy to see what the selection is
 	self.selectedr = event.GetRow()
@@ -984,7 +1155,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    self.grdConstraints.SetCellBackgroundColour(r, c, "white")
 	self.grdConstraints.Refresh()
 	if (self.selectedr >= 0):
-	    self.constraintView(self.grdConstraints.GetCellValue(self.selectedr, 0).split(":")[0], self.grdConstraints.GetCellValue(self.selectedr, 1))
+	    #self.constraintView(self.grdConstraints.GetCellValue(self.selectedr, 0).split(":")[0], self.grdConstraints.GetCellValue(self.selectedr, 1))
 	    self.updatePartnerList()
 	event.Skip()
 	
@@ -1011,16 +1182,16 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    atomID = self.selectedData[indx][2] + self.seqWin.sequences[self.selectedData[indx][1]][self.selectedData[indx][0]] + ":CA"
 		else:
 		    atomID = self.selectedData[indx][2] + self.seqWin.sequences[self.selectedData[indx][1]][self.selectedData[indx][0]] + ":CB"
-		self.grdConstraints.SetCellValue(r, 2, atomID)
-		self.grdConstraints.SetCellValue(r, 3, modelID)
+		self.grdConstraints.SetCellValue(r, 3, atomID)
+		self.grdConstraints.SetCellValue(r, 4, modelID)
 		self.constraints[r][2] = modelID + ":" + atomID
 	    else:
 		while (True):
 		    if (indx >= len(self.selectedData)):
 			break
-		    elif (self.grdConstraints.GetCellValue(r, 1) in self.staticChains and self.seqWin.IDs[self.selectedData[indx][1]] in self.movingChains):
+		    elif (self.grdConstraints.GetCellValue(r, 2) in self.staticChains and self.seqWin.IDs[self.selectedData[indx][1]] in self.movingChains):
 			break
-		    elif (self.grdConstraints.GetCellValue(r, 1) in self.movingChains and self.seqWin.IDs[self.selectedData[indx][1]] in self.staticChains):
+		    elif (self.grdConstraints.GetCellValue(r, 2) in self.movingChains and self.seqWin.IDs[self.selectedData[indx][1]] in self.staticChains):
 			break
 		    indx = indx + 1
 		if (indx >= len(self.selectedData)):
@@ -1029,18 +1200,19 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    indx = indx + 1
 		    continue
 		modelID = self.seqWin.IDs[self.selectedData[indx][1]]
-		self.grdConstraints.SetCellValue(r, 2, modelID)
 		self.grdConstraints.SetCellValue(r, 3, modelID)
+		self.grdConstraints.SetCellValue(r, 4, modelID)
 		self.constraints[r][2] = modelID
 	    r = r + 1
 	    indx = indx + 1
 	# Resize columns if necessary
-	fitGridColumn(self.grdConstraints, 0, 100)
+	fitGridColumn(self.grdConstraints, 0, 50)
 	fitGridColumn(self.grdConstraints, 1, 100)
 	fitGridColumn(self.grdConstraints, 2, 100)
 	fitGridColumn(self.grdConstraints, 3, 100)
 	fitGridColumn(self.grdConstraints, 4, 100)
-	fitGridColumn(self.grdConstraints, 5, 200)
+	fitGridColumn(self.grdConstraints, 5, 100)
+	fitGridColumn(self.grdConstraints, 6, 200)
 	event.Skip()
 	
     def updateFunctionArguments(self):
@@ -1057,7 +1229,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	if (len(args) > 0):
 	    args = args[0:len(args)-2] # Trim off the last ,
 	self.constraints[self.selectedr][4] = args
-	self.grdConstraints.SetCellValue(self.selectedr, 5, args)
+	self.grdConstraints.SetCellValue(self.selectedr, 6, args)
 	
     def functionMenuTooltip(self):
 	if (self.menuFunctions.GetStringSelection() == "Bounded"):
@@ -1105,14 +1277,14 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	# Update the data with the new selection
 	resID = self.constraints[self.selectedr][1]
 	self.constraints[self.selectedr][1] = resID.split(":")[0] + ":" + resID.split(":")[1] + ":" + self.menuResidueAtoms.GetStringSelection()
-	self.grdConstraints.SetCellValue(self.selectedr, 0, resID.split(":")[1] + ":" + self.menuResidueAtoms.GetStringSelection())
+	self.grdConstraints.SetCellValue(self.selectedr, 1, resID.split(":")[1] + ":" + self.menuResidueAtoms.GetStringSelection())
 	self.constraintView(self.grdConstraints.GetCellValue(self.selectedr, 0).split(":")[0], self.grdConstraints.GetCellValue(self.selectedr, 1), self.grdConstraints.GetCellValue(self.selectedr, 0).split(":")[1])
 
     def partnerAtomMenuSelect(self, event):
 	# Update the data with the new selection
 	resID = self.constraints[self.selectedr][2]
 	self.constraints[self.selectedr][2] = resID.split(":")[0] + ":" + resID.split(":")[1] + ":" + self.menuPartnerAtoms.GetStringSelection()
-	self.grdConstraints.SetCellValue(self.selectedr, 2, resID.split(":")[1] + ":" + self.menuPartnerAtoms.GetStringSelection())
+	self.grdConstraints.SetCellValue(self.selectedr, 3, resID.split(":")[1] + ":" + self.menuPartnerAtoms.GetStringSelection())
 	self.constraintView(self.grdConstraints.GetCellValue(self.selectedr, 2).split(":")[0], self.grdConstraints.GetCellValue(self.selectedr, 3), self.grdConstraints.GetCellValue(self.selectedr, 2).split(":")[1])
 
     def constraintView(self, posID, origmodel, atom=None):
@@ -1217,6 +1389,289 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	recolorEnergies(self.dockView, self.residue_E, "dock_view", self.scoretypeMenu.GetStringSelection(), self.cmd)
 	self.viewMenuSelect(event) # To update all the labels
     
+    def saveCST(self, event):
+	if (len(self.constraints) == 0):
+	    wx.MessageBox("There's nothing to save to a constraints file!", "No Constraints", wx.OK|wx.ICON_EXCLAMATION)
+	    return
+	logInfo("Clicked the Save CST button")
+	# Save the data in the resfile graph as an actual resfile for the user's convenience
+	dlg = wx.FileDialog(
+	    self, message="Save a Constraints File",
+	    defaultDir=self.seqWin.cwd,
+	    defaultFile="",
+	    wildcard="Constraints (*.cst)|*.cst",
+	    style=wx.SAVE | wx.CHANGE_DIR)
+	if (dlg.ShowModal() == wx.ID_OK):
+	    paths = dlg.GetPaths()
+	    # Change cwd to the last opened file
+	    if (platform.system() == "Windows"):
+		lastDirIndx = paths[len(paths)-1].rfind("\\")
+	    else:
+		lastDirIndx = paths[len(paths)-1].rfind("/")
+	    self.seqWin.cwd = str(paths[len(paths)-1][0:lastDirIndx])
+	    self.seqWin.saveWindowData(None)
+	    filename = str(paths[0]).split(".cst")[0] + ".cst"
+	    # Does it exist already?  If so, ask if the user really wants to overwrite it
+	    if (os.path.isfile(filename)):
+		dlg2 = wx.MessageDialog(self, "The file " + filename + " already exists.  Overwrite it?", "Filename Already Exists", wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
+		if (dlg2.ShowModal() == wx.ID_NO):
+		    dlg2.Destroy()
+		    logInfo("Canceled save operation due to filename already existing")
+	    self.saveConstraints(filename)
+	else:
+	    logInfo("Cancelled save constraints operation")
+    
+    def loadCST(self, event):
+	logInfo("Load CST button clicked")
+	# Load data from an existing resfile into the resfile window
+	# If there is already data in the graph, notify the user that this data will be erased if they
+	# proceed further
+	if (len(self.constraints) > 0):
+	    dlg = wx.MessageDialog(self, "The data in your current workflow will be lost and replaced with a loaded constraints file.  Are you sure you want to proceed?", "Current Constraints Data Will Be Lost", wx.YES_NO | wx.ICON_EXCLAMATION | wx.CENTRE)
+	    if (dlg.ShowModal() == wx.ID_YES):
+		# Don't clear it out until the user actually selects a resfile (instead of cancelling
+		# at the file selection dialog
+		pass
+	    else:
+		logInfo("Load CST operation cancelled due to data already being in the resfile")
+		return
+	dlg = wx.FileDialog(
+	    self, message="Choose a File",
+	    defaultDir=self.seqWin.cwd,
+	    defaultFile="",
+	    wildcard="Constraints (*.cst)|*.cst",
+	    style=wx.OPEN | wx.CHANGE_DIR)
+	if (dlg.ShowModal() == wx.ID_OK):
+	    paths = dlg.GetPaths()
+	    # Change cwd to the last opened file
+	    if (platform.system() == "Windows"):
+		lastDirIndx = paths[len(paths)-1].rfind("\\")
+	    else:
+		lastDirIndx = paths[len(paths)-1].rfind("/")
+	    self.seqWin.cwd = str(paths[len(paths)-1][0:lastDirIndx])
+	    self.seqWin.saveWindowData(None)
+	    filename = str(paths[0])
+	    # Does it open?  If yes, then erase the resfile data and continue
+	    try:
+		f = open(filename, "r")
+	    except:
+		wx.MessageBox("The file " + filename.strip() + " cannot be opened!", "File Cannot Be Read", wx.OK|wx.ICON_EXCLAMATION)
+		return
+	    logInfo("Loaded data from a constraints file", filename)
+	    self.constraints = []
+	    # Read the data and only add constraints for currently valid information
+	    # If models are missing for constraints, do not load those constraints
+	    group = ""
+	    groupid = 1
+	    for aline in f:
+		if (len(aline.strip()) == 0):
+		    continue
+		if (aline.strip().lower().startswith("ambiguousconstraint")):
+		    group = str(groupid)
+		elif (aline.strip().lower().startswith("end")):
+		    group = ""
+		    groupid += 1
+		try:
+		    constraintType = aline.split()[0]
+		    if (not(constraintType in ["AtomPair", "SiteConstraint"])):
+			raise Exception()
+		    if (constraintType == "SiteConstraint"):
+			constraintType = "Site"
+		    resatom = aline.split()[1]
+		    resloc = aline.split()[2]
+		    if (resloc[len(resloc)-1] in "0123456789"):
+			# Undefined chain ID
+			reschain = "_"
+			resseqpos = resloc
+		    else:
+			reschain = resloc[len(resloc)-1]
+			resseqpos = resloc[0:len(resloc)-1]
+		    if (constraintType == "Site"):
+			partchain = aline.split()[3]
+			funcstart = 4
+		    else:
+			partatom = aline.split()[3]
+			partloc = aline.split()[4]
+			if (partloc[len(partloc)-1] in "0123456789"):
+			    # Undefined chain ID
+			    partchain = "_"
+			    partseqpos = partloc
+			else:
+			    partchain = partloc[len(partloc)-1]
+			    partseqpos = partloc[0:len(partloc)-1]
+			funcstart = 5
+		    functype = aline.split()[funcstart]
+		    functype = functype[0] + functype[1:].lower() # To get the casing right
+		    if (not(functype in ["Bounded", "Sigmoid", "Gaussian", "Harmonic"])):
+			raise Exception()
+		    funcargs = None
+		    for i in range(funcstart+1, len(aline.split())):
+			if (aline.split()[i][0] == "#"):
+			    funcargs = aline.split()[funcstart+1:i]
+			    break
+		    if (not(funcargs)):
+			raise Exception()
+		    commentstart = aline.index("#")
+		    resmodel = aline[commentstart:].split("\t")[1].strip()
+		    partmodel = aline[commentstart:].split("\t")[3].strip()
+		    rescoord = self.seqWin.doesAtomExist(resmodel, reschain, resseqpos, resatom)
+		    if (constraintType == "Site"):
+			partcoord = True
+		    else:
+			partcoord = self.seqWin.doesAtomExist(partmodel, partchain, partseqpos, partatom)
+		    if (not(rescoord) or not(partcoord)):
+			raise Exception()
+		    if (constraintType == "Site"):
+			allchains = []
+			allchains.extend(self.staticChains)
+			allchains.extend(self.movingChains)
+			if (not(resmodel + "|" + reschain in allchains) or not(partmodel + "|" + partchain in allchains)):
+			    raise Exception()
+		    else:
+			if (not(resmodel + "|" + reschain in self.staticChains) or not(partmodel + "|" + partchain in self.movingChains)):
+			    raise Exception()
+		    # If we've survived this far, all of the data should be valid
+		    resID = resmodel + "|" + reschain + ":" + resseqpos + self.seqWin.sequences[rescoord[0]][rescoord[1]] + ":" + resatom
+		    if (constraintType == "Site"):
+			partID = partmodel + "|" + partchain
+		    else:
+			partID = partmodel + "|" + partchain + ":" + partseqpos + self.seqWin.sequences[partcoord[0]][partcoord[1]] + ":" + partatom
+		    # Back calculate what the weight should be (because in the constraints file it was translated to an SD value
+		    if (functype == "Sigmoid"):
+			weight = funcargs[1]
+		    elif (functype == "Bounded"):
+			weight = str(1.0 / (float(funcargs[2])**2))
+		    else:
+			weight = str(1.0 / (float(funcargs[1])**2))
+		    if (functype == "Bounded"):
+			funcstr = "Max: " + funcargs[0] + ", Min: " + funcargs[1] + ", Weight: " + weight
+		    else:
+			funcstr = "Ideal: " + funcargs[0] + ", Weight: " + weight
+		    self.insertConstraint(constraintType, resID, partID, functype, funcstr, group)
+		except:
+		    continue
+	    f.close()
+	    self.updateConstraints()
+    
+    def writeConstraint(self, f, constraintType, residue, partner, functionType, functionArgs, group, convertChains):
+	# Writes out the constraint
+	trailingcomment = ""
+	residueAtom = residue.split(":")[2].strip()
+	if (convertChains):
+	    residueChain = self.realChainConversion[residue.split(":")[0].strip()]
+	else:
+	    residueChain = residue.split(":")[0].strip()
+	    trailingcomment = "# MODEL1\t" + residueChain[0:len(residueChain)-2]
+	    residueChain = residueChain[len(residueChain)-1]
+	residueSeqpos = residue.split(":")[1]
+	residueSeqpos = residueSeqpos[0:len(residueSeqpos)-1]
+	if (convertChains):
+	    partnerChain = self.realChainConversion[partner.split(":")[0].strip()]
+	else:
+	    partnerChain = partner.split(":")[0].strip()
+	    trailingcomment += "\tMODEL2\t" + partnerChain[0:len(partnerChain)-2]
+	    partnerChain = partnerChain[len(partnerChain)-1]
+	if (constraintType == "AtomPair"):
+	    partnerAtom = partner.split(":")[2].strip()
+	    partnerSeqpos = partner.split(":")[1]
+	    partnerSeqpos = partnerSeqpos[0:len(partnerSeqpos)-1]
+	    f.write("AtomPair " + residueAtom + " " + residueSeqpos + residueChain + " " + partnerAtom + " " + partnerSeqpos + partnerChain + " ")
+	else:
+	    f.write("SiteConstraint " + residueAtom + " " + residueSeqpos + residueChain + " " + partnerChain + " ")
+	# Now make sure the arguments are all validly defined
+	if (functionType == "Gaussian"):
+	    f.write(functionType.upper() + "FUNC ")
+	else:
+	    f.write(functionType.upper() + " ")
+	args = functionArgs.split(",")
+	if (functionType.upper() == "BOUNDED"):
+	    maxD = 12
+	    minD = 6
+	    weight = 1
+	    for arg in args:
+		field = arg.split(":")[0].strip()
+		val = float(arg.split(":")[1].strip())
+		if (field == "Max"):
+		    maxD = val
+		elif (field == "Min"):
+		    minD = val
+		elif (field == "Weight"):
+		    weight = val
+	    # Fix any issues
+	    if (weight <= 0):
+		weight = 1
+	    if (minD < 0):
+		minD = 0
+	    if (maxD < 0):
+		maxD = 0
+	    if (maxD < minD):
+		temp = maxD
+		maxD = minD
+		minD = temp
+	    sd = 1.0 / math.sqrt(weight)
+	    #f.write(str(minD) + " " + str(maxD) + " " + str(sd) + " constraint" + str(tagno))
+	    f.write(str(minD) + " " + str(maxD) + " " + str(sd))
+	    #tagno = tagno + 1
+	else:
+	    idealD = 9
+	    weight = 1
+	    for arg in args:
+		field = arg.split(":")[0].strip()
+		val = float(arg.split(":")[1].strip())
+		if (field == "Ideal"):
+		    idealD = val
+		elif (field == "Weight"):
+		    weight = val
+	    # Fix any issues
+	    if (weight <= 0):
+		weight = 1
+	    if (idealD < 0):
+		idealD = 0
+	    sd = 1.0 / math.sqrt(weight)
+	    if (functionType.upper() == "SIGMOID"):
+		f.write(str(idealD) + str(weight))
+	    elif (functionType.upper() == "HARMONIC"):
+		f.write(str(idealD) + str(sd))
+	    else:
+		#f.write(str(idealD) + str(sd) + " constraint" + str(tagno))
+		f.write(str(idealD) + str(sd))
+		#tagno = tagno + 1
+	if (len(trailingcomment) > 0):
+	    f.write(" " + trailingcomment + "\n")
+	else:
+	    f.write("\n")
+    
+    def saveConstraints(self, filename, convertChains=False):
+	f = open(filename, "w")
+	ambig_groups = {}
+	tagno = 1
+	for [constraintType, residue, partner, functionType, functionArgs, group] in self.constraints:
+	    if (len(partner.strip()) == 0):
+		# Ignore incomplete constraints when saving
+		continue
+	    # Let's skip the grouped constraints, which will end up in ambiguous constraints eventually
+	    if (len(group.strip()) > 0):
+		try:
+		    ambig_groups[group].append([constraintType, residue, partner, functionType, functionArgs, group])
+		except:
+		    ambig_groups[group] = []
+		    ambig_groups[group].append([constraintType, residue, partner, functionType, functionArgs, group])
+		continue
+	    # Don't add entries for positions that do not have partners specified
+	    if (len(partner.strip()) == 0):
+		continue
+	    self.writeConstraint(f, constraintType, residue, partner, functionType, functionArgs, group, convertChains)
+	# Now write out the ambiguous constraints for grouped constraints
+	for group in ambig_groups:
+	    # "group" is a key
+	    if (len(ambig_groups[group]) > 1):
+		f.write("AmbiguousConstraint\n")
+	    for [constraintType, residue, partner, functionType, functionArgs, group] in ambig_groups[group]:
+		self.writeConstraint(f, constraintType, residue, partner, functionType, functionArgs, group, convertChains)
+	    if (len(ambig_groups[group]) > 1):
+		f.write("END\n")
+	f.close()
+    
     def writeSinglePDB(self):
 	# We need to get everything that will be docked into one PDB file, and make sure all the chains are distinct
 	# The docker seems to work on a single pose
@@ -1227,13 +1682,23 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	chains = self.staticChains[:]
 	chains.extend(self.movingChains[:])
 	self.jumpconfig = ""
-	realChainConversion = {}
+	self.realChainConversion = {}
+	usedChains = ""
 	for i in range(0, len(chains)):
 	    if (i == len(self.staticChains)):
 		self.jumpconfig = self.jumpconfig + "_"
-	    chainID = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[i]
+	    # Try to preserve chain IDs, but rename them if there are conflicts with two chains from different
+	    # models having the same chain ID
+	    chainID = chains[i][len(chains[i])-1]
+	    if (chainID in usedChains or chainID == "_"):
+		# Find a new one
+		for char in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+		    if (not(char in usedChains)):
+			chainID = char
+			break
+	    usedChains += chainID
 	    self.jumpconfig = self.jumpconfig + chainID # This is a string that helps Rosetta figure out what is static/movable
-	    realChainConversion[chains[i]] = chainID # For the constraints file to be able to convert pre-dock chains to the actual chainIDs in the docked PDB
+	    self.realChainConversion[chains[i]] = chainID # For the constraints file to be able to convert pre-dock chains to the actual chainIDs in the docked PDB
 	    posechain = self.seqWin.getChainPose(chains[i])
 	    posechain.id = chainID
 	    # Rename the chainIDs
@@ -1253,81 +1718,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	except:
 	    pass
 	if (len(self.constraints) > 0):
-	    f = open("constraints.cst", "w")
-	    tagno = 1
-	    for [constraintType, residue, partner, functionType, functionArgs] in self.constraints:
-		# Don't add entries for positions that do not have partners specified
-		if (len(partner.strip()) == 0):
-		    continue
-		residueAtom = residue.split(":")[2].strip()
-		residueChain = realChainConversion[residue.split(":")[0].strip()]
-		residueSeqpos = residue.split(":")[1]
-		residueSeqpos = residueSeqpos[0:len(residueSeqpos)-1]
-		partnerChain = realChainConversion[partner.split(":")[0].strip()]
-		if (constraintType == "AtomPair"):
-		    partnerAtom = partner.split(":")[2].strip()
-		    partnerSeqpos = partner.split(":")[1]
-		    partnerSeqpos = partnerSeqpos[0:len(partnerSeqpos)-1]
-		    f.write("AtomPair " + residueAtom + " " + residueSeqpos + residueChain + " " + partnerAtom + " " + partnerSeqpos + partnerChain + " ")
-		else:
-		    f.write("SiteConstraint " + residueAtom + " " + residueSeqpos + residueChain + " " + partnerChain + " ")
-		# Now make sure the arguments are all validly defined
-		if (functionType == "Gaussian"):
-		    f.write(functionType.upper() + "FUNC ")
-		else:
-		    f.write(functionType.upper() + " ")
-		if (functionType == "Bounded"):
-		    maxD = 12
-		    minD = 6
-		    weight = 1
-		    args = functionArgs.split(",")
-		    for arg in args:
-			field = arg.split(":")[0].strip()
-			val = int(arg.split(":")[1].strip())
-			if (field == "Max"):
-			    maxD = val
-			elif (field == "Min"):
-			    minD = val
-			elif (field == "Weight"):
-			    weight = val
-		    # Fix any issues
-		    if (weight <= 0):
-			weight = 1
-		    if (minD < 0):
-			minD = 0
-		    if (maxD < 0):
-			maxD = 0
-		    if (maxD < minD):
-			temp = maxD
-			maxD = minD
-			minD = temp
-		    sd = 1.0 / math.sqrt(weight)
-		    f.write(str(minD) + " " + str(maxD) + " " + str(sd) + " constraint" + str(tagno) + "\n")
-		    tagno = tagno + 1
-		else:
-		    idealD = 9
-		    weight = 1
-		    for arg in args:
-			field = arg.split(":")[0].strip()
-			val = int(arg.split(":")[1].strip())
-			if (field == "Ideal"):
-			    idealD = val
-			elif (field == "Weight"):
-			    weight = val
-		    # Fix any issues
-		    if (weight <= 0):
-			weight = 1
-		    if (idealD < 0):
-			idealD = 0
-		    sd = 1.0 / math.sqrt(weight)
-		    if (functionType == "Sigmoid"):
-			f.write(str(idealD) + str(weight) + "\n")
-		    elif (functionType == "Harmonic"):
-			f.write(str(idealD) + str(sd) + "\n")
-		    else:
-			f.write(str(idealD) + str(sd) + " constraint" + str(tagno) + "\n")
-			tagno = tagno + 1
-	    f.close()
+	    self.saveConstraints("constraints.cst", convertChains=True)
     
     def toggleStarting(self, event):
 	# Toggle the randomize/use current orientation option
@@ -1360,6 +1751,18 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		self.btnStarting.SetLabel(self.startingType)
 	    self.btnStarting.SetToolTipString("Perform a global dock, where the orientations of both partners is unknown")
 	logInfo("Set orientation mode to " + self.startingType)
+    
+    def serverToggle(self, event):
+	if (self.serverOn):
+	    self.serverOn = False
+	    self.btnServerToggle.SetLabel("Server Off")
+	    self.btnServerToggle.SetToolTipString("Perform docking simulations locally")
+	    logInfo("Turned off docking server usage")
+	else:
+	    self.serverOn = True
+	    self.btnServerToggle.SetLabel("Server On")
+	    self.btnServerToggle.SetToolTipString("Perform docking simulations on a remote server")
+	    logInfo("Turned on docking server usage")
     
     def saveClick(self, event):
 	# Save the currently loaded docking structure
@@ -1397,6 +1800,268 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    logInfo("Saved model " + self.viewMenu.GetStringSelection() + " to " + filename)
 	else:
 	    logInfo("Cancelled save operation")
+    
+    def loadStaticEnsb(self, event):
+	logInfo("Load Static Ensemble button clicked")
+	# If no static chain has been specified, abort because we cannot check to make sure the ensemble
+	# and the static chains are compatible
+	if (len(self.staticChains) == 0):
+	    dlg = wx.MessageDialog(self, "Please specify which chains are in the static structure before specifying an ensemble.", "No Static Structure", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+	    dlg.ShowModal()
+	    dlg.Destroy()
+	    return
+	dlg = wx.FileDialog(
+	    self, message="Choose a File",
+	    defaultDir=self.seqWin.cwd,
+	    defaultFile="",
+	    wildcard="Ensemble Archives (*.ensb)|*.ensb",
+	    style=wx.OPEN | wx.CHANGE_DIR)
+	if (dlg.ShowModal() == wx.ID_OK):
+	    paths = dlg.GetPaths()
+	    # Change cwd to the last opened file
+	    if (platform.system() == "Windows"):
+		lastDirIndx = paths[len(paths)-1].rfind("\\")
+	    else:
+		lastDirIndx = paths[len(paths)-1].rfind("/")
+	    self.seqWin.cwd = str(paths[len(paths)-1][0:lastDirIndx])
+	    self.seqWin.saveWindowData(None)
+	    filename = str(paths[0])
+	    filelabel = filename[lastDirIndx+1:]
+	    # Does it open?  If yes, then erase the resfile data and continue
+	    try:
+		fin = gzip.open(filename, "r")
+	    except:
+		wx.MessageBox("The file " + filename.strip() + " cannot be opened!", "File Cannot Be Read", wx.OK|wx.ICON_EXCLAMATION)
+		return
+	    logInfo("Loaded data from an ensemble archive", filename)
+	    # Now we have to read the first model in the archive, find its chains and sequences, and make
+	    # sure they all match what is already loaded in the static chains
+	    readingData = False
+	    modeldata = {}
+	    lastres = " 0000"
+	    for aline in fin:
+		if (aline.startswith("BEGIN PDB")):
+		    readingData = True
+		elif (aline.startswith("END PDB")):
+		    break
+		elif (readingData and (aline.startswith("ATOM") or aline.startswith("HETATM"))):
+		    chain = aline[21]
+		    if (len(chain.strip()) == 0):
+			chain = "_"
+		    if (chain + aline[22:27] != lastres):
+			lastres = chain + aline[22:27]
+			try:
+			    modeldata[chain] += AA3to1(aline[17:20])
+			except:
+			    modeldata[chain] = AA3to1(aline[17:20])
+	    fin.close()
+	    # Now check against the static chains loaded
+	    for modelchain in self.staticChains:
+		chain = modelchain[len(modelchain)-1]
+		for i in range(0, len(self.seqWin.IDs)):
+		    if (modelchain == self.seqWin.IDs[i]):
+			try:
+			    if (modeldata[chain] != self.seqWin.sequences[i]):
+				dlg = wx.MessageDialog(self, "The sequences for chain " + chain + " do not match between the specified static chains and the selected ensemble.", "Ensemble Data Mismatch", wx.OK | wx.ICON_ERROR | wx.CENTRE)
+				dlg.ShowModal()
+				dlg.Destroy()
+				return
+			except:
+			    dlg = wx.MessageDialog(self, "Chain " + chain + " in the static chains is not in the ensemble", "Ensemble Data Mismatch", wx.OK | wx.ICON_ERROR | wx.CENTRE)
+			    dlg.ShowModal()
+			    dlg.Destroy()
+			    return
+			modeldata.pop(chain)
+	    # Are there extra chains left over from the ensemble?
+	    if (len(modeldata.keys()) > 0):
+		dlg = wx.MessageDialog(self, "Chain " + modeldata.keys()[0] + " does not exist in the specified static chains.", "Ensemble Data Mismatch", wx.OK | wx.ICON_ERROR | wx.CENTRE)
+		dlg.ShowModal()
+		dlg.Destroy()
+		return
+	    # If we got this far, then the ensemble should be okay
+	    self.ensemble1 = filename
+	    self.lblSelStaticEnsb.SetLabel(filelabel)
+	    if (platform.system() == "Linux"):
+		resizeTextControlForUNIX(self.lblSelStaticEnsb, 0, 320)
+    
+    def deleteStaticEnsb(self, event):
+	self.ensemble1 = None
+	self.lblSelStaticEnsb.SetLabel("No Ensemble Specified")
+	if (platform.system() == "Linux"):
+	    resizeTextControlForUNIX(self.lblSelStaticEnsb, 0, 320)
+    
+    def loadMovingEnsb(self, event):
+	logInfo("Load Moving Ensemble button clicked")
+	# If no static chain has been specified, abort because we cannot check to make sure the ensemble
+	# and the static chains are compatible
+	if (len(self.movingChains) == 0):
+	    dlg = wx.MessageDialog(self, "Please specify which chains are in the moving structure before specifying an ensemble.", "No Moving Structure", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+	    dlg.ShowModal()
+	    dlg.Destroy()
+	    return
+	dlg = wx.FileDialog(
+	    self, message="Choose a File",
+	    defaultDir=self.seqWin.cwd,
+	    defaultFile="",
+	    wildcard="Ensemble Archives (*.ensb)|*.ensb",
+	    style=wx.OPEN | wx.CHANGE_DIR)
+	if (dlg.ShowModal() == wx.ID_OK):
+	    paths = dlg.GetPaths()
+	    # Change cwd to the last opened file
+	    if (platform.system() == "Windows"):
+		lastDirIndx = paths[len(paths)-1].rfind("\\")
+	    else:
+		lastDirIndx = paths[len(paths)-1].rfind("/")
+	    self.seqWin.cwd = str(paths[len(paths)-1][0:lastDirIndx])
+	    self.seqWin.saveWindowData(None)
+	    filename = str(paths[0])
+	    filelabel = filename[lastDirIndx+1:]
+	    # Does it open?  If yes, then erase the resfile data and continue
+	    try:
+		fin = gzip.open(filename, "r")
+	    except:
+		wx.MessageBox("The file " + filename.strip() + " cannot be opened!", "File Cannot Be Read", wx.OK|wx.ICON_EXCLAMATION)
+		return
+	    logInfo("Loaded data from an ensemble archive", filename)
+	    # Now we have to read the first model in the archive, find its chains and sequences, and make
+	    # sure they all match what is already loaded in the static chains
+	    readingData = False
+	    modeldata = {}
+	    lastres = " 0000"
+	    for aline in fin:
+		if (aline.startswith("BEGIN PDB")):
+		    readingData = True
+		elif (aline.startswith("END PDB")):
+		    break
+		elif (readingData and (aline.startswith("ATOM") or aline.startswith("HETATM"))):
+		    chain = aline[21]
+		    if (len(chain.strip()) == 0):
+			chain = "_"
+		    if (chain + aline[22:27] != lastres):
+			lastres = chain + aline[22:27]
+			try:
+			    modeldata[chain] += AA3to1(aline[17:20])
+			except:
+			    modeldata[chain] = AA3to1(aline[17:20])
+	    fin.close()
+	    # Now check against the moving chains loaded
+	    for modelchain in self.movingChains:
+		chain = modelchain[len(modelchain)-1]
+		for i in range(0, len(self.seqWin.IDs)):
+		    if (modelchain == self.seqWin.IDs[i]):
+			try:
+			    if (modeldata[chain] != self.seqWin.sequences[i]):
+				dlg = wx.MessageDialog(self, "The sequences for chain " + chain + " do not match between the specified moving chains and the selected ensemble.", "Ensemble Data Mismatch", wx.OK | wx.ICON_ERROR | wx.CENTRE)
+				dlg.ShowModal()
+				dlg.Destroy()
+				return
+			except:
+			    dlg = wx.MessageDialog(self, "Chain " + chain + " in the moving chains is not in the ensemble", "Ensemble Data Mismatch", wx.OK | wx.ICON_ERROR | wx.CENTRE)
+			    dlg.ShowModal()
+			    dlg.Destroy()
+			    return
+			modeldata.pop(chain)
+	    # Are there extra chains left over from the ensemble?
+	    if (len(modeldata.keys()) > 0):
+		dlg = wx.MessageDialog(self, "Chain " + modeldata.keys()[0] + " does not exist in the specified moving chains.", "Ensemble Data Mismatch", wx.OK | wx.ICON_ERROR | wx.CENTRE)
+		dlg.ShowModal()
+		dlg.Destroy()
+		return
+	    # If we got this far, then the ensemble should be okay
+	    self.ensemble2 = filename
+	    self.lblSelMovingEnsb.SetLabel(filelabel)
+	    if (platform.system() == "Linux"):
+		resizeTextControlForUNIX(self.lblSelMovingEnsb, 0, 320)
+    
+    def deleteMovingEnsb(self, event):
+	self.ensemble2 = None
+	self.lblSelMovingEnsb.SetLabel("No Ensemble Specified")
+	if (platform.system() == "Linux"):
+	    resizeTextControlForUNIX(self.lblSelMovingEnsb, 0, 320)
+    
+    def reorient(self, event):
+	#from pymol.cgo import *
+	# First find the interface in the current selection that are on the static chains
+	staticchainstr = "("
+	for modelchain in self.staticChains:
+	    model = modelchain[0:len(modelchain)-2]
+	    chainID = modelchain[len(modelchain)-1]
+	    if (chainID == "_"):
+		staticchainstr += "(model " + model + ") or "
+	    else:
+		staticchainstr += "(model " + model + " and chain " + chainID + ") or "
+	staticchainstr = staticchainstr[0:len(staticchainstr)-4] + ")"
+	# And now the moving chains
+	movingchainstr = "("
+	for modelchain in self.movingChains:
+	    model = modelchain[0:len(modelchain)-2]
+	    chainID = modelchain[len(modelchain)-1]
+	    if (chainID == "_"):
+		movingchainstr += "(model " + model + ") or "
+	    else:
+		movingchainstr += "(model " + model + " and chain " + chainID + ") or "
+	movingchainstr = movingchainstr[0:len(movingchainstr)-4] + ")"
+	try:
+	    # Now find the average center point of all atoms in this chainset
+	    self.stored.sum_x = 0.0
+	    self.stored.sum_y = 0.0
+	    self.stored.sum_z = 0.0
+	    self.stored.n = 0
+	    self.cmd.iterate_state(1, staticchainstr + " and name ca", "stored.sum_x += x; stored.sum_y +=y; stored.sum_z += z; stored.n += 1")
+	    center_x = self.stored.sum_x / float(self.stored.n)
+	    center_y = self.stored.sum_y / float(self.stored.n)
+	    center_z = self.stored.sum_z / float(self.stored.n)
+	    vcenter = numpy.array([center_x, center_y, center_z])	    
+	    # Now get the center of the interface only
+	    self.stored.sum_x = 0.0
+	    self.stored.sum_y = 0.0
+	    self.stored.sum_z = 0.0
+	    self.stored.n = 0
+	    self.cmd.iterate_state(1, staticchainstr + " and seqsele and name ca", "stored.sum_x += x; stored.sum_y +=y; stored.sum_z += z; stored.n += 1")
+	    interface_x = self.stored.sum_x / float(self.stored.n)
+	    interface_y = self.stored.sum_y / float(self.stored.n)
+	    interface_z = self.stored.sum_z / float(self.stored.n)
+	    vinterface = numpy.array([interface_x, interface_y, interface_z])
+	    # Now calculate the destination of the opposing chain
+	    # It will be along the line between these previous two points, four times the distance between them
+	    vtranslate = vinterface - vcenter
+	    vdestination = vinterface + 4*vtranslate
+	    # Now calculate the center of mass of the other chainset
+	    self.stored.sum_x = 0.0
+	    self.stored.sum_y = 0.0
+	    self.stored.sum_z = 0.0
+	    self.stored.n = 0
+	    self.cmd.iterate_state(1, movingchainstr + " and name ca", "stored.sum_x += x; stored.sum_y +=y; stored.sum_z += z; stored.n += 1")
+	    center2_x = self.stored.sum_x / float(self.stored.n)
+	    center2_y = self.stored.sum_y / float(self.stored.n)
+	    center2_z = self.stored.sum_z / float(self.stored.n)
+	    vcenter2 = numpy.array([center2_x, center2_y, center2_z])
+	    # Now calculate the translation vector
+	    vtranslate = vdestination - vcenter2
+	    # Now translate
+	    self.cmd.translate(list(vtranslate), movingchainstr, camera=0)
+	    #self.stored.sum_x = 0.0
+	    #self.stored.sum_y = 0.0
+	    #self.stored.sum_z = 0.0
+	    #self.stored.n = 0
+	    #self.cmd.iterate_state(1, partner2 + " and name ca", "stored.sum_x += x; stored.sum_y +=y; stored.sum_z += z; stored.n += 1")
+	    #center3_x = self.stored.sum_x / float(self.stored.n)
+	    #center3_y = self.stored.sum_y / float(self.stored.n)
+	    #center3_z = self.stored.sum_z / float(self.stored.n)
+	    #spherelist = [
+	    #    COLOR, 1.0, 0.0, 0.0,
+	    #    SPHERE, center_x, center_y, center_z, 3,
+	    #    COLOR, 1.0, 0.0, 1.0,
+	    #    SPHERE, center2_x, center2_y, center2_z, 3,
+	    #    COLOR, 1.0, 1.0, 0.0,
+	    #    SPHERE, center3_x, center3_y, center3_z, 3,
+	    #    COLOR, 0.0, 0.0, 1.0,
+	    #    SPHERE, vdestination[0], vdestination[1], vdestination[2], 3,
+	    #    COLOR, 0.0, 1.0, 0.0,
+	    #    SPHERE, interface_x, interface_y, interface_z, 3]
+	    #self.cmd.load_cgo(spherelist, "segment", 1)
+	except:
+	    pass
     
     def cancelDock(self):
 	logInfo("Canceled docking operation")
@@ -1494,6 +2159,14 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    except:
 		wx.MessageBox("Please enter a positive integer for the number of refined decoys.", "Invalid Number of Refined Decoys", wx.OK|wx.ICON_EXCLAMATION)
 		return
+	    # Ensemble docking is only available on the server
+	    if ((self.ensemble1 or self.ensemble2) and not(self.serverOn)):
+		dlg = wx.MessageDialog(self, "Ensemble docking is only available through the Rosetta server.  Would you like to enable server mode?", "Server Needed for EnsembleDock", wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
+		if (dlg.ShowModal() == wx.ID_YES):
+		    self.serverToggle(None)
+		else:
+		    return
+		dlg.Destroy()
 	    self.seqWin.labelMsg.SetLabel("Performing protein docking, please be patient...")
 	    self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	    self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
@@ -1515,6 +2188,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    #thrKIC = Thread(target=self.threadKIC, args=())
 	    #thrKIC.start()
 	    logInfo("Clicked the Dock button")
+	    goToSandbox()
 	    self.tmrDock = wx.Timer(self)
 	    self.Bind(wx.EVT_TIMER, self.threadDock, self.tmrDock)
 	    self.writeSinglePDB()
@@ -1528,11 +2202,43 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    dlg.Destroy()
 	else:
 	    # Finalize button, ask whether the changes will be accepted or rejected
-	    dlg = wx.MessageDialog(self, "Do you want to accept the currently viewed model of this docking session?", "Accept/Reject Model", wx.YES_NO | wx.CANCEL | wx.ICON_QUESTION | wx.CENTRE)
+	    dlg = wx.MessageDialog(self, "Do you want to accept the results of this docking session?", "Accept/Reject Model", wx.YES_NO | wx.CANCEL | wx.ICON_QUESTION | wx.CENTRE)
 	    result = dlg.ShowModal()
 	    if (result == wx.ID_YES):
 		logInfo("Accepted docked model")
 		accept = True
+		# Get a filename prefix for these models
+		while (True):
+		    dlg3 = wx.FileDialog(
+			self, message="Save a PDB File",
+			defaultDir=self.seqWin.cwd,
+			defaultFile=self.staticChains[0][0:len(self.staticChains[0])-2],
+			wildcard="PDB Files (*.pdb)|*.pdb",
+			style=wx.SAVE | wx.CHANGE_DIR)
+		    if (dlg3.ShowModal() == wx.ID_OK):
+			path = dlg3.GetPath()
+			# Change cwd to the last opened file
+			if (platform.system() == "Windows"):
+			    lastDirIndx = path.rfind("\\")
+			else:
+			    lastDirIndx = path.rfind("/")
+			self.seqWin.cwd = str(path[0:lastDirIndx])
+			self.seqWin.saveWindowData(None)
+			# Load the PDBs into PyMOL
+			filename = str(path).split(".pdb")[0] + "_0001.pdb"
+			# Does it exist already?  If so, ask if the user really wants to overwrite it
+			if (os.path.isfile(filename)):
+			    dlg2 = wx.MessageDialog(self, "The file " + filename + " already exists.  Overwrite it?", "Filename Already Exists", wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
+			    if (dlg2.ShowModal() == wx.ID_NO):
+				dlg2.Destroy()
+				continue
+			    dlg2.Destroy()
+		    else:
+			# Default to cancel behavior
+			dlg.Destroy()
+			return
+		    filename = filename.split("_0001.pdb")[0] + ".pdb"
+		    break
 	    elif (result == wx.ID_NO):
 		logInfo("Rejected docked model")
 		accept = False
@@ -1548,8 +2254,6 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.btnAddMoving.Enable()
 	    self.btnRemoveMoving.Enable()
 	    self.btnStarting.Enable()
-	    self.movingChains = []
-	    self.staticChains = []
 	    self.grdDocking.ClearGrid()
 	    if (platform.system() == "Darwin"):
 		self.btnDock.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnDock.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
@@ -1557,7 +2261,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		self.btnDock.SetLabel("Dock!")
 	    self.buttonState = "Dock!"
 	    self.btnDock.SetToolTipString("Perform docking simulation with selected parameters")
-	    self.btnSave.Disable()
+	    #self.btnSave.Disable()
 	    self.cmd.label("all", "")
 	    self.seqWin.cannotDelete = False
 	    if (not(accept)):
@@ -1571,30 +2275,40 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    for ID in self.movingChains:
 		row = self.seqWin.IDs.index(ID)
 		self.seqWin.deleteChain(row)
-	    newID = self.staticChains[0][0:len(self.staticChains[0])-2]
+	    newname = filename.split(".pdb")[0]
 	    if (platform.system() == "Windows"):
-		newname = os.path.expanduser("~") + "\\InteractiveROSETTA\\" + newID + ".pdb"
+		newID = newname[newname.rfind("\\")+1:]
 	    else:
-		newname = os.path.expanduser("~") + "/InteractiveROSETTA/" + newID + ".pdb"
-	    try:
-		os.rename(self.selectedModel, newname)
-	    except:
-		# Windows may complain if the file already exists
+		newID = newname[newname.rfind("/")+1:]
+	    self.movingChains = []
+	    self.staticChains = []
+	    #if (platform.system() == "Windows"):
+		#newname = os.path.expanduser("~") + "\\InteractiveROSETTA\\" + newID
+	    #else:
+		#newname = os.path.expanduser("~") + "/InteractiveROSETTA/" + newID
+	    for i in range(0, len(self.viewMenu.GetItems())):
+		if (self.selectedModel == self.viewMenu.GetItems()[i]):
+		    realID = newID + "_%4.4i" % (i+1)
+		    realname = newname + "_%4.4i" % (i+1) + ".pdb"
 		try:
-		    os.remove(newname)
-		    os.rename(self.selectedModel, newname)
+		    os.rename(self.viewMenu.GetItems()[i], newname + "_%4.4i" % (i+1) + ".pdb")
 		except:
-		    print "ERROR: Could not load the docked structure into the Sequence Window"
-		    if (platform.system() == "Windows"):
-			print "The model is currently at " + self.selectedModel + " in " + os.path.expanduser("~") + "\\InteractiveROSETTA"
-		    else:
-			print "The model is currently at " + self.selectedModel + " in " + os.path.expanduser("~") + "/InteractiveROSETTA"
+		    # Windows may complain if the file already exists
+		    try:
+			os.remove(newname + "_%4.4i" % (i+1) + ".pdb")
+			os.rename(self.viewMenu.GetItems()[i], newname + "_%4.4i" % (i+1) + ".pdb")
+		    except:
+			print "ERROR: Could not load the docked structure into the Sequence Window"
+			if (platform.system() == "Windows"):
+			    print "The model is currently at " + self.selectedModel + " in " + os.path.expanduser("~") + "\\InteractiveROSETTA"
+			else:
+			    print "The model is currently at " + self.selectedModel + " in " + os.path.expanduser("~") + "/InteractiveROSETTA"
 	    try:
 		self.cmd.remove("dock_view")
 		self.cmd.delete("dock_view")
-		self.cmd.load(newname, newID)
-		self.seqWin.PyMOLPDBLoad(0, newname)
-		defaultPyMOLView(self.cmd, newID)
+		self.cmd.load(realname, realID)
+		self.seqWin.PyMOLPDBLoad(0, realname)
+		defaultPyMOLView(self.cmd, realID)
 		del self.dockView
 	    except:
 		# Some weird error happened, do nothing instead of crashing
@@ -1665,30 +2379,97 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.timeoutCount = 0
 	    f = open("coarsedockinputtemp", "w")
 	    f.write("PDBFILE\t" + self.dockpdbname.strip() + "\n")
-	    f2 = open(self.dockpdbname.strip(), "r")
+	    try:
+		f2 = open(self.dockpdbname.strip(), "r")
+	    except:
+		# Might not have finished writing it yet
+		return
 	    f.write("BEGIN PDB DATA\n")
 	    for aline in f2:
 		f.write(aline.strip() + "\n")
 	    f.write("END PDB DATA\n")
 	    f2.close()
+	    try:
+		f2 = open("constraints.cst", "r")
+		f.write("BEGIN CST DATA\n")
+		for aline in f2:
+		    f.write(aline.strip() + "\n")
+		f.write("END CST DATA\n")
+		f2.close()
+	    except:
+		pass
 	    f.write("JUMPCONFIG\t" + self.jumpconfig + "\n")
 	    f.write("ORIENT\t" + self.startingType + "\n")
 	    f.write("COARSEDECOYS\t" + self.txtCoarse.GetValue() + "\n")
 	    f.write("REFINEDDECOYS\t" + self.txtRefined.GetValue() + "\n")
+	    if (self.ensemble1):
+		fin = gzip.open(self.ensemble1, "r")
+		f.write("BEGIN ENSEMBLE1 DATA\n")
+		for aline in fin:
+		    f.write(aline)
+		f.write("END ENSEMBLE1 DATA\n")
+		fin.close()
+	    if (self.ensemble2):
+		fin = gzip.open(self.ensemble2, "r")
+		f.write("BEGIN ENSEMBLE2 DATA\n")
+		for aline in fin:
+		    f.write(aline)
+		f.write("END ENSEMBLE2 DATA\n")
+		fin.close()
 	    f.close()
 	    appendScorefxnParamsInfoToFile("coarsedockinputtemp", self.selectWin.weightsfile)
-	    if (useServer and False):
+	    if (self.serverOn):
 		try: 
 		    self.ID = sendToServer("coarsedockinput")
-		    self.usingServer = True
+		    # First make sure this isn't a duplicate
+		    alreadythere = False
+		    try:
+			f = open("downloadwatch", "r")
+			for aline in f:
+			    if (len(aline.split("\t")) >= 2 and aline.split("\t")[0] == "DOCK" and aline.split("\t")[1] == self.ID.strip()):
+				alreadythere = True
+				break
+			f.close()
+		    except:
+			pass
+		    if (not(alreadythere)):
+			f = open("downloadwatch", "a")
+			f.write("DOCK\t" + self.ID.strip() + "\t" + str(datetime.datetime.now().strftime("%A, %B %d - %I:%M:%S %p")) + "\t" + getServerName() + "\n")
+			f.close()
+		    dlg = wx.MessageDialog(self, "InteractiveROSETTA is now watching the server for job ID " + self.ID.strip() + ".  You will be notified when the package is available for download.", "Listening for Download", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		    dlg.ShowModal()
+		    dlg.Destroy()
+		    # Re-enable everything since we're not waiting for the local daemon to do anything
+		    self.viewMenu.Disable()
+		    self.parent.GoBtn.Enable()
+		    self.btnAddStatic.Enable()
+		    self.btnRemoveStatic.Enable()
+		    self.btnAddMoving.Enable()
+		    self.btnRemoveMoving.Enable()
+		    self.btnStarting.Enable()
+		    if (platform.system() == "Darwin"):
+			self.btnDock.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnDock.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		    else:
+			self.btnDock.SetLabel("Dock!")
+		    self.buttonState = "Dock!"
+		    self.btnDock.SetToolTipString("Perform docking simulation with selected parameters")
+		    self.seqWin.cannotDelete = False
+		    # Pop this message out of the queue
+		    for i in range(0, len(self.seqWin.msgQueue)):
+			if (self.seqWin.msgQueue[i].find("Performing protein docking") >= 0):
+			    self.seqWin.msgQueue.pop(i)
+			    break
+		    if (len(self.seqWin.msgQueue) > 0):
+			self.seqWin.labelMsg.SetLabel(self.seqWin.msgQueue[len(self.seqWin.msgQueue)-1])
+		    else:
+			self.seqWin.labelMsg.SetLabel("")
 		    logInfo("Coarse docking input sent to server daemon with ID " + self.ID)
-		    self.stage = 4 # When using server we cannot see the intermediates
+		    return
 		except:
-		    # Something failed, default to the local daemon
-		    os.rename("coarsedockinputtemp", "coarsedockinput")
-		    self.usingServer = False
-		    logInfo("Server daemon not available, coarse docking input uploaded at coarsedockinput")
-		    self.stage = 2
+		    dlg = wx.MessageDialog(self, "The server could not be reached!  Ensure that you have specified a valid server and that you have an network connection.", "Server Could Not Be Reached", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		    dlg.ShowModal()
+		    dlg.Destroy()
+		    return
 	    else:
 		os.rename("coarsedockinputtemp", "coarsedockinput")
 		self.usingServer = False
@@ -1855,7 +2636,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		self.viewMenu.Enable()
 		self.parent.GoBtn.Enable()
 		self.btnDock.Enable()
-		self.btnSave.Enable()
+		#self.btnSave.Enable()
 		#self.enableControls()
 		#self.selectedModel = ""
 		if (platform.system() == "Darwin"):

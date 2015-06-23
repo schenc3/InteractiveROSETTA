@@ -10,6 +10,7 @@ import webbrowser
 from tools import resizeTextControlForUNIX
 from tools import logInfo
 from tools import defaultPyMOLView
+from tools import getChainColor
 
 class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def __init__(self, parent, W, H):
@@ -180,6 +181,16 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.RibbonChainBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.RibbonChainBtn.Bind(wx.EVT_BUTTON, self.ribbonChainColor)
 	self.RibbonChainBtn.SetToolTipString("Color selected ribbons by chain")
+	
+	if (platform.system() == "Darwin"):
+	    self.ToggleSurfBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/ToggleSurfBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(85, 209), size=(70, 20))
+	else:
+	    self.ToggleSurfBtn = wx.Button(self, id=-1, label="Surf Off", pos=(85, 209), size=(70, 20))
+	    self.ToggleSurfBtn.SetForegroundColour("#000000")
+	    self.ToggleSurfBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	self.ToggleSurfBtn.Bind(wx.EVT_BUTTON, self.toggleSurf)
+	self.ToggleSurfBtn.SetToolTipString("Display configured surfaces")
+	self.showSurf = False
 	
 	if (platform.system() == "Windows"):
 	    self.labelSelection = wx.StaticText(self, -1, "Selection", (175, 5), (140, 20), wx.ALIGN_CENTRE)
@@ -795,8 +806,15 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    mycolor = "0x%02x%02x%02x" % data.GetColour().Get()
 	    try:
 		self.cmd.color(mycolor, "seqsele and symbol c")
+		try:
+		    # Save the fact that these residues are not colored by chain in case the colors get moved around later
+		    # (i.e. chains were deleted and other chains were moved up)
+		    self.cmd.select("atomcolorsele", "atomcolorsele and not seqsele")
+		except:
+		    pass
 	    except:
 		self.cmd.color(mycolor, "all and symbol c")
+		self.cmd.delete("atomcolorsele")
 	    logInfo("Set atom colors to " + mycolor)
 	dlg.Destroy()
 
@@ -815,6 +833,12 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.cmd.select("temp", "symbol h in seqsele")
 	    self.cmd.color("white", "temp")
 	    self.cmd.delete("temp")
+	    try:
+		# Save the fact that these residues are not colored by chain in case the colors get moved around later
+		# (i.e. chains were deleted and other chains were moved up)
+		self.cmd.select("atomcolorsele", "atomcolorsele and not seqsele")
+	    except:
+		pass
 	    self.cmd.enable("seqsele")
 	except:
 	    self.cmd.select("temp", "symbol c")
@@ -830,6 +854,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.cmd.select("temp", "symbol h")
 	    self.cmd.color("white", "temp")
 	    self.cmd.delete("temp")
+	    self.cmd.delete("atomcolorsele")
 	logInfo("Turned atom coloring to standard")
 	
     def atomChainColor(self, event):
@@ -838,7 +863,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.pymol.stored.selected = []
 	try:
 	    self.cmd.select("temp", "seqsele")
-	    self.cmd.iterate_state(1, "seqsele", "stored.selected.append(model+\" \"+chain)")
+	    self.cmd.iterate_state(1, "seqsele", "stored.selected.append(model+\"|\"+chain)")
 	    # Get the unique set of model|chain pairs
 	    self.pymol.stored.selected.sort()
 	    IDs = list(set(self.pymol.stored.selected))
@@ -851,21 +876,31 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    IDs.append(modelchain)
 	    selection = "all"
 	for modelchain in IDs:
-	    model = modelchain.split()[0]
+	    if (modelchain[len(modelchain)-1] == " " or modelchain[len(modelchain)-1] == "|"):
+		modelchain = modelchain.strip() + "_"
+	    model = modelchain.split("|")[0]
 	    try:
-		chain = modelchain.split()[1]
+		chain = modelchain.split("|")[1]
 	    except:
 		chain = "_"
-	    x = len(model) / 3
-	    r = hash(model[0:x] + chain) % 256
-	    g = hash(model[x:2*x] + chain) % 256
-	    b = hash(model[2*x:] + chain) % 256
-	    color = "0x%02x%02x%02x" % (r, g, b)
+	    #x = len(model) / 3
+	    #r = hash(model[0:x] + chain) % 256
+	    #g = hash(model[x:2*x] + chain) % 256
+	    #b = hash(model[2*x:] + chain) % 256
+	    #color = "0x%02x%02x%02x" % (r, g, b)
+	    row = self.seqWin.IDs.index(modelchain)
+	    color = getChainColor(row)
 	    if (chain != "_" and chain != " " and chain != ""):
 		self.cmd.select("temp", "model " + model + " and chain " + chain + " and " + selection + " and symbol c")
 	    else:
 		self.cmd.select("temp", "model " + model + " and " + selection + " and symbol c")
 	    self.cmd.color(color, "temp")
+	try:
+	    # Save the fact that these residues are colored by chain in case the colors get moved around later
+	    # (i.e. chains were deleted and other chains were moved up)
+	    self.cmd.select("atomcolorsele", selection + " or atomcolorsele")
+	except:
+	    self.cmd.select("atomcolorsele", selection)
 	try:
 	    self.cmd.delete("temp")
 	except:
@@ -991,9 +1026,19 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    try:
 		self.cmd.set("ribbon_color", mycolor, "seqsele")
 		self.cmd.set("cartoon_color", mycolor, "seqsele")
+		try:
+		    # Save the fact that these residues are not colored by chain in case the colors get moved around later
+		    # (i.e. chains were deleted and other chains were moved up)
+		    self.cmd.select("chaincolorsele", "chaincolorsele and not seqsele")
+		except:
+		    pass
 	    except:
-		self.cmd.set("ribbon_color", mycolor, "all")
-		self.cmd.set("cartoon_color", mycolor, "all")
+		self.cmd.set("ribbon_color", mycolor, "resi 1-9999")
+		self.cmd.set("cartoon_color", mycolor, "resi 1-9999")
+		try:
+		    self.cmd.delete("chaincolorsele")
+		except:
+		    pass
 	    logInfo("Set ribbon color to " + mycolor)
 	dlg.Destroy()
 
@@ -1008,18 +1053,49 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.cmd.select("temp", "ss h in seqsele")
 	    self.cmd.set("ribbon_color", "red", "temp")
 	    self.cmd.set("cartoon_color", "red", "temp")
-	    cmd.select("temp", "(ss b or ss t) and model " + model)
-	    cmd.set("ribbon_color", "blue", "temp")
-	    cmd.set("cartoon_color", "blue", "temp")
-	    cmd.select("temp", "(ss g or ss i) and model " + model)
-	    cmd.set("ribbon_color", "orange", "temp")
-	    cmd.set("cartoon_color", "orange", "temp")
+	    self.cmd.select("temp", "(ss b or ss t) and seqsele")
+	    self.cmd.set("ribbon_color", "blue", "temp")
+	    self.cmd.set("cartoon_color", "blue", "temp")
+	    self.cmd.select("temp", "(ss g or ss i) and seqsele")
+	    self.cmd.set("ribbon_color", "orange", "temp")
+	    self.cmd.set("cartoon_color", "orange", "temp")
+	    try:
+		# Save the fact that these residues are not colored by chain in case the colors get moved around later
+		# (i.e. chains were deleted and other chains were moved up)
+		self.cmd.select("chaincolorsele", "chaincolorsele and not seqsele")
+	    except:
+		pass
 	    self.cmd.delete("temp")
 	    self.cmd.select("seqsele", "seqsele")
 	    self.cmd.enable("seqsele")
 	except:
 	    defaultPyMOLView(self.cmd)
+	    try:
+		self.cmd.delete("colorchainsele")
+	    except:
+		pass
 	logInfo("Reset ribbon coloring to standard")
+	
+    def recolorSavedChainColors(self):
+	# This function is called whenever a chain is deleted to update chain-colored residues with their new
+	# colors according to the colored strip in the sequence viewer
+	try:
+	    self.cmd.select("temp", "seqsele")
+	except:
+	    pass
+	try:
+	    self.cmd.select("seqsele", "atomcolorsele")
+	    self.atomChainColor(None)
+	    self.cmd.disable("atomcolorsele")
+	except:
+	    pass
+	try:
+	    self.cmd.select("seqsele", "chaincolorsele")
+	    self.ribbonChainColor(None)
+	    self.cmd.disable("chaincolorsele")
+	except:
+	    pass
+	self.cmd.disable("seqsele")
 	
     def ribbonChainColor(self, event):
 	# Color the selected ribbons according to chain where the color of the chain
@@ -1027,7 +1103,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.pymol.stored.selected = []
 	try:
 	    self.cmd.select("temp", "seqsele")
-	    self.cmd.iterate_state(1, "seqsele", "stored.selected.append(model+\" \"+chain)")
+	    self.cmd.iterate_state(1, "seqsele", "stored.selected.append(model+\"|\"+chain)")
 	    # Get the unique set of model|chain pairs
 	    self.pymol.stored.selected.sort()
 	    IDs = list(set(self.pymol.stored.selected))
@@ -1035,25 +1111,29 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	except:
 	    IDs = []
 	    for ID in self.seqWin.IDs:
-		modelchain = ID[0:len(ID)-2] + " " + ID[len(ID)-1]
+		modelchain = ID[0:len(ID)-2] + "|" + ID[len(ID)-1]
 		if (not(modelchain) in IDs):
 		    IDs.append(modelchain)
 	    selection = "all"
 	for modelchain in IDs:
-	    model = modelchain.split()[0]
+	    if (modelchain[len(modelchain)-1] == " " or modelchain[len(modelchain)-1] == "|"):
+		modelchain = modelchain.strip() + "_"
+	    model = modelchain.split("|")[0]
 	    try:
-		chain = modelchain.split()[1]
+		chain = modelchain.split("|")[1]
 	    except:
 		chain = "_"
-	    x = len(model) / 3
-	    #h = hash(model + chain)
-	    #r = h & 0xFF0000 >> 16
-	    #g = h & 0x00FF00 >> 8
-	    #b = h & 0x0000FF
-	    r = hash(model[0:x] + chain) % 256
-	    g = hash(model[x:2*x] + chain) % 256
-	    b = hash(model[2*x:] + chain) % 256
-	    color = "0x%02x%02x%02x" % (r, g, b)
+	    #x = len(model) / 3
+	    ##h = hash(model + chain)
+	    ##r = h & 0xFF0000 >> 16
+	    ##g = h & 0x00FF00 >> 8
+	    ##b = h & 0x0000FF
+	    #r = hash(model[0:x] + chain) % 256
+	    #g = hash(model[x:2*x] + chain) % 256
+	    #b = hash(model[2*x:] + chain) % 256
+	    #color = "0x%02x%02x%02x" % (r, g, b)
+	    row = self.seqWin.IDs.index(modelchain)
+	    color = getChainColor(row)
 	    if (chain != "_" and chain != " " and chain != ""):
 		self.cmd.select("temp", "model " + model + " and chain " + chain + " and " + selection)
 	    else:
@@ -1061,12 +1141,44 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.cmd.set("ribbon_color", color, "temp")
 	    self.cmd.set("cartoon_color", color, "temp")
 	try:
+	    try:
+		# Save the fact that these residues are colored by chain in case the colors get moved around later
+		# (i.e. chains were deleted and other chains were moved up)
+		self.cmd.select("chaincolorsele", selection + " or chaincolorsele")
+	    except:
+		self.cmd.select("chaincolorsele", selection)
+	    self.cmd.disable("chaincolorsele")
 	    self.cmd.delete("temp")
 	except:
 	    pass
 	if (selection == "seqsele"):
 	    self.cmd.enable("seqsele")
 	logInfo("Colored ribbons by chain")
+    
+    def displaySurfaces(self):
+	# Use the selection information to display pre-configured surfaces from the molecular surfaces protocol
+	if (self.parent.Protocols.currentProtocol == "Molecular Surfaces"):
+	    return
+	self.cmd.flag("ignore", "all", "clear")
+	for name in self.cmd.get_names("selections"):
+	    if (name.startswith("surf_recp_")):
+		try:
+		    self.cmd.flag("ignore", "surf_lig_" + name[10:], "set")
+		except:
+		    pass
+		self.cmd.show("surface", "surf_recp_" + name[10:])
+    
+    def toggleSurf(self, event):
+	if (self.showSurf):
+	    self.showSurf = False
+	    self.ToggleSurfBtn.SetToolTipString("Display configured surfaces")
+	    self.ToggleSurfBtn.SetLabel("Surf Off")
+	    self.cmd.hide("surface", "all")
+	else:
+	    self.showSurf = True
+	    self.ToggleSurfBtn.SetToolTipString("Hide configured surfaces")
+	    self.ToggleSurfBtn.SetLabel("Surf On")
+	    self.displaySurfaces()
     
     def selectAll(self, event):
 	try:

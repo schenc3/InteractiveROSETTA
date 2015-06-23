@@ -306,7 +306,7 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	try:
 	    f = open("downloadwatch", "r")
 	    for aline in f:
-		if (len(aline.split("\t")) >= 2 and aline.split("\t")[0] == "FRAGMENT" and aline.split("\t") == str(txtJobID.GetValue().strip())):
+		if (len(aline.split("\t")) >= 2 and aline.split("\t")[0] == "FRAGMENT" and aline.split("\t")[1] == str(txtJobID.GetValue().strip())):
 		    alreadythere = True
 		    break
 	    f.close()
