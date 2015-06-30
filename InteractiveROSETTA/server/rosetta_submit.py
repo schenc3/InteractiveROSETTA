@@ -34,6 +34,8 @@ rosetta_bin = "/usr/local/rosetta/main/source/bin"
 rosetta_db = "/usr/local/rosetta/main/database"
 # Location of the antibody.py script and the antibody/blast databases
 antibody_home = "/usr/local/rosetta/tools/antibody"
+# Location of the fragment tools package
+fragment_tools = "/usr/local/rosetta/tools/fragment_tools"
 # ====================================================================================================================
 
 def AA3to1(resn):
@@ -44,7 +46,7 @@ def AA3to1(resn):
 	indx = indx3 / 4
 	return "ACDEFGHIKLMNPQRSTVWYO"[indx]
 
-def twoStageDock(nproc, inputstruct, hostfile, receptorchains, ligandchains, decoys, nfinal, randomize1, randomize2, ensemble1, ensemble2):
+def doDock(nproc, inputstruct, hostfile, receptorchains, ligandchains, decoys, nfinal, randomize1, randomize2, ensemble1, ensemble2):
     outputdir = "."
     # If either ensemble1 or ensemble2 is present, then we need a file for both ensembles
     # If either is False, then that ensemble needs a file with only the single template from the input 
@@ -229,7 +231,7 @@ def twoStageDock(nproc, inputstruct, hostfile, receptorchains, ligandchains, dec
 		print "ERROR: The ensemble scorer crashed!"
 		print "Output: " + output
 		exit()
-    # Do round 1 in MPI mode
+    # Do docking
     if (separateMPI_master):
 	commandline = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " -hostfile " + hostfile + " -np " + str(nproc) + " " + rosetta_bin + "/docking_protocol.mpi.linuxgccrelease @flags > dock.out) >& dock.err\""
     else:
@@ -251,128 +253,10 @@ def twoStageDock(nproc, inputstruct, hostfile, receptorchains, ligandchains, dec
 	for output in outputfiles:
 	    os.rename(output, outputdir + "/" + output)
 	outputfiles = glob.glob(outputdir + "/" + pdbprefix + "_*.pdb")
-    # If there were no constraints, we're done
-    if (constraintsfile):
-	# Now let's find the top 100 PDBs by constraint-only score, using total_score to break ties (if no constraints are
-	# given, then the ranking is basically just the total_score)
-	totalS = []
-	constraintS = []
-	for outputfile in outputfiles:
-	    fin = open(outputfile, "r")
-	    cscore = 0.0
-	    score = 9999999999.0
-	    for aline in fin:
-		if (aline.startswith("pose")):
-		    score = float(aline.split()[len(aline.split())-1])
-		elif (aline.startswith("atom_pair_constraint")):
-		    cscore = float(aline.split()[len(aline.split())-1])
-	    fin.close()
-	    totalS.append(score)
-	    constraintS.append(cscore)
-	# Now sort
-	for i in range(0, len(totalS)-1):
-	    bestindx = i
-	    for j in range(i, len(totalS)):
-		if (constraintS[j] < constraintS[bestindx]):
-		    bestindx = j
-		elif (constraintS[j] == constraintS[bestindx] and totalS[j] < totalS[bestindx]):
-		    bestindx = j
-	    temp = outputfiles[i]
-	    outputfiles[i] = outputfiles[bestindx]
-	    outputfiles[bestindx] = temp
-	    temp = totalS[i]
-	    totalS[i] = totalS[bestindx]
-	    totalS[bestindx] = temp
-	    temp = constraintS[i]
-	    constraintS[i] = constraintS[bestindx]
-	    constraintS[bestindx] = temp
-	winners = outputfiles[0:int(len(outputfiles) / 10)]
-	# Generate a list of commands for doing all the round 2 docking simulations
-	# Try to find the default, single processor Rosetta binary
-	platform = "default.linuxgccrelease"
-	binaries = glob.glob(rosetta_bin + "/docking_protocol.default.*")
-	if (len(binaries) > 0):
-	    platform = binaries[0].split("docking_protocol")[1]
-	    platform = platform[1:] # Get rid of the leading .
-	else:
-	    binaries = glob.glob(rosetta_bin + "/docking_protocol.static.*")
-	    if (len(binaries) > 0):
-		platform = binaries[0].split("docking_protocol")[1]
-		platform = platform[1:] # Get rid of the leading
-	commandlines = []
-	fout = open("commandslist", "w")
-	for i in range(0, len(winners)):
-	    # Generate the flags file
-	    commandline = rosetta_bin + "/docking_protocol." + platform + " "
-	    commandline = commandline + "-in:path:database " + rosetta_db + " "
-	    commandline = commandline + "-in:file:s " + winners[i].strip() + " "
-	    commandline = commandline + "-out:nstruct 10 "
-	    commandline = commandline + "-no_filters "
-	    if (ensemble1 or ensemble2):
-		commandline = commandline + "-ensemble1 ensemble1 -ensemble2 ensemble2 "
-	    commandline = commandline + "-score:weights talaris2013_cst "
-	    commandline = commandline + "-ignore_unrecognized_res "
-	    commandline = commandline + "-partners " + receptorchains + "_" + ligandchains + " "
-	    commandline = commandline + "-dock_pert 3 8 "
-	    commandline = commandline + "-constraints:cst_file " + constraintsfile + " " # Use the tight constraints now
-	    commandline = commandline + "-out:file:fullatom "
-	    commandline = commandline + "-overwrite"
-	    fout.write(commandline + "\n")
-	fout.close()
-	# Spawn the child processes
-	# For some reason, you cannot have mpi4py active in this script to spawn Rosetta processes
-	# I think it has something to do with the fact that Rosetta is MPI-aware, so having this script running with
-	# mpi4py activates MPI in the environment Rosetta starts in, so MPI-things get activated in Rosetta when they should
-	# not be activated (since you are intending to only submit a lot of individual single-CPU Rosetta sessions) and
-	# bad things happen
-	# The method below seems to work
-	#
-	# Calculate what machines will be given to each machine, duplicating if a machine has multiple CPUs
-	thishost = socket.gethostname()
-	hosts = []
-	fin = open(hostfile, "r")
-	for aline in fin:
-	    if (len(aline.strip()) == 0):
-		continue
-	    hostname = aline.split()[0]
-	    ncpus = int(aline.split()[1].split("=")[1]) # hostname slots=ncpus max-slots=ncpus
-	    for i in range(0, ncpus):
-		hosts.append(hostname)
-	fin.close()
-	processes = []
-	if (separateMPI_master):
-	    commandline = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " -hostfile " + hostfile + " -np " + str(nproc) + " python ../../dockR2.py > dock.out) >& dock.err\""
-	else:
-	    commandline = "cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " -hostfile " + hostfile + " -np " + str(nproc) + " python ../../dockR2.py > dock.out) >& dock.err"
-	res, output = commands.getstatusoutput(commandline)
-	if (res):
-	    print "ERROR: The Rosetta MPI docker, round 2, crashed!"
-	    print "Output: " + output
-	    exit()
-	# Move the outputs if desired
-	outputfiles = glob.glob(pdbprefix + "_*_*.pdb")
-	if (outputdir != "."):
-	    try:
-		os.mkdir(outputdir + "/round2")
-	    except:
-		pass
-	    pdbprefix = inputstruct.split(".pdb")[0]
-	    for output in outputfiles:
-		os.rename(output, outputdir + "/round2/" + output)
-	    outputfiles = glob.glob(outputdir + "/round2/" + pdbprefix + "_*_*.pdb")
-	else:
-	    try:
-		os.mkdir("round2")
-	    except:
-		pass
-	    pdbprefix = inputstruct.split(".pdb")[0]
-	    for output in outputfiles:
-		os.rename(output, "round2/" + output)
-	    outputfiles = glob.glob("round2/" + pdbprefix + "_*_*.pdb")
-	# Now again, rank by increasing constraint-only score with total_score to break ties
-	# Return the top 10 as the right answers
-	totalS = []
-	constraintS = []
+    # Now again, rank by increasing constraint-only score with total_score to break ties
+    # Return the top 10 as the right answers
+    totalS = []
+    constraintS = []
     for outputfile in outputfiles:
 	fin = open(outputfile, "r")
 	cscore = 0.0
@@ -411,6 +295,366 @@ def twoStageDock(nproc, inputstruct, hostfile, receptorchains, ligandchains, dec
 	else:
 	    os.rename(winner, "final_%4.4i.pdb" % i)
 	i += 1
+
+def setupKIC():
+    # Unpack everything we need from that inputfile and generate the flags file for KIC submission
+    fin = open("coarsekicinput", "r")
+    nstruct = 1
+    loopdata = []
+    for aline in fin:
+	if (aline[0:7] == "PDBFILE"):
+	    pdbfile = aline.split("\t")[1].strip()
+	    f2 = open(pdbfile, "w")
+	elif (aline[0:8] == "SCOREFXN"):
+	    weightsfile = aline.split("\t")[1].strip()
+	elif (aline[0:6] == "PARAMS"):
+	    paramsfile = aline.split("\t")[1].strip()
+	    f2 = open(paramsfile, "w")
+	elif (aline.startswith("BEGIN PDB")):
+	    readingData = True
+	elif (aline.startswith("END PDB")):
+	    f2.close()
+	    readingData = False
+	elif (aline.startswith("BEGIN PARAMS")):
+	    readingData = True
+	elif (aline.startswith("END PARAMS")):
+	    f2.close()
+	    readingData = False
+	elif (aline[0:19] == "BEGIN SCOREFXN DATA"):
+	    weightsfile = "weights"
+	    f2 = open(weightsfile, "w")
+	    readingData = True
+	elif (aline[0:17] == "END SCOREFXN DATA"):
+	    f2.close()
+	    readingData = False
+	elif (readingData):
+	    f2.write(aline.strip() + "\n")
+	elif (aline[0:4] == "LOOP"):
+	    # Save the information in a list that we will iterate through later
+	    loopdata.append(aline.strip().split("\t")[1:])
+	elif (aline[0:7] == "NSTRUCT"):
+	    nstruct = int(aline.split("\t")[1])
+	elif (aline[0:7] == "PERTURB"):
+	    perturbType = aline.split("\t")[1].strip()
+    fin.close()
+    # Get the PDB data because we're probably going to have to modify it
+    pdbdata = []
+    fin = open(pdbfile, "r")
+    last_res = "00000"
+    for aline in fin:
+	if (aline.startswith("ATOM") or aline.startswith("HETATM")):
+	    if (aline[22:27] != last_res):
+		last_res = aline[22:27]
+		pdbdata.append("")
+	    pdbdata[len(pdbdata)-1] += aline
+    fin.close()
+    # Read the dummy residues PDB data
+    rsd_factory = []
+    fin = open("../../data/residues.pdb", "r")
+    for aline in fin:
+	if (aline.startswith("ATOM") or aline.startswith("HETATM")):
+	    if (aline[22:27] != last_res):
+		last_res = aline[22:27]
+		rsd_factory.append("")
+	    rsd_factory[len(rsd_factory)-1] += aline
+    fin.close()
+    # Now construct dummy sequences for de novo loops
+    for i in range(0, len(loopdata)):
+	[loopType, sequence, begin, pivot, end] = loopdata[i]
+	loopBegin = int(begin)
+	pivot = int(pivot)
+	loopEnd = int(end)
+	if (loopType == "DE NOVO"):
+	    # Since this is a new sequence being added, we first have to delete all the residues
+	    # between the beginning and ending points
+	    oldlen = 0
+	    for ires in range(loopEnd-1, loopBegin, -1):
+		pdbdata.pop(ires-1) # Rosetta indices are from 1, not 0
+		#pose.delete_polymer_residue(ires)
+		oldlen += 1
+	    # Now we have to add the sequence using our nifty little "rsd_factory" pose
+	    # The residues will have coordinates in weird places but it doesn't matter because
+	    # KIC fixes that and puts them in the right place; they don't need to start out anywhere
+	    # near being right
+	    offset = 0
+	    for AA in sequence.strip():
+		indx = "ACDEFGHIKLMNPQRSTVWY".find(AA) + 1
+		pdbdata.insert(loopBegin+offset, rsd_factory[indx])
+		#pose.append_polymer_residue_after_seqpos(Residue(rsd_factory.residue(indx)), loopBegin+offset, True)
+		offset = offset + 1
+	    # Now we have to update the begin and end points of the other loops if necessary
+	    for j in range(0, len(loopdata)):
+		if (loopBegin < int(loopdata[j][2])):
+		    loopdata[j][2] = int(loopdata[j][2]) + len(sequence) - oldlen
+		if (loopBegin < int(loopdata[j][3])):
+		    loopdata[j][3] = int(loopdata[j][3]) + len(sequence) - oldlen
+		if (loopBegin < int(loopdata[j][4])):
+		    loopdata[j][4] = int(loopdata[j][4]) + len(sequence) - oldlen
+	    # Now maybe the sequence is longer than what was originally the length of the sequence
+	    # between start and end, so we need to recalculate the loop end
+	    loopEnd = loopBegin + len(sequence.strip()) + 1
+	if (loopType == "DE NOVO"):
+	    # This has to be hard-coded, because the loop is not actually there until coarse modeling happens so there's no pivot point
+	    # other than the loop anchor residues
+	    loopdata[i][3] = loopEnd
+    # Rewrite the PDB data
+    fout = open(pdbfile, "w")
+    for i in range(0, len(pdbdata)):
+	data = pdbdata[i]
+	# Renumber the residues
+	for aline in data.split("\n"):
+	    if (len(aline.strip()) > 0):
+		fout.write(aline[0:22] + "%4i" % (i+1) + aline[26:] + "\n")
+    fout.close()
+    # Write the loops file
+    fout = open("in.loop", "w")
+    for [loopType, sequence, begin, pivot, end] in loopdata:
+	if (loopType == "REFINE"):
+	    fout.write("LOOP " + str(begin) + " " + str(end) + " " + str(pivot) + " 0 0\n")
+	else:
+	    fout.write("LOOP " + str(begin) + " " + str(end) + " " + str(pivot) + " 0 1\n")
+    fout.close()
+    # Write the flags file
+    fout = open("flags", "w")
+    fout.write("-in:file:s " + pdbfile + "\n")
+    fout.write("-database " + rosetta_db + "\n")
+    fout.write("-loops:loop_file in.loop\n")
+    fout.write("-loops:remodel perturb_kic\n")
+    fout.write("-loops:refine refine_kic\n")
+    fout.write("-ignore_unrecognized_res\n")
+    fout.write("-overwrite\n")
+    fout.write("-score:weights weights\n")
+    fout.write("-out:nstruct " + str(nstruct) + "\n")
+    fout.close()
+    # Return the output stem so the ensemble packer can find the PDB outputs
+    return pdbfile.split(".pdb")[0] + "_"
+
+def doFlexPep():
+    # Generate the input files
+    fin = open("flexpepinput", "r")
+    readingData = False
+    have_cst = False
+    for aline in fin:
+	if (aline[0:7] == "PDBFILE"):
+	    pdbfile = aline.split("\t")[1].strip()
+	    f2 = open(pdbfile, "w")
+	elif (aline[0:8] == "SCOREFXN"):
+	    weightsfile = aline.split("\t")[1].strip()
+	elif (aline.startswith("BEGIN PDB")):
+	    readingData = True
+	elif (aline.startswith("END PDB")):
+	    f2.close()
+	    readingData = False
+	elif (aline[0:19] == "BEGIN SCOREFXN DATA"):
+	    weightsfile = "weights"
+	    f2 = open(weightsfile, "w")
+	    readingData = True
+	elif (aline[0:17] == "END SCOREFXN DATA"):
+	    f2.close()
+	    readingData = False
+	elif (aline[0:14] == "BEGIN CST DATA"):
+	    f2 = open("constraints.cst", "w")
+	    readingData = True
+	    have_cst = True
+	elif (aline[0:12] == "END CST DATA"):
+	    f2.close()
+	    readingData = False
+	elif (readingData):
+	    f2.write(aline.strip() + "\n")
+	elif (aline.startswith("RECEPTOR")):
+	    receptorChains = aline.split("\t")[1].strip()
+	elif (aline.startswith("PEPTIDE")):
+	    peptideChain = aline.split("\t")[1].strip()
+	elif (aline.startswith("DECOYS")):
+	    ndecoys = int(aline.split("\t")[1].strip())
+	elif (aline.startswith("RETURNMODELS")):
+	    nreturn = int(aline.split("\t")[1].strip())
+	elif (aline.startswith("FLEXMODE")):
+	    mode = aline.split("\t")[1].strip()
+    fin.close()
+    if (mode == "ABINITIO"):
+	# Generate the FASTA file for the peptide
+	# This is needed so we can generate fragments 
+	fin = open(pdbfile, "r")
+	fout = open("peptide.fasta", "w")
+	fout.write("> Peptide Sequence\n")
+	lastres = "0000"
+	for aline in fin:
+	    if (aline.startswith("ATOM") and aline[21] == peptideChain and lastres != aline[22:26]):
+		lastres = aline[22:26]
+		fout.write(AA3to1(aline[17:20]))
+	fout.write("\n")
+	fin.close()
+	fout.close()
+	# Now we have to run PSIBLAST to get a position specific matrix to generate the sequence
+	# profile for fragment selections
+	commandline = "blastpgp -i peptide.fasta -j 2 -d nr.15 -C checkpoint.pssm"
+	print commandline
+	res, output = commands.getstatusoutput(commandline)
+	if (res):
+	    print "ERROR: blastpgp failed!"
+	    exit()
+	# Now we have to use Rosetta's script to convert the binary checkpoint.pssm to a text
+	# file that can be used for sequence profiles
+	commandline = "perl ../../gen-sequence-profile.pl peptide.fasta checkpoint.pssm frags.chk"
+	print commandline
+	res, output = commands.getstatusoutput(commandline)
+	if (res):
+	    print "ERROR: gen-sequence-profile.pl failed!"
+	    exit()
+	# Now run psipred to get the secondary structure prediction
+	commandline = "runpsipred_single peptide.fasta"
+	print commandline
+	res, output = commands.getstatusoutput(commandline)
+	if (res):
+	    print "ERROR: PSIPRED failed!"
+	    exit()
+	# Now generate a simple weighting scheme for fragment selection
+	fout = open("simple.wghts", "w")
+	fout.write("# score name        priority  wght   max_allowed  extras\n")
+	fout.write("SecondarySimilarity 350 1.0 - psipred\n")
+	fout.write("RamaScore 150 2.0 - psipred\n")
+	fout.write("ProfileScoreL1 200 2.0 -\n")
+	fout.write("SequenceIdentity 100 1.0 -") # No newline here otherwise you get a duplicate!!!
+	fout.close()
+	# Setup and run fragment generation
+	fout = open("flags", "w")
+	fout.write("-database " + rosetta_db + "\n")
+	fout.write("-in::file::vall " + fragment_tools + "/vall.apr24.2008.extended.gz\n")
+	fout.write("-in::file::fasta peptide.fasta\n")
+	fout.write("-in::file::checkpoint frags.chk\n")
+	fout.write("-frags::ss_pred peptide.ss2 psipred\n")
+	fout.write("-frags::scoring::config simple.wghts\n")
+	fout.write("-frags::bounded_protocol\n")
+	fout.write("-frags::frag_sizes 3 5 9\n")
+	fout.write("-frags::n_candidates 200\n")
+	fout.write("-frags::n_frags 200\n")
+	fout.write("-out::file::frag_prefix frags\n")
+	fout.write("-frags::describe_fragments frags.fsc\n")
+	fout.close()
+	if (separateMPI_master):
+            command = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " 1 " + rosetta_bin + "/fragment_picker.mpi.linuxgccrelease @flags > frag.out) >& frag.err\""
+        else:
+            command = "cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " 1 " + rosetta_bin + "/fragment_picker.mpi.linuxgccrelease @flags > frag.out) >& frag.err"
+	print command
+	p = Popen(args=command, stdout=PIPE, shell=True)
+	(out, err) = p.communicate()
+	# As per the flexpepdock instructions, we have to shift the fragment positions in the
+	# frags files by the number of residues in receptor chains
+	# Count the number of receptor residues
+	fin = open(pdbfile, "r")
+	nResReceptor = 0
+	last_res = "0000"
+	for aline in fin:
+	    if ((aline.startswith("ATOM") or aline.startswith("HETATM")) and aline[21] in receptorChains and aline[22:26] != last_res):
+		last_res = aline[22:26]
+		nResReceptor += 1
+	fin.close()
+	fout = open("shift.csh", "w")
+	fout.write("set ifragfile=\"frags.200.3mers\"\n")
+	fout.write("set ofragfile=\"frags.200.shifted.3mers\"\n")
+	fout.write("set nResReceptor=" + str(nResReceptor) + "\n")
+	fout.write("awk '{if ( substr ( $0,1,3 ) == \"pos\" ) {print substr ( $0,0,18 ) sprintf (\"%4d\",substr ( $0,19,4 ) + '\"$nResReceptor\"' ) substr ( $0,23,1000 ) ; } else {print ; }}' $ifragfile > $ofragfile\n")
+	fout.write("set ifragfile=\"frags.200.5mers\"\n")
+	fout.write("set ofragfile=\"frags.200.shifted.5mers\"\n")
+	fout.write("awk '{if ( substr ( $0,1,3 ) == \"pos\" ) {print substr ( $0,0,18 ) sprintf (\"%4d\",substr ( $0,19,4 ) + '\"$nResReceptor\"' ) substr ( $0,23,1000 ) ; } else {print ; }}' $ifragfile > $ofragfile\n")
+	fout.write("set ifragfile=\"frags.200.9mers\"\n")
+	fout.write("set ofragfile=\"frags.200.shifted.9mers\"\n")
+	fout.write("awk '{if ( substr ( $0,1,3 ) == \"pos\" ) {print substr ( $0,0,18 ) sprintf (\"%4d\",substr ( $0,19,4 ) + '\"$nResReceptor\"' ) substr ( $0,23,1000 ) ; } else {print ; }}' $ifragfile > $ofragfile\n")
+	fout.close()
+	commandline = "tcsh shift.csh"
+	print commandline
+	res, output = commands.getstatusoutput(commandline)
+	if (res):
+	    print "ERROR: Could not shift the frag files!"
+	    exit()
+    # Now that we have the fragments, we can run flexpepdock
+    # Generate the new frags file
+    fout = open("flags", "w")
+    fout.write("-database " + rosetta_db + "\n")
+    fout.write("-s " + pdbfile + "\n")
+    fout.write("-ex1\n")
+    fout.write("-ex2aro\n")
+    fout.write("-use_input_sc\n")
+    if (mode == "ABINITIO"):
+	fout.write("-frag3 frags.200.shifted.3mers\n")
+	fout.write("-frag5 frags.200.shifted.5mers\n")
+	fout.write("-frag9 frags.200.shifted.9mers\n")
+	fout.write("-lowres_abinitio\n")
+    fout.write("-pep_refine\n")
+    fout.write("-nstruct " + str(ndecoys) + "\n")
+    if (have_cst):
+	fout.write("-constraints:cst_file constraints.cst\n")
+	if (mode == "ABINITIO"):
+	    fout.write("-place_peptide_on_binding_site\n")
+    fout.write("-receptor_chain " + receptorChains + "\n")
+    fout.write("-peptide_chain " + peptideChain + "\n")
+    fout.write("-score:weights talaris2013_cst\n")
+    fout.close()
+    # Run it
+    if (separateMPI_master):
+	command = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/FlexPepDocking.mpi.linuxgccrelease @flags > flexpep.out) >& flexpep.err\""
+    else:
+	command = "cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/FlexPepDocking.mpi.linuxgccrelease @flags > flexpep.out) >& flexpep.err"
+    print command
+    p = Popen(args=command, stdout=PIPE, shell=True)
+    (out, err) = p.communicate()
+    # Okay, now let's take the top N models as ranked by the constraints score first and
+    # reweighted FlexPepDock score second
+    # We can get this information out of the score file
+    pdbstem = pdbfile.split(".pdb")[0]
+    pdblist = []
+    cst_scores = []
+    rw_scores = []
+    for i in range(0, ndecoys):
+	pdblist.append(pdbstem + "_%4.4i.pdb" % (i+1))
+	cst_scores.append(0.0)
+	rw_scores.append(0.0)
+    fin = open("score.sc", "r")
+    for aline in fin:
+	if ("total_score" in aline):
+	    fields = aline.split()
+	    try:
+		rw_indx = fields.index("reweighted_sc")
+	    except:
+		rw_indx = fields.index("total_score")
+	    try:
+		cst_indx = fields.index("atom_pair_constraint")
+	    except:
+		cst_indx = -1
+	    desc_indx = fields.index("description")
+	elif (aline.startswith("SCORE:")):
+	    try:
+		pdb = aline.split()[desc_indx] + ".pdb"
+		score = float(aline.split()[rw_indx])
+		rw_scores[pdblist.index(pdb)] = score
+		if (cst_indx >= 0):
+		    score = float(aline.split()[cst_indx])
+		    cst_scores[pdblist.index(pdb)] = score
+	    except:
+		pass
+    fin.close()
+    # Now do the select sorting
+    for i in range(0, len(pdblist)-1):
+	best = i
+	for j in range(i+1, len(pdblist)):
+	    if (cst_scores[j] < cst_scores[best]):
+		best = j
+	    elif (cst_scores[j] == cst_scores[best] and rw_scores[j] < rw_scores[best]):
+		best = j
+	temp = pdblist[best]
+	pdblist[best] = pdblist[i]
+	pdblist[i] = temp
+	temp = rw_scores[best]
+	rw_scores[best] = rw_scores[i]
+	rw_scores[i] = temp
+	temp = cst_scores[best]
+	cst_scores[best] = cst_scores[i]
+	cst_scores[i] = temp
+    # Copy them to new filename
+    for i in range(0, nreturn):
+	outfile = "final_flexpep_%4.4i.pdb" % (i+1)
+	os.system("cp " + pdblist[i] + " " + outfile)
 
 # This script is used by InteractiveROSETTA to submit uploaded jobs to the C++ Rosetta, and then packages them up into
 # files that the client GUI can access remotely
@@ -460,7 +704,7 @@ if (protocol == "msd"):
 else:
     addparams = False
 if (addparams):
-    paramsfiles = glob.glob("*.params")
+    paramsfiles = glob.glob("*.fa.params")
     if (len(paramsfiles) > 0):
         f = open("flags", "a")
         f.write("-extra_res_fa")
@@ -469,11 +713,20 @@ if (addparams):
         f.write("\n")
         f.close()
 # Enter the queue
-while (os.path.isfile(iRosetta_home + "/writing_to_queue")):
-    time.sleep(10)
-f = open(iRosetta_home + "/writing_to_queue", "w")
-f.write("TAKEN")
-f.close()
+while (True):
+    while (os.path.isfile(iRosetta_home + "/writing_to_queue")):
+	time.sleep(10)
+    f = open(iRosetta_home + "/writing_to_queue", "w")
+    f.write(this_host)
+    f.close()
+    # Wait a while, in case other nodes got in as well, then check the hostname in the file
+    # and wait some more if it is not this hostname
+    time.sleep(3)
+    fin = open(iRosetta_home + "/writing_to_queue", "r")
+    filehostname = fin.readlines()[0].strip()
+    fin.close()
+    if (filehostname == this_host):
+	break
 f = open(iRosetta_home + "/rosetta_queue", "a")
 f.write(jobID.strip() + "\n")
 f.close()
@@ -485,11 +738,20 @@ while (True):
     # We'll use a common file to queue jobIDs so they all run in order
     # First grab a mutex in case multiple instances of this script are running, so they don't query the backends at the same
     # time and grab the same nodes
-    while (os.path.isfile(iRosetta_home + "/writing_to_queue")):
-        time.sleep(10)
-    f = open(iRosetta_home + "/writing_to_queue", "w")
-    f.write("TAKEN")
-    f.close()
+    while (True):
+	while (os.path.isfile(iRosetta_home + "/writing_to_queue")):
+	    time.sleep(10)
+	f = open(iRosetta_home + "/writing_to_queue", "w")
+	f.write(this_host)
+	f.close()
+	# Wait a while, in case other nodes got in as well, then check the hostname in the file
+	# and wait some more if it is not this hostname
+	time.sleep(3)
+	fin = open(iRosetta_home + "/writing_to_queue", "r")
+	filehostname = fin.readlines()[0].strip()
+	fin.close()
+	if (filehostname == this_host):
+	    break
     f = open(iRosetta_home + "/rosetta_queue", "r")
     data = f.readlines()
     if (len(data) > 0 and data[0].strip() == jobID.strip()):
@@ -508,17 +770,33 @@ while (True):
     time.sleep(10)
 # Loop for finding free nodes
 while (True):
-    while (os.path.isfile(iRosetta_home + "/backend_query")):
-        time.sleep(10)
-    f = open(iRosetta_home + "/backend_query", "w")
-    f.write("TAKEN")
-    f.close()
+    while (True):
+	while (os.path.isfile(iRosetta_home + "/backend_query")):
+	    time.sleep(10)
+	f = open(iRosetta_home + "/backend_query", "w")
+	f.write(this_host)
+	f.close()
+	# Wait a while, in case other nodes got in as well, then check the hostname in the file
+	# and wait some more if it is not this hostname
+	time.sleep(3)
+	fin = open(iRosetta_home + "/backend_query", "r")
+	filehostname = fin.readlines()[0].strip()
+	fin.close()
+	if (filehostname == this_host):
+	    break
     # How many models do we need for certain protocols?
     if (protocol == "antibody"):
 	fin = open("antibodyinput", "r")
 	for aline in fin:
 	    if (aline.startswith("NMODELS")):
 		nmodels = int(aline.split("\t")[1])
+		break
+	fin.close()
+    elif (protocol == "kic"):
+	fin = open("coarsekicinput", "r")
+	for aline in fin:
+	    if (aline.startswith("NSTRUCT")):
+		nmodels = int(aline.split("\t")[1]) + 1
 		break
 	fin.close()
     elif (protocol == "backrub"):
@@ -535,11 +813,21 @@ while (True):
 		nmodels = int(aline.split("\t")[1])
 		break
 	fin.close()
+    elif (protocol == "flexpep"):
+	fin = open("flexpepinput", "r")
+	for aline in fin:
+	    if (aline.startswith("RETURNMODELS")):
+		nmodels = int(aline.split("\t")[1])
+		break
+	fin.close()
     elif (protocol == "pmutscan"):
 	# Take as many as we can get
 	nmodels = 99999
     # Query the backend nodes to find which nodes are free and submit to those nodes
     for host in hosts:
+	# Wait a minute in case a new job is starting, we need to wait to let the CPUs
+	# get busy enough that uptime reports accurate loads
+	#time.sleep(60)
         hostname = host[0]
         slots = host[1]
         if (hostname == this_host):
@@ -567,7 +855,7 @@ while (True):
         if (float(load_1min) < 0.5 * float(nproc)):
             cpus_allocated = cpus_allocated + slots
             selected_hosts.append([hostname, slots])
-	if (protocol in ["antibody", "dock", "pmutscan", "backrub"]):
+	if (protocol in ["antibody", "dock", "pmutscan", "backrub", "kic", "flexpep"]):
 	    if (cpus_allocated >= nmodels):
 		cpus = nmodels
 		runnable = True
@@ -581,9 +869,15 @@ while (True):
 	    else:
 		runnable = False
     os.remove(iRosetta_home + "/backend_query")
-    if (protocol in ["antibody", "dock", "pmutscan", "backrub"]):
+    if (protocol in ["antibody", "dock", "pmutscan", "backrub", "kic"]):
 	# Ideally we want one processor per model, but if we have at least mincpus then let's go for it
 	if (not(runnable) and cpus_allocated >= mincpus):
+	    cpus = cpus_allocated
+	    runnable = True
+    elif (protocol == "flexpep"):
+	# This one really needs a lot to finish in time, this is calculated such that it should
+	# get enough nodes to finish in one day at the most
+	if (not(runnable) and cpus_allocated >= nmodels / 300):
 	    cpus = cpus_allocated
 	    runnable = True
     if (runnable):
@@ -727,7 +1021,7 @@ if (runnable):
 	    ensemble2 = True
 	else:
 	    ensemble2 = False
-	twoStageDock(cpus, pdbfile, "hostfile_" + jobID.strip(), jumpconfig.split("_")[0], jumpconfig.split("_")[1], ncoarse, nrefined, randomize1, randomize2, ensemble1, ensemble2)
+	doDock(cpus, pdbfile, "hostfile_" + jobID.strip(), jumpconfig.split("_")[0], jumpconfig.split("_")[1], ncoarse, nrefined, randomize1, randomize2, ensemble1, ensemble2)
     elif (protocol == "pmutscan"):
 	# Get the pdbfile, resfile, and scorefxn from the input file
 	fin = open("scaninput", "r")
@@ -776,12 +1070,20 @@ if (runnable):
             command = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/pmut_scan_parallel.mpi.linuxgccrelease @flags > pmut.out) >& pmut.err\""
         else:
             command = "cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/pmut_scan_parallel.mpi.linuxgccrelease @flags > pmut.out) >& pmut.err"
+    elif (protocol == "kic"):
+	outputstem = setupKIC()
+	if (separateMPI_master):
+            command = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/loopmodel.mpi.linuxgccrelease @flags > kic.out) >& kic.err\""
+        else:
+            command = "cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/loopmodel.mpi.linuxgccrelease @flags > kic.out) >& kic.err"
     elif (protocol == "msd"):
 	if (separateMPI_master):
             command = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/mpi_msd.mpi.linuxgccrelease @flags > msd.out) >& msd.err\""
         else:
             command = "cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/mpi_msd.mpi.linuxgccrelease @flags > msd.out) >& msd.err"
-    if (protocol != "dock"):
+    elif (protocol == "flexpep"):
+	doFlexPep()
+    if (protocol not in ["dock", "flexpep"]):
 	print command
 	p = Popen(args=command, stdout=PIPE, shell=True)
 	(out, err) = p.communicate()
@@ -861,6 +1163,30 @@ elif (protocol == "dock"):
         f.write(errmsg)
         f.close()
         exit()
+elif (protocol == "flexpep"):
+    # Did we crash?  The answer is yes then we did not get the required number of output models
+    crashed = False
+    errmsg = ""
+    try:
+	f = open("flexpep.err", "r")
+	for aline in f:
+	    errmsg = errmsg + aline.strip() + "\n"
+	f.close()
+    except:
+	f = open("frag.err", "r")
+	for aline in f:
+	    errmsg = errmsg + aline.strip() + "\n"
+	f.close()
+    # Sometimes warnings get outputted to the error file, so we can't know if an error really happening
+    # simply by checking to see if dock.err has content in it
+    outputfiles = glob.glob("final_flexpep_????.pdb")
+    if (len(outputfiles) == 0):
+	crashed = True
+    if (crashed):
+        f = open("errreport", "w")
+        f.write(errmsg)
+        f.close()
+        exit()
 elif (protocol == "backrub"):
     # Did we crash?  The answer is yes then we did not get the required number of output models
     crashed = False
@@ -872,6 +1198,24 @@ elif (protocol == "backrub"):
     # Sometimes warnings get outputted to the error file, so we can't know if an error really happening
     # simply by checking to see if dock.err has content in it
     outputfiles = glob.glob(pdbfile.split(".pdb")[0] + "_*.pdb")
+    if (len(outputfiles) == 0):
+	crashed = True
+    if (crashed):
+        f = open("errreport", "w")
+        f.write(errmsg)
+        f.close()
+        exit()
+elif (protocol == "kic"):
+    # Did we crash?  The answer is yes then we did not get the required number of output models
+    crashed = False
+    errmsg = ""
+    f = open("kic.err", "r")
+    for aline in f:
+        errmsg = errmsg + aline.strip() + "\n"
+    f.close()
+    # Sometimes warnings get outputted to the error file, so we can't know if an error really happening
+    # simply by checking to see if dock.err has content in it
+    outputfiles = glob.glob(outputstem + "*.pdb")
     if (len(outputfiles) == 0):
 	crashed = True
     if (crashed):

@@ -616,9 +616,19 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	if (chainList != self.staticMenu.GetItems()):
 	    self.staticMenu.Clear()
 	    self.staticMenu.AppendItems(chainList)
+	    # Take out invalid chains if the list of models changed
+	    for i in range(len(self.staticChains)-1, -1, -1):
+		if (self.staticChains[i] not in chainList):
+		    self.staticChains.pop(i)
+	    self.updateGrid()
 	if (chainList != self.movingMenu.GetItems()):
 	    self.movingMenu.Clear()
 	    self.movingMenu.AppendItems(chainList)
+	    # Take out invalid chains if the list of models changed
+	    for i in range(len(self.movingChains)-1, -1, -1):
+		if (self.movingChains[i] not in chainList):
+		    self.movingChains.pop(i)
+	    self.updateGrid()
 	# Grab the current selection of residues for adding constraints
 	topLefts = self.seqWin.SeqViewer.GetSelectionBlockTopLeft()
 	bottomRights = self.seqWin.SeqViewer.GetSelectionBlockBottomRight()
@@ -830,10 +840,13 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    residueMoving = True
 		if ((residueStatic and residueMoving) or (not(residueStatic) and not(residueMoving))):
 		    self.constraints.pop(i)
+		    continue
 		elif (residueStatic and len(self.grdConstraints.GetCellValue(i, 4)) > 0 and not(self.grdConstraints.GetCellValue(i, 4) in self.movingChains)):
 		    self.constraints.pop(i)
+		    continue
 		elif (residueMoving and len(self.grdConstraints.GetCellValue(i, 4)) > 0 and not(self.grdConstraints.GetCellValue(i, 4) in self.staticChains)):
 		    self.constraints.pop(i)
+		    continue
 		# Now make sure the residues still exist
 		model = self.grdConstraints.GetCellValue(i, 2)
 		chain = model[len(model)-1]
@@ -1883,6 +1896,9 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblSelStaticEnsb.SetLabel(filelabel)
 	    if (platform.system() == "Linux"):
 		resizeTextControlForUNIX(self.lblSelStaticEnsb, 0, 320)
+	# Turn the server on by default if it is not already on
+	if (not(self.serverOn)):
+	    self.serverToggle(event)
     
     def deleteStaticEnsb(self, event):
 	self.ensemble1 = None
@@ -1972,6 +1988,9 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblSelMovingEnsb.SetLabel(filelabel)
 	    if (platform.system() == "Linux"):
 		resizeTextControlForUNIX(self.lblSelMovingEnsb, 0, 320)
+	# Turn the server on by default if it is not already on
+	if (not(self.serverOn)):
+	    self.serverToggle(event)
     
     def deleteMovingEnsb(self, event):
 	self.ensemble2 = None
@@ -2040,6 +2059,8 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    vtranslate = vdestination - vcenter2
 	    # Now translate
 	    self.cmd.translate(list(vtranslate), movingchainstr, camera=0)
+	    self.cmd.center(staticchainstr + " or " + movingchainstr)
+	    self.cmd.zoom(staticchainstr + " or " + movingchainstr)
 	    #self.stored.sum_x = 0.0
 	    #self.stored.sum_y = 0.0
 	    #self.stored.sum_z = 0.0

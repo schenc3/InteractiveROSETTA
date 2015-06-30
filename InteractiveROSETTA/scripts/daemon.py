@@ -705,7 +705,36 @@ def doScore():
     total_E = scorefxn(pose)
     # Dump the output
     outputpdb = pdbfile.split(".pdb")[0] + "_S.pdb"
+    # Save atomic charge information in the segment identifier fields (columns 73-76 in PDB)
+    # PyMOL reads that as the "segl" field
+    info = pose.pdb_info()
+    charges = {}
+    for ires in range(1, pose.n_residue()+1):
+	for iatom in range(1, len(pose.residue(ires).atoms())+1):
+	    pc = pose.residue(ires).atomic_charge(iatom)
+	    pc = round(pc * 4.0)
+	    if (pc < -4):
+		pc = -4
+	    elif (pc > 4):
+		pc = 4
+	    charges[str(info.number(ires)) + pose.residue(ires).atom_name(iatom)] = int(pc)
     pose.dump_pdb(outputpdb)
+    # Now manually insert the charges
+    fin = open(outputpdb, "r")
+    data = []
+    for aline in fin:
+	data.append(aline)
+    fin.close()
+    fout = open(outputpdb, "w")
+    for aline in data:
+	if (aline.startswith("ATOM") or aline.startswith("HETATM")):
+	    pc = charges[aline[22:26].strip() + aline[12:16]]
+	    if (pc < 0):
+		aline = aline[0:78] + "%1i-" % (pc * -1) + aline[80:]
+	    else:
+		aline = aline[0:78] + "%1i+" % pc + aline[80:]
+	fout.write(aline)
+    fout.close()
     # Now write the output information for the main GUI
     f.write("OUTPUT\t" + outputpdb + "\n")
     f.write("TOTAL_E\t" + str(total_E) + "\n")
@@ -714,7 +743,6 @@ def doScore():
     for scoretype in nonzero_scoretypes:
 	f.write("\t" + str(scoretype))
     f.write("\n")
-    info = pose.pdb_info()
     for res in range(1, pose.n_residue()+1):
 	# Skip HETATMs/NCAAs
 	if (not(pose.residue(res).name1() in "ACDEFGHIKLMNPQRSTVWY")):
@@ -906,6 +934,7 @@ def doKIC(stage="Coarse"):
 	    raise Exception("ERROR: The file \"finekicinput\" is missing!")
     # Get the pdbfile, resfile, and scorefxn from the input file
     pivotOffset = 0
+    loopdata = []
     for aline in f:
 	if (aline[0:7] == "PDBFILE"):
 	    # But for the fine grained step the pose comes from repacked.pdb
@@ -922,6 +951,9 @@ def doKIC(stage="Coarse"):
 	    loopEnd = int(aline.split("\t")[1])
 	elif (aline[0:5] == "PIVOT"):
 	    pivotOffset = int(aline.split("\t")[1])
+	elif (aline[0:4] == "LOOP"):
+	    # Save the information in a list that we will iterate through later
+	    loopdata.append(aline.strip().split("\t")[1:])
 	elif (aline[0:7] == "NSTRUCT"):
 	    nstruct = int(aline.split("\t")[1])
 	elif (aline[0:7] == "PERTURB"):
@@ -937,36 +969,9 @@ def doKIC(stage="Coarse"):
 	raise Exception("ERROR: The scoring function weights could not be initialized!")
     if (stage == "Coarse"):
 	pose = pose_from_pdb(pdbfile)
-    if (loopType == "DE NOVO"):
-	if (stage == "Coarse"):
-	    # Since this is a new sequence being added, we first have to delete all the residues
-	    # between the beginning and ending points
-	    for ires in range(loopEnd-1, loopBegin, -1):
-		pose.delete_polymer_residue(ires)
-	    # Now we have to add the sequence using our nifty little "rsd_factory" pose
-	    # The residues will have coordinates in weird places but it doesn't matter because
-	    # KIC fixes that and puts them in the right place; they don't need to start out anywhere
-	    # near being right
-	    try:
-		rsd_factory = pose_from_pdb("data/residues.pdb")
-	    except:
-		raise Exception("ERROR: The file \"data/residues.pdb\" is missing!")
-	    offset = 0
-	    for AA in sequence.strip():
-		indx = "ACDEFGHIKLMNPQRSTVWY".find(AA) + 2
-		pose.append_polymer_residue_after_seqpos(Residue(rsd_factory.residue(indx)), loopBegin+offset, True)
-		offset = offset + 1
-	# Now maybe the sequence is longer than what was originally the length of the sequence
-	# between start and end, so we need to recalculate the loop end
-	loopEnd = loopBegin + len(sequence.strip()) + 1
-    elif (loopType == "REFINE"):
-	# Here we only want to do high resolution modeling
-	stage = "Fine"
-	nstruct = 1
-    # We have to take the HETATMs out otherwise it will crash the centroid mover
-    # We could try to make centroid params files, but it seems that they sometimes cause Rosetta to seg fault, which we cannot have
-    # Later we'll put them back in
-    if (stage == "Coarse"):
+	# We have to take the HETATMs out otherwise it will crash the centroid mover
+	# We could try to make centroid params files, but it seems that they sometimes cause Rosetta to seg fault, which we cannot have
+	# Later we'll put them back in
 	HETATMs = []
 	HETATM_indx = []
 	info = pose.pdb_info()
@@ -976,10 +981,14 @@ def doKIC(stage="Coarse"):
 		    HETATMs.append([i, Residue(pose.residue(i))])
 		else:
 		    HETATM_indx.append((info.chain(i), info.number(i)))
-		if (i < loopBegin):
-		    loopBegin = loopBegin -1
-		if (i < loopEnd):
-		    loopEnd = loopEnd -1
+		# Taking these residues out might change where the loop anchors are
+		for j in range(0, len(loopdata)):
+		    if (i < int(loopdata[j][2])):
+			loopdata[j][2] = int(loopdata[j][2]) -1
+		    if (i < int(loopdata[j][3])):
+			loopdata[j][3] = int(loopdata[j][3]) -1
+		    if (i < int(loopdata[j][4])):
+			loopdata[j][4] = int(loopdata[j][4]) -1
 		if (i == 1):
 		    pose.replace_residue(1, pose.residue(2), False)
 		    pose.delete_polymer_residue(2)
@@ -994,18 +1003,59 @@ def doKIC(stage="Coarse"):
 		if ((chain, seqpos) in HETATM_indx):
 		    HETATM_lines.append(aline.strip())
 	f.close()
-    if (loopType == "DE NOVO" and stage == "Coarse"):
-	# This has to be hard-coded, because the loop is not actually there until coarse modeling happens so there's no pivot point
-	# other than the loop anchor residues
-	cutpoint = loopEnd
-    else:
-	cutpoint = loopBegin + pivotOffset
-    loop = Loop(loopBegin, loopEnd, cutpoint, 0, 1)
-    loops = Loops()
-    loops.add_loop(loop)
+    loops = []
+    for [loopType, sequence, begin, pivot, end] in loopdata:
+	loopBegin = int(begin)
+	pivot = int(pivot)
+	loopEnd = int(end)
+	if (loopType == "DE NOVO"):
+	    if (stage == "Coarse"):
+		# Since this is a new sequence being added, we first have to delete all the residues
+		# between the beginning and ending points
+		oldlen = 0
+		for ires in range(loopEnd-1, loopBegin, -1):
+		    pose.delete_polymer_residue(ires)
+		    oldlen += 1
+		# Now we have to add the sequence using our nifty little "rsd_factory" pose
+		# The residues will have coordinates in weird places but it doesn't matter because
+		# KIC fixes that and puts them in the right place; they don't need to start out anywhere
+		# near being right
+		try:
+		    rsd_factory = pose_from_pdb("data/residues.pdb")
+		except:
+		    raise Exception("ERROR: The file \"data/residues.pdb\" is missing!")
+		offset = 0
+		for AA in sequence.strip():
+		    indx = "ACDEFGHIKLMNPQRSTVWY".find(AA) + 2
+		    pose.append_polymer_residue_after_seqpos(Residue(rsd_factory.residue(indx)), loopBegin+offset, True)
+		    offset = offset + 1
+		# Now we have to update the begin and end points of the other loops if necessary
+		for j in range(0, len(loopdata)):
+		    if (loopBegin < int(loopdata[j][2])):
+			loopdata[j][2] = int(loopdata[j][2]) + len(sequence) - oldlen
+		    if (loopBegin < int(loopdata[j][3])):
+			loopdata[j][3] = int(loopdata[j][3]) + len(sequence) - oldlen
+		    if (loopBegin < int(loopdata[j][4])):
+			loopdata[j][4] = int(loopdata[j][4]) + len(sequence) - oldlen
+	    # Now maybe the sequence is longer than what was originally the length of the sequence
+	    # between start and end, so we need to recalculate the loop end
+	    loopEnd = loopBegin + len(sequence.strip()) + 1
+	#elif (loopType == "REFINE"):
+	    # Here we only want to do high resolution modeling
+	#    stage = "Fine"
+	#    nstruct = 1
+	if (loopType == "DE NOVO" and stage == "Coarse"):
+	    # This has to be hard-coded, because the loop is not actually there until coarse modeling happens so there's no pivot point
+	    # other than the loop anchor residues
+	    cutpoint = loopEnd
+	else:
+	    cutpoint = pivot
+	if (loopType == "REFINE"):
+	    loop = Loop(loopBegin, loopEnd, cutpoint, 0, 0)
+	else:
+	    loop = Loop(loopBegin, loopEnd, cutpoint, 0, 1)
+	loops.append(loop)
     if (stage == "Coarse"):
-	add_single_cutpoint_variant(pose, loop)
-	set_single_loop_fold_tree(pose, loop)
 	# Low res KIC
 	for decoy in range(0, nstruct):
 	    sw = SwitchResidueTypeSetMover("centroid")
@@ -1013,12 +1063,17 @@ def doKIC(stage="Coarse"):
 		sw.apply(pose)
 	    except:
 		raise Exception("ERROR: The PDB could not be converted to centroid mode!")
-	    kic_perturb = LoopMover_Perturb_KIC(loops)
-	    kic_perturb.set_max_kic_build_attempts(120)
-	    try:
-		kic_perturb.apply(pose)
-	    except:
-		raise Exception("ERROR: The coarse KIC perturber failed!")
+	    for loop in loops:
+		loops_set = Loops()
+		loops_set.add_loop(loop)
+		add_single_cutpoint_variant(pose, loop)
+		set_single_loop_fold_tree(pose, loop)
+		kic_perturb = LoopMover_Perturb_KIC(loops_set)
+		kic_perturb.set_max_kic_build_attempts(120)
+		try:
+		    kic_perturb.apply(pose)
+		except:
+		    raise Exception("ERROR: The coarse KIC perturber failed!")
 	    if (perturbType == "Perturb Only, Centroid"):
 	        outputpdb = pdbfile.split(".pdb")[0] + "_K.pdb"
 	        pose.dump_pdb(outputpdb)
@@ -1081,19 +1136,37 @@ def doKIC(stage="Coarse"):
 		for aline in HETATM_lines:
 		    f.write(aline + "\n")
 		f.close()
+	# Now we have to rewrite the input file for refined mode, since if we added or deleted
+	# sequence the loop beginning and ending points may have changed
+	fin = open("coarsekicinput", "r")
+	filedata = []
+	for aline in fin:
+	    if (aline[0:5] == "LOOP\t"):
+		continue
+	    filedata.append(aline)
+	fin.close()
+	fout = open("coarsekicinput", "w")
+	for aline in filedata:
+	    fout.write(aline)
+	for [loopType, sequence, begin, pivot, end] in loopdata:
+	    fout.write("LOOP\t" + loopType + "\t" + sequence.strip() + "\t" + str(begin) + "\t" + str(pivot) + "\t" + str(end) + "\n")
+	fout.close()
     else:
 	for decoy in range(0, nstruct):
 	    if (loopType == "REFINE"):
 		pose = pose_from_pdb(pdbfile)
 	    else:
 		pose = pose_from_pdb("repacked_" + str(decoy) + ".pdb")
-	    add_single_cutpoint_variant(pose, loop)
-	    set_single_loop_fold_tree(pose, loop)
-	    kic_refine = LoopMover_Refine_KIC(loops)
-	    try:
-		kic_refine.apply(pose)
-	    except:
-		raise Exception("ERROR: The KIC refiner failed!")
+	    for loop in loops:
+		loops_set = Loops()
+		loops_set.add_loop(loop)
+		add_single_cutpoint_variant(pose, loop)
+		set_single_loop_fold_tree(pose, loop)
+		kic_refine = LoopMover_Refine_KIC(loops_set)
+		try:
+		    kic_refine.apply(pose)
+		except:
+		    raise Exception("ERROR: The KIC refiner failed!")
 	    if (decoy == 0):
 		outputpdb = pdbfile.split(".pdb")[0] + "_K.pdb"
 		pose.dump_pdb(outputpdb)
@@ -1676,7 +1749,7 @@ def daemonLoop():
 		    elif (aline[0:7] == "NSTRUCT"):
 			nstruct = int(aline.split("\t")[1].strip())
 		f.close()
-		if (perturbType == "Perturb Only, Centroid" or loopType == "REFINE"):
+		if (perturbType == "Perturb Only, Centroid"): # or loopType == "REFINE"):
 		    os.remove("coarsekicinput")
 		else:
 		    os.rename("coarsekicinput", "finekicinputtemp")
@@ -1712,7 +1785,8 @@ def daemonLoop():
 	elif (os.path.isfile("finekicinput")):
 	    print "Daemon starting fine KIC loop modeling job..."
 	    try:
-		doKIC("Fine")
+		with ScanCapturing() as output:
+		    doKIC("Fine")
 		print "Daemon completed fine KIC loop modeling job"
 	    except Exception as e:
 		print "The daemon crashed while performing the rotamer search job!"

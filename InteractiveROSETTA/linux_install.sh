@@ -28,10 +28,11 @@ cd "$SCRIPTDIR"
 # Have the user unpackage PyRosetta before doing anything else
 echo "Searching for PyRosetta installation..."
 read -p "Enter a directory to search (default: "$SEARCHDIR"): " input
-if [ $input != "" ]; then
+if [ $input ]; then
     SEARCHDIR=$input
 fi
 NEWROSETTA=`find $SEARCHDIR -name SetPyRosettaEnvironment* 2> /dev/null | head -n 1 | awk -F "/SetPyRosetta" '{print $1}' `
+echo "Looking for PyRosetta in "$NEWROSETTA
 if [ $NEWROSETTA != "" ]; then
     # This is obnoxious...there is a colon in the Ubuntu PyRosetta directory name
     # and it messes up : delimited paths, so create an appropriate symlink
@@ -98,7 +99,11 @@ echo "Installing poster..."
 sudo easy_install -q poster
 echo "Installing requests..."
 sudo easy_install -q requests
-echo "Installing OpenBabel..."
+echo "Installing pyperclip..."
+sudo easy_install -q pyperclip
+echo "Downloading OpenBabel..."
+rm -f openbabel-2.3.1.tar.gz
+$PMGR"wget"
 if [[ $ROSETTA_VER == "Ubuntu" ]]; then
 	$PMGR"python-openbabel"
 else

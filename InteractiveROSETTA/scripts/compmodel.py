@@ -44,56 +44,15 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.HelpBtn.SetToolTipString("Display the help file for this window")
 	
 	if (platform.system() == "Windows"):
-	    self.lblInst = wx.StaticText(self, -1, "Model a structure ab initio using an existing\nstructure as a template.\nFirst generate fragment files using Robetta.\nRegistration with Robetta is required to do this.", (0, 45), (320, 25), wx.ALIGN_CENTRE)
+	    self.lblInst = wx.StaticText(self, -1, "Model a structure ab initio using an existing\nstructure as a template.", (0, 45), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
 	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstCompModel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 80))
 	else:
-	    self.lblInst = wx.StaticText(self, -1, "Model a structure ab initio using an existing\nstructure as a template.\nFirst generate fragment files using Robetta.\nRegistration with Robetta is required to do this.", (5, 45), style=wx.ALIGN_CENTRE)
+	    self.lblInst = wx.StaticText(self, -1, "Model a structure ab initio using an existing\nstructure as a template.", (5, 45), style=wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	    resizeTextControlForUNIX(self.lblInst, 0, self.GetSize()[0]-20)
 	self.lblInst.SetForegroundColour("#FFFFFF")
-	
-	if (platform.system() == "Windows"):
-	    self.lblVisit = wx.StaticText(self, -1, "Visit Robetta", (0, 130), (155, 20), wx.ALIGN_CENTRE)
-	    self.lblVisit.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-	elif (platform.system() == "Darwin"):
-	    self.lblVisit = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblVisit.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 130), size=(155, 20))
-	else:
-	    self.lblVisit = wx.StaticText(self, -1, "Visit Robetta", (0, 130), style=wx.ALIGN_CENTRE)
-	    self.lblVisit.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-	    resizeTextControlForUNIX(self.lblVisit, 0, 155)
-	self.lblVisit.SetForegroundColour("#FFFFFF")
-	if (platform.system() == "Darwin"):
-	    self.btnFragGen = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnFragments.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(175, 125), size=(120, 25))
-	else:
-	    self.btnFragGen = wx.Button(self, id=-1, label="Get Fragments", pos=(175, 125), size=(120, 25))
-	    self.btnFragGen.SetForegroundColour("#000000")
-	    self.btnFragGen.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-	self.btnFragGen.Bind(wx.EVT_BUTTON, self.fragGen)
-	self.btnFragGen.SetToolTipString("Visit Robetta to generate fragment files")
-	
-	if (platform.system() == "Windows"):
-	    self.lblJobID = wx.StaticText(self, -1, "Job ID:", (0, 163), (100, 20), wx.ALIGN_CENTRE)
-	    self.lblJobID.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-	elif (platform.system() == "Darwin"):
-	    self.lblJobID = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblJobID.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 163), size=(100, 20))
-	else:
-	    self.lblJobID = wx.StaticText(self, -1, "Job ID:", (0, 163), style=wx.ALIGN_CENTRE)
-	    self.lblJobID.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-	    resizeTextControlForUNIX(self.lblJobID, 0, 100)
-	self.lblJobID.SetForegroundColour("#FFFFFF")
-	self.txtJobID = wx.TextCtrl(self, -1, pos=(110, 160), size=(100, 25))
-	self.txtJobID.SetValue("")
-	self.txtJobID.SetToolTipString("Job ID for submitted Robetta fragment job.")
-	if (platform.system() == "Darwin"):
-	    self.btnWatch = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnWatch.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(220, 160), size=(100, 25))
-	else:
-	    self.btnWatch = wx.Button(self, id=-1, label="Watch", pos=(220, 160), size=(100, 25))
-	    self.btnWatch.SetForegroundColour("#000000")
-	    self.btnWatch.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-	self.btnWatch.Bind(wx.EVT_BUTTON, self.jobWatch)
-	self.btnWatch.SetToolTipString("Start automatically watching for the specified job ID to complete")
 	
 	if (platform.system() == "Windows"):
 	    self.lblModel = wx.StaticText(self, -1, "Templates", (0, 190), (155, 20), wx.ALIGN_CENTRE)

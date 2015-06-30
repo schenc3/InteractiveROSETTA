@@ -661,7 +661,8 @@ class SequenceWin(wx.Frame):
 	self.Bind(wx.grid.EVT_GRID_CELL_RIGHT_CLICK, self.rightClick)
 	self.Bind(wx.grid.EVT_GRID_LABEL_LEFT_DCLICK, self.labelDClick)
 	self.Bind(wx.grid.EVT_GRID_LABEL_RIGHT_CLICK, self.labelRClick)
-	self.SeqViewer.GetGridWindow().Bind(wx.EVT_KEY_DOWN, self.keyPress)
+	self.Bind(wx.EVT_CHAR_HOOK, self.keyPress)
+	#self.SeqViewer.GetGridWindow().Bind(wx.EVT_KEY_DOWN, self.keyPress)
 	self.selectedResidues = []
 	
 	# This is the label along the bottom of the window, that displays what Rosetta is currently doing
@@ -986,11 +987,12 @@ class SequenceWin(wx.Frame):
 			    currID = currID + fields[i] + "|"
 			currID = currID[0:len(currID)-1]
 			chainID = fields[len(fields)-1]
-			if (chainID != "_"):
-			    self.cmd.remove("model " + currID + " and chain " + chainID + " and resi " + str(pyMOLPos))
-			else:
-			    self.cmd.remove("model " + currID + " and resi " + str(pyMOLPos))
+			#if (chainID != "_"):
+			#    self.cmd.remove("model " + currID + " and chain " + chainID + " and resi " + str(pyMOLPos))
+			#else:
+			#    self.cmd.remove("model " + currID + " and resi " + str(pyMOLPos))
 		# Now delete whole chains that we may have identified
+		self.cmd.remove("byres seqsele")
 		for i in range(len(chain_deletes)-1, -1, -1):
 		    self.deleteChain(chain_deletes[i])
 		#self.recolorResidues()
@@ -1015,7 +1017,7 @@ class SequenceWin(wx.Frame):
 	    self.SeqViewer.ClearSelection()
 	    self.PyMOLUpdateTimer.Stop()
 	    self.PyMOLUpdateTimer.Start(100)
-	elif (event.ControlDown() and int(event.GetKeyCode()) == ord("C")):
+	elif (event.ControlDown() and int(event.GetKeyCode()) == 3):
 	    # Copy the current selection to the clipboard as FASTA data
 	    copystr = ""
 	    amISelected = []
@@ -1024,11 +1026,13 @@ class SequenceWin(wx.Frame):
 		for c in range(0, len(self.sequences[r])):
 		    amISelected[r].append(0)
 	    # Find the selections
-	    for data in self.getSelectedResidues():
-		r = data[0]
-		for c in data[2]:
-		    if (c < len(amISelected[r])):
-			amISelected[r][c] = 1
+	    topLefts = self.SeqViewer.GetSelectionBlockTopLeft()
+	    bottomRights = self.SeqViewer.GetSelectionBlockBottomRight()
+	    for i in range(0, len(topLefts)):
+		for r in range(topLefts[i][0], bottomRights[i][0]+1):
+		    for c in range(topLefts[i][1], bottomRights[i][1]+1):
+			if (c < len(amISelected[r])):
+			    amISelected[r][c] = 1
 	    # Do the copying
 	    for r in range(0, len(self.sequences)):
 		if (sum(amISelected[r]) > 0):
@@ -1938,7 +1942,10 @@ class SequenceWin(wx.Frame):
     # pdbfile is the filename to load
     # showDialog is "Show" if the protein load dialog should be shown
     # showDialog should be "Reuse" for extra models in an ensemble pdbfile
-    def PyMOLPDBLoad(self, dummy, pdbfile, showDialog="NoShow"):
+    # FlexiblePeptide is specific for when FlexPepDock attempts to create the peptide
+    #    Usually the name "flexpeptide" is reserved but this tells the loader to use the
+    #    flexpeptide keyword for this peptide
+    def PyMOLPDBLoad(self, dummy, pdbfile, showDialog="NoShow", flexiblePeptide=False):
 	pdbfile = str(pdbfile)
 	# Check the PDB for duplicate atoms
 	# We want to rename dupliates otherwise BioPython will drop them
@@ -1988,7 +1995,9 @@ class SequenceWin(wx.Frame):
 		break
 	# Sometimes I use special names for selections, and if the modelname is the same as
 	# these selections it can screw things up
-	if (newID in ["temp", "sele", "seqsele"]):
+	if (newID in ["temp", "sele", "seqsele", "params", "designed_view", "minimized_view"]):
+	    taken = True
+	if (newID == "flexpeptide" and not(flexiblePeptide)):
 	    taken = True
 	# Replace whitespace with _ to avoid PyMOL issues
 	newID = newID.replace(" ", "_")
@@ -3141,7 +3150,7 @@ class SequenceWin(wx.Frame):
 		except:
 		    # Not there yet
 		    pass
-	    elif (job.startswith("MSD") or job.startswith("ANTIBODY") or job.startswith("DOCK") or job.startswith("PMUTSCAN") or job.startswith("BACKRUB")):
+	    elif (job.startswith("MSD") or job.startswith("ANTIBODY") or job.startswith("DOCK") or job.startswith("PMUTSCAN") or job.startswith("BACKRUB") or job.startswith("KIC") or job.startswith("FLEXPEP")):
 		jobtype = job.split("\t")[0]
 		ID = job.split("\t")[1].strip()
 		jobURL = job.split("\t")[3].strip()
@@ -3176,6 +3185,10 @@ class SequenceWin(wx.Frame):
 			    dlg = wx.MessageDialog(self, "Your point mutant scanning job ID " + ID + " is ready.", "Point Mutants Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 			elif (jobtype == "BACKRUB"):
 			    dlg = wx.MessageDialog(self, "Your backrub ensemble job ID " + ID + " is ready.", "Backrub Ensemble Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+			elif (jobtype == "KIC"):
+			    dlg = wx.MessageDialog(self, "Your KIC ensemble job ID " + ID + " is ready.", "KIC Ensemble Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+			elif (jobtype == "FLEXPEP"):
+			    dlg = wx.MessageDialog(self, "Your flexible peptide docking package job ID " + ID + " is ready.", "Flexible Peptide Docking Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 			dlg.ShowModal()
 			dlg.Destroy()
 			os.rename(filepath, "results" + packageext)
@@ -3192,6 +3205,10 @@ class SequenceWin(wx.Frame):
 			    dlg = wx.MessageDialog(self, "Your point mutant scanning job ID " + ID + " is ready.", "Point Mutants Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 			elif (jobtype == "BACKRUB"):
 			    dlg = wx.MessageDialog(self, "Your backrub ensemble job ID " + ID + " is ready.", "Backrub Ensemble Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+			elif (jobtype == "KIC"):
+			    dlg = wx.MessageDialog(self, "Your KIC ensemble job ID " + ID + " is ready.", "KIC Ensemble Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+			elif (jobtype == "FLEXPEP"):
+			    dlg = wx.MessageDialog(self, "Your flexible peptide docking package job ID " + ID + " is ready.", "Flexible Peptide Docking Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 			dlg.ShowModal()
 			dlg.Destroy()
 			if (jobtype == "MSD"):
@@ -3204,6 +3221,10 @@ class SequenceWin(wx.Frame):
 			    busyDlg = wx.BusyInfo("Downloading point mutant scan report, please wait...")
 			elif (jobtype == "BACKRUB"):
 			    busyDlg = wx.BusyInfo("Downloading backrub archive, please wait...")
+			elif (jobtype == "KIC"):
+			    busyDlg = wx.BusyInfo("Downloading KIC archive, please wait...")
+			elif (jobtype == "FLEXPEP"):
+			    busyDlg = wx.BusyInfo("Downloading flexpep archive, please wait...")
 			(oldfilename, info) = urllib.urlretrieve(URL, "results" + packageext)
 			busyDlg.Destroy()
 			del busyDlg
@@ -3239,6 +3260,20 @@ class SequenceWin(wx.Frame):
 			elif (jobtype == "BACKRUB"):
 			    dlg = wx.FileDialog(
 				self, message="Save the backrub package",
+				defaultDir=self.cwd,
+				defaultFile=ID,
+				wildcard="Ensemble Archives (*.ensb)|*.ensb",
+				style=wx.SAVE | wx.CHANGE_DIR)
+			elif (jobtype == "KIC"):
+			    dlg = wx.FileDialog(
+				self, message="Save the KIC package",
+				defaultDir=self.cwd,
+				defaultFile=ID,
+				wildcard="Ensemble Archives (*.ensb)|*.ensb",
+				style=wx.SAVE | wx.CHANGE_DIR)
+			elif (jobtype == "FLEXPEP"):
+			    dlg = wx.FileDialog(
+				self, message="Save the flexpep package",
 				defaultDir=self.cwd,
 				defaultFile=ID,
 				wildcard="Ensemble Archives (*.ensb)|*.ensb",
@@ -3281,7 +3316,7 @@ class SequenceWin(wx.Frame):
 					f = open(self.cwd + "\\" + aline.split()[len(aline.split())-1].strip(), "w")
 				    else:
 					f = open(self.cwd + "/" + aline.split()[len(aline.split())-1].strip(), "w")
-				elif (jobtype == "ANTIBODY" or jobtype == "DOCK" or jobtype == "BACKRUB"):
+				elif (jobtype == "ANTIBODY" or jobtype == "DOCK" or jobtype == "BACKRUB" or jobtype == "KIC" or jobtype == "FLEXPEP"):
 				    indx = aline[aline.rfind("_")+1:].strip()
 				    f = open(prefix + "_" + indx, "w")
 				readingData = True

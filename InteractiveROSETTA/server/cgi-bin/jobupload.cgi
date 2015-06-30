@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import sys
 import os
+import commands
 
 iRosetta_home = ".." # Alter this if iRosetta home is not the parent directory of this script
 hostlist = iRosetta_home + "/hostlist"
@@ -38,7 +39,7 @@ try:
         elif (aline.find("Content") < 0):
             filedata.append(aline.strip())
     # Make sure the filename is something we'd be expecting to see from InteractiveROSETTA
-    if (not(filename in ["minimizeinput", "designinput", "scoreinput", "rotamerinput", "coarsekicinput", "msdinput", "testinput"])):
+    if (not(filename in ["minimizeinput", "designinput", "scoreinput", "rotamerinput", "coarsekicinput", "msdinput", "testinput", "coarsedockinput", "antibodyinput", "scaninput", "killinput", "backrubinput", "flexpepinput"])):
         raise Exception()
     if (filename == "testinput"):
         print "InteractiveROSETTA Upload Successful"

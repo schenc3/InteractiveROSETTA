@@ -654,7 +654,23 @@ def doRotamerSearch(inputfile):
     os.rename(hostname + "-rotameroutputtemp", "results/rotameroutput-" + ID)
     os.remove(weightsfile)
 
-def doKIC(inputfile, stage="Coarse"):
+def doKIC(inputfile):
+    # Make a new results folder and unpack the data there
+    try:
+	os.mkdir("results/" + ID)
+    except:
+	shutil.rmtree("results/" + ID, ignore_errors=True)
+	os.mkdir("results/" + ID)
+    os.chdir("results/" + ID)
+    # Move the input file here
+    os.rename("../../" + inputfile, inputfile.split("-")[1])
+    # Submit it to the queue
+    sub = subprocess.Popen(["python", "../../rosetta_submit.py", "kic", ID])
+    # The Python script will handle everything from here
+    # Get back to where we were
+    os.chdir("../..")
+
+def old_doKIC(inputfile, stage="Coarse"):
     try:
 	f = open(inputfile, "r")
     except:
@@ -914,6 +930,22 @@ def doBackrub(inputfile):
     # Get back to where we were
     os.chdir("../..")
 
+def doFlexPep(inputfile):
+    # Make a new results folder and unpack the data there
+    try:
+	os.mkdir("results/" + ID)
+    except:
+	shutil.rmtree("results/" + ID, ignore_errors=True)
+	os.mkdir("results/" + ID)
+    os.chdir("results/" + ID)
+    # Move the input file here
+    os.rename("../../" + inputfile, inputfile.split("-")[1])
+    # Submit it to the queue
+    sub = subprocess.Popen(["python", "../../rosetta_submit.py", "flexpep", ID])
+    # The Python script will handle everything from here
+    # Get back to where we were
+    os.chdir("../..")
+
 def writeError(msg, inputfile="None-"):
     # Open a file and write out the error message so the main GUI can tell the user what happened
     # The main GUI needs to check to see if an errreport gets generated and recover from the error
@@ -989,86 +1021,92 @@ while (True):
 		# If the hostname has - in it, it will screw up the splitting later on, so fix it here
 		os.rename(inputfile, "jobfiles/" + hostname.replace("-", "") + "-coarsekicinput-" + ID)
 		inputfile = "jobfiles/" + hostname.replace("-", "") + "-coarsekicinput-" + ID
-	    print "Daemon starting coarse KIC loop modeling job..."
+	    print "Daemon starting KIC job..."
+	    doKIC(inputfile)
+	    #if ("-" in hostname):
+		# If the hostname has - in it, it will screw up the splitting later on, so fix it here
+		#os.rename(inputfile, "jobfiles/" + hostname.replace("-", "") + "-coarsekicinput-" + ID)
+		#inputfile = "jobfiles/" + hostname.replace("-", "") + "-coarsekicinput-" + ID
+	    #print "Daemon starting coarse KIC loop modeling job..."
 	    # This is code to pipe stdout to a variable called "captured_stdout" so I can
 	    # parse the standard output of the coarse KIC perturber and see if it failed to
 	    # build the loop.  Then I know the sequence was too short
-	    stdout_fileno = sys.stdout.fileno()
-	    stdout_save = os.dup(stdout_fileno)
-	    stdout_pipe = os.pipe()
-	    os.dup2(stdout_pipe[1], stdout_fileno)
-	    os.close(stdout_pipe[1])
-	    captured_stdout = ""
-	    t = Thread(target=drain_pipe)
-	    t.start()
-	    crashed = False
-	    try:
+	    #stdout_fileno = sys.stdout.fileno()
+	    #stdout_save = os.dup(stdout_fileno)
+	    #stdout_pipe = os.pipe()
+	    #os.dup2(stdout_pipe[1], stdout_fileno)
+	    #os.close(stdout_pipe[1])
+	    #captured_stdout = ""
+	    #t = Thread(target=drain_pipe)
+	    #t.start()
+	    #crashed = False
+	    #try:
 		# This function call has the potential to run indefinitely if it cannot find
 		# a way to bridge the two endpoint residues (in a de novo loop model)
 		# The main GUI is timing the daemon's response though and will kill it and display
 		# an error if it doesn't finish before a timeout (usually 3 min)
-		doKIC(inputfile, "Coarse")
-		os.rename(hostname + "-torepack.pdb", hostname + "-repackme.pdb") # So the GUI sees it
-		print "Daemon completed coarse KIC loop modeling job"
-	    except Exception as e:
-		print "The daemon crashed while performing the coarse KIC loop modeling job!"
-		os.remove(inputfile)
-		writeError(e.message, inputfile)
-		crashed = True
+		#doKIC(inputfile, "Coarse")
+		#os.rename(hostname + "-torepack.pdb", hostname + "-repackme.pdb") # So the GUI sees it
+		#print "Daemon completed coarse KIC loop modeling job"
+	    #except Exception as e:
+		#print "The daemon crashed while performing the coarse KIC loop modeling job!"
+		#os.remove(inputfile)
+		#writeError(e.message, inputfile)
+		#crashed = True
 		# The daemon needs to be killed by the main GUI because the coarse KIC thread is
 		# still running and will do so indefinitely
 	    # Clean up the thread that was reading the standard output
-	    os.close(stdout_fileno)
-	    t.join()
+	    #os.close(stdout_fileno)
+	    #t.join()
 	    # Clean up the pipe and restore the original stdout
-	    os.close(stdout_pipe[0])
-	    os.dup2(stdout_save, stdout_fileno)
-	    os.close(stdout_save)
-	    outputline = captured_stdout.split("\n")[len(captured_stdout.split("\n"))-10]
-	    try:
-		if (not(crashed) and outputline.find("Attempting loop building") >= 0 and int(outputline.split()[len(outputline.split())-2]) >= 100):
-		    raise Exception("ERROR: The loop sequence is too short and cannot bridge the endpoint residues!")
-	    except Exception as e:
-		print "The loop sequence was too short!"
-		os.remove(inputfile)
-		os.remove(hostname + "-repackme.pdb")
-		writeError(e.message, inputfile)
-		continue
-	    if (crashed):
-		continue
-	    print "Daemon starting rotamer repacking job..."
-	    try:
-		doRepack(inputfile)
-		print "Daemon completed rotamer repacking job"
-	    except Exception as e:
-		print "The daemon crashed while performing the rotamer repacking job!"
-		writeError(e.message, inputfile)
-		os.remove(inputfile)
-		os.remove("jobfiles/" + hostname + "-repackmetemp.pdb")
-		continue
-	    if (doKICLocally):
+	    #os.close(stdout_pipe[0])
+	    #os.dup2(stdout_save, stdout_fileno)
+	    #os.close(stdout_save)
+	    #outputline = captured_stdout.split("\n")[len(captured_stdout.split("\n"))-10]
+	    #try:
+		#if (not(crashed) and outputline.find("Attempting loop building") >= 0 and int(outputline.split()[len(outputline.split())-2]) >= 100):
+		    #raise Exception("ERROR: The loop sequence is too short and cannot bridge the endpoint residues!")
+	    #except Exception as e:
+		#print "The loop sequence was too short!"
+		#os.remove(inputfile)
+		#os.remove(hostname + "-repackme.pdb")
+		#writeError(e.message, inputfile)
+		#continue
+	    #if (crashed):
+		#continue
+	    #print "Daemon starting rotamer repacking job..."
+	    #try:
+		#doRepack(inputfile)
+		#print "Daemon completed rotamer repacking job"
+	    #except Exception as e:
+		#print "The daemon crashed while performing the rotamer repacking job!"
+		#writeError(e.message, inputfile)
+		#os.remove(inputfile)
+		#os.remove("jobfiles/" + hostname + "-repackmetemp.pdb")
+		#continue
+	    #if (doKICLocally):
 		# Dump the repacked PDB file to an outputfile that the client can read
-		f = open(hostname + "-coarsekicoutputtemp", "w")
-		f2 = open(hostname + "-repacked.pdb", "r")
-		f.write("OUTPUT\trepackedtemp.pdb\n")
-		f.write("BEGIN PDB DATA\n")
-		for aline in f2:
-		    f.write(aline.strip() + "\n")
-		f.write("END PDB DATA\n")
-		f2.close()
-		f.close()
-		os.rename(hostname + "-coarsekicoutputtemp", "results/coarsekicoutput-" + inputfile.split("-")[2])
-		os.remove(hostname + "-repacked.pdb")
-		os.remove(inputfile)
-	    else:
-		print "Daemon starting fine KIC loop modeling job..."
-		try:
-		    doKIC(inputfile, "Fine")
-		    print "Daemon completed fine KIC loop modeling job"
-		except Exception as e:
-		    print "The daemon crashed while performing the fine KIC loop modeling job!"
-		    writeError(e.message, inputfile)
-		os.remove(inputfile)
+		#f = open(hostname + "-coarsekicoutputtemp", "w")
+		#f2 = open(hostname + "-repacked.pdb", "r")
+		#f.write("OUTPUT\trepackedtemp.pdb\n")
+		#f.write("BEGIN PDB DATA\n")
+		#for aline in f2:
+		#    f.write(aline.strip() + "\n")
+		#f.write("END PDB DATA\n")
+		#f2.close()
+		#f.close()
+		#os.rename(hostname + "-coarsekicoutputtemp", "results/coarsekicoutput-" + inputfile.split("-")[2])
+		#os.remove(hostname + "-repacked.pdb")
+		#os.remove(inputfile)
+	    #else:
+		#print "Daemon starting fine KIC loop modeling job..."
+		#try:
+		#    doKIC(inputfile, "Fine")
+		#    print "Daemon completed fine KIC loop modeling job"
+		#except Exception as e:
+		#    print "The daemon crashed while performing the fine KIC loop modeling job!"
+		#    writeError(e.message, inputfile)
+		#os.remove(inputfile)
 	elif (inputfile.startswith("jobfiles/" + hostname + "-msdinput")):
 	    if ("-" in hostname):
 		# If the hostname has - in it, it will screw up the splitting later on, so fix it here
@@ -1105,6 +1143,13 @@ while (True):
 		inputfile = "jobfiles/" + hostname.replace("-", "") + "-backrubinput-" + ID
 	    print "Daemon starting backrubbing job..."
 	    doBackrub(inputfile)
+	elif (inputfile.startswith("jobfiles/" + hostname + "-flexpepinput")):
+	    if ("-" in hostname):
+		# If the hostname has - in it, it will screw up the splitting later on, so fix it here
+		os.rename(inputfile, "jobfiles/" + hostname.replace("-", "") + "-flexpepinput-" + ID)
+		inputfile = "jobfiles/" + hostname.replace("-", "") + "-flexpepinput-" + ID
+	    print "Daemon starting flexible peptide docking job..."
+	    doFlexPep(inputfile)
 	elif (inputfile.startswith("jobfiles/" + hostname + "-killinput")):
 	    fin = open(inputfile, "r")
 	    filedata = fin.readlines()

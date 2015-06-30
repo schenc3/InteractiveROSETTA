@@ -7,6 +7,7 @@ import time
 import platform
 import multiprocessing
 import webbrowser
+import datetime
 from threading import Thread
 from tools import *
 
@@ -643,13 +644,16 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    return
 	# If we're doing a de novo search, is the sequence specified?
 	if (self.loopType == "De Novo"):
-	    for AA in self.txtSequence.GetValue().strip().upper():
+	    sequence = self.txtSequence.GetValue().strip().upper()
+	    for AA in sequence:
 		if (not(AA in "ACDEFGHIKLMNPQRSTVWY")):
 		    wx.MessageBox("The sequence you have provided is invalid.  Please only use canonical amino acids.", "Sequence Invalid", wx.OK|wx.ICON_EXCLAMATION)
 		    return
-	    if (len(self.txtSequence.GetValue().strip().upper()) == 0):
+	    if (len(sequence) == 0):
 		wx.MessageBox("You have indicated that you want to design a loop de novo but have not provided the putative sequence of the loop.  Please provide one or switch to use a pre-existing loop.", "No Sequence Indicated", wx.OK|wx.ICON_EXCLAMATION)
 		return
+	else:
+	    sequence = ""
 	# Did the model change?  If yes, and loops is not empty, then tell the user that this
 	# will remove all loops to make room for the new model
 	if (len(self.loops) > 0 and self.modelMenu.GetValue() != self.loops[0][2]):
@@ -660,7 +664,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.loops = []
 	# Does this loop overlap with a previously-specified loop?  If so, do not add
 	i = 1
-	for loopType, sequence, model, begin, pivot, end in self.loops:
+	for loopType, s, model, begin, pivot, end in self.loops:
 	    if ((self.loopBegin >= begin and self.loopBegin <= end) or (self.loopEnd >= begin and self.loopEnd <= end)):
 		dlg = wx.MessageDialog(self, "The loop you have indicated overlaps with loop " + str(i) + ".  Either change the current loop or remove loop " + str(i) + ".", "Loop Overlap", wx.OK | wx.ICON_ERROR | wx.CENTRE)
 		dlg.ShowModal()
@@ -668,7 +672,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		return
 	    i += 1
 	# Add this loop to the list of loops currently active
-	self.loops.append([self.loopType, self.txtSequence.GetValue().strip().upper(), self.modelMenu.GetValue(), self.loopBegin, self.menuPivot.GetSelection() + self.loopBegin, self.loopEnd])
+	self.loops.append([self.loopType, sequence, self.modelMenu.GetValue(), self.loopBegin, self.menuPivot.GetSelection() + self.loopBegin, self.loopEnd])
 	self.updateLoops()
 		
     def remove(self, event):
@@ -864,21 +868,9 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	# This is also the "Finalize!" button
 	if (self.buttonState == "KIC!"):
 	    # First we have to make sure that the loops are defined and that the sequence is valid
-	    if (self.loopBegin < 0):
-		wx.MessageBox("Please select a loop beginning position.", "Loop Begin Required", wx.OK|wx.ICON_EXCLAMATION)
+	    if (len(self.loops) == 0):
+		wx.MessageBox("Please specify at least one valid loop to model", "No Loops Provided", wx.OK|wx.ICON_EXCLAMATION)
 		return
-	    elif (self.loopEnd < 0):
-		wx.MessageBox("Please select a loop ending position.", "Loop End Required", wx.OK|wx.ICON_EXCLAMATION)
-		return
-	    elif (self.loopType == "De Novo"):
-		# Make sure the sequence has only CAAs in it
-		for AA in self.txtSequence.GetValue().strip().upper():
-		    if (not(AA in "ACDEFGHIKLMNPQRSTVWY")):
-			wx.MessageBox("The sequence you have provided is invalid.  Please only use canonical amino acids.", "Sequence Invalid", wx.OK|wx.ICON_EXCLAMATION)
-			return
-		if (len(self.txtSequence.GetValue().strip().upper()) == 0):
-		    wx.MessageBox("You have indicated that you want to design a loop de novo but have not provided the putative sequence of the loop.  Please provide one or switch to use a pre-existing loop.", "No Sequence Indicated", wx.OK|wx.ICON_EXCLAMATION)
-		    return
 	    try:
 		if (int(self.txtNStruct.GetValue()) <= 0):
 		    raise Exception
@@ -1063,44 +1055,92 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		f.write(aline.strip() + "\n")
 	    f.write("END PDB DATA\n")
 	    f2.close()
-	    f.write("REMODEL\t" + self.loopType.upper() + "\n")
-	    chain = self.beginMenu.GetStringSelection()[0]
-	    seqpos = self.beginMenu.GetStringSelection()[3:]
-	    loopBegin = self.seqWin.getRosettaIndex(self.selectedModel, chain, seqpos)
-	    f.write("LOOPBEGIN\t" + str(loopBegin) + "\n")
-	    chain = self.endMenu.GetStringSelection()[0]
-	    seqpos = self.endMenu.GetStringSelection()[3:]
-	    loopEnd = self.seqWin.getRosettaIndex(self.selectedModel, chain, seqpos)
-	    f.write("LOOPEND\t" + str(loopEnd) + "\n")
-	    if (self.loopType == "De Novo"):
-		f.write("SEQUENCE\t" + self.txtSequence.GetValue().strip().upper() + "\n")
-	    f.write("PIVOT\t" + str(self.menuPivot.GetSelection()) + "\n")
+	    #f.write("REMODEL\t" + self.loopType.upper() + "\n")
+	    #chain = self.beginMenu.GetStringSelection()[0]
+	    #seqpos = self.beginMenu.GetStringSelection()[3:]
+	    #loopBegin = self.seqWin.getRosettaIndex(self.selectedModel, chain, seqpos)
+	    #f.write("LOOPBEGIN\t" + str(loopBegin) + "\n")
+	    #chain = self.endMenu.GetStringSelection()[0]
+	    #seqpos = self.endMenu.GetStringSelection()[3:]
+	    #loopEnd = self.seqWin.getRosettaIndex(self.selectedModel, chain, seqpos)
+	    #f.write("LOOPEND\t" + str(loopEnd) + "\n")
+	    #if (self.loopType == "De Novo"):
+		#f.write("SEQUENCE\t" + self.txtSequence.GetValue().strip().upper() + "\n")
+	    #f.write("PIVOT\t" + str(self.menuPivot.GetSelection()) + "\n")
+	    # Write the loops information
+	    for [loopType, sequence, model, begin, pivot, end] in self.loops:
+		f.write("LOOP\t" + loopType.upper() + "\t" + sequence.strip() + "\t" + str(begin) + "\t" + str(pivot) + "\t" + str(end) + "\n")
 	    f.write("NSTRUCT\t" + str(self.nstruct) + "\n")
 	    f.write("PERTURB\t" + self.perturbType + "\n")
-	    f.write("OUTPUTDIR\t" + self.outputdir + "\n")
+	    #f.write("OUTPUTDIR\t" + self.outputdir + "\n")
 	    f.close()
 	    appendScorefxnParamsInfoToFile("coarsekicinputtemp", self.selectWin.weightsfile)
-	    if (False): #(useServer):
+	    if (self.serverOn):
 		try: 
 		    self.ID = sendToServer("coarsekicinput")
-		    self.usingServer = True
+		    # First make sure this isn't a duplicate
+		    alreadythere = False
+		    try:
+			f = open("downloadwatch", "r")
+			for aline in f:
+			    if (len(aline.split("\t")) >= 2 and aline.split("\t")[0] == "KIC" and aline.split("\t")[1] == self.ID.strip()):
+				alreadythere = True
+				break
+			f.close()
+		    except:
+			pass
+		    if (not(alreadythere)):
+			f = open("downloadwatch", "a")
+			f.write("KIC\t" + self.ID.strip() + "\t" + str(datetime.datetime.now().strftime("%A, %B %d - %I:%M:%S %p")) + "\t" + getServerName() + "\n")
+			f.close()
+		    dlg = wx.MessageDialog(self, "InteractiveROSETTA is now watching the server for job ID " + self.ID.strip() + ".  You will be notified when the package is available for download.", "Listening for Download", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		    dlg.ShowModal()
+		    dlg.Destroy()
+		    # Re-enable everything since we're not waiting for the local daemon to do anything
+		    self.scoretypeMenu.Disable()
+		    self.viewMenu.Disable()
+		    self.modelMenu.Enable()
+		    self.beginMenu.Enable()
+		    self.endMenu.Enable()
+		    self.btnLoopType.Enable()
+		    if (self.loopType == "De Novo"):
+			self.txtSequence.Enable()
+		    if (platform.system() == "Darwin"):
+			self.btnKIC.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		    else:
+			self.btnKIC.SetLabel("KIC!")
+		    self.buttonState = "KIC!"
+		    self.btnKIC.SetToolTipString("Perform KIC simulation with selected parameters")
+		    self.cmd.label("all", "")
+		    self.seqWin.cannotDelete = False
+		    # Pop this message out of the queue
+		    for i in range(0, len(self.seqWin.msgQueue)):
+			if (self.seqWin.msgQueue[i].find("Performing KIC loop modeling") >= 0):
+			    self.seqWin.msgQueue.pop(i)
+			    break
+		    if (len(self.seqWin.msgQueue) > 0):
+			self.seqWin.labelMsg.SetLabel(self.seqWin.msgQueue[len(self.seqWin.msgQueue)-1])
+		    else:
+			self.seqWin.labelMsg.SetLabel("")
 		    logInfo("Coarse KIC input sent to server daemon with ID " + self.ID)
-		    self.stage = 4 # When using server we cannot see the intermediates
+		    return
 		except:
-		    # Something failed, default to the local daemon
-		    os.rename("coarsekicinputtemp", "coarsekicinput")
-		    self.usingServer = False
-		    logInfo("Server daemon not available, coarse KIC input uploaded at coarsekicinput")
-		    self.stage = 2
+		    dlg = wx.MessageDialog(self, "The server could not be reached!  Ensure that you have specified a valid server and that you have an network connection.", "Server Could Not Be Reached", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		    dlg.ShowModal()
+		    dlg.Destroy()
+		    return
 	    else:
 		os.rename("coarsekicinputtemp", "coarsekicinput")
 		self.usingServer = False
 		logInfo("Coarse KIC input uploaded locally at coarsekicinput")
 		self.stage = 2
-	    if (self.perturbType == "Perturb Only, Centroid" or self.loopType == "Refine"):
+	    if (self.perturbType == "Perturb Only, Centroid"):# or self.loopType == "Refine"):
 		self.stage = 4
 	    self.looptimecount = 0
 	    self.timeout = 18000000
+	    self.progress = wx.ProgressDialog("KIC Progress", "Modeling loops in centroid mode...", 100, style=wx.PD_CAN_ABORT | wx.PD_APP_MODAL | wx.PD_ELAPSED_TIME | wx.PD_REMAINING_TIME)
+	    self.loop_indx = 0
+	    self.last_progress_indx = 99
 	    self.tmrKIC.Start(1000)
 	elif (self.stage == 2):
 	    # This is really annoying, here's the ugly memory problem again
@@ -1205,6 +1245,10 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		self.stage = 3
 	    elif (os.path.isfile("kicoutput")):
 		self.tmrKIC.Stop()
+		try:
+		    self.progress.Destroy()
+		except:
+		    pass
 		self.residue_E = []
 		f = open("kicoutput", "r")
 		for aline in f:
@@ -1286,7 +1330,57 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		self.seqWin.pdbwriter.set_structure(self.KICView)
 		self.seqWin.pdbwriter.save(pdbfile) 
 		recolorEnergies(self.KICView, self.residue_E, "kic_view", self.scoretypeMenu.GetStringSelection(), self.cmd)
+		return
 	    elif (os.path.isfile("errreport")):
 		# Something went wrong, tell the user about it
+		try:
+		    self.progress.Destroy()
+		except:
+		    pass
 		self.tmrKIC.Stop()
 		self.recoverFromError()
+		return
+	if (os.path.isfile("scanprogress")):
+	    f = open("scanprogress", "r")
+	    data = f.readlines()
+	    f.close()
+	    if (len(data) == 0):
+		return
+	    try:
+		lastline = None
+		for j in range(len(data)-1, -1, -1):
+		    if (data[j].strip().startswith("protocols.loops.loop_mover.refine.LoopMover_Refine_KIC: refinement cycle")):
+			lastline = data[j].strip()
+			break
+		if (lastline is None):
+		    raise Exception()
+		outercycles = lastline.split()[len(lastline.split())-2]
+		innercycles = lastline.split()[len(lastline.split())-1]
+		outer_num = int(outercycles.split("/")[0])
+		outer_den = int(outercycles.split("/")[1])
+		inner_num = int(innercycles.split("/")[0])
+		inner_den = int(innercycles.split("/")[1])
+		maxtrials = outer_den * inner_den
+		currpos = (outer_num-1) * inner_den + inner_num
+		indx = int(currpos * 100.0 / maxtrials)
+		if (indx >= 100):
+		    # This should be destroyed when the refined KIC output is available
+		    indx = 99
+	    except:
+		return
+	    if (indx >= 100):
+		try:
+		    self.progress.Destroy()
+		except:
+		    pass
+	    else:
+		if (self.last_progress_indx > indx):
+		    self.loop_indx += 1
+		    (keepGoing, skip) = self.progress.Update(indx, "Refining loop " + str(self.loop_indx) + " in fullatom mode...")
+		else:
+		    (keepGoing, skip) = self.progress.Update(indx)
+		self.last_progress_indx = indx
+		if (not(keepGoing)):
+		    # User clicked "Cancel" on the progress bar
+		    self.cancelKIC()
+		    self.progress.Destroy()

@@ -921,6 +921,7 @@ class PointMutationsPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    f = open("scoreinputtemp", "w")
 	    pdbfile = self.selectedModel + ".pdb"
 	    # Dump the PDB from PyMOL first in case the coordinates were altered by the user
+	    self.scoreModel = self.selectedModel
 	    self.cmd.save(pdbfile.strip(), "model " + self.selectedModel)
 	    fixPyMOLSave(pdbfile.strip())
 	    f.write("PDBFILE\t" + pdbfile.strip() + "\n")
@@ -1033,6 +1034,12 @@ class PointMutationsPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    self.grdEnergies.SetRowAttr(i, readOnly)
 		self.parent.GoBtn.Enable()
 		self.btnSearch.Enable()
+		self.cmd.remove(self.scoreModel)
+		self.cmd.delete(self.scoreModel)
+		self.cmd.load(self.scoreModel + "_S.pdb", self.scoreModel)
+		poseindx = self.seqWin.getPoseIndexForModel(self.scoreModel)
+		self.seqWin.reloadPose(poseindx, self.scoreModel, self.scoreModel + "_S.pdb")
+		defaultPyMOLView(self.cmd, self.scoreModel)
 		self.energiesCalculated = True
 		self.recolorEnergies()
 		self.seqWin.recolorResidues()

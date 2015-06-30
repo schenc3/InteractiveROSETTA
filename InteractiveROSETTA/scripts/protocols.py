@@ -37,6 +37,7 @@ from pmutscan import PointMutantScanPanel
 from surfaces import SurfacesPanel
 from antibody import AntibodyPanel
 from ensemblegen import EnsembleGenPanel
+from flexpepdock import FlexPepDockPanel
 
 class ProtocolsPanel(wx.Panel):
     def __init__(self, parent, W, H):
@@ -63,6 +64,7 @@ class ProtocolsPanel(wx.Panel):
 		   "Energy Minimization", 
 		   "Ensemble Browser", 
 		   "Ensemble Generation",
+		   "Flexible Peptide Docking",
 		   "Loop Modeling (KIC)",
 		   "Molecular Surfaces", 
 		   "Point Mutant Scan", 
@@ -252,6 +254,9 @@ class ProtocolsPanel(wx.Panel):
 		    self.parent.Selection.displaySurfaces()
 		self.protPanel.Destroy()
 		del self.protPanel
+	    elif (self.currentProtocol == "Flexible Peptide Docking"):
+		self.protPanel.Destroy()
+		del self.protPanel
 	    self.currentProtocol = selectedProtocol
 	    self.seqWin.cannotDelete = False
 	    # Restart the Rosetta daemon to clear its memory up
@@ -295,6 +300,9 @@ class ProtocolsPanel(wx.Panel):
 	    elif (selectedProtocol == "Molecular Surfaces"):
 		self.protPanel = SurfacesPanel(self, self.W, self.H)
 		self.cmd.hide("surface", "all")
+	    elif (selectedProtocol == "Flexible Peptide Docking"):
+		self.protPanel = FlexPepDockPanel(self, self.W, self.H)
+		self.protPanel.setSelectWin(self.selectWin)
 	    self.protPanel.setSeqWin(self.seqWin)
 	    self.protPanel.setPyMOL(self.pymol)
 	    self.protPanel.activate()

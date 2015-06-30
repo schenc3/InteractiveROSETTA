@@ -1196,7 +1196,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	logInfo("Inverted current selection")
 	
     def selectVisible(self, event):
-	self.cmd.select("seqsele", "visible")
+	self.cmd.select("seqsele", "rep lines or rep sticks or rep spheres")
 	self.cmd.enable("seqsele")
 	self.seqWin.selectUpdate(False)
 	logInfo("Clicked on the visible select button")

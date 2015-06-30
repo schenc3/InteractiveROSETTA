@@ -651,6 +651,7 @@ class ResidueCreatorPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.resMenu.Clear()
 	self.resMenu.AppendItems(self.unrecognized_types.keys())
 	self.removeMenu.Append(self.selectedType)
+	self.cmd.remove("params")
 	
     def removeParams(self, event):
 	# Take the indicated parameters file out of the database

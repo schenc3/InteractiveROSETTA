@@ -285,9 +285,32 @@ class SurfacesPanel(wx.lib.scrolledpanel.ScrolledPanel):
     
     def elecColor(self, event):
 	try:
-	    self.cmd.set("surface_color", "white", "curr_surf_recp")
-	    self.cmd.set("surface_color", "blue", "curr_surf_recp and (resn lys or resn arg)")
-	    self.cmd.set("surface_color", "red", "curr_surf_recp and (resn asp or resn glu)")
+	    total_charge = 0
+	    natoms = 0
+	    self.stored.bfactors = []
+	    self.cmd.iterate_state(1, "curr_surf_recp", "stored.bfactors.append([model, chain, resi, name, formal_charge])")
+	    for model, chain, resi, name, c in self.stored.bfactors:
+		natoms += 1
+		total_charge += c / 4
+		if (len(chain.strip()) == 0):
+		    chain = " "
+		    selstring = "model " + model + " and resi " + str(resi) + " and name " + name
+		else:
+		    selstring = "model " + model + " and chain " + chain + " and resi " + str(resi) + " and name " + name
+		if (c <= 0):
+		    red = 255
+		    blue = int(255 * float(4+c)/4.0)
+		    green = blue
+		else:
+		    blue = 255
+		    red = int(255 * float(4-c)/4.0)
+		    green = red
+		color = "0x%02x%02x%02x" % (red, green, blue)
+		self.cmd.set("surface_color", color, selstring)
+	    if (total_charge < natoms / -2.0 or total_charge > natoms / 2):
+		self.cmd.set("surface_color", "white", "curr_surf_recp")
+		self.cmd.set("surface_color", "blue", "curr_surf_recp and (resn lys or resn arg)")
+		self.cmd.set("surface_color", "red", "curr_surf_recp and (resn asp or resn glu)")
 	except:
 	    pass
     

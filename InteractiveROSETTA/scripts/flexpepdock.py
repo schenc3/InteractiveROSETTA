@@ -58,64 +58,76 @@ class FlexPepDockPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.lblInst.SetForegroundColour("#FFFFFF")
 	
 	if (platform.system() == "Windows"):
-	    self.lblPeptide = wx.StaticText(self, -1, "Peptide Sequence", (10, 80), (310, 20))
+	    self.lblPeptide = wx.StaticText(self, -1, "Peptide:", (10, 83), (90, 20))
 	    self.lblPeptide.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblPeptide = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblPeptide.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 90), size=(155, 20))
+	    self.lblPeptide = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblPeptideSeq.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 83), size=(90, 20))
 	else:
-	    self.lblPeptide = wx.StaticText(self, -1, "Peptide Sequence", (10, 80))
+	    self.lblPeptide = wx.StaticText(self, -1, "Peptide:", (10, 83))
 	    self.lblPeptide.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.lblPeptide.SetForegroundColour("#FFFFFF")
-	self.txtPeptide = wx.TextCtrl(self, -1, pos=(0, 100), size=(260, 25))
+	self.peptideMenu = wx.ComboBox(self, pos=(100, 80), size=(220, 25), choices=[], style=wx.CB_READONLY)
+	self.peptideMenu.Bind(wx.EVT_COMBOBOX, self.peptideMenuSelect)
+	self.peptideMenu.SetToolTipString("Select chains that will be fixed receptors")
+	
+	if (platform.system() == "Windows"):
+	    self.lblPeptideSeq = wx.StaticText(self, -1, "Peptide Sequence", (10, 110), (310, 20))
+	    self.lblPeptideSeq.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	elif (platform.system() == "Darwin"):
+	    self.lblPeptideSeq = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblPeptideSeq.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 120), size=(310, 20))
+	else:
+	    self.lblPeptideSeq = wx.StaticText(self, -1, "Peptide Sequence", (10, 110))
+	    self.lblPeptideSeq.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	self.lblPeptideSeq.SetForegroundColour("#FFFFFF")
+	self.txtPeptide = wx.TextCtrl(self, -1, pos=(0, 130), size=(260, 25))
 	self.txtPeptide.SetValue("")
 	self.txtPeptide.SetToolTipString("The sequence of the flexible peptide")
 	if (platform.system() == "Darwin"):
-	    self.btnCreate = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAddChain.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 100), size=(77, 25))
+	    self.btnCreate = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAddChain.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 130), size=(77, 25))
 	else:
-	    self.btnCreate = wx.Button(self, id=-1, label="Create", pos=(260, 100), size=(60, 25))
+	    self.btnCreate = wx.Button(self, id=-1, label="Create", pos=(260, 130), size=(60, 25))
 	    self.btnCreate.SetForegroundColour("#000000")
 	    self.btnCreate.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnCreate.Bind(wx.EVT_BUTTON, self.createPeptide)
 	self.btnCreate.SetToolTipString("Add selected chain to the list of static receptor chains")
 	
 	if (platform.system() == "Windows"):
-	    self.lblStatic = wx.StaticText(self, -1, "Receptor Chains", (0, 130), (155, 20), wx.ALIGN_CENTRE)
+	    self.lblStatic = wx.StaticText(self, -1, "Receptor Chains", (0, 160), (155, 20), wx.ALIGN_CENTRE)
 	    self.lblStatic.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblStatic = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblStatic.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 130), size=(155, 20))
+	    self.lblStatic = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblStatic.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 160), size=(155, 20))
 	else:
-	    self.lblStatic = wx.StaticText(self, -1, "Receptor Chains", (0, 130), style=wx.ALIGN_CENTRE)
+	    self.lblStatic = wx.StaticText(self, -1, "Receptor Chains", (0, 160), style=wx.ALIGN_CENTRE)
 	    self.lblStatic.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	    resizeTextControlForUNIX(self.lblStatic, 0, 155)
 	self.lblStatic.SetForegroundColour("#FFFFFF")
-	self.staticMenu = wx.ComboBox(self, pos=(0, 150), size=(155, 25), choices=[], style=wx.CB_READONLY)
+	self.staticMenu = wx.ComboBox(self, pos=(0, 180), size=(155, 25), choices=[], style=wx.CB_READONLY)
 	self.staticMenu.Bind(wx.EVT_COMBOBOX, self.staticMenuSelect)
 	self.staticMenu.SetToolTipString("Select chains that will be fixed receptors")
 	
 	if (platform.system() == "Darwin"):
-	    self.btnAddStatic = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAddChain.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 150), size=(77, 25))
+	    self.btnAddStatic = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAddChain.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 180), size=(77, 25))
 	else:
-	    self.btnAddStatic = wx.Button(self, id=-1, label="Add", pos=(165, 150), size=(77, 25))
+	    self.btnAddStatic = wx.Button(self, id=-1, label="Add", pos=(165, 180), size=(77, 25))
 	    self.btnAddStatic.SetForegroundColour("#000000")
 	    self.btnAddStatic.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnAddStatic.Bind(wx.EVT_BUTTON, self.addStatic)
 	self.btnAddStatic.SetToolTipString("Add selected chain to the list of static receptor chains")
 	if (platform.system() == "Darwin"):
-	    self.btnRemoveStatic = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnRemoveChain.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(77, 150), size=(78, 25))
+	    self.btnRemoveStatic = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnRemoveChain.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(77, 180), size=(78, 25))
 	else:
-	    self.btnRemoveStatic = wx.Button(self, id=-1, label="Remove", pos=(242, 150), size=(78, 25))
+	    self.btnRemoveStatic = wx.Button(self, id=-1, label="Remove", pos=(242, 180), size=(78, 25))
 	    self.btnRemoveStatic.SetForegroundColour("#000000")
 	    self.btnRemoveStatic.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnRemoveStatic.Bind(wx.EVT_BUTTON, self.removeStatic)
 	self.btnRemoveStatic.SetToolTipString("Remove selected chain from the list of movable docked chains")
 	self.staticChains = []
-	
 	self.movingChains = []
 	
 	self.grdDocking = wx.grid.Grid(self)
 	self.grdDocking.CreateGrid(0, 1)
 	self.grdDocking.SetSize((320, 100))
-	self.grdDocking.SetPosition((0, 185))
+	self.grdDocking.SetPosition((0, 215))
 	self.grdDocking.SetLabelFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.grdDocking.DisableDragColSize()
 	self.grdDocking.DisableDragRowSize()
@@ -364,137 +376,127 @@ class FlexPepDockPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.lblLine.SetForegroundColour("#FFFFFF")
 	
 	ypos = self.lblLine.GetPosition()[1] + self.lblLine.GetSize()[1] + 10
-	if (platform.system() == "Windows"):
-	    self.lblProt3 = wx.StaticText(self, -1, "Ensemble Docking (Optional)", (0, ypos), (320, 25), wx.ALIGN_CENTRE)
-	    self.lblProt3.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-	elif (platform.system() == "Darwin"):
-	    self.lblProt3 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblEnsembleDocking.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, ypos), size=(270, 25))
-	else:
-	    self.lblProt3 = wx.StaticText(self, -1, "Ensemble Docking (Optional)", (70, ypos), style=wx.ALIGN_CENTRE)
-	    self.lblProt3.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-	    resizeTextControlForUNIX(self.lblProt3, 0, self.GetSize()[0]-20)
-	self.lblProt3.SetForegroundColour("#FFFFFF")
+	#if (platform.system() == "Windows"):
+	#    self.lblProt3 = wx.StaticText(self, -1, "Ensemble Docking (Optional)", (0, ypos), (320, 25), wx.ALIGN_CENTRE)
+	#    self.lblProt3.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	#elif (platform.system() == "Darwin"):
+	#    self.lblProt3 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblEnsembleDocking.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, ypos), size=(270, 25))
+	#else:
+	#    self.lblProt3 = wx.StaticText(self, -1, "Ensemble Docking (Optional)", (70, ypos), style=wx.ALIGN_CENTRE)
+	#    self.lblProt3.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	#    resizeTextControlForUNIX(self.lblProt3, 0, self.GetSize()[0]-20)
+	#self.lblProt3.SetForegroundColour("#FFFFFF")
 	
-	if (platform.system() == "Windows"):
-	    self.lblInst3 = wx.StaticText(self, -1, "Rosetta can represent the static and/or moving\nmodels as ensembles rather than single models.\nProvide an ensemble archive (.ensb) as input for\neither structure to activate ensemble docking.", (0, ypos+30), (320, 25), wx.ALIGN_CENTRE)
-	    self.lblInst3.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
-	elif (platform.system() == "Darwin"):
-	    self.lblInst3 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstConstraints.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+30), size=(320, 95))
-	else:
-	    self.lblInst3 = wx.StaticText(self, -1, "Rosetta can represent the static and/or moving\nmodels as ensembles rather than single models.\nProvide an ensemble archive (.ensb) as input for\neither structure to activate ensemble docking.", (5, ypos+30), style=wx.ALIGN_CENTRE)
-	    self.lblInst3.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
-	    resizeTextControlForUNIX(self.lblInst3, 0, self.GetSize()[0]-20)
-	self.lblInst3.SetForegroundColour("#FFFFFF")
+	#if (platform.system() == "Windows"):
+	#    self.lblInst3 = wx.StaticText(self, -1, "Rosetta can represent the static and/or moving\nmodels as ensembles rather than single models.\nProvide an ensemble archive (.ensb) as input for\neither structure to activate ensemble docking.", (0, ypos+30), (320, 25), wx.ALIGN_CENTRE)
+	#    self.lblInst3.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
+	#elif (platform.system() == "Darwin"):
+	#    self.lblInst3 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstConstraints.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+30), size=(320, 95))
+	#else:
+	#    self.lblInst3 = wx.StaticText(self, -1, "Rosetta can represent the static and/or moving\nmodels as ensembles rather than single models.\nProvide an ensemble archive (.ensb) as input for\neither structure to activate ensemble docking.", (5, ypos+30), style=wx.ALIGN_CENTRE)
+	#    self.lblInst3.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
+	#    resizeTextControlForUNIX(self.lblInst3, 0, self.GetSize()[0]-20)
+	#self.lblInst3.SetForegroundColour("#FFFFFF")
 	
-	if (platform.system() == "Windows"):
-	    self.lblStaticEnsb = wx.StaticText(self, -1, "Receptor Ensemble:", (0, ypos+103), (160, 20), wx.ALIGN_CENTRE)
-	    self.lblStaticEnsb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-	elif (platform.system() == "Darwin"):
-	    self.lblStaticEnsb = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblStaticEnsb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+103), size=(160, 20))
-	else:
-	    self.lblStaticEnsb = wx.StaticText(self, -1, "Receptor Ensemble:", (0, ypos+103), style=wx.ALIGN_CENTRE)
-	    self.lblStaticEnsb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-	    resizeTextControlForUNIX(self.lblStaticEnsb, 0, 160)
-	self.lblStaticEnsb.SetForegroundColour("#FFFFFF")
-	if (platform.system() == "Darwin"):
-	    self.btnLoadStaticEnsb = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLoadStaticEnsb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(170, ypos+100), size=(70, 25))
-	else:
-	    self.btnLoadStaticEnsb = wx.Button(self, id=-1, label="Load", pos=(170, ypos+100), size=(70, 25))
-	    self.btnLoadStaticEnsb.SetForegroundColour("#000000")
-	    self.btnLoadStaticEnsb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-	self.btnLoadStaticEnsb.Bind(wx.EVT_BUTTON, self.loadStaticEnsb)
-	self.btnLoadStaticEnsb.SetToolTipString("Load an ensemble archive for the static chains")
-	if (platform.system() == "Darwin"):
-	    self.btnDeleteStaticEnsb = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLoadStaticEnsb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(250, ypos+100), size=(70, 25))
-	else:
-	    self.btnDeleteStaticEnsb = wx.Button(self, id=-1, label="Delete", pos=(250, ypos+100), size=(70, 25))
-	    self.btnDeleteStaticEnsb.SetForegroundColour("#000000")
-	    self.btnDeleteStaticEnsb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-	self.btnDeleteStaticEnsb.Bind(wx.EVT_BUTTON, self.deleteStaticEnsb)
-	self.btnDeleteStaticEnsb.SetToolTipString("Delete the loaded ensemble archive for the static chains")
-	if (platform.system() == "Windows"):
-	    self.lblSelStaticEnsb = wx.StaticText(self, -1, "No Ensemble Specified", (0, ypos+133), (320, 20), wx.ALIGN_CENTRE)
-	    self.lblSelStaticEnsb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-	else:
-	    self.lblSelStaticEnsb = wx.StaticText(self, -1, "No Ensemble Specified", (0, ypos+133), style=wx.ALIGN_CENTRE)
-	    self.lblSelStaticEnsb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-	    resizeTextControlForUNIX(self.lblSelStaticEnsb, 0, 320)
-	self.lblSelStaticEnsb.SetForegroundColour("#FFFFFF")
+	#if (platform.system() == "Windows"):
+	#    self.lblStaticEnsb = wx.StaticText(self, -1, "Receptor Ensemble:", (0, ypos+103), (160, 20), wx.ALIGN_CENTRE)
+	#    self.lblStaticEnsb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	#elif (platform.system() == "Darwin"):
+	#    self.lblStaticEnsb = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblStaticEnsb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+103), size=(160, 20))
+	#else:
+	#    self.lblStaticEnsb = wx.StaticText(self, -1, "Receptor Ensemble:", (0, ypos+103), style=wx.ALIGN_CENTRE)
+	#    self.lblStaticEnsb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	#    resizeTextControlForUNIX(self.lblStaticEnsb, 0, 160)
+	#self.lblStaticEnsb.SetForegroundColour("#FFFFFF")
+	#if (platform.system() == "Darwin"):
+	#    self.btnLoadStaticEnsb = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLoadStaticEnsb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(170, ypos+100), size=(70, 25))
+	#else:
+	#    self.btnLoadStaticEnsb = wx.Button(self, id=-1, label="Load", pos=(170, ypos+100), size=(70, 25))
+	#    self.btnLoadStaticEnsb.SetForegroundColour("#000000")
+	#    self.btnLoadStaticEnsb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	#self.btnLoadStaticEnsb.Bind(wx.EVT_BUTTON, self.loadStaticEnsb)
+	#self.btnLoadStaticEnsb.SetToolTipString("Load an ensemble archive for the static chains")
+	#if (platform.system() == "Darwin"):
+	#    self.btnDeleteStaticEnsb = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLoadStaticEnsb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(250, ypos+100), size=(70, 25))
+	#else:
+	#    self.btnDeleteStaticEnsb = wx.Button(self, id=-1, label="Delete", pos=(250, ypos+100), size=(70, 25))
+	#    self.btnDeleteStaticEnsb.SetForegroundColour("#000000")
+	#    self.btnDeleteStaticEnsb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	#self.btnDeleteStaticEnsb.Bind(wx.EVT_BUTTON, self.deleteStaticEnsb)
+	#self.btnDeleteStaticEnsb.SetToolTipString("Delete the loaded ensemble archive for the static chains")
+	#if (platform.system() == "Windows"):
+	#    self.lblSelStaticEnsb = wx.StaticText(self, -1, "No Ensemble Specified", (0, ypos+133), (320, 20), wx.ALIGN_CENTRE)
+	#    self.lblSelStaticEnsb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	#else:
+	#    self.lblSelStaticEnsb = wx.StaticText(self, -1, "No Ensemble Specified", (0, ypos+133), style=wx.ALIGN_CENTRE)
+	#    self.lblSelStaticEnsb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	#    resizeTextControlForUNIX(self.lblSelStaticEnsb, 0, 320)
+	#self.lblSelStaticEnsb.SetForegroundColour("#FFFFFF")
 	self.ensemble1 = None
 	self.ensemble2 = None
 	
-	if (platform.system() == "Windows"):
-	    self.lblLine2 = wx.StaticText(self, -1, "==========================", (0, ypos+160), (320, 20), wx.ALIGN_CENTRE)
-	    self.lblLine2.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
-	elif (platform.system() == "Darwin"):
-	    self.lblLine2 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblLine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+220), size=(320, 20))
-	else:
-	    self.lblLine2 = wx.StaticText(self, -1, "==========================", (0, ypos+160), style=wx.ALIGN_CENTRE)
-	    self.lblLine2.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
-	    resizeTextControlForUNIX(self.lblLine2, 20, 120)
-	self.lblLine2.SetForegroundColour("#FFFFFF")
+	#if (platform.system() == "Windows"):
+	#    self.lblLine2 = wx.StaticText(self, -1, "==========================", (0, ypos+160), (320, 20), wx.ALIGN_CENTRE)
+	#    self.lblLine2.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
+	#elif (platform.system() == "Darwin"):
+	#    self.lblLine2 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblLine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+220), size=(320, 20))
+	#else:
+	#    self.lblLine2 = wx.StaticText(self, -1, "==========================", (0, ypos+160), style=wx.ALIGN_CENTRE)
+	#    self.lblLine2.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
+	#    resizeTextControlForUNIX(self.lblLine2, 20, 120)
+	#self.lblLine2.SetForegroundColour("#FFFFFF")
 	
 	if (platform.system() == "Windows"):
-	    self.lblInst4 = wx.StaticText(self, -1, "After specifying constraints, click the button\nbelow to reorient the peptide near the \ninterface of the constraints.", (0, ypos+180), (320, 25), wx.ALIGN_CENTRE)
+	    self.lblInst4 = wx.StaticText(self, -1, "After specifying constraints, click the button\nbelow to reorient the peptide near the \ninterface of the constraints.", (0, ypos), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblInst4.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblInst4 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstFlexPepInterface.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+180), size=(320, 95))
+	    self.lblInst4 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstFlexPepInterface.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos), size=(320, 95))
 	else:
-	    self.lblInst4 = wx.StaticText(self, -1, "After specifying constraints, click the button\nbelow to reorient the peptide near the \ninterface of the constraints.", (5, ypos+180), style=wx.ALIGN_CENTRE)
+	    self.lblInst4 = wx.StaticText(self, -1, "After specifying constraints, click the button\nbelow to reorient the peptide near the \ninterface of the constraints.", (5, ypos), style=wx.ALIGN_CENTRE)
 	    self.lblInst4.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	    resizeTextControlForUNIX(self.lblInst4, 0, self.GetSize()[0]-20)
 	self.lblInst4.SetForegroundColour("#FFFFFF")
 	
 	if (platform.system() == "Darwin"):
-	    self.btnReorient = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnReorient.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(110, ypos+230), size=(100, 25))
+	    self.btnReorient = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnReorient.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(110, ypos+50), size=(100, 25))
 	else:
-	    self.btnReorient = wx.Button(self, id=-1, label="Re-orient Peptide", pos=(60, ypos+230), size=(200, 25))
+	    self.btnReorient = wx.Button(self, id=-1, label="Re-orient Peptide", pos=(60, ypos+50), size=(200, 25))
 	    self.btnReorient.SetForegroundColour("#000000")
 	    self.btnReorient.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnReorient.Bind(wx.EVT_BUTTON, self.reorient)
 	self.btnReorient.SetToolTipString("Reorient the static chain selection to point towards the ligand.  Then use Fix Stat for the docking mode.")
 	
 	if (platform.system() == "Windows"):
-	    self.lblCoarse = wx.StaticText(self, -1, "Coarse Models", (0, ypos+260), (155, 20), wx.ALIGN_CENTRE)
-	    self.lblCoarse.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	    self.lblDecoys = wx.StaticText(self, -1, "Decoys", (0, ypos+80), (155, 20), wx.ALIGN_CENTRE)
+	    self.lblDecoys.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblCoarse = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblCoarse.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+260), size=(155, 20))
+	    self.lblDecoys = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblDecoys.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+80), size=(155, 20))
 	else:
-	    self.lblCoarse = wx.StaticText(self, -1, "Coarse Models", (0, ypos+260), style=wx.ALIGN_CENTRE)
-	    self.lblCoarse.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-	    resizeTextControlForUNIX(self.lblCoarse, 0, 155)
-	self.lblCoarse.SetForegroundColour("#FFFFFF")
-	self.txtCoarse = wx.TextCtrl(self, -1, pos=(0, ypos+280), size=(155, 25))
-	self.txtCoarse.SetValue("1000")
-	self.txtCoarse.SetToolTipString("Number of decoys to generate in the coarse docking simulation")
+	    self.lblDecoys = wx.StaticText(self, -1, "Decoys", (0, ypos+80), style=wx.ALIGN_CENTRE)
+	    self.lblDecoys.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	    resizeTextControlForUNIX(self.lblDecoys, 0, 155)
+	self.lblDecoys.SetForegroundColour("#FFFFFF")
+	self.txtDecoys = wx.TextCtrl(self, -1, pos=(0, ypos+100), size=(155, 25))
+	self.txtDecoys.SetValue("1000")
+	self.txtDecoys.SetToolTipString("Number of decoys to generate for flexible peptide docking")
 	if (platform.system() == "Windows"):
-	    self.lblRefined = wx.StaticText(self, -1, "Refined Models", (165, ypos+260), (155, 20), wx.ALIGN_CENTRE)
-	    self.lblRefined.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	    self.lblReturn = wx.StaticText(self, -1, "Return", (165, ypos+80), (155, 20), wx.ALIGN_CENTRE)
+	    self.lblReturn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblRefined = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblRefined.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(165, ypos+260), size=(155, 20))
+	    self.lblReturn = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblReturn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(165, ypos+80), size=(155, 20))
 	else:
-	    self.lblRefined = wx.StaticText(self, -1, "Refined Models", (165, ypos+260), style=wx.ALIGN_CENTRE)
-	    self.lblRefined.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-	    resizeTextControlForUNIX(self.lblRefined, 165, 155)
-	self.lblRefined.SetForegroundColour("#FFFFFF")
-	self.txtRefined = wx.TextCtrl(self, -1, pos=(165, ypos+280), size=(155, 25))
-	self.txtRefined.SetValue("10")
-	self.txtRefined.SetToolTipString("Number of decoys to generate in the refined docking simulation that you will be able to view")
+	    self.lblReturn = wx.StaticText(self, -1, "Return", (165, ypos+80), style=wx.ALIGN_CENTRE)
+	    self.lblReturn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	    resizeTextControlForUNIX(self.lblReturn, 165, 155)
+	self.lblReturn.SetForegroundColour("#FFFFFF")
+	self.txtReturn = wx.TextCtrl(self, -1, pos=(165, ypos+100), size=(155, 25))
+	self.txtReturn.SetValue("10")
+	self.txtReturn.SetToolTipString("Number of decoys to generate in the refined docking simulation that you will be able to view")
 	
 	if (platform.system() == "Darwin"):
-	    self.btnServerToggle = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnServerOff.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+310), size=(100, 25))
+	    self.btnDock = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnDock.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(220, ypos+130), size=(100, 25))
 	else:
-	    self.btnServerToggle = wx.Button(self, id=-1, label="Server Off", pos=(40, ypos+310), size=(100, 25))
-	    self.btnServerToggle.SetForegroundColour("#000000")
-	    self.btnServerToggle.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-	self.btnServerToggle.Bind(wx.EVT_BUTTON, self.serverToggle)
-	self.btnServerToggle.SetToolTipString("Perform docking simulations locally")
-	self.serverOn = False
-	
-	if (platform.system() == "Darwin"):
-	    self.btnDock = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnDock.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(220, ypos+310), size=(100, 25))
-	else:
-	    self.btnDock = wx.Button(self, id=-1, label="Dock!", pos=(180, ypos+310), size=(100, 25))
+	    self.btnDock = wx.Button(self, id=-1, label="Dock!", pos=(110, ypos+130), size=(100, 25))
 	    self.btnDock.SetForegroundColour("#000000")
 	    self.btnDock.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	self.btnDock.Bind(wx.EVT_BUTTON, self.dockClick)
@@ -533,15 +535,35 @@ class FlexPepDockPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def activate(self):
 	# Get the list of all the chains in the sequence viewer
 	chainList = []
+	peptideList = []
+	peptideStillThere = False
 	for r in range(0, self.seqWin.SeqViewer.NumberRows):
-	    chainList.append(self.seqWin.IDs[r])
+	    if (self.seqWin.IDs[r] != "flexpeptide|P"):
+		chainList.append(self.seqWin.IDs[r])
+	    else:
+		peptideStillThere = True
+	    if (len(self.seqWin.sequences[r]) <= 30):
+		peptideList.append(self.seqWin.IDs[r])
+	if (not(peptideStillThere)):
+	    self.movingChains = []
 	# Update the combobox list if the list has changed
 	if (chainList != self.staticMenu.GetItems()):
 	    self.staticMenu.Clear()
 	    self.staticMenu.AppendItems(chainList)
-	if (chainList != self.movingMenu.GetItems()):
-	    self.movingMenu.Clear()
-	    self.movingMenu.AppendItems(chainList)
+	    # Take out invalid chains if the list of models changed
+	    for i in range(len(self.staticChains)-1, -1, -1):
+		if (self.staticChains[i] not in chainList):
+		    self.staticChains.pop(i)
+	    self.updateGrid()
+	# Update the combobox list if the list has changed
+	if (peptideList != self.peptideMenu.GetItems()):
+	    self.peptideMenu.Clear()
+	    self.peptideMenu.AppendItems(peptideList)
+	    # Take out invalid chains if the list of models changed
+	    for i in range(len(self.movingChains)-1, -1, -1):
+		if (self.movingChains[i] not in peptideList):
+		    self.movingChains.pop(i)
+		    self.peptideMenu.SetSelection(0)
 	# Grab the current selection of residues for adding constraints
 	topLefts = self.seqWin.SeqViewer.GetSelectionBlockTopLeft()
 	bottomRights = self.seqWin.SeqViewer.GetSelectionBlockBottomRight()
@@ -589,12 +611,76 @@ class FlexPepDockPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	#self.showChain(self.movingMenu.GetStringSelection())
     
     def createPeptide(self, event):
-	pass
-    
+	# Is the sequence valid?
+	if (len(self.txtPeptide.GetValue().strip()) == 0):
+	    dlg = wx.MessageDialog(self, "Please specify the sequence of the flexible peptide that will be modeled.", "No Peptide Given", wx.OK | wx.ICON_ERROR | wx.CENTRE)
+	    dlg.ShowModal()
+	    dlg.Destroy()
+	    return
+	sequence = self.txtPeptide.GetValue().strip().upper()
+	sequence = sequence.replace(" ", "").replace("\t", "").replace("\n", "")
+	for AA in sequence:
+	    if (AA not in "ACDEFGHIKLMNPQRSTVWY"):
+		dlg = wx.MessageDialog(self, "An unrecognized amino acid was found in the peptide sequence: " + AA, "Unrecognized Amino Acid", wx.OK | wx.ICON_ERROR | wx.CENTRE)
+		dlg.ShowModal()
+		dlg.Destroy()
+		return
+	# Is it too long?
+	if (len(sequence) > 30):
+	    dlg = wx.MessageDialog(self, "Your peptide is too long.  The maximum length is 30 residues, but most of the benchmarks were performed on peptides of length 5-15 residues.", "Peptide Too Long", wx.OK | wx.ICON_ERROR | wx.CENTRE)
+	    dlg.ShowModal()
+	    dlg.Destroy()
+	    return
+	# Unload a previously created peptide if it exists
+	for r in range(0, len(self.seqWin.IDs)):
+	    if (self.seqWin.IDs[r] == "flexpeptide|P"):
+		self.seqWin.deleteChain(r)
+		break
+	# Create an extended peptide with the given sequence
+	for AA in sequence:
+	    self.cmd._alt(AA.lower())
+	# Load it in the sequence window
+	goToSandbox()
+	self.cmd.alter("pkmol", "chain=\"P\"")
+	self.cmd.save("flexpeptide.pdb", "pkmol")
+	self.cmd.remove("pkmol")
+	self.cmd.delete("pkmol")
+	self.cmd.remove("pk1")
+	self.cmd.delete("pk1")
+	for three in "ala cys asp glu phe gly his ile lys leu met asn pro gln arg ser thr val trp tyr".split():
+	    try:
+		self.cmd.remove(three)
+		self.cmd.delete(three)
+	    except:
+		pass
+	# The peptide gets weird numbering for some reason, so let's renumber from one
+	fin = open("flexpeptide.pdb", "r")
+	data = []
+	for aline in fin:
+	    data.append(aline)
+	fin.close()
+	fout = open("flexpeptide.pdb", "w")
+	lastres = "0000"
+	indx = 0
+	for aline in data:
+	    if (aline.startswith("ATOM") and aline[22:26] != lastres):
+		lastres = aline[22:26]
+		indx += 1
+	    if (aline.startswith("ATOM")):
+		aline = aline[0:22] + "%4.4i" % indx + aline[26:]
+	    fout.write(aline)
+	fout.close()
+	self.seqWin.PyMOLPDBLoad(1, "flexpeptide.pdb", flexiblePeptide=True)
+	self.movingChains = ["flexpeptide|P"]
+	# Select the created peptide automatically
+	self.activate()
+	indx = self.peptideMenu.GetItems().index("flexpeptide|P")
+	self.peptideMenu.SetSelection(indx)
+	
     def updateGrid(self):
 	if (self.grdDocking.NumberRows > 0):
 	    self.grdDocking.DeleteRows(0, self.grdDocking.NumberRows)
-	for i in range(0, max(len(self.staticChains), len(self.movingChains))):
+	for i in range(0, len(self.staticChains)):
 	    self.grdDocking.AppendRows(1)
 	    readOnly = wx.grid.GridCellAttr()
 	    readOnly.SetReadOnly(True)
@@ -602,9 +688,7 @@ class FlexPepDockPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.grdDocking.SetCellAlignment(i, 0, wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
 	    self.grdDocking.SetRowLabelValue(i, "")
 	for i in range(0, len(self.staticChains)):
-	    self.grdDocking.SetRowLabelValue(i, self.staticChains[i])
-	for i in range(0, len(self.movingChains)):
-	    self.grdDocking.SetCellValue(i, 0, self.movingChains[i])
+	    self.grdDocking.SetCellValue(i, 0, self.staticChains[i])
     
     def addStatic(self, event):
 	# Add this to the list of chains that will be fixed
@@ -621,7 +705,6 @@ class FlexPepDockPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	# Update the grid with this new information
 	self.updateGrid()
 	self.pruneConstraints()
-	self.deleteStaticEnsb(None) # Ensemble data is not valid anymore, remove it
 	logInfo("Added " + chain + " to the list of static chains")
 	
     def removeStatic(self, event):
@@ -633,13 +716,12 @@ class FlexPepDockPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	# Update the grid with this new information
 	self.updateGrid()
 	self.pruneConstraints()
-	self.deleteStaticEnsb(None) # Ensemble data is not valid anymore, remove it
 	logInfo("Removed " + chain + " from the list of static chains")
 	    
-    def addMoving(self, event):
+    def peptideMenuSelect(self, event):
 	# Add this to the list of chains that will be docked
 	# If this chain is already in the static list then we need to take it out of that list and put it as movable
-	chain = str(self.movingMenu.GetStringSelection())
+	chain = str(self.peptideMenu.GetStringSelection())
 	if (len(chain.strip()) == 0):
 	    return
 	if (not(chain in self.movingChains)):
@@ -648,11 +730,8 @@ class FlexPepDockPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	if (chain in self.staticChains):
 	    indx = self.staticChains.index(chain)
 	    self.staticChains.pop(indx)
-	# Update the grid with this new information
-	self.updateGrid()
 	self.pruneConstraints()
-	self.deleteMovingEnsb(None) # Ensemble data is not valid anymore, remove it
-	logInfo("Added " + chain + " to the list of moving chains")
+	logInfo("Selected " + chain + " as a peptide chain")
     
     def removeMoving(self, event):
 	# Just pop out the indicated chain
@@ -756,10 +835,13 @@ class FlexPepDockPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    residueMoving = True
 		if ((residueStatic and residueMoving) or (not(residueStatic) and not(residueMoving))):
 		    self.constraints.pop(i)
+		    continue
 		elif (residueStatic and len(self.grdConstraints.GetCellValue(i, 4)) > 0 and not(self.grdConstraints.GetCellValue(i, 4) in self.movingChains)):
 		    self.constraints.pop(i)
+		    continue
 		elif (residueMoving and len(self.grdConstraints.GetCellValue(i, 4)) > 0 and not(self.grdConstraints.GetCellValue(i, 4) in self.staticChains)):
 		    self.constraints.pop(i)
+		    continue
 		# Now make sure the residues still exist
 		model = self.grdConstraints.GetCellValue(i, 2)
 		chain = model[len(model)-1]
@@ -1635,6 +1717,9 @@ class FlexPepDockPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		pose.add(m)
 	    else:
 		pose[0].add(posechain)
+	# Get the receptor and peptide chain lists
+	self.receptorChains = usedChains[0:len(usedChains)-1]
+	self.peptideChain = usedChains[len(usedChains)-1]
 	self.dockpdbname = str(chains[0][0:len(chains[0])-2]) + "_dock.pdb"
 	self.seqWin.pdbwriter.set_structure(pose)
 	self.seqWin.pdbwriter.save(self.dockpdbname)
@@ -1727,184 +1812,6 @@ class FlexPepDockPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	else:
 	    logInfo("Cancelled save operation")
     
-    def loadStaticEnsb(self, event):
-	logInfo("Load Static Ensemble button clicked")
-	# If no static chain has been specified, abort because we cannot check to make sure the ensemble
-	# and the static chains are compatible
-	if (len(self.staticChains) == 0):
-	    dlg = wx.MessageDialog(self, "Please specify which chains are in the static structure before specifying an ensemble.", "No Static Structure", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
-	    dlg.ShowModal()
-	    dlg.Destroy()
-	    return
-	dlg = wx.FileDialog(
-	    self, message="Choose a File",
-	    defaultDir=self.seqWin.cwd,
-	    defaultFile="",
-	    wildcard="Ensemble Archives (*.ensb)|*.ensb",
-	    style=wx.OPEN | wx.CHANGE_DIR)
-	if (dlg.ShowModal() == wx.ID_OK):
-	    paths = dlg.GetPaths()
-	    # Change cwd to the last opened file
-	    if (platform.system() == "Windows"):
-		lastDirIndx = paths[len(paths)-1].rfind("\\")
-	    else:
-		lastDirIndx = paths[len(paths)-1].rfind("/")
-	    self.seqWin.cwd = str(paths[len(paths)-1][0:lastDirIndx])
-	    self.seqWin.saveWindowData(None)
-	    filename = str(paths[0])
-	    filelabel = filename[lastDirIndx+1:]
-	    # Does it open?  If yes, then erase the resfile data and continue
-	    try:
-		fin = gzip.open(filename, "r")
-	    except:
-		wx.MessageBox("The file " + filename.strip() + " cannot be opened!", "File Cannot Be Read", wx.OK|wx.ICON_EXCLAMATION)
-		return
-	    logInfo("Loaded data from an ensemble archive", filename)
-	    # Now we have to read the first model in the archive, find its chains and sequences, and make
-	    # sure they all match what is already loaded in the static chains
-	    readingData = False
-	    modeldata = {}
-	    lastres = " 0000"
-	    for aline in fin:
-		if (aline.startswith("BEGIN PDB")):
-		    readingData = True
-		elif (aline.startswith("END PDB")):
-		    break
-		elif (readingData and (aline.startswith("ATOM") or aline.startswith("HETATM"))):
-		    chain = aline[21]
-		    if (len(chain.strip()) == 0):
-			chain = "_"
-		    if (chain + aline[22:27] != lastres):
-			lastres = chain + aline[22:27]
-			try:
-			    modeldata[chain] += AA3to1(aline[17:20])
-			except:
-			    modeldata[chain] = AA3to1(aline[17:20])
-	    fin.close()
-	    # Now check against the static chains loaded
-	    for modelchain in self.staticChains:
-		chain = modelchain[len(modelchain)-1]
-		for i in range(0, len(self.seqWin.IDs)):
-		    if (modelchain == self.seqWin.IDs[i]):
-			try:
-			    if (modeldata[chain] != self.seqWin.sequences[i]):
-				dlg = wx.MessageDialog(self, "The sequences for chain " + chain + " do not match between the specified static chains and the selected ensemble.", "Ensemble Data Mismatch", wx.OK | wx.ICON_ERROR | wx.CENTRE)
-				dlg.ShowModal()
-				dlg.Destroy()
-				return
-			except:
-			    dlg = wx.MessageDialog(self, "Chain " + chain + " in the static chains is not in the ensemble", "Ensemble Data Mismatch", wx.OK | wx.ICON_ERROR | wx.CENTRE)
-			    dlg.ShowModal()
-			    dlg.Destroy()
-			    return
-			modeldata.pop(chain)
-	    # Are there extra chains left over from the ensemble?
-	    if (len(modeldata.keys()) > 0):
-		dlg = wx.MessageDialog(self, "Chain " + modeldata.keys()[0] + " does not exist in the specified static chains.", "Ensemble Data Mismatch", wx.OK | wx.ICON_ERROR | wx.CENTRE)
-		dlg.ShowModal()
-		dlg.Destroy()
-		return
-	    # If we got this far, then the ensemble should be okay
-	    self.ensemble1 = filename
-	    self.lblSelStaticEnsb.SetLabel(filelabel)
-	    if (platform.system() == "Linux"):
-		resizeTextControlForUNIX(self.lblSelStaticEnsb, 0, 320)
-    
-    def deleteStaticEnsb(self, event):
-	self.ensemble1 = None
-	self.lblSelStaticEnsb.SetLabel("No Ensemble Specified")
-	if (platform.system() == "Linux"):
-	    resizeTextControlForUNIX(self.lblSelStaticEnsb, 0, 320)
-    
-    def loadMovingEnsb(self, event):
-	logInfo("Load Moving Ensemble button clicked")
-	# If no static chain has been specified, abort because we cannot check to make sure the ensemble
-	# and the static chains are compatible
-	if (len(self.movingChains) == 0):
-	    dlg = wx.MessageDialog(self, "Please specify which chains are in the moving structure before specifying an ensemble.", "No Moving Structure", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
-	    dlg.ShowModal()
-	    dlg.Destroy()
-	    return
-	dlg = wx.FileDialog(
-	    self, message="Choose a File",
-	    defaultDir=self.seqWin.cwd,
-	    defaultFile="",
-	    wildcard="Ensemble Archives (*.ensb)|*.ensb",
-	    style=wx.OPEN | wx.CHANGE_DIR)
-	if (dlg.ShowModal() == wx.ID_OK):
-	    paths = dlg.GetPaths()
-	    # Change cwd to the last opened file
-	    if (platform.system() == "Windows"):
-		lastDirIndx = paths[len(paths)-1].rfind("\\")
-	    else:
-		lastDirIndx = paths[len(paths)-1].rfind("/")
-	    self.seqWin.cwd = str(paths[len(paths)-1][0:lastDirIndx])
-	    self.seqWin.saveWindowData(None)
-	    filename = str(paths[0])
-	    filelabel = filename[lastDirIndx+1:]
-	    # Does it open?  If yes, then erase the resfile data and continue
-	    try:
-		fin = gzip.open(filename, "r")
-	    except:
-		wx.MessageBox("The file " + filename.strip() + " cannot be opened!", "File Cannot Be Read", wx.OK|wx.ICON_EXCLAMATION)
-		return
-	    logInfo("Loaded data from an ensemble archive", filename)
-	    # Now we have to read the first model in the archive, find its chains and sequences, and make
-	    # sure they all match what is already loaded in the static chains
-	    readingData = False
-	    modeldata = {}
-	    lastres = " 0000"
-	    for aline in fin:
-		if (aline.startswith("BEGIN PDB")):
-		    readingData = True
-		elif (aline.startswith("END PDB")):
-		    break
-		elif (readingData and (aline.startswith("ATOM") or aline.startswith("HETATM"))):
-		    chain = aline[21]
-		    if (len(chain.strip()) == 0):
-			chain = "_"
-		    if (chain + aline[22:27] != lastres):
-			lastres = chain + aline[22:27]
-			try:
-			    modeldata[chain] += AA3to1(aline[17:20])
-			except:
-			    modeldata[chain] = AA3to1(aline[17:20])
-	    fin.close()
-	    # Now check against the moving chains loaded
-	    for modelchain in self.movingChains:
-		chain = modelchain[len(modelchain)-1]
-		for i in range(0, len(self.seqWin.IDs)):
-		    if (modelchain == self.seqWin.IDs[i]):
-			try:
-			    if (modeldata[chain] != self.seqWin.sequences[i]):
-				dlg = wx.MessageDialog(self, "The sequences for chain " + chain + " do not match between the specified moving chains and the selected ensemble.", "Ensemble Data Mismatch", wx.OK | wx.ICON_ERROR | wx.CENTRE)
-				dlg.ShowModal()
-				dlg.Destroy()
-				return
-			except:
-			    dlg = wx.MessageDialog(self, "Chain " + chain + " in the moving chains is not in the ensemble", "Ensemble Data Mismatch", wx.OK | wx.ICON_ERROR | wx.CENTRE)
-			    dlg.ShowModal()
-			    dlg.Destroy()
-			    return
-			modeldata.pop(chain)
-	    # Are there extra chains left over from the ensemble?
-	    if (len(modeldata.keys()) > 0):
-		dlg = wx.MessageDialog(self, "Chain " + modeldata.keys()[0] + " does not exist in the specified moving chains.", "Ensemble Data Mismatch", wx.OK | wx.ICON_ERROR | wx.CENTRE)
-		dlg.ShowModal()
-		dlg.Destroy()
-		return
-	    # If we got this far, then the ensemble should be okay
-	    self.ensemble2 = filename
-	    self.lblSelMovingEnsb.SetLabel(filelabel)
-	    if (platform.system() == "Linux"):
-		resizeTextControlForUNIX(self.lblSelMovingEnsb, 0, 320)
-    
-    def deleteMovingEnsb(self, event):
-	self.ensemble2 = None
-	self.lblSelMovingEnsb.SetLabel("No Ensemble Specified")
-	if (platform.system() == "Linux"):
-	    resizeTextControlForUNIX(self.lblSelMovingEnsb, 0, 320)
-    
     def reorient(self, event):
 	#from pymol.cgo import *
 	# First find the interface in the current selection that are on the static chains
@@ -1927,7 +1834,31 @@ class FlexPepDockPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    else:
 		movingchainstr += "(model " + model + " and chain " + chainID + ") or "
 	movingchainstr = movingchainstr[0:len(movingchainstr)-4] + ")"
+	# Now get residues in the receptor constraints
+	cststr = "("
+	cstfound = False
+	for constraint in self.constraints:
+	    modelchain = constraint[1].split(":")[0]
+	    if (constraint[0] == "Site" and modelchain not in self.staticChains):
+		continue
+	    cstfound = True
+	    resi = constraint[1].split(":")[1]
+	    resi = resi[0:len(resi)-1]
+	    model = modelchain[0:len(modelchain)-2]
+	    chain = modelchain[len(modelchain)-1]
+	    if (chain == "_"):
+		cststr += "(model " + model + " and resi " + resi + ") or "
+	    else:
+		cststr += "(model " + model + " and chain " + chain + " and resi " + resi + ") or "
+	if (not(cstfound)):
+	    dlg = wx.MessageDialog(self, "The binding interface cannot be determined without constraints that specify receptor residues at the interface.", "No Receptor Constraints", wx.OK|wx.ICON_ERROR)
+	    dlg.ShowModal()
+	    dlg.Destroy()
+	cststr = cststr[0:len(cststr)-4] + ")"
 	try:
+	    # First, superimpose the peptide Ca atoms on top of the interface Ca atoms to get
+	    # it oriented properly, later we'll move it out
+	    self.cmd.align(movingchainstr + " and name ca", cststr + " and name ca", cycles=0)
 	    # Now find the average center point of all atoms in this chainset
 	    self.stored.sum_x = 0.0
 	    self.stored.sum_y = 0.0
@@ -1943,15 +1874,15 @@ class FlexPepDockPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.stored.sum_y = 0.0
 	    self.stored.sum_z = 0.0
 	    self.stored.n = 0
-	    self.cmd.iterate_state(1, staticchainstr + " and seqsele and name ca", "stored.sum_x += x; stored.sum_y +=y; stored.sum_z += z; stored.n += 1")
+	    self.cmd.iterate_state(1, cststr + " and name ca", "stored.sum_x += x; stored.sum_y +=y; stored.sum_z += z; stored.n += 1")
 	    interface_x = self.stored.sum_x / float(self.stored.n)
 	    interface_y = self.stored.sum_y / float(self.stored.n)
 	    interface_z = self.stored.sum_z / float(self.stored.n)
 	    vinterface = numpy.array([interface_x, interface_y, interface_z])
 	    # Now calculate the destination of the opposing chain
-	    # It will be along the line between these previous two points, four times the distance between them
+	    # It will be along the line between these previous two points
 	    vtranslate = vinterface - vcenter
-	    vdestination = vinterface + 4*vtranslate
+	    vdestination = vinterface + 0.5*vtranslate
 	    # Now calculate the center of mass of the other chainset
 	    self.stored.sum_x = 0.0
 	    self.stored.sum_y = 0.0
@@ -1966,6 +1897,8 @@ class FlexPepDockPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    vtranslate = vdestination - vcenter2
 	    # Now translate
 	    self.cmd.translate(list(vtranslate), movingchainstr, camera=0)
+	    self.cmd.center(staticchainstr + " or " + movingchainstr)
+	    self.cmd.zoom(staticchainstr + " or " + movingchainstr)
 	    #self.stored.sum_x = 0.0
 	    #self.stored.sum_y = 0.0
 	    #self.stored.sum_z = 0.0
@@ -1989,74 +1922,16 @@ class FlexPepDockPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	except:
 	    pass
     
-    def cancelDock(self):
-	logInfo("Canceled docking operation")
-	try:
-	    self.progress.Destroy()
-	except:
-	    pass
-	try:
-	    os.remove("coarsedockinput")
-	except:
-	    pass
-	try:
-	    os.remove("coarsedockinputtemp")
-	except:
-	    pass
-	try:
-	    os.remove("repackmedock_0.pdb")
-	except:
-	    pass
-	try:
-	    os.remove("finedockinput")
-	except:
-	    pass
-	self.tmrDock.Stop()
-	self.seqWin.cannotDelete = False
-	self.parent.GoBtn.Enable()
-	self.btnAddStatic.Enable()
-	self.btnRemoveStatic.Enable()
-	self.btnAddMoving.Enable()
-	self.btnRemoveMoving.Enable()
-	self.btnStarting.Enable()
-	if (platform.system() == "Darwin"):
-	    self.btnDock.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnDock.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-	else:
-	    self.btnDock.SetLabel("Dock!")
-	self.buttonState = "Dock!"
-	self.btnDock.SetToolTipString("Perform docking simulation with selected parameters")
-	deleteInputFiles()
-	self.parent.parent.restartDaemon()
-	# Get rid of the messages
-	for i in range(0, len(self.seqWin.msgQueue)):
-	    if (self.seqWin.msgQueue[i].find("Performing protein docking") >= 0):
-		self.seqWin.msgQueue.pop(i)
-		break
-	for i in range(0, len(self.seqWin.msgQueue)):
-	    if (self.seqWin.msgQueue[i].find("Performing rotamer repacking") >= 0):
-		self.seqWin.msgQueue.pop(i)
-		break
-	for i in range(0, len(self.seqWin.msgQueue)):
-	    if (self.seqWin.msgQueue[i].find("Performing refined protein docking") >= 0):
-		self.seqWin.msgQueue.pop(i)
-		break
-	if (len(self.seqWin.msgQueue) > 0):
-	    self.seqWin.labelMsg.SetLabel(self.seqWin.msgQueue[len(self.seqWin.msgQueue)-1])
-	else:
-	    self.seqWin.labelMsg.SetLabel("")
-	self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-	self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
-    
     def dockClick(self, event):
 	# This is also the "Finalize!" button
 	if (self.buttonState == "Dock!"):
 	    # Make sure that there is at least one chain in each of the lists and that the fixed chain list includes
 	    # a polypeptide chain
 	    if (len(self.staticChains) == 0):
-		wx.MessageBox("Please indicate a chain that will serve as the receptor!", "Static Chain Required", wx.OK|wx.ICON_EXCLAMATION)
+		wx.MessageBox("Please indicate a chain that will serve as the receptor!", "Receptor Chain Required", wx.OK|wx.ICON_EXCLAMATION)
 		return
 	    if (len(self.movingChains) == 0):
-		wx.MessageBox("Please indicate a chain that will serve as the docked structure!", "Movable Chain Required", wx.OK|wx.ICON_EXCLAMATION)
+		wx.MessageBox("Please provide a flexible peptide ligand or create one!", "Flexible Peptide Required", wx.OK|wx.ICON_EXCLAMATION)
 		return
 	    ispolypeptide = False
 	    for ID in self.staticChains:
@@ -2072,244 +1947,35 @@ class FlexPepDockPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		return
 	    # Are the decoy numbers valid?
 	    try:
-		n = int(self.txtCoarse.GetValue())
+		n = int(self.txtDecoys.GetValue())
 		if (n <= 0):
 		    raise Exception("Coarse decoy number not a positive integer")
 	    except:
 		wx.MessageBox("Please enter a positive integer for the number of coarse decoys.", "Invalid Number of Coarse Decoys", wx.OK|wx.ICON_EXCLAMATION)
 		return
 	    try:
-		n = int(self.txtRefined.GetValue())
+		n = int(self.txtReturn.GetValue())
 		if (n <= 0):
 		    raise Exception("Refined decoy number not a positive integer")
 	    except:
 		wx.MessageBox("Please enter a positive integer for the number of refined decoys.", "Invalid Number of Refined Decoys", wx.OK|wx.ICON_EXCLAMATION)
 		return
-	    # Ensemble docking is only available on the server
-	    if ((self.ensemble1 or self.ensemble2) and not(self.serverOn)):
-		dlg = wx.MessageDialog(self, "Ensemble docking is only available through the Rosetta server.  Would you like to enable server mode?", "Server Needed for EnsembleDock", wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
-		if (dlg.ShowModal() == wx.ID_YES):
-		    self.serverToggle(None)
-		else:
-		    return
-		dlg.Destroy()
-	    self.seqWin.labelMsg.SetLabel("Performing protein docking, please be patient...")
-	    self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-	    self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
-	    self.seqWin.msgQueue.append("Performing protein docking, please be patient...")
-	    self.seqWin.cannotDelete = True
-	    self.parent.GoBtn.Disable()
 	    self.btnAddStatic.Disable()
 	    self.btnRemoveStatic.Disable()
-	    self.btnAddMoving.Disable()
-	    self.btnRemoveMoving.Disable()
-	    self.btnStarting.Disable()
-	    if (platform.system() == "Darwin"):
-		self.btnDock.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnDock_Cancel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-	    else:
-		self.btnDock.SetLabel("Cancel!")
-	    self.buttonState = "Cancel!"
-	    self.btnDock.SetToolTipString("Cancel the docking simulation")
 	    self.stage = 1
-	    #thrKIC = Thread(target=self.threadKIC, args=())
-	    #thrKIC.start()
 	    logInfo("Clicked the Dock button")
 	    goToSandbox()
-	    self.tmrDock = wx.Timer(self)
-	    self.Bind(wx.EVT_TIMER, self.threadDock, self.tmrDock)
 	    self.writeSinglePDB()
-	    self.parent.parent.restartDaemon()
-	    self.tmrDock.Start(1000)
-	elif (self.buttonState == "Cancel!"):
-	    dlg = wx.MessageDialog(self, "Are you sure you want to cancel the docking simulation?  All progress will be lost.", "Cancel Docking Simulation", wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
-	    result = dlg.ShowModal()
-	    if (result == wx.ID_YES):
-		self.cancelDock()
-	    dlg.Destroy()
-	else:
-	    # Finalize button, ask whether the changes will be accepted or rejected
-	    dlg = wx.MessageDialog(self, "Do you want to accept the results of this docking session?", "Accept/Reject Model", wx.YES_NO | wx.CANCEL | wx.ICON_QUESTION | wx.CENTRE)
-	    result = dlg.ShowModal()
-	    if (result == wx.ID_YES):
-		logInfo("Accepted docked model")
-		accept = True
-		# Get a filename prefix for these models
-		while (True):
-		    dlg3 = wx.FileDialog(
-			self, message="Save a PDB File",
-			defaultDir=self.seqWin.cwd,
-			defaultFile=self.staticChains[0][0:len(self.staticChains[0])-2],
-			wildcard="PDB Files (*.pdb)|*.pdb",
-			style=wx.SAVE | wx.CHANGE_DIR)
-		    if (dlg3.ShowModal() == wx.ID_OK):
-			path = dlg3.GetPath()
-			# Change cwd to the last opened file
-			if (platform.system() == "Windows"):
-			    lastDirIndx = path.rfind("\\")
-			else:
-			    lastDirIndx = path.rfind("/")
-			self.seqWin.cwd = str(path[0:lastDirIndx])
-			self.seqWin.saveWindowData(None)
-			# Load the PDBs into PyMOL
-			filename = str(path).split(".pdb")[0] + "_0001.pdb"
-			# Does it exist already?  If so, ask if the user really wants to overwrite it
-			if (os.path.isfile(filename)):
-			    dlg2 = wx.MessageDialog(self, "The file " + filename + " already exists.  Overwrite it?", "Filename Already Exists", wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
-			    if (dlg2.ShowModal() == wx.ID_NO):
-				dlg2.Destroy()
-				continue
-			    dlg2.Destroy()
-		    else:
-			# Default to cancel behavior
-			dlg.Destroy()
-			return
-		    filename = filename.split("_0001.pdb")[0] + ".pdb"
-		    break
-	    elif (result == wx.ID_NO):
-		logInfo("Rejected docked model")
-		accept = False
-	    else:
-		logInfo("Canceled Finalize operation")
-		dlg.Destroy()
-		return
-	    dlg.Destroy()
-	    self.viewMenu.Disable()
-	    self.parent.GoBtn.Enable()
-	    self.btnAddStatic.Enable()
-	    self.btnRemoveStatic.Enable()
-	    self.btnAddMoving.Enable()
-	    self.btnRemoveMoving.Enable()
-	    self.btnStarting.Enable()
-	    self.grdDocking.ClearGrid()
-	    if (platform.system() == "Darwin"):
-		self.btnDock.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnDock.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-	    else:
-		self.btnDock.SetLabel("Dock!")
-	    self.buttonState = "Dock!"
-	    self.btnDock.SetToolTipString("Perform docking simulation with selected parameters")
-	    #self.btnSave.Disable()
-	    self.cmd.label("all", "")
-	    self.seqWin.cannotDelete = False
-	    if (not(accept)):
-		self.cmd.remove("dock_view")
-		self.cmd.delete("dock_view")
-		return
-	    # Get rid of the original chains, save the docked pose, and reload the structure in PyMOL
-	    for ID in self.staticChains:
-		row = self.seqWin.IDs.index(ID)
-		self.seqWin.deleteChain(row)
-	    for ID in self.movingChains:
-		row = self.seqWin.IDs.index(ID)
-		self.seqWin.deleteChain(row)
-	    newname = filename.split(".pdb")[0]
-	    if (platform.system() == "Windows"):
-		newID = newname[newname.rfind("\\")+1:]
-	    else:
-		newID = newname[newname.rfind("/")+1:]
-	    self.movingChains = []
-	    self.staticChains = []
-	    #if (platform.system() == "Windows"):
-		#newname = os.path.expanduser("~") + "\\InteractiveROSETTA\\" + newID
-	    #else:
-		#newname = os.path.expanduser("~") + "/InteractiveROSETTA/" + newID
-	    for i in range(0, len(self.viewMenu.GetItems())):
-		if (self.selectedModel == self.viewMenu.GetItems()[i]):
-		    realID = newID + "_%4.4i" % (i+1)
-		    realname = newname + "_%4.4i" % (i+1) + ".pdb"
-		try:
-		    os.rename(self.viewMenu.GetItems()[i], newname + "_%4.4i" % (i+1) + ".pdb")
-		except:
-		    # Windows may complain if the file already exists
-		    try:
-			os.remove(newname + "_%4.4i" % (i+1) + ".pdb")
-			os.rename(self.viewMenu.GetItems()[i], newname + "_%4.4i" % (i+1) + ".pdb")
-		    except:
-			print "ERROR: Could not load the docked structure into the Sequence Window"
-			if (platform.system() == "Windows"):
-			    print "The model is currently at " + self.selectedModel + " in " + os.path.expanduser("~") + "\\InteractiveROSETTA"
-			else:
-			    print "The model is currently at " + self.selectedModel + " in " + os.path.expanduser("~") + "/InteractiveROSETTA"
-	    try:
-		self.cmd.remove("dock_view")
-		self.cmd.delete("dock_view")
-		self.cmd.load(realname, realID)
-		self.seqWin.PyMOLPDBLoad(0, realname)
-		defaultPyMOLView(self.cmd, realID)
-		del self.dockView
-	    except:
-		# Some weird error happened, do nothing instead of crashing
-		print "Bug at accept button click"
-		pass	
-    
-    def recoverFromError(self, msg=""):
-	# This function tells the user what the error was and tries to revert the protocol
-	# back to the pre-daemon state so the main GUI can continue to be used
-	if (len(msg) == 0):
-	    f = open("errreport", "r")
-	    errmsg = "An error was encountered during the protocol:\n\n"
-	    for aline in f:
-		errmsg = errmsg + str(aline)
-	    f.close()
-	    os.remove("errreport")
-	else:
-	    errmsg = msg
-	logInfo("Error Encountered")
-	logInfo(errmsg)
-	if (platform.system() == "Windows"):
-	    sessioninfo = os.path.expanduser("~") + "\\InteractiveRosetta\\sessionlog"
-	else:
-	    sessioninfo = os.path.expanduser("~") + "/InteractiveRosetta/sessionlog"
-	errmsg = errmsg + "\n\nIf you don't know what caused this, send the file " + sessioninfo + " to a developer along with an explanation of what you did."
-	# You have to use a MessageDialog because the MessageBox doesn't always work for some reason
-	dlg = wx.MessageDialog(self, errmsg, "Error Encountered", wx.OK|wx.ICON_EXCLAMATION)
-	dlg.ShowModal()
-	dlg.Destroy()
-	self.seqWin.cannotDelete = False
-	self.parent.GoBtn.Enable()
-	self.btnAddStatic.Enable()
-	self.btnRemoveStatic.Enable()
-	self.btnAddMoving.Enable()
-	self.btnRemoveMoving.Enable()
-	self.btnDock.Enable()
-	if (platform.system() == "Darwin"):
-	    self.btnDock.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnDock.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-	else:
-	    self.btnDock.SetLabel("Dock!")
-	self.buttonState = "Dock!"
-	self.btnDock.SetToolTipString("Perform docking simulation with selected parameters")
-	# Get rid of the messages
-	for i in range(0, len(self.seqWin.msgQueue)):
-	    if (self.seqWin.msgQueue[i].find("Performing protein docking") >= 0):
-		self.seqWin.msgQueue.pop(i)
-		break
-	for i in range(0, len(self.seqWin.msgQueue)):
-	    if (self.seqWin.msgQueue[i].find("Performing rotamer repacking") >= 0):
-		self.seqWin.msgQueue.pop(i)
-		break
-	for i in range(0, len(self.seqWin.msgQueue)):
-	    if (self.seqWin.msgQueue[i].find("Performing refined protein docking") >= 0):
-		self.seqWin.msgQueue.pop(i)
-		break
-	if (len(self.seqWin.msgQueue) > 0):
-	    self.seqWin.labelMsg.SetLabel(self.seqWin.msgQueue[len(self.seqWin.msgQueue)-1])
-	else:
-	    self.seqWin.labelMsg.SetLabel("")
-	self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-	self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
-    
-    def threadDock(self, event):
-	# Dump a file with the loop modeling parameters for the daemon to pick up
-	goToSandbox()
-	if (self.stage == 1):
-	    self.tmrDock.Stop()
-	    self.timeoutCount = 0
-	    f = open("coarsedockinputtemp", "w")
+	    # Write the input file
+	    f = open("flexpepinputtemp", "w")
 	    f.write("PDBFILE\t" + self.dockpdbname.strip() + "\n")
-	    try:
-		f2 = open(self.dockpdbname.strip(), "r")
-	    except:
-		# Might not have finished writing it yet
-		return
+	    while (True):
+		try:
+		    f2 = open(self.dockpdbname.strip(), "r")
+		except:
+		    # Might not have finished writing it yet
+		    continue
+		break
 	    f.write("BEGIN PDB DATA\n")
 	    for aline in f2:
 		f.write(aline.strip() + "\n")
@@ -2324,260 +1990,38 @@ class FlexPepDockPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		f2.close()
 	    except:
 		pass
-	    f.write("JUMPCONFIG\t" + self.jumpconfig + "\n")
-	    f.write("ORIENT\t" + self.startingType + "\n")
-	    f.write("COARSEDECOYS\t" + self.txtCoarse.GetValue() + "\n")
-	    f.write("REFINEDDECOYS\t" + self.txtRefined.GetValue() + "\n")
-	    if (self.ensemble1):
-		fin = gzip.open(self.ensemble1, "r")
-		f.write("BEGIN ENSEMBLE1 DATA\n")
-		for aline in fin:
-		    f.write(aline)
-		f.write("END ENSEMBLE1 DATA\n")
-		fin.close()
-	    if (self.ensemble2):
-		fin = gzip.open(self.ensemble2, "r")
-		f.write("BEGIN ENSEMBLE2 DATA\n")
-		for aline in fin:
-		    f.write(aline)
-		f.write("END ENSEMBLE2 DATA\n")
-		fin.close()
-	    f.close()
-	    appendScorefxnParamsInfoToFile("coarsedockinputtemp", self.selectWin.weightsfile)
-	    if (self.serverOn):
-		try: 
-		    self.ID = sendToServer("coarsedockinput")
-		    # First make sure this isn't a duplicate
-		    alreadythere = False
-		    try:
-			f = open("downloadwatch", "r")
-			for aline in f:
-			    if (len(aline.split("\t")) >= 2 and aline.split("\t")[0] == "DOCK" and aline.split("\t")[1] == self.ID.strip()):
-				alreadythere = True
-				break
-			f.close()
-		    except:
-			pass
-		    if (not(alreadythere)):
-			f = open("downloadwatch", "a")
-			f.write("DOCK\t" + self.ID.strip() + "\t" + str(datetime.datetime.now().strftime("%A, %B %d - %I:%M:%S %p")) + "\t" + getServerName() + "\n")
-			f.close()
-		    dlg = wx.MessageDialog(self, "InteractiveROSETTA is now watching the server for job ID " + self.ID.strip() + ".  You will be notified when the package is available for download.", "Listening for Download", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
-		    dlg.ShowModal()
-		    dlg.Destroy()
-		    # Re-enable everything since we're not waiting for the local daemon to do anything
-		    self.viewMenu.Disable()
-		    self.parent.GoBtn.Enable()
-		    self.btnAddStatic.Enable()
-		    self.btnRemoveStatic.Enable()
-		    self.btnAddMoving.Enable()
-		    self.btnRemoveMoving.Enable()
-		    self.btnStarting.Enable()
-		    if (platform.system() == "Darwin"):
-			self.btnDock.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnDock.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		    else:
-			self.btnDock.SetLabel("Dock!")
-		    self.buttonState = "Dock!"
-		    self.btnDock.SetToolTipString("Perform docking simulation with selected parameters")
-		    self.seqWin.cannotDelete = False
-		    # Pop this message out of the queue
-		    for i in range(0, len(self.seqWin.msgQueue)):
-			if (self.seqWin.msgQueue[i].find("Performing protein docking") >= 0):
-			    self.seqWin.msgQueue.pop(i)
-			    break
-		    if (len(self.seqWin.msgQueue) > 0):
-			self.seqWin.labelMsg.SetLabel(self.seqWin.msgQueue[len(self.seqWin.msgQueue)-1])
-		    else:
-			self.seqWin.labelMsg.SetLabel("")
-		    logInfo("Coarse docking input sent to server daemon with ID " + self.ID)
-		    return
-		except:
-		    dlg = wx.MessageDialog(self, "The server could not be reached!  Ensure that you have specified a valid server and that you have an network connection.", "Server Could Not Be Reached", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
-		    dlg.ShowModal()
-		    dlg.Destroy()
-		    return
+	    f.write("RECEPTOR\t" + self.receptorChains + "\n")
+	    f.write("PEPTIDE\t" + self.peptideChain + "\n")
+	    f.write("DECOYS\t" + self.txtDecoys.GetValue() + "\n")
+	    f.write("RETURNMODELS\t" + self.txtReturn.GetValue() + "\n")
+	    if (self.movingChains[0] == "flexpeptide|P"):
+		f.write("FLEXMODE\tABINITIO\n")
 	    else:
-		os.rename("coarsedockinputtemp", "coarsedockinput")
-		self.usingServer = False
-		logInfo("Coarse docking input uploaded locally at coarsedockinput")
-		self.stage = 2
-	    self.looptimecount = 0
-	    self.timeout = 180
-	    self.tmrDock.Start(1000)
+		f.write("FLEXMODE\tREFINED\n")
+	    f.close()
+	    appendScorefxnParamsInfoToFile("flexpepinputtemp", self.selectWin.weightsfile)
+	    # Try to send it to the server
 	    try:
-		os.remove("dock_progress")
-	    except:
-		pass
-	    self.progress = wx.ProgressDialog("Coarse Docking", "Performing coarse protein docking...", int(self.txtCoarse.GetValue()), style=wx.PD_CAN_ABORT | wx.PD_APP_MODAL | wx.PD_ELAPSED_TIME | wx.PD_REMAINING_TIME)
-	elif (self.stage == 2):
-	    # This is really annoying, here's the ugly memory problem again
-	    # So first we have to do a coarse KIC job in the daemon
-	    # This involves using centroid residues, so those have to be repacked in another 
-	    # instance of the daemon process because the repacking step pushes the memory usage too
-	    # high, so first wait for the "repackmetemp.pdb" structure to show up, kill the daemon
-	    # and restart it to do the repacking step
-	    if (os.path.isfile("repackmedocktemp_" + str(int(self.txtRefined.GetValue())-1) + ".pdb")):
-		self.tmrDock.Stop()
+		self.ID = sendToServer("flexpepinput")
+		# First make sure this isn't a duplicate
+		alreadythere = False
 		try:
-		    self.progress.Destroy()
+		    f = open("downloadwatch", "r")
+		    for aline in f:
+			if (len(aline.split("\t")) >= 2 and aline.split("\t")[0] == "FLEXPEP" and aline.split("\t")[1] == self.ID.strip()):
+			    alreadythere = True
+			    break
+		    f.close()
 		except:
 		    pass
-		# Pop this message out of the queue
-		for i in range(0, len(self.seqWin.msgQueue)):
-		    if (self.seqWin.msgQueue[i].find("Performing protein docking") >= 0):
-			self.seqWin.msgQueue.pop(i)
-			break
-		self.seqWin.labelMsg.SetLabel("Performing rotamer repacking, please be patient...")
-		self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-		self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
-		self.seqWin.msgQueue.append("Performing rotamer repacking, please be patient...")
-		self.parent.parent.restartDaemon()
-		for i in range(0, int(self.txtRefined.GetValue())):
-		    os.rename("repackmedocktemp_" + str(i) + ".pdb", "repackmedock_" + str(i) + ".pdb") # So the new daemon sees it
-		logInfo("repackmedocktemp.pdb sent to be rotamer repacked")
-		self.stage = 3
-		self.tmrDock.Start(1000)
-	    elif (os.path.isfile("errreport")):
-		# Something went wrong, tell the user about it (loop sequence probably too short)
-		self.tmrDock.Stop()
-		try:
-		    self.progress.Destroy()
-		except:
-		    pass
-		self.parent.parent.restartDaemon() # Has to happen because coarse KIC is threaded
-		self.recoverFromError()
-	    elif (os.path.isfile("dock_progress")):
-		f = open("dock_progress", "r")
-		for aline in f:
-		    count = int(aline)
-		f.close()
-		if (count == int(self.txtCoarse.GetValue())):
-		    try:
-			self.progress.Destroy()
-		    except:
-			pass
-		else:
-		    (keepGoing, skip) = self.progress.Update(count)
-		    if (not(keepGoing)):
-			# User clicked "Cancel" on the progress bar
-			self.cancelDock()
-			self.progress.Destroy()
-	elif (self.stage == 3):
-	    # Now we have to wait for the output of the repacking step and restart the daemon again
-	    # so we can finish up with a fine-grained KIC step
-	    if (os.path.isfile("repackeddock_" + str(int(self.txtRefined.GetValue())-1) + ".pdb")):
-		self.tmrDock.Stop()
-		# Pop this message out of the queue
-		for i in range(0, len(self.seqWin.msgQueue)):
-		    if (self.seqWin.msgQueue[i].find("Performing rotamer repacking") >= 0):
-			self.seqWin.msgQueue.pop(i)
-			break
-		self.seqWin.labelMsg.SetLabel("Performing refined protein docking, please be patient...")
-		self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-		self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
-		self.seqWin.msgQueue.append("Performing refined protein docking, please be patient...")
-		self.parent.parent.restartDaemon()
-		os.rename("finedockinputtemp", "finedockinput") # So the new daemon sees it
-		logInfo("Repacked coarse structure sent to fine grained docking")
-		self.stage = 4
-		self.tmrDock.Start(1000)
-	    elif (os.path.isfile("errreport")):
-		# Something went wrong, tell the user about it
-		self.tmrDock.Stop()
-		self.recoverFromError()
-	elif (self.stage == 4):
-	    if (self.usingServer):
-		# See if the file has been uploaded yet and bring it here if so
-		queryServerForResults("dockoutput-" + self.ID)
-		queryServerForResults("coarsedockoutput-" + self.ID)
-		self.timeoutCount = self.timeoutCount + 1
-	    if (self.timeoutCount >= serverTimeout):
-		self.tmrDock.Stop()
-		# If this is taking too long, maybe there's something wrong with the server
-		# Ask the user if they want to continue waiting or use the local daemon instead
-		dlg = wx.MessageDialog(self, "The server is taking a long time to respond.  Continue to wait?  Pressing No will run the calculations locally.", "Delayed Server Response", wx.YES_NO | wx.ICON_EXCLAMATION | wx.CENTRE)
-		if (dlg.ShowModal() == wx.ID_YES):
-		    # Reset the counter
-		    self.timeoutCount = 0
-		else:
-		    self.usingServer = False
-		    self.timeoutCount = 0
-		    os.rename("coarsedockinputtemp", "coarsedockinput")
-		    logInfo("Server took too long to respond so the local daemon was used")
-		    self.stage = 2
+		if (not(alreadythere)):
+		    f = open("downloadwatch", "a")
+		    f.write("FLEXPEP\t" + self.ID.strip() + "\t" + str(datetime.datetime.now().strftime("%A, %B %d - %I:%M:%S %p")) + "\t" + getServerName() + "\n")
+		    f.close()
+		dlg = wx.MessageDialog(self, "InteractiveROSETTA is now watching the server for job ID " + self.ID.strip() + ".  You will be notified when the package is available for download.", "Listening for Download", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		dlg.ShowModal()
 		dlg.Destroy()
-		self.tmrDock.Start(1000)
-	    # Read the output dumped by the child process (finally!)
-	    if (os.path.isfile("repackeddocktemp.pdb")):
-		# Flip back so the timer sees repacked.pdb and runs the local daemon
-		os.rename("coarsedockinputtemp", "finedockinputtemp")
-		os.rename("repackeddocktemp.pdb", "repackeddock.pdb")
-		# Pop this message out of the queue
-		for i in range(0, len(self.seqWin.msgQueue)):
-		    if (self.seqWin.msgQueue[i].find("Performing protein docking") >= 0):
-			self.seqWin.msgQueue.pop(i)
-			break
-		self.usingServer = False
-		self.timeoutCount = 0
-		self.stage = 3
-	    elif (os.path.isfile("dockoutput")):
-		self.tmrDock.Stop()
-		self.residue_E = []
-		self.dockmodels = []
-		f = open("dockoutput", "r")
-		for aline in f:
-		    if (aline[0:6] == "OUTPUT"):
-			pdbfile = aline.split("\t")[1].strip()
-			self.dockmodels.append(pdbfile)
-			self.residue_E.append([])
-			#self.dockView = pose_from_pdb(pdbfile)
-		    elif (aline[0:6] == "ENERGY"):
-			if (aline.split()[1] == "total_score"):
-			    # This is the scoretype line, row 0 in residue_E
-			    self.residue_E[len(self.residue_E)-1].append(aline.split()[1:])
-			else:
-			    self.residue_E[len(self.residue_E)-1].append([])
-			    indx = len(self.residue_E[len(self.residue_E)-1]) - 1
-			    for E in aline.split()[1:]:
-				self.residue_E[len(self.residue_E)-1][indx].append(float(E))
-		f.close()
-		self.dockView = self.seqWin.pdbreader.get_structure("dock_view", self.dockmodels[0])
-		self.selectedModel = self.dockmodels[0]
-		logInfo("Found docking output at dockoutput")
-		# Pop this message out of the queue
-		for i in range(0, len(self.seqWin.msgQueue)):
-		    if (self.seqWin.msgQueue[i].find("Performing refined protein docking") >= 0):
-			self.seqWin.msgQueue.pop(i)
-			break
-		if (len(self.seqWin.msgQueue) > 0):
-		    self.seqWin.labelMsg.SetLabel(self.seqWin.msgQueue[len(self.seqWin.msgQueue)-1])
-		else:
-		    self.seqWin.labelMsg.SetLabel("")
-		self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-		self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
-		# Add these loop residues to the view menu so the user can look at the new loop
-		self.viewMenu.Clear()
-		self.viewMenu.AppendItems(self.dockmodels)
-		self.viewMenu.SetSelection(0)
-		self.viewMenu.Enable()
-		self.parent.GoBtn.Enable()
-		self.btnDock.Enable()
-		#self.btnSave.Enable()
-		#self.enableControls()
-		#self.selectedModel = ""
-		if (platform.system() == "Darwin"):
-		    self.btnDock.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnDock_Finalize.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		else:
-		    self.btnDock.SetLabel("Finalize!")
-		self.buttonState = "Finalize!"
-		self.btnDock.SetToolTipString("Accept or reject protocol results")
-		os.remove("dockoutput")
-		# Load the docked pose as the "dock_view" model so the user can look at the results
-		self.cmd.load(self.dockmodels[0], "dock_view")
-		self.cmd.hide("everything", "model dock_view")
-		#recolorEnergies(self.dockView, self.residue_E[0], "dock_view", self.scoretypeMenu.GetStringSelection(), self.cmd)
-		self.focusView(self.viewMenu.GetStringSelection(), "dock_view")
-	    elif (os.path.isfile("errreport")):
-		# Something went wrong, tell the user about it
-		self.tmrDock.Stop()
-		self.recoverFromError()
+	    except:
+		dlg = wx.MessageDialog(self, "The flexible peptide docking job could not be sent to the server!  Verify that you have an Internet connection and that the server is running.", "Server Could Not Be Reached", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		dlg.ShowModal()
+		dlg.Destroy()
