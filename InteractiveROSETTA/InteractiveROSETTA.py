@@ -468,7 +468,7 @@ if (__name__ == "__main__"):
 	if ("### LICENSE ACCEPTED ###" in aline):
 	    license_accepted = license_accepted + 1
     f.close()
-    if (license_accepted < 3):
+    if (license_accepted < 3 and platform.system() != "Windows"): # Windows users accept the license through the installer
 	# Make sure we are root on OSX/Linux
 	# On Windows, the batch script that starts InteractiveROSETTA makes sure they are the Admin
 	if (platform.system() != "Windows" and os.getuid() != 0 and not(os.access("InteractiveROSETTA.py", os.W_OK))):

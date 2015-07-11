@@ -14,6 +14,7 @@ import gzip
 import numpy
 from threading import Thread
 from tools import *
+from docking import SettingsDialog
 
 class FlexPepDockPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def __init__(self, parent, W, H):
@@ -251,6 +252,34 @@ class FlexPepDockPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnSaveCST.SetToolTipString("Save the current constraints data to a real Rosetta constraints file")
 	ypos = self.btnSaveCST.GetPosition()[1] + self.btnSaveCST.GetSize()[1] + 10
 	
+	self.btnDefaults = wx.BitmapButton(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/wrench.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos-5), size=(25, 25))
+	self.btnDefaults.Bind(wx.EVT_BUTTON, self.configureDefaults)
+	self.btnDefaults.SetToolTipString("Configure the default settings for docking constraints")
+	self.dFunction = "Bounded"
+	self.dMax = 12.0
+	self.dMin = 6.0
+	self.dIdeal = 9.0
+	self.dWeight = 1.0
+	# Try to read the default settings from the cfg file
+	goToSandbox()
+	try:
+	    fin = open("flexpep.cfg", "r")
+	    for aline in fin:
+		if (len(aline.strip()) == 0):
+		    continue
+		if (aline.startswith("[FUNCTION]")):
+		    self.dFunction = aline.split("\t")[1].strip()
+		elif (aline.startswith("[IDEAL]")):
+		    self.dIdeal = float(aline.split("\t")[1].strip())
+		elif (aline.startswith("[MAX]")):
+		    self.dMax = float(aline.split("\t")[1].strip())
+		elif (aline.startswith("[MIN]")):
+		    self.dMin = float(aline.split("\t")[1].strip())
+		elif (aline.startswith("[WEIGHT]")):
+		    self.dWeight = float(aline.split("\t")[1].strip())
+	    fin.close()
+	except:
+	    pass
 	if (platform.system() == "Windows"):
 	    self.lblAdvanced = wx.StaticText(self, -1, "Advanced Options", (0, ypos), (320, 20), wx.ALIGN_CENTRE)
 	    self.lblAdvanced.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -587,6 +616,50 @@ class FlexPepDockPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    if ("ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR".find(self.seqWin.poses[poseindx][0][chain][self.seqWin.indxToSeqPos[r][c]].resname) >= 0):
 			self.selectedData.append([indx, r, seqpos, poseindx, chainID, chainoffset])
 	self.pruneConstraints()
+    
+    def configureDefaults(self, event):
+	dlg = SettingsDialog(self)
+	if (dlg.ShowModal() == wx.OK):
+	    # Update the default settings, ignoring invalid values
+	    self.dFunction = dlg.menuFunctions.GetStringSelection()
+	    try:
+		val = float(dlg.txtIdealD.GetValue())
+		if (val <= 0):
+		    raise Exception()
+		self.dIdeal = val
+	    except:
+		pass
+	    try:
+		val = float(dlg.txtMaxD.GetValue())
+		if (val <= 0):
+		    raise Exception()
+		self.dMax = val
+	    except:
+		pass
+	    try:
+		val = float(dlg.txtMinD.GetValue())
+		if (val <= 0):
+		    raise Exception()
+		self.dMin = val
+	    except:
+		pass
+	    try:
+		val = float(dlg.txtWeight.GetValue())
+		if (val <= 0):
+		    raise Exception()
+		self.dWeight = val
+	    except:
+		pass
+	    # Save these settings
+	    goToSandbox()
+	    fout = open("flexpep.cfg", "w")
+	    fout.write("[FUNCTION]\t" + self.dFunction + "\n")
+	    fout.write("[IDEAL]\t" + str(self.dIdeal) + "\n")
+	    fout.write("[MAX]\t" + str(self.dMax) + "\n")
+	    fout.write("[MIN]\t" + str(self.dMin) + "\n")
+	    fout.write("[WEIGHT]\t" + str(self.dWeight) + "\n")
+	    fout.close()
+	dlg.Destroy()
     
     def showChain(self, ID):
 	model = ID[0:len(ID)-2]
@@ -999,8 +1072,11 @@ class FlexPepDockPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		#    break
 	    if (not(alreadyIn)):
 		# Default parameters are added and the user can change these later
-		functionType = "Bounded"
-		functionArgs = "Max: 6, Min: 4, Weight: 1"
+		functionType = self.dFunction
+		if (functionType == "Bounded"):
+		    functionArgs = "Max: " + str(self.dMax) + ", Min: " + str(self.dMin) + ", Weight: " + str(self.dWeight)
+		else:
+		    functionArgs = "Ideal: " + str(self.dIdeal) + ", Weight: " + str(self.dWeight)
 		self.insertConstraint(self.constraintType, thisID, "", functionType, functionArgs, "")
 	self.updateConstraints()
 	
@@ -1254,12 +1330,12 @@ class FlexPepDockPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	if (self.menuFunctions.GetStringSelection() == "Bounded"):
 	    self.txtIdealD.SetValue("0")
 	    self.txtIdealD.Disable()
-	    self.txtMaxD.SetValue("12")
+	    self.txtMaxD.SetValue(str(self.dMax))
 	    self.txtMaxD.Enable()
-	    self.txtMinD.SetValue("6")
+	    self.txtMinD.SetValue(str(self.dMin))
 	    self.txtMinD.Enable()
 	else:
-	    self.txtIdealD.SetValue("9")
+	    self.txtIdealD.SetValue(str(self.dIdeal))
 	    self.txtIdealD.Enable()
 	    self.txtMaxD.SetValue("0")
 	    self.txtMaxD.Disable()

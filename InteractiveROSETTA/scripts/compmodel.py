@@ -11,6 +11,7 @@ import requests
 import webbrowser
 from threading import Thread
 from tools import *
+from Bio.Align.Applications import MuscleCommandline
 
 class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def __init__(self, parent, W, H):
@@ -55,32 +56,69 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.lblInst.SetForegroundColour("#FFFFFF")
 	
 	if (platform.system() == "Windows"):
-	    self.lblModel = wx.StaticText(self, -1, "Templates", (0, 190), (155, 20), wx.ALIGN_CENTRE)
+	    self.lblFASTA = wx.StaticText(self, -1, "FASTA Sequence:", (10, 90), (320, 20), wx.ALIGN_LEFT)
+	    self.lblFASTA.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	elif (platform.system() == "Darwin"):
+	    self.lblFASTA = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblFASTA.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 90), size=(320, 20))
+	else:
+	    self.lblFASTA = wx.StaticText(self, -1, "FASTA Sequence:", (10, 90), style=wx.ALIGN_LEFT)
+	    self.lblFASTA.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	self.lblFASTA.SetForegroundColour("#FFFFFF")
+	self.txtFASTA = wx.TextCtrl(self, -1, pos=(0, 110), size=(320, 75), style=wx.TE_MULTILINE)
+	self.txtFASTA.SetValue("")
+	self.txtFASTA.SetToolTipString("FASTA sequence of the protein that will be modeled")
+	self.txtFASTA.Bind(wx.EVT_KILL_FOCUS, self.fastaChange)
+	self.FASTA = ""
+	
+	if (platform.system() == "Windows"):
+	    self.lblProt2 = wx.StaticText(self, -1, "Homologous Templates", (0, 190), (320, 25), wx.ALIGN_CENTRE)
+	    self.lblProt2.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	elif (platform.system() == "Darwin"):
+	    self.lblProt2 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblHomologyTemplates.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 190), size=(270, 25))
+	else:
+	    self.lblProt2 = wx.StaticText(self, -1, "Homologous Templates", (70, 190), style=wx.ALIGN_CENTRE)
+	    self.lblProt2.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	    resizeTextControlForUNIX(self.lblProt2, 0, self.GetSize()[0]-20)
+	self.lblProt2.SetForegroundColour("#FFFFFF")
+	
+	if (platform.system() == "Windows"):
+	    self.lblInst2 = wx.StaticText(self, -1, "Provide scaffolds that the above sequence will\nbe threaded onto.  Templates higher in the grid\nare given more priority.  Click on templates in\nthe grid to edit their alignments.", (0, 220), (320, 25), wx.ALIGN_CENTRE)
+	    self.lblInst2.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
+	elif (platform.system() == "Darwin"):
+	    self.lblInst2 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstHomologyTemplates.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 220), size=(320, 95))
+	else:
+	    self.lblInst2 = wx.StaticText(self, -1, "Provide scaffolds that the above sequence will\nbe threaded onto.  Templates higher in the grid\nare given more priority.  Click on templates in\nthe grid to edit their alignments.", (5, 220), style=wx.ALIGN_CENTRE)
+	    self.lblInst2.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
+	    resizeTextControlForUNIX(self.lblInst2, 0, self.GetSize()[0]-20)
+	self.lblInst2.SetForegroundColour("#FFFFFF")
+	
+	if (platform.system() == "Windows"):
+	    self.lblModel = wx.StaticText(self, -1, "Templates", (0, 290), (155, 20), wx.ALIGN_CENTRE)
 	    self.lblModel.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblModel = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblModelCompModel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 190), size=(155, 20))
+	    self.lblModel = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblModelCompModel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 290), size=(155, 20))
 	else:
-	    self.lblModel = wx.StaticText(self, -1, "Templates", (0, 190), style=wx.ALIGN_CENTRE)
+	    self.lblModel = wx.StaticText(self, -1, "Templates", (0, 290), style=wx.ALIGN_CENTRE)
 	    self.lblModel.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	    resizeTextControlForUNIX(self.lblModel, 0, 155)
 	self.lblModel.SetForegroundColour("#FFFFFF")
-	self.modelMenu = wx.ComboBox(self, pos=(0, 210), size=(155, 25), choices=[], style=wx.CB_READONLY)
-	self.modelMenu.Bind(wx.EVT_COMBOBOX, self.modelMenuSelect)
+	self.modelMenu = wx.ComboBox(self, pos=(0, 310), size=(155, 25), choices=[], style=wx.CB_READONLY)
 	self.modelMenu.SetToolTipString("Select the models to serve as templates for structure prediction")
 	self.templates = []
+	self.alignments = []
 	
 	if (platform.system() == "Darwin"):
-	    self.btnAddTemplate = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAddFragments.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(165, 210), size=(77, 25))
+	    self.btnAddTemplate = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAddFragments.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(165, 310), size=(77, 25))
 	else:
-	    self.btnAddTemplate = wx.Button(self, id=-1, label="Add", pos=(165, 210), size=(77, 25))
+	    self.btnAddTemplate = wx.Button(self, id=-1, label="Add", pos=(165, 310), size=(77, 25))
 	    self.btnAddTemplate.SetForegroundColour("#000000")
 	    self.btnAddTemplate.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnAddTemplate.Bind(wx.EVT_BUTTON, self.addModel)
 	self.btnAddTemplate.SetToolTipString("Add model to the list of templates")
 	if (platform.system() == "Darwin"):
-	    self.btnRemoveTemplate = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnRemoveFragments.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(242, 210), size=(78, 25))
+	    self.btnRemoveTemplate = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnRemoveFragments.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(242, 310), size=(78, 25))
 	else:
-	    self.btnRemoveTemplate = wx.Button(self, id=-1, label="Remove", pos=(242, 210), size=(78, 25))
+	    self.btnRemoveTemplate = wx.Button(self, id=-1, label="Remove", pos=(242, 310), size=(78, 25))
 	    self.btnRemoveTemplate.SetForegroundColour("#000000")
 	    self.btnRemoveTemplate.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnRemoveTemplate.Bind(wx.EVT_BUTTON, self.removeModel)
@@ -89,56 +127,74 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.grdTemplates = wx.grid.Grid(self)
 	self.grdTemplates.CreateGrid(0, 1)
 	self.grdTemplates.SetSize((320, 150))
-	self.grdTemplates.SetPosition((0, 240))
+	self.grdTemplates.SetPosition((0, 340))
 	self.grdTemplates.SetLabelFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.grdTemplates.DisableDragColSize()
 	self.grdTemplates.DisableDragRowSize()
 	self.grdTemplates.SetColLabelValue(0, "Templates")
 	self.grdTemplates.SetRowLabelSize(160)
 	self.grdTemplates.SetColSize(0, 160)
+	self.grdTemplates.Bind(wx.grid.EVT_GRID_CELL_LEFT_CLICK, self.gridClick)
+	self.selectedr = -1
+	ypos = self.grdTemplates.GetPosition()[1] + self.grdTemplates.GetSize()[1] + 10
 	
-	self.lblFrag = wx.StaticText(self, -1, "None Uploaded", pos=(10, 403), size=(180, 25), style=wx.ALIGN_CENTRE)
-	self.lblFrag.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-	if (platform.system() == "Linux"):
-	    resizeTextControlForUNIX(self.lblFrag, 10, 180)
-	self.lblFrag.SetForegroundColour("#FFFFFF")
+	self.btnMoveUp = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/up-arrow.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos), size=(25, 25))
+	self.btnMoveUp.Bind(wx.EVT_BUTTON, self.moveUp)
+	self.btnMoveUp.SetToolTipString("Add model to the list of templates")
+	self.btnMoveDown = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/down-arrow.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(295, ypos), size=(25, 25))
+	self.btnMoveDown.Bind(wx.EVT_BUTTON, self.moveDown)
+	self.btnMoveDown.SetToolTipString("Remove model from the list of templates")
 	if (platform.system() == "Darwin"):
-	    self.btnLoad = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLoadFrag.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(200, 400), size=(110, 25))
+	    self.btnLoadAlign = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLoadAlign.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(30, ypos), size=(127, 25))
 	else:
-	    self.btnLoad = wx.Button(self, id=-1, label="Load Frag", pos=(200, 400), size=(110, 25))
-	    self.btnLoad.SetForegroundColour("#000000")
-	    self.btnLoad.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-	self.btnLoad.Bind(wx.EVT_BUTTON, self.loadFrag)
-	self.btnLoad.SetToolTipString("Load a frag GZ file")
-	self.loadedfile = ""
-	
+	    self.btnLoadAlign = wx.Button(self, id=-1, label="Load Alignment", pos=(30, ypos), size=(127, 25))
+	    self.btnLoadAlign.SetForegroundColour("#000000")
+	    self.btnLoadAlign.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	self.btnLoadAlign.Bind(wx.EVT_BUTTON, self.loadAlign)
+	self.btnLoadAlign.SetToolTipString("Load a previously-saved alignment for this template-target pair")
 	if (platform.system() == "Darwin"):
-	    self.scoretypeMenu = wx.ComboBox(self, pos=(7, 430), size=(305, 25), choices=[], style=wx.CB_READONLY)
+	    self.btnSaveAlign = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnSaveAlign.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(163, ypos), size=(127, 25))
 	else:
-	    self.scoretypeMenu = wx.ComboBox(self, pos=(7, 430), size=(305, 25), choices=[], style=wx.CB_READONLY | wx.CB_SORT)
-	self.scoretypeMenu.Bind(wx.EVT_COMBOBOX, self.scoretypeMenuSelect)
-	self.scoretypeMenu.Disable() # Is only enabled after a design and before accepting it
-	self.scoretypeMenu.SetToolTipString("Scoretype by which PyMOL residues will be colored")
+	    self.btnSaveAlign = wx.Button(self, id=-1, label="Save Alignment", pos=(163, ypos), size=(127, 25))
+	    self.btnSaveAlign.SetForegroundColour("#000000")
+	    self.btnSaveAlign.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	self.btnSaveAlign.Bind(wx.EVT_BUTTON, self.saveAlign)
+	self.btnSaveAlign.SetToolTipString("Load a previously-saved alignment for this template-target pair")
 	
 	if (platform.system() == "Windows"):
-	    self.lblModelView = wx.StaticText(self, -1, "View Structure:", (20, 463), (120, 20), wx.ALIGN_CENTRE)
-	    self.lblModelView.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	    self.lblAlignment = wx.StaticText(self, -1, "Alignment:", (10, ypos+30), (320, 20), wx.ALIGN_LEFT)
+	    self.lblAlignment.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblModelView = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblModelView.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 463), size=(120, 20))
+	    self.lblAlignment = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblAlignment.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, ypos+30), size=(320, 20))
 	else:
-	    self.lblModelView = wx.StaticText(self, -1, "View Structure:", (20, 463), style=wx.ALIGN_CENTRE)
-	    self.lblModelView.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-	    resizeTextControlForUNIX(self.lblModelView, 20, 120)
-	self.lblModelView.SetForegroundColour("#FFFFFF")
-	self.viewMenu = wx.ComboBox(self, pos=(175, 460), size=(120, 25), choices=[], style=wx.CB_READONLY)
-	self.viewMenu.Bind(wx.EVT_COMBOBOX, self.viewMenuSelect)
-	self.viewMenu.Disable()
-	self.viewMenu.SetToolTipString("Select model positions to view in PyMOL")
+	    self.lblAlignment = wx.StaticText(self, -1, "Alignment:", (10, ypos+30), style=wx.ALIGN_LEFT)
+	    self.lblAlignment.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	self.lblAlignment.SetForegroundColour("#FFFFFF")
+	self.txtAlignment = wx.TextCtrl(self, -1, pos=(0, ypos+50), size=(320, 125), style=wx.TE_MULTILINE | wx.TE_READONLY)
+	self.txtAlignment.SetValue("")
+	self.txtAlignment.SetFont(wx.Font(10, wx.FONTFAMILY_TELETYPE, wx.NORMAL, wx.NORMAL))
+	self.txtAlignment.SetToolTipString("Alignment of the currently selected model")
+	self.txtAlignment.Bind(wx.EVT_KEY_DOWN, self.alignmentEdit)
+	self.maxsize = 30
+	
+	if (platform.system() == "Windows"):
+	    self.lblNumModels = wx.StaticText(self, -1, "Models to Generate:", (0, ypos+193), (260, 20), wx.ALIGN_CENTRE)
+	    self.lblNumModels.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	elif (platform.system() == "Darwin"):
+	    self.lblNumModels = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblNumModels.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+193), size=(260, 20))
+	else:
+	    self.lblNumModels = wx.StaticText(self, -1, "Models to Generate:", (0, ypos+193), style=wx.ALIGN_CENTRE)
+	    self.lblNumModels.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	    resizeTextControlForUNIX(self.lblNumModels, 0, 260)
+	self.lblNumModels.SetForegroundColour("#FFFFFF")
+	self.txtNumModels = wx.TextCtrl(self, -1, pos=(260, ypos+190), size=(60, 25))
+	self.txtNumModels.SetValue("10")
+	self.txtNumModels.SetToolTipString("Number of comparative models to generate (1-100)")
 	
 	if (platform.system() == "Darwin"):
-	    self.btnThread = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnThread.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(110, 490), size=(100, 25))
+	    self.btnThread = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnThread.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(110, ypos+220), size=(100, 25))
 	else:
-	    self.btnThread = wx.Button(self, id=-1, label="Thread!", pos=(110, 490), size=(100, 25))
+	    self.btnThread = wx.Button(self, id=-1, label="Thread!", pos=(110, ypos+220), size=(100, 25))
 	    self.btnThread.SetForegroundColour("#000000")
 	    self.btnThread.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	self.btnThread.Bind(wx.EVT_BUTTON, self.threadClick)
@@ -176,119 +232,88 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	
     def activate(self):
 	if (self.seqWin):		
-	    # Find out which models are selected and the locations of their poses
-	    selection = self.seqWin.getSelectedResidues()
-	    rowsSelected = []
-	    for line in selection:
-		rowsSelected.append(line[0])
-	    if (len(rowsSelected) == 0):
-		# If nothing selected, select all models
-		if (self.seqWin.numChains() > 0):
-		    rowsSelected = range(0, self.seqWin.numChains())
-		else:
-		    return
+	    # Select all models
+	    if (self.seqWin.numChains() > 0):
+		rowsSelected = range(0, self.seqWin.numChains())
+	    else:
+		return
 	    self.models = []
 	    for r in rowsSelected:
 		ID = self.seqWin.IDs[r]
-		model = self.seqWin.getModelForChain(r)
-		if (not(model in self.models)):
-		    self.models.append(str(model))
-	    # Update the combo box to have these models as selections
-	    self.modelMenu.Clear()
-	    self.modelMenu.AppendItems(self.models)
-	    if (len(self.models) > 0):
-		if (platform.system() == "Windows"):
-		    # Doing this on Linux freezes up the ComboBox, so don't do it on Linux
-		    self.modelMenu.SetSelection(0)
-    
-    def uploadFASTA(self, event):
-	if (len(self.txtFASTA.GetValue().strip()) > 0):
-	    dlg = wx.MessageDialog(self, "Your current FASTA sequence will be replaced with the loaded data.  Do you want to continue?", "Replace FASTA Data", wx.YES_NO | wx.ICON_EXCLAMATION | wx.CENTRE)
-	    if (dlg.ShowModal() == wx.ID_YES):
-		# Don't clear it out until the user actually selects a resfile (instead of cancelling
-		# at the file selection dialog
-		pass
-	    else:
-		logInfo("Upload FASTA operation canceled due to data already being present in the text box.")
-		return
-	dlg = wx.FileDialog(
-	    self, message="Choose a File",
-	    defaultDir=self.seqWin.cwd,
-	    defaultFile="",
-	    wildcard="All Files (*)|*",
-	    style=wx.OPEN | wx.CHANGE_DIR)
-	if (dlg.ShowModal() == wx.ID_OK):
-	    paths = dlg.GetPaths()
-	    # Change cwd to the last opened file
-	    lastDirIndx = paths[len(paths)-1].rfind("/")
-	    self.seqWin.cwd = str(paths[len(paths)-1][0:lastDirIndx])
-	    self.seqWin.saveWindowData(None)
-	    filename = str(paths[0])
-	    # Does it open?  If yes, then erase the resfile data and continue
-	    try:
-		f = open(filename, "r")
-	    except:
-		wx.MessageBox("The file " + filename.strip() + " cannot be opened!", "File Cannot Be Read", wx.OK|wx.ICON_EXCLAMATION)
-		return
-	    logInfo("Loaded data from a FASTA file", filename)
-	    fastastr = ""
-	    for aline in f:
-		fastastr = fastastr + aline.strip() + "\n"
-	    self.txtFASTA.SetValue(fastastr)
-	    f.close()
-    
-    def fragGen(self, event):
-	webbrowser.open("http://robetta.bakerlab.org/fragmentsubmit.jsp")
-	dlg = wx.MessageDialog(self, "After submitting a job, please make note of the job ID integer and specify it below so InteractiveROSETTA can watch for it to be completed.", "Specify Job ID", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
-	dlg.ShowModal()
-	dlg.Destroy()
+		self.models.append(str(ID))
+	    if (self.models != self.modelMenu.GetItems()):
+		# Update the combo box to have these models as selections
+		self.modelMenu.Clear()
+		self.modelMenu.AppendItems(self.models)
+		if (len(self.models) > 0):
+		    if (platform.system() == "Windows"):
+			# Doing this on Linux freezes up the ComboBox, so don't do it on Linux
+			self.modelMenu.SetSelection(0)
+		# Take out templates that are not loaded
+		self.txtAlignment.SetValue("")
+		self.selectedr = -1
+		for i in range(len(self.templates)-1, -1, -1):
+		    if (self.templates[i] not in self.models):
+			self.templates.pop(i)
+			self.alignments.pop(i)
+		self.updateGrid()
 	
-    def jobWatch(self, event):
-	# First ask if the ID is valid (it has to be an integer, no letters)
-	if (len(self.txtJobID.GetValue().strip()) == 0):
-	    dlg = wx.MessageDialog(self, "Please specify a job ID!", "Job ID Required", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
-	    dlg.ShowModal()
-	    dlg.Destroy()
-	    return
-	try:
-	    int(self.txtJobID.GetValue())
-	except:
-	    dlg = wx.MessageDialog(self, "Please specify a valid job ID!  Valid Job IDs are integers.", "Job ID Invalid", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
-	    dlg.ShowModal()
-	    dlg.Destroy()
-	    return
-	# Now write this to a text file
-	# A timer on the SequenceWindow will use this information to look for the files to appear on the Robetta server
-	goToSandbox()
-	# First make sure this isn't a duplicate
-	alreadythere = False
-	try:
-	    f = open("downloadwatch", "r")
-	    for aline in f:
-		if (len(aline.split("\t")) >= 2 and aline.split("\t")[0] == "FRAGMENT" and aline.split("\t")[1] == str(txtJobID.GetValue().strip())):
-		    alreadythere = True
-		    break
-	    f.close()
-	except:
-	    pass
-	if (not(alreadythere)):
-	    f = open("downloadwatch", "a")
-	    f.write("FRAGMENT\t" + str(self.txtJobID.GetValue()) + "\t" + str(datetime.datetime.now()) + "\n")
-	    f.close()
-	dlg = wx.MessageDialog(self, "InteractiveROSETTA is now watching the Robetta server for job ID " + str(self.txtJobID.GetValue()) + ".  You will be notified when the package is available for download.", "Listening for Download", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
-	dlg.ShowModal()
-	dlg.Destroy()
+    def recolorModel(self, modelchain):
+	# Recolor the model such that aligned portions of the model are shown in purple
+	# and unaligned structure is in cyan
+	# Purple: Aligned regions, will grab from template in comparative modeling
+	# Cyan: Deletions, will not be present at all in the final model
+	# Yellow: Insertion, will attempt to add a loop in this region
+	addToSelection = False
+	model = modelchain[0:len(modelchain)-2]
+	chain = modelchain[len(modelchain)-1]
+	r = self.seqWin.IDs.index(modelchain)
+	c = 1
+	# Save the locations of where the insertions will occur
+	insertions = []
+	for i in range(0, len(self.alignments[self.selectedr][0])):
+	    if (self.alignments[self.selectedr][0][i] != "-" and self.alignments[self.selectedr][1][i] != "-"):
+		self.seqWin.selectNthResidue(r, c, addToSelection, updateSelection=False)
+		addToSelection = True
+	    if (self.alignments[self.selectedr][0][i] != "-" and self.alignments[self.selectedr][1][i] == "-" and c not in insertions):
+		insertions.append(c-1)
+	    if (self.alignments[self.selectedr][1][i] != "-"):
+		c += 1
+	self.seqWin.selectUpdate(True)
+	self.cmd.set("ribbon_color", "purple", "seqsele")
+	self.cmd.set("cartoon_color", "purple", "seqsele")
+	if (chain != "_"):
+	    self.cmd.set("ribbon_color", "cyan", "model " + model + " and chain " + chain + " and not seqsele")
+	    self.cmd.set("cartoon_color", "cyan", "model " + model + " and chain " + chain + " and not seqsele")
+	else:
+	    self.cmd.set("ribbon_color", "cyan", "model " + model + " and not seqsele")
+	    self.cmd.set("cartoon_color", "cyan", "model " + model + " and not seqsele")
+	addToSelection = False
+	for c in insertions:
+	    self.seqWin.selectNthResidue(r, c, addToSelection, updateSelection=False)
+	    addToSelection = True
+	self.seqWin.selectUpdate(True)
+	self.cmd.set("ribbon_color", "yellow", "seqsele")
+	self.cmd.set("cartoon_color", "yellow", "seqsele")
+	self.cmd.disable("seqsele")
+	self.cmd.delete("seqsele")
 	
-    def showModel(self, model):
+    def showModel(self, modelchain):
+	model = modelchain[0:len(modelchain)-2]
+	chain = modelchain[len(modelchain)-1]
 	defaultPyMOLView(self.cmd)
-	self.cmd.select("sele", "model " + model)
+	if (chain != "_"):
+	    self.cmd.select("sele", "model " + model + " and chain " + chain)
+	else:
+	    self.cmd.select("sele", "model " + model)
 	self.cmd.zoom("sele")
 	self.cmd.hide("everything", "not sele")
-	self.seqWin.selectUpdate(False)
+	self.recolorModel(modelchain)
+	#self.seqWin.selectUpdate(False)
     
     def modelMenuSelect(self, event):
 	logInfo("Selected model " + self.modelMenu.GetValue())
-	self.showModel(self.modelMenu.GetStringSelection())
+	#self.showModel(self.modelMenu.GetStringSelection())
     
     def updateGrid(self):
 	if (self.grdTemplates.NumberRows > 0):
@@ -302,12 +327,382 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.grdTemplates.SetRowLabelValue(i, "")
 	    self.grdTemplates.SetCellValue(i, 0, self.templates[i])
     
+    def drawAlignment(self, indx):
+	# Renders the alignment in txtAlignment in formal output
+	# Columns 1-4: Targ/1st 4 letters of scaffold
+	# Column 5: Blank
+	# Columns 6+: Alignment
+	self.alignmentstr = ""
+	# First look to see if we have any gaps aligned to other gaps and remove them
+	for i in range(len(self.alignments[indx][0])-1, -1, -1):
+	    if (self.alignments[indx][0][i] == "-" and self.alignments[indx][1][i] == "-"):
+		self.alignments[indx][0] = self.alignments[indx][0][0:i] + self.alignments[indx][0][i+1:]
+		self.alignments[indx][1] = self.alignments[indx][1][0:i] + self.alignments[indx][1][i+1:]
+	for i in range(0, len(self.alignments[indx][0]), self.maxsize):
+	    self.alignmentstr += "Targ " + self.alignments[indx][0][i:i+self.maxsize] + "\n"
+	    self.alignmentstr += self.templates[indx][0:4] + " " + self.alignments[indx][1][i:i+self.maxsize] + "\n\n"
+	self.txtAlignment.SetValue(self.alignmentstr)
+    
+    def alignmentEdit(self, event):
+	(selpos, end) = self.txtAlignment.GetSelection()
+	if (selpos != end):
+	    return
+	# Now we have to do some math and make sure the insertion is in the actual alignment
+	# and not in header information or the blank line
+	if (platform.system() == "Windows"):
+	    # Apparently in Windows text boxes newlines register as 2 characters instead of 1 -_-
+	    linewidth = 16 + 2*self.maxsize # Two alignments, each line has 5 header columns, and 3 newlines
+	    targstart = 5
+	    tempstart = 12+self.maxsize
+	    offset = 1
+	else:
+	    linewidth = 13 + 2*self.maxsize # Two alignments, each line has 5 header columns, and 3 newlines
+	    targstart = 5
+	    tempstart = 11+self.maxsize
+	    offset = 0
+	linepos = selpos
+	block = 0
+	while (linepos >= linewidth):
+	    linepos -= linewidth
+	    block += 1
+	# Only the SPACEBAR, BACKSPACE, and DELETE keys change the sequence
+	# Arrow keys are supported to move the cursor around
+	if (int(event.GetKeyCode()) == wx.WXK_SPACE):
+	    if (linepos < 5 or (linepos > 5+self.maxsize and linepos < 11+self.maxsize) or linepos > 11+2*self.maxsize):
+		return
+	    # Put a gap in this location and add a gap to the end of the other sequence
+	    shift = True
+	    if (linepos <= targstart+self.maxsize):
+		# Selection in target sequence
+		p = linepos - targstart + block * self.maxsize
+		seq = 0
+	    else:
+		p = linepos - tempstart + block * self.maxsize
+		seq = 1
+	    self.alignments[self.selectedr][seq] = self.alignments[self.selectedr][seq][0:p] + "-" + self.alignments[self.selectedr][seq][p:]
+	    if (self.alignments[self.selectedr][seq].endswith("-")):
+		self.alignments[self.selectedr][seq] = self.alignments[self.selectedr][seq][0:len(self.alignments[self.selectedr][seq])-1]
+	    else:
+		self.alignments[self.selectedr][1-seq] += "-"
+	    if (self.alignments[self.selectedr][1-seq][p] == "-"):
+		# The doubly-aligned - will be eliminated by drawAlignment
+		shift = False
+	    # Redrawing the alignment resets the scrollbars, this gets the original scroll position back
+	    vpos = self.txtAlignment.GetScrollPos(wx.VERTICAL)
+	    self.drawAlignment(self.selectedr)
+	    self.txtAlignment.SetScrollPos(wx.VERTICAL, vpos)
+	    if (shift):
+		# Move the cursor
+		if (linepos == targstart+self.maxsize or linepos == targstart+self.maxsize):
+		    # We're at the edge of a line and need to shift by a whole block
+		    linepos -= self.maxsize
+		    block += 1
+		linepos += 1
+	    selpos = linepos + block * linewidth
+	    self.txtAlignment.SetSelection(selpos, selpos)
+	    # Alignment changed, update coloring
+	    self.recolorModel(self.templates[self.selectedr])
+	elif (int(event.GetKeyCode()) == wx.WXK_BACK or int(event.GetKeyCode()) == wx.WXK_DELETE or (platform.system() == "Darwin" and int(event.GetKeyCode()) == 8)):
+	    # Backspace deletes the gap before the current position and delete deletes the current gap
+	    if (int(event.GetKeyCode()) == wx.WXK_BACK or (platform.system() == "Darwin" and int(event.GetKeyCode()) == wx.WXK_DELETE)):
+		if (linepos < targstart or (linepos > targstart+self.maxsize and linepos < tempstart) or linepos > tempstart+self.maxsize):
+		    return
+		# Put a gap in this location and add a gap to the end of the other sequence
+		shift = True
+		if (linepos <= targstart+self.maxsize):
+		    # Selection in target sequence
+		    p = linepos - targstart + block * self.maxsize
+		    seq = 0
+		else:
+		    p = linepos - tempstart + block * self.maxsize
+		    seq = 1
+		if (p-1 < 0 or self.alignments[self.selectedr][seq][p-1] != "-"):
+		    # You can only delete gaps
+		    return
+		self.alignments[self.selectedr][seq] = self.alignments[self.selectedr][seq][0:p-1] + self.alignments[self.selectedr][seq][p:] + "-"
+	    else:
+		if (linepos < targstart or (linepos > targstart+self.maxsize and linepos < tempstart) or linepos > tempstart+self.maxsize):
+		    return
+		# Put a gap in this location and add a gap to the end of the other sequence
+		shift = False
+		if (linepos <= targstart+self.maxsize):
+		    # Selection in target sequence
+		    p = linepos - targstart + block * self.maxsize
+		    seq = 0
+		else:
+		    p = linepos - tempstart + block * self.maxsize
+		    seq = 1
+		if (p >= len(self.alignments[self.selectedr][seq]) or self.alignments[self.selectedr][seq][p] != "-"):
+		    # You can only delete gaps
+		    return
+		self.alignments[self.selectedr][seq] = self.alignments[self.selectedr][seq][0:p] + self.alignments[self.selectedr][seq][p+1:] + "-"
+	    # Redrawing the alignment resets the scrollbars, this gets the original scroll position back
+	    vpos = self.txtAlignment.GetScrollPos(wx.VERTICAL)
+	    self.drawAlignment(self.selectedr)
+	    self.txtAlignment.SetScrollPos(wx.VERTICAL, vpos)
+	    if (shift):
+		# Move the cursor
+		if (linepos == targstart or linepos == tempstart):
+		    # We're at the edge of a line and need to shift by a whole block
+		    linepos += self.maxsize
+		    block -= 1
+		linepos -= 1
+	    selpos = linepos + block * linewidth
+	    self.txtAlignment.SetSelection(selpos, selpos)
+	    # Alignment changed, update coloring
+	    self.recolorModel(self.templates[self.selectedr])
+	elif (int(event.GetKeyCode()) == wx.WXK_LEFT):
+	    if (linepos <= targstart and block == 0):
+		linepos = targstart
+	    elif (linepos <= tempstart and linepos > targstart+self.maxsize and block == 0):
+		linepos = tempstart
+	    elif (linepos < targstart):
+		linepos = targstart
+	    elif (linepos < tempstart and linepos > targstart+self.maxsize):
+		linepos = tempstart
+	    elif (linepos > tempstart+self.maxsize):
+		linepos = tempstart+self.maxsize
+	    elif (linepos == targstart or linepos == tempstart):
+		linepos += self.maxsize
+		block -= 1
+	    else:
+		linepos -= 1
+	    selpos = linepos + block * linewidth
+	    self.txtAlignment.SetSelection(selpos, selpos)
+	elif (int(event.GetKeyCode()) == wx.WXK_RIGHT):
+	    if (linepos < targstart):
+		linepos = targstart
+	    elif (linepos < tempstart and linepos > targstart+self.maxsize):
+		linepos = tempstart
+	    elif (linepos > tempstart+self.maxsize):
+		linepos = targstart
+		block += 1
+	    elif (linepos == targstart+self.maxsize or linepos == tempstart+self.maxsize):
+		# We're at the edge of a line and need to shift by a whole block
+		linepos -= self.maxsize
+		block += 1
+	    else:
+		linepos += 1
+	    # Okay, the last line is weird since it doesn't have to be self.maxsize in length
+	    # Did we go past the end of a sequence?
+	    if (linepos <= targstart+self.maxsize):
+		# Selection in target sequence
+		p = linepos - targstart + block * self.maxsize
+		seq = 0
+	    else:
+		p = linepos - tempstart + block * self.maxsize
+		seq = 1
+	    if (p >= len(self.alignments[self.selectedr][seq])):
+		p = len(self.alignments[self.selectedr][seq])
+		if (seq == 0):
+		    linepos = p - (block * self.maxsize) + targstart
+		else:
+		    linepos = p - (block * self.maxsize) + tempstart
+	    selpos = linepos + block * linewidth
+	    if (selpos >= len(self.alignmentstr)):
+		# Block is pushing it passed the end of the string
+		selpos = linepos + (block-1) * linewidth
+	    self.txtAlignment.SetSelection(selpos, selpos)
+	elif (int(event.GetKeyCode()) == wx.WXK_UP):
+	    # Again, that last line is annoying since it doesn't have to be maxsize in length
+	    lastblock = int(len(self.alignments[self.selectedr][0]) / self.maxsize)
+	    if (block == lastblock):
+		maxsize = len(self.alignments[self.selectedr][0]) - lastblock * self.maxsize
+		if (linepos < targstart+maxsize):
+		    # Still on the top row, so maxsize should not be changed since we're going
+		    # up into the previous block which has a full alignment row
+		    maxsize = self.maxsize
+		else:
+		    tempstart = tempstart - self.maxsize + maxsize
+	    else:
+		maxsize = self.maxsize
+	    # Move up to the next higher sequence if possible
+	    if (linepos <= targstart and block == 0):
+		# In the header region on the first line
+		linepos = targstart
+	    elif (linepos <= tempstart and linepos > targstart+maxsize and block == 0):
+		# In the header region on the first alignment, lower sequence
+		linepos = targstart
+	    elif (linepos <= targstart):
+		# In header region of target sequence
+		linepos = tempstart + offset
+		block -= 1
+	    elif (linepos < tempstart and linepos > targstart+maxsize):
+		# In header region of the scaffold sequence
+		linepos = targstart
+		#block -= 1
+	    elif (linepos > tempstart+maxsize):
+		# In the gap between alignment blocks
+		linepos = 11+maxsize + offset
+	    elif (linepos <= targstart+maxsize and block > 0):
+		# In target sequence, move up to scaffold sequence in previous block
+		linepos += targstart + maxsize + 1 + offset 
+		block -= 1
+	    elif (linepos >= tempstart and linepos <= tempstart+maxsize):
+		# In scaffold sequence, move up to the target in the same block
+		linepos -= targstart + maxsize + 1 + offset
+	    selpos = linepos + block * linewidth
+	    self.txtAlignment.SetSelection(selpos, selpos)
+	elif (int(event.GetKeyCode()) == wx.WXK_DOWN):
+	    # Again, that last line is annoying since it doesn't have to be maxsize in length
+	    lastblock = int(len(self.alignments[self.selectedr][0]) / self.maxsize)
+	    lastmaxsize = len(self.alignments[self.selectedr][0]) - lastblock * self.maxsize
+	    # Move down to the next lower sequence if possible
+	    if (linepos <= targstart and block == 0):
+		# In the header region on the first line
+		linepos = tempstart
+	    elif (linepos <= targstart):
+		# In header region of target sequence
+		linepos = tempstart
+	    elif (linepos < tempstart and linepos > targstart+self.maxsize):
+		# In header region of the scaffold sequence
+		linepos = targstart
+		block += 1
+	    elif (linepos > tempstart+self.maxsize and block != lastblock):
+		# In the gap between alignment blocks, not in the last alignment block
+		linepos = targstart
+		block += 1
+	    elif (linepos <= targstart+self.maxsize and block < lastblock):
+		# In target sequence, move down to scaffold sequence in same block
+		linepos += targstart + self.maxsize + 1 + offset
+	    elif (linepos <= targstart+self.maxsize and block == lastblock):
+		# In target sequence in the last block, shift by the length of the last block
+		linepos += targstart + lastmaxsize + 1 + offset
+	    elif (linepos >= tempstart and linepos <= tempstart+self.maxsize and block < lastblock-1):
+		# In scaffold sequence, move down to the target in the next block
+		linepos -= targstart + self.maxsize + 1 + offset
+		block += 1
+	    elif (linepos >= tempstart and linepos <= tempstart+self.maxsize and block == lastblock-1):
+		# In scaffold sequence but moving to last block, check to make sure we don't go past the edge of the alignment
+		linepos -= targstart + self.maxsize + 1 + offset
+		block += 1
+		if (linepos > targstart+lastmaxsize):
+		    linepos = targstart+lastmaxsize
+	    else:
+		# In scaffold of last block, move the cursor to the end of the scaffold
+		linepos = tempstart+lastmaxsize
+	    selpos = linepos + block * linewidth
+	    self.txtAlignment.SetSelection(selpos, selpos)
+	# Select this residue (or the one before if in a gap) in the sequence window
+	(selpos, end) = self.txtAlignment.GetSelection()
+	linepos = selpos
+	block = 0
+	while (linepos >= linewidth):
+	    linepos -= linewidth
+	    block += 1
+	if (linepos <= targstart+self.maxsize):
+	    # Selection in target sequence
+	    p = linepos - targstart + block * self.maxsize
+	else:
+	    p = linepos - tempstart + block * self.maxsize
+	# Find the row
+	for i in range(0, len(self.seqWin.IDs)):
+	    if (self.templates[self.selectedr] == self.seqWin.IDs[i]):
+		r = i
+		break
+	# Find the residue
+	c = 0
+	for i in range(0, p+1):
+	    if (c >= len(self.alignments[self.selectedr][1])):
+		break
+	    if (self.alignments[self.selectedr][1][i] != "-"):
+		c += 1
+	self.seqWin.selectNthResidue(r, c)
+    
+    def regenerateAlignments(self, indx=-1):
+	# Uses MUSCLE to recalculate the alignments when a change occurs
+	# If MUSCLE is not available, a default alignment will be given and the user will
+	# have to align manually
+	if (indx < 0):
+	    indx = 0
+	    l = len(self.alignments)
+	else:
+	    l = indx + 1
+	goToSandbox()
+	if (platform.system() == "Windows"):
+	    muscle = self.parent.parent.scriptdir + "\\bin\\muscle_win.exe"
+	else:
+	    muscle = self.parent.parent.scriptdir + "/bin/muscle_unix"
+	for i in range(indx, l):
+	    # Generate the MUSCLE input
+	    fout = open("muscle.in", "w")
+	    fout.write("> Target\n")
+	    fout.write(self.FASTA.strip() + "\n\n")
+	    fout.write("> Scaffold\n")
+	    # Get the sequence
+	    modelchain = self.templates[i]
+	    seq = ""
+	    for r in range(0, len(self.seqWin.sequences)):
+		if (modelchain == self.seqWin.IDs[r]):
+		    seq += self.seqWin.sequences[r]
+	    fout.write(seq + "\n")
+	    fout.close()
+	    # Try to align with MUSCLE
+	    try:
+		muscle_cline = MuscleCommandline(muscle, input="muscle.in", out="muscle.out")
+		muscle_cline()
+		# Read the results
+		targetseq = ""
+		scaffoldseq = ""
+		onScaffold = False
+		fin = open("muscle.out", "r")
+		for aline in fin:
+		    if (aline.startswith("> Scaffold")):
+			onScaffold = True
+		    elif (len(aline.strip()) == 0 or aline.strip()[0] == ">"):
+			continue
+		    elif (onScaffold):
+			scaffoldseq += aline.strip()
+		    else:
+			targetseq += aline.strip()
+		fin.close()
+		self.alignments.append([targetseq, scaffoldseq])
+	    except:
+		print "WARNING: MUSCLE could not be found at " + muscle
+		argetseq = self.FASTA
+		scaffoldseq = seq
+		if (len(targetseq) < len(scaffoldseq)):
+		    for j in range(0, len(scaffoldseq)-len(targetseq)):
+			targetseq += "-"
+		else:
+		    for j in range(0, len(targetseq)-len(scaffoldseq)):
+			scaffoldseq += "-"
+		self.alignments.append([targetseq, scaffoldseq])
+	if (self.selectedr >= 0):
+	    self.drawAlignment(self.selectedr)
+    
+    def fastaChange(self, event):
+	# Scan the current contents of this text box and take out everything that is invalid
+	data = self.txtFASTA.GetValue()#.strip()
+	fastaOnly = ""
+	for aline in data.split("\n"):
+	    if (aline.strip().startswith(">")):
+		continue
+	    fastaOnly += aline
+	fastaOnly = str(fastaOnly.replace(" ", "").replace("\t", "").upper())
+	newseq = ""
+	for AA in fastaOnly:
+	    if (AA not in "ACDEFGHIKLMNPQRSTVWY"):
+		dlg = wx.MessageDialog(self, "The amino acid " + AA + " is not valid.  It will be ignored.", "Invalid Amino Acid", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		dlg.ShowModal()
+		dlg.Destroy()
+	    else:
+		newseq += AA
+	if (newseq != self.FASTA):
+	    self.regenerateAlignments()
+	self.FASTA = newseq
+	self.txtFASTA.SetValue(self.FASTA)
+	self.txtFASTA.SetSelection(len(self.FASTA), len(self.FASTA))
+	event.Skip()
+    
     def addModel(self, event):
 	# Add this to the list of template structures
 	model = str(self.modelMenu.GetValue())
+	if (model not in self.modelMenu.GetItems()):
+	    return
 	if (not(model in self.templates)):
 	    self.templates.append(model)
-	self.templates.sort()
+	    self.regenerateAlignments(len(self.templates)-1)
 	# Update the grid with this new information
 	self.updateGrid()
 	logInfo("Added " + model + " to the list of model structures")
@@ -318,43 +713,56 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	if (model in self.templates):
 	    indx = self.templates.index(model)
 	    self.templates.pop(indx)
+	    self.alignments.pop(indx)
 	# Update the grid with this new information
 	self.updateGrid()
 	logInfo("Removed " + model + " from the list of static chains")
 	
-    def loadFrag(self, event):
-	# Get the structure from a MOL2 file and load it into PyMOL
-	logInfo("Load Frag button clicked")
-	dlg = wx.FileDialog(
-	    self, message="Choose a File",
-	    defaultDir=self.seqWin.cwd,
-	    defaultFile="",
-	    wildcard="Frag Files (*.frag)|*.frag",
-	    style=wx.OPEN | wx.CHANGE_DIR)
-	if (dlg.ShowModal() == wx.ID_OK):
-	    paths = dlg.GetPaths()
-	    # Change cwd to the last opened file
-	    if (platform.system() == "Windows"):
-		lastDirIndx = paths[len(paths)-1].rfind("\\")
+    def selectRow(self, row):
+	self.selectedr = row
+	if (self.selectedr >= self.grdTemplates.NumberRows):
+	    self.selectedr = -1
+	for r in range(0, self.grdTemplates.NumberRows):
+	    if (r == self.selectedr):
+		for c in range(0, self.grdTemplates.NumberCols):
+		    self.grdTemplates.SetCellBackgroundColour(r, c, "light blue")
 	    else:
-		lastDirIndx = paths[len(paths)-1].rfind("/")
-	    self.seqWin.cwd = str(paths[len(paths)-1][0:lastDirIndx])
-	    self.seqWin.saveWindowData(None)
-	    filename = str(paths[0])
-	    self.loadedfile = filename
-	    localfilename = filename[lastDirIndx+1:]
-	    self.lblFrag.SetLabel(localfilename)
-	    self.lblFrag.SetForegroundColour("#FFFFFF")
-	else:
-	    logInfo("Load PDB operation cancelled")
+		for c in range(0, self.grdTemplates.NumberCols):
+		    self.grdTemplates.SetCellBackgroundColour(r, c, "white")
+	self.grdTemplates.Refresh()
+	self.showModel(self.templates[self.selectedr])
 	
-    def viewMenuSelect(self, event):
-	try:
-	    self.focusView(self.viewMenu.GetStringSelection(), self.selectedModel, "thread_view")
-	    logInfo("Viewing " + self.viewMenu.GetStringSelection())
-	except:
-	    # Probably the user left the field blank, do nothing
-	    pass
+    def gridClick(self, event):
+	self.selectRow(event.GetRow())
+	if (len(self.FASTA.strip()) > 0):
+	    self.drawAlignment(self.selectedr)
+	event.Skip()
+	
+    def moveUp(self, event):
+	# Move the selected template up in the ranking
+	if (self.selectedr > 0):
+	    temp = self.templates[self.selectedr]
+	    self.templates[self.selectedr] = self.templates[self.selectedr-1]
+	    self.templates[self.selectedr-1] = temp
+	    temp = self.alignments[self.selectedr]
+	    self.alignments[self.selectedr] = self.alignments[self.selectedr-1]
+	    self.alignments[self.selectedr-1] = temp
+	    self.updateGrid()
+	    self.selectedr -= 1
+	    self.selectRow(self.selectedr)
+    
+    def moveDown(self, event):
+	# Move the selected template down in the ranking
+	if (self.selectedr >= 0 and self.selectedr < len(self.templates)-1):
+	    temp = self.templates[self.selectedr]
+	    self.templates[self.selectedr] = self.templates[self.selectedr+1]
+	    self.templates[self.selectedr+1] = temp
+	    temp = self.alignments[self.selectedr]
+	    self.alignments[self.selectedr] = self.alignments[self.selectedr+1]
+	    self.alignments[self.selectedr+1] = temp
+	    self.updateGrid()
+	    self.selectedr += 1
+	    self.selectRow(self.selectedr)
     
     def focusView(self, posID, origmodel, newmodel=None):
 	if (posID != "Whole View"):
@@ -394,260 +802,202 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.cmd.delete("viewsele")
 	self.cmd.delete("exviewsele")
     
-    def scoretypeMenuSelect(self, event):
-	# Make sure there is even a PyMOL_Mover pose loaded
-	if (self.selectedModel == ""):
+    def loadAlign(self, event):
+	logInfo("Load Alignment button clicked")
+	# Is a row selected?
+	if (len(self.txtAlignment.GetValue().strip()) == 0):
+	    dlg = wx.MessageDialog(self, "Please select a template from the grid whose alignment is the one attempting to be loaded.", "No Template Selected", wx.OK | wx.ICON_ERROR | wx.CENTRE)
+	    dlg.ShowModal()
+	    dlg.Destroy()
 	    return
-	logInfo("Changed scoretype view to " + self.scoretypeMenu.GetStringSelection())
-	recolorEnergies(self.threadView, self.residue_E, "thread_view", self.scoretypeMenu.GetStringSelection(), self.cmd)
-	self.viewMenuSelect(event) # To update all the labels
+	dlg = wx.FileDialog(
+	    self, message="Choose a File",
+	    defaultDir=self.seqWin.cwd,
+	    defaultFile="",
+	    wildcard="Alignments (*.fasta)|*.fasta",
+	    style=wx.OPEN | wx.CHANGE_DIR)
+	if (dlg.ShowModal() == wx.ID_OK):
+	    paths = dlg.GetPaths()
+	    # Change cwd to the last opened file
+	    if (platform.system() == "Windows"):
+		lastDirIndx = paths[len(paths)-1].rfind("\\")
+	    else:
+		lastDirIndx = paths[len(paths)-1].rfind("/")
+	    self.seqWin.cwd = str(paths[len(paths)-1][0:lastDirIndx])
+	    self.seqWin.saveWindowData(None)
+	    filename = str(paths[0])
+	    # Does it open?  If yes, then erase the resfile data and continue
+	    try:
+		f = open(filename, "r")
+	    except:
+		wx.MessageBox("The file " + filename.strip() + " cannot be opened!", "File Cannot Be Read", wx.OK|wx.ICON_EXCLAMATION)
+		return
+	    logInfo("Loaded data from a FASTA alignment", filename)
+	# Read the sequences out of the alignment file
+	targseq = ""
+	readingtarg = False
+	readingtemp = False
+	tempseq = ""
+	fin = open(filename, "r")
+	for aline in fin:
+	    if (aline.startswith("> Target")):
+		readingtarg = True
+	    elif (readingtarg and aline.startswith(">")):
+		# Does the ID in here match the one selected?
+		ID = aline[2:].strip()
+		if (ID != self.templates[self.selectedr]):
+		    dlg = wx.MessageDialog(self, "The PDB IDs in the alignment file do not match.\n\nSelected template: " + self.templates[self.selectedr] + "\nFound: " + ID, "PDB IDs Do Not Match", wx.OK | wx.ICON_ERROR | wx.CENTRE)
+		    dlg.ShowModal()
+		    dlg.Destroy()
+		    return
+		readingtemp = True
+		readingtarg = False
+	    elif (readingtemp and aline.startswith(">")):
+		break
+	    elif (readingtarg):
+		targseq += aline.strip()
+	    elif (readingtemp):
+		tempseq += aline.strip()
+	fin.close()
+	# Do the sequences match the sequences of the current FASTA and template?
+	currtarg = ""
+	currtemp = ""
+	loadtarg = ""
+	loadtemp = ""
+	for AA in self.alignments[self.selectedr][0]:
+	    if (AA != "-"):
+		currtarg += AA
+	for AA in self.alignments[self.selectedr][1]:
+	    if (AA != "-"):
+		currtemp += AA
+	for AA in targseq:
+	    if (AA != "-"):
+		loadtarg += AA
+	for AA in tempseq:
+	    if (AA != "-"):
+		loadtemp += AA
+	if (currtarg != loadtarg):
+	    dlg = wx.MessageDialog(self, "The target sequence in the alignment file does not match the current sequence given above!", "Target Sequences Do Not Match", wx.OK | wx.ICON_ERROR | wx.CENTRE)
+	    dlg.ShowModal()
+	    dlg.Destroy()
+	    print currtarg
+	    print loadtarg
+	    return
+	if (currtemp != loadtemp):
+	    dlg = wx.MessageDialog(self, "The template sequence in the alignment file does not match the sequence of the selected template!", "Template Sequences Do Not Match", wx.OK | wx.ICON_ERROR | wx.CENTRE)
+	    dlg.ShowModal()
+	    dlg.Destroy()
+	    print currtemp
+	    print loadtemp
+	    return
+	# If we made it this far, then the sequences should be good
+	self.alignments[self.selectedr][0] = targseq
+	self.alignments[self.selectedr][1] = tempseq
+	self.drawAlignment(self.selectedr)
+	self.recolorModel(self.templates[self.selectedr])
+    
+    def saveAlign(self, event):
+	# Is an alignment even there?
+	if (len(self.txtAlignment.GetValue().strip()) == 0):
+	    dlg = wx.MessageDialog(self, "There is no alignment to save!", "No Alignment", wx.OK | wx.ICON_ERROR | wx.CENTRE)
+	    dlg.ShowModal()
+	    dlg.Destroy()
+	    return
+	# Okay, now just save the alignment in FASTA format for later use
+	dlg = wx.FileDialog(
+	    self, message="Save an alignment",
+	    defaultDir=self.seqWin.cwd,
+	    defaultFile="",
+	    wildcard="Alignments (*.fasta)|*.fasta",
+	    style=wx.SAVE | wx.CHANGE_DIR)
+	if (dlg.ShowModal() == wx.ID_OK):
+	    paths = dlg.GetPaths()
+	    # Change cwd to the last opened file
+	    if (platform.system() == "Windows"):
+		lastDirIndx = paths[len(paths)-1].rfind("\\")
+	    else:
+		lastDirIndx = paths[len(paths)-1].rfind("/")
+	    self.seqWin.cwd = str(paths[len(paths)-1][0:lastDirIndx])
+	    self.seqWin.saveWindowData(None)
+	    filename = str(paths[0]).split(".fasta")[0] + ".fasta"
+	    # Does it exist already?  If so, ask if the user really wants to overwrite it
+	    if (os.path.isfile(filename)):
+		dlg2 = wx.MessageDialog(self, "The file " + filename + " already exists.  Overwrite it?", "Filename Already Exists", wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
+		if (dlg2.ShowModal() == wx.ID_NO):
+		    dlg2.Destroy()
+		    logInfo("Canceled save operation due to filename already existing")
+	    fout = open(filename, "w")
+	    fout.write("> Target\n\n")
+	    for i in range(0, len(self.alignments[self.selectedr][0]), 50):
+		fout.write(self.alignments[self.selectedr][0][i:i+50] + "\n")
+	    fout.write("\n> " + self.templates[self.selectedr].strip() + "\n\n")
+	    for i in range(0, len(self.alignments[self.selectedr][1]), 50):
+		fout.write(self.alignments[self.selectedr][1][i:i+50] + "\n")
+	    fout.close()
     
     def threadClick(self, event):
+	logInfo("Clicked the Thread button")
 	# This is also the "Finalize!" button
 	if (self.buttonState == "Thread!"):
-	    # Make sure there is at least one template structure specified and that a frag gz file is specified
+	    # Do we have a FASTA sequence?
+	    if (len(self.FASTA.strip()) == 0):
+		wx.MessageBox("You need to input a FASTA sequence whose structure will be predicted!", "FASTA Sequence Required", wx.OK|wx.ICON_ERROR)
+		return
+	    # Do we have at least one template?
 	    if (len(self.templates) == 0):
-		wx.MessageBox("Please select at least one loaded model as a template for threading!", "Template Required", wx.OK|wx.ICON_EXCLAMATION)
+		wx.MessageBox("You need to provide at least one homologous structure that will be used for modeling!", "Homologous Structure Required", wx.OK|wx.ICON_ERROR)
 		return
-	    if (len(self.loadedfile.strip()) == 0):
-		wx.MessageBox("Please indicate a FRAG file generated from the FASTA sequence that will be modeled.  Use Robetta to generate this if you have not done so already.", "Movable Chain Required", wx.OK|wx.ICON_EXCLAMATION)
-		return
-	    self.seqWin.labelMsg.SetLabel("Performing protein threading, please be patient...")
-	    self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-	    self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
-	    self.seqWin.msgQueue.append("Performing protein threading, please be patient...")
-	    self.seqWin.cannotDelete = True
-	    self.parent.GoBtn.Disable()
-	    self.btnAddTemplate.Disable()
-	    self.btnRemoveTemplate.Disable()
-	    self.btnLoad.Disable()
-	    self.btnThread.Disable()
-	    self.stage = 1
-	    logInfo("Clicked the Thread button")
-	    self.tmrThread = wx.Timer(self)
-	    self.Bind(wx.EVT_TIMER, self.threadThread, self.tmrThread)
-	    self.tmrThread.Start(1000)
-	else:
-	    # Finalize button, ask whether the changes will be accepted or rejected
-	    dlg = wx.MessageDialog(self, "Do you want to accept the threaded model?", "Accept/Reject Model", wx.YES_NO | wx.CANCEL | wx.ICON_QUESTION | wx.CENTRE)
-	    result = dlg.ShowModal()
-	    if (result == wx.ID_YES):
-		logInfo("Accepted threaded model")
-		accept = True
-	    elif (result == wx.ID_NO):
-		logInfo("Rejected threaded model")
-		accept = False
-	    else:
-		logInfo("Canceled Finalize operation")
-		dlg.Destroy()
-		return
-	    dlg.Destroy()
-	    self.viewMenu.Disable()
-	    self.scoretypeMenu.Disable()
-	    self.parent.GoBtn.Enable()
-	    self.btnAddTemplate.Enable()
-	    self.btnRemoveTemplate.Enable()
-	    self.btnLoad.Enable()
-	    if (platform.system() == "Darwin"):
-		self.btnThread.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnThread.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-	    else:
-		self.btnThread.SetLabel("Finalize!")
-	    self.buttonState = "Thread!"
-	    self.btnThread.SetToolTipString("Perform docking simulation with selected parameters")
-	    self.cmd.label("all", "")
-	    self.seqWin.cannotDelete = False
-	    if (not(accept)):
-		self.cmd.remove("thread_view")
-		self.cmd.delete("thread_view")
-		return
-	    # Load the structure in PyMOL and the sequence viewer
-	    if (platform.system() == "Windows"):
-		newname = os.path.expanduser("~") + "\\thread_T.pdb"
-	    else:
-		newname = os.path.expanduser("~") + "/thread_T.pdb"
-	    os.rename(self.selectedModel, newname)
+	    # Do we have a valid number of models?
 	    try:
-		self.cmd.remove("thread_view")
-		self.cmd.delete("thread_view")
-		self.cmd.load(newname, "thread_T")
-		defaultPyMOLView(self.cmd, "thread_T")
-		self.seqWin.PyMOLPDBLoad(0, newname)
-		del self.threadView
+		nmodels = int(self.txtNumModels.GetValue())
+		if (nmodels < 1 or nmodels > 100):
+		    raise Exception()
 	    except:
-		# Some weird error happened, do nothing instead of crashing
-		print "Bug at accept button click"
-		pass	
-    
-    def recoverFromError(self, msg=""):
-	# This function tells the user what the error was and tries to revert the protocol
-	# back to the pre-daemon state so the main GUI can continue to be used
-	if (len(msg) == 0):
-	    f = open("errreport", "r")
-	    errmsg = "An error was encountered during the protocol:\n\n"
-	    for aline in f:
-		errmsg = errmsg + str(aline)
-	    f.close()
-	    os.remove("errreport")
-	else:
-	    errmsg = msg
-	logInfo("Error Encountered")
-	logInfo(errmsg)
-	if (platform.system() == "Windows"):
-	    sessioninfo = os.path.expanduser("~") + "\\InteractiveRosetta\\sessionlog"
-	else:
-	    sessioninfo = os.path.expanduser("~") + "/InteractiveRosetta/sessionlog"
-	errmsg = errmsg + "\n\nIf you don't know what caused this, send the file " + sessioninfo + " to a developer along with an explanation of what you did."
-	# You have to use a MessageDialog because the MessageBox doesn't always work for some reason
-	dlg = wx.MessageDialog(self, errmsg, "Error Encountered", wx.OK|wx.ICON_EXCLAMATION)
-	dlg.ShowModal()
-	dlg.Destroy()
-	self.seqWin.cannotDelete = False
-	self.parent.GoBtn.Enable()
-	self.btnAddTemplate.Enable()
-	self.btnRemoveTemplate.Enable()
-	self.btnLoad.Enable()
-	self.btnThread.SetLabel("Thread!")
-	self.btnThread.SetToolTipString("Begin threading the sequence onto the template structures")
-	# Get rid of the messages
-	for i in range(0, len(self.seqWin.msgQueue)):
-	    if (self.seqWin.msgQueue[i].find("Performing protein threading") >= 0):
-		self.seqWin.msgQueue.pop(i)
-		break
-	if (len(self.seqWin.msgQueue) > 0):
-	    self.seqWin.labelMsg.SetLabel(self.seqWin.msgQueue[len(self.seqWin.msgQueue)-1])
-	else:
-	    self.seqWin.labelMsg.SetLabel("")
-	self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-	self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
-    
-    def threadThread(self, event):
-	# Dump a file with the loop modeling parameters for the daemon to pick up
-	goToSandbox()
-	if (self.stage == 1):
-	    self.tmrThread.Stop()
-	    self.timeoutCount = 0
-	    f = open("threadinputtemp", "w")
-	    for pdb in self.templates:
-		f.write("PDBFILE\t" + pdb.strip() + ".pdb\n")
-		f2 = open(pdb.strip() + ".pdb", "r")
-		f.write("BEGIN PDB DATA\n")
-		for aline in f2:
-		    f.write(aline.strip() + "\n")
-		f.write("END PDB DATA\n")
-		f2.close()
-	    f.write("FRAG\t" + self.loadedfile + "\n")
-	    f.close()
+		wx.MessageBox("Please enter an integer from 1-100 for the number of models.", "Invalid Number of Models", wx.OK|wx.ICON_ERROR)
+		return
+	    # Write the input file
+	    fout = open("threadinputtemp", "w")
+	    fout.write("FASTA\t" + self.FASTA.strip() + "\n")
+	    fout.write("NMODELS\t" + str(nmodels) + "\n")
+	    indx = 1
+	    for template in self.templates:
+		chain = template[len(template)-1]
+		fout.write("PDBFILE\tPRT" + str(indx) + chain + ".pdb\n")
+		indx += 1
+		fout.write("BEGIN PDB DATA\n")
+		fin = open(template[0:len(template)-2] + ".pdb", "r")
+		for aline in fin:
+		    if ((aline.startswith("ATOM") or aline.startswith("HETATM")) and aline[21] == template[len(template)-1]):
+			fout.write(aline)
+		fin.close()
+		fout.write("END PDB DATA\n")
+	    for i in range(0, len(self.alignments)):
+		fout.write("TARGALIGN\t" + self.alignments[i][0].strip() + "\n")
+		fout.write("TEMPALIGN\t" + self.alignments[i][1].strip() + "\n")
+	    fout.close()
 	    appendScorefxnParamsInfoToFile("threadinputtemp", self.selectWin.weightsfile)
-	    if (useServer and False):
-		try: 
-		    self.ID = sendToServer("threadinput")
-		    self.usingServer = True
-		    logInfo("Threading input sent to server daemon with ID " + self.ID)
+	    # Try to send it to the server
+	    try:
+		self.ID = sendToServer("threadinput")
+		# First make sure this isn't a duplicate
+		alreadythere = False
+		try:
+		    f = open("downloadwatch", "r")
+		    for aline in f:
+			if (len(aline.split("\t")) >= 2 and aline.split("\t")[0] == "COMPMODEL" and aline.split("\t")[1] == self.ID.strip()):
+			    alreadythere = True
+			    break
+		    f.close()
 		except:
-		    # Something failed, default to the local daemon
-		    os.rename("threadinputtemp", "threadinput")
-		    self.usingServer = False
-		    logInfo("Server daemon not available, threading input uploaded at threadinput")
-	    else:
-		os.rename("threadinputtemp", "threadinput")
-		self.usingServer = False
-		logInfo("Threading input uploaded locally at threadinput")
-	    self.stage = 2
-	    self.tmrThread.Start(1000)
-	elif (self.stage == 2):
-	    if (self.usingServer):
-		# See if the file has been uploaded yet and bring it here if so
-		queryServerForResults("threadoutput-" + self.ID)
-		self.timeoutCount = self.timeoutCount + 1
-	    if (self.timeoutCount >= serverTimeout):
-		self.tmrThread.Stop()
-		# If this is taking too long, maybe there's something wrong with the server
-		# Ask the user if they want to continue waiting or use the local daemon instead
-		dlg = wx.MessageDialog(self, "The server is taking a long time to respond.  Continue to wait?  Pressing No will run the calculations locally.", "Delayed Server Response", wx.YES_NO | wx.ICON_EXCLAMATION | wx.CENTRE)
-		if (dlg.ShowModal() == wx.ID_YES):
-		    # Reset the counter
-		    self.timeoutCount = 0
-		else:
-		    self.usingServer = False
-		    self.timeoutCount = 0
-		    os.rename("threadinputtemp", "threadinput")
-		    logInfo("Server took too long to respond so the local daemon was used")
+		    pass
+		if (not(alreadythere)):
+		    f = open("downloadwatch", "a")
+		    f.write("COMPMODEL\t" + self.ID.strip() + "\t" + str(datetime.datetime.now().strftime("%A, %B %d - %I:%M:%S %p")) + "\t" + getServerName() + "\n")
+		    f.close()
+		dlg = wx.MessageDialog(self, "InteractiveROSETTA is now watching the server for job ID " + self.ID.strip() + ".  You will be notified when the package is available for download.", "Listening for Download", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		dlg.ShowModal()
 		dlg.Destroy()
-		self.tmrThread.Start(1000)
-	    # Read the output dumped by the child process (finally!)
-	    if (os.path.isfile("threadoutput")):
-		self.tmrThread.Stop()
-		self.residue_E = []
-		f = open("threadoutput", "r")
-		for aline in f:
-		    if (aline[0:6] == "OUTPUT"):
-			pdbfile = aline.split("\t")[1].strip()
-			self.threadmodel = pdbfile
-			#self.dockView = pose_from_pdb(pdbfile)
-		    elif (aline[0:6] == "ENERGY"):
-			if (aline.split()[1] == "total_score"):
-			    # This is the scoretype line, row 0 in residue_E
-			    self.residue_E.append(aline.split()[1:])
-			else:
-			    self.residue_E.append([])
-			    indx = len(self.residue_E) - 1
-			    for E in aline.split()[1:]:
-				self.residue_E[indx].append(float(E))
-		f.close()
-		self.threadView = self.seqWin.pdbreader.get_structure("thread_view", self.threadmodel)
-		self.selectedModel = self.threadmodel
-		logInfo("Found threading output at threadoutput")
-		# Pop this message out of the queue
-		for i in range(0, len(self.seqWin.msgQueue)):
-		    if (self.seqWin.msgQueue[i].find("Performing protein threading") >= 0):
-			self.seqWin.msgQueue.pop(i)
-			break
-		if (len(self.seqWin.msgQueue) > 0):
-		    self.seqWin.labelMsg.SetLabel(self.seqWin.msgQueue[len(self.seqWin.msgQueue)-1])
-		else:
-		    self.seqWin.labelMsg.SetLabel("")
-		self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-		self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
-		# Add these loop residues to the view menu so the user can look at the new loop
-		viewoptions = ["Whole View"]
-		ires = 1
-		for ch in self.threadView[0]:
-		    for residue in ch:
-			chain = ch.id
-			if (len(chain.strip()) == 0):
-			    chain = "_"
-			seqpos = str(residue.id[1])
-			resn = AA3to1(residue.resname)
-			viewoptions.append(chain + ":" + resn + seqpos)
-			ires = ires + 1
-		self.viewMenu.Clear()
-		self.viewMenu.AppendItems(viewoptions)
-		self.viewMenu.SetSelection(0)
-		self.viewMenu.Enable()
-		# Add the nonzero scoretypes to the energy viewing list from the current score function
-		self.scoretypeMenu.Clear()
-		for scoretype in self.residue_E[0]:
-		    try:
-			toAdd = scoretypes[str(scoretype)]
-		    except:
-			toAdd = str(scoretype)
-		    self.scoretypeMenu.Append(toAdd)
-		self.scoretypeMenu.Enable()
-		self.parent.GoBtn.Enable()
-		self.btnThread.Enable()
-		if (platform.system() == "Darwin"):
-		    self.btnThread.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnThread_Finalize.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		else:
-		    self.btnThread.SetLabel("Finalize!")
-		self.buttonState = "Finalize!"
-		self.btnThread.SetToolTipString("Accept or reject protocol results")
-		os.remove("threadoutput")
-		# Load the docked pose as the "dock_view" model so the user can look at the results
-		self.cmd.load(self.threadmodel, "thread_view")
-		self.cmd.hide("everything", "model thread_view")
-		recolorEnergies(self.threadView, self.residue_E, "thread_view", self.scoretypeMenu.GetValue(), self.cmd)
-		self.focusView(self.viewMenu.GetValue(), "thread_view")
-	    elif (os.path.isfile("errreport")):
-		# Something went wrong, tell the user about it
-		self.tmrThread.Stop()
-		self.recoverFromError()
+	    except:
+		dlg = wx.MessageDialog(self, "The comparative modeling job could not be sent to the server!  Verify that you have an Internet connection and that the server is running.", "Server Could Not Be Reached", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		dlg.ShowModal()
+		dlg.Destroy()

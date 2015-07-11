@@ -45,6 +45,14 @@ end
 foreach OLDFILE (`find $IROSETTA_HOME/results/* -maxdepth 0 -mmin +5 -type f`)
     rm -f $OLDFILE
 end
+# Sometimes the mutexes get abandoned, and then the whole server hangs until the sysadmin 
+# manually deletes them.  This deletes mutexes more than 10 minutes old
+foreach OLDFILE (`find $IROSETTA_HOME/backend_query -maxdepth 0 -mmin +10 -type f`)
+    rm -f $OLDFILE
+end
+foreach OLDFILE (`find $IROSETTA_HOME/backend_query -maxdepth 0 -mmin +10 -type f`)
+    rm -f $OLDFILE
+end
 # Clean up some more junk
 foreach OLDFILE (`find $IROSETTA_HOME/*.pdb -maxdepth 0 -mmin +20 -type f`)
     rm -f $OLDFILE
@@ -107,6 +115,18 @@ foreach DIR (`ls -d -- results/*/`)
 	    echo $MODELS" Models Completed" > $DIR/status
 	else
 	    echo "Pending"
+	endif
+    endif
+    if (-e $DIR/flexpepinput) then
+	if (-e $DIR/frag.out) then
+	    echo "Generating fragments..." > $DIR/status
+	else
+	    echo "Pending"
+	endif
+	if (-e $DIR/flexpep.out) then
+	    set MODELS = `ls $DIR/*.pdb | wc -l`
+	    set MODELS = `expr $MODELS - 1`
+	    echo $MODELS" Models Completed" > $DIR/status
 	endif
     endif
 end

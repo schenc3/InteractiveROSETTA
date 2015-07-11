@@ -57,7 +57,7 @@ backrubRMSD = float(sys.argv[3])
 init(extra_options="-ignore_unrecognized_res -mute all")
 scorefxn = create_score_function("talaris2013")
 # Get the params files
-paramsfiles = glob.glob("*.params")
+paramsfiles = glob.glob("*.fa.params")
 paramsstr = " -extra_res_fa "
 if (len(paramsfiles) == 0):
     paramsstr = ""

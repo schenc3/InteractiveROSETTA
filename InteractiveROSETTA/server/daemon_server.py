@@ -166,7 +166,7 @@ def initializeRosetta(inputfile):
 	    f2.write(aline.strip() + "\n")
     f.close()
     paramsstr = ""
-    paramsFiles = glob.glob(hostname + "-*.params")
+    paramsFiles = glob.glob(hostname + "-*.fa.params")
     for params in paramsFiles:
 	paramsstr = paramsstr + params.strip() + " "
     if (len(paramsstr) > 0):
@@ -945,6 +945,22 @@ def doFlexPep(inputfile):
     # The Python script will handle everything from here
     # Get back to where we were
     os.chdir("../..")
+    
+def doThread(inputfile):
+    # Make a new results folder and unpack the data there
+    try:
+	os.mkdir("results/" + ID)
+    except:
+	shutil.rmtree("results/" + ID, ignore_errors=True)
+	os.mkdir("results/" + ID)
+    os.chdir("results/" + ID)
+    # Move the input file here
+    os.rename("../../" + inputfile, inputfile.split("-")[1])
+    # Submit it to the queue
+    sub = subprocess.Popen(["python", "../../rosetta_submit.py", "thread", ID])
+    # The Python script will handle everything from here
+    # Get back to where we were
+    os.chdir("../..")
 
 def writeError(msg, inputfile="None-"):
     # Open a file and write out the error message so the main GUI can tell the user what happened
@@ -1150,6 +1166,13 @@ while (True):
 		inputfile = "jobfiles/" + hostname.replace("-", "") + "-flexpepinput-" + ID
 	    print "Daemon starting flexible peptide docking job..."
 	    doFlexPep(inputfile)
+	elif (inputfile.startswith("jobfiles/" + hostname + "-threadinput")):
+	    if ("-" in hostname):
+		# If the hostname has - in it, it will screw up the splitting later on, so fix it here
+		os.rename(inputfile, "jobfiles/" + hostname.replace("-", "") + "-threadinput-" + ID)
+		inputfile = "jobfiles/" + hostname.replace("-", "") + "-threadinput-" + ID
+	    print "Daemon starting comparative modeling job..."
+	    doThread(inputfile)
 	elif (inputfile.startswith("jobfiles/" + hostname + "-killinput")):
 	    fin = open(inputfile, "r")
 	    filedata = fin.readlines()

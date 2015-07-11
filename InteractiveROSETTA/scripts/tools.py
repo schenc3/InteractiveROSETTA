@@ -1341,12 +1341,12 @@ def goToSandbox(extra=""):
 	os.chdir(homedir + "/InteractiveROSETTA" + extra)
 	
 def AA3to1(resn):
-    indx3 = "ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR HOH ".find(resn)
+    indx3 = "ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR HOH ADE CYT GUA THY RAD RCY RGU URA ".find(resn)
     if (indx3 < 0):
 	return "Z"
     else:
 	indx = indx3 / 4
-	return "ACDEFGHIKLMNPQRSTVWYO"[indx]
+	return "ACDEFGHIKLMNPQRSTVWYOacgtacgu"[indx]
 
 def resizeTextControlForUNIX(widget, leftbound, width):
     # The centering feature doesn't seem to work on UNIX, so in order to center we have to
@@ -1575,6 +1575,7 @@ def appendScorefxnParamsInfoToFile(filename, weightsfile):
     goToSandbox("params")
     paramsfiles = glob.glob("*.params")
     for paramsfile in paramsfiles:
+	# Do not send over nucleotides, they apparently already get imported by default
 	f.write("PARAMS\t" + paramsfile.strip() + "\n")
 	f.write("BEGIN PARAMS DATA\n")
 	f2 = open(paramsfile.strip(), "r")
@@ -1706,7 +1707,8 @@ def queryServerForResults(outputfile):
 def getRecognizedTypes():
     # Returns a list of 3 letter codes that will be recognized by Rosetta
     recognized = ["ALA", "CYS", "ASP", "GLU", "PHE", "GLY", "HIS", "ILE", "LYS", "LEU", "MET", "ASN", 
-	      "PRO", "GLN", "ARG", "SER", "THR", "VAL", "TRP", "TYR", "HIE", "HID"]
+	      "PRO", "GLN", "ARG", "SER", "THR", "VAL", "TRP", "TYR", "HIE", "HID", "ADE", "CYT",
+	      "GUA", "THY", "RAD", "RCY", "RGU", "URA"]
     if (platform.system() == "Windows"):
 	# Windows has all the metal ions by default
 	recognized.extend(["CA", "FE2", "FE", "K", "MG", "MN", "NA", "ZN"])
@@ -1722,9 +1724,13 @@ def cleanPDB(pdbfile):
     # This function will look for and remove duplicate atoms
     # It will permanently modify the PDB that the user loaded 
     # This shouldn't cause problems for other programs though
+    # I am also going to give blank chain IDs a value because it
+    # is causing too much trouble with some of the Rosetta protocols
+    # to handle blank chain IDs
     data = []
     taken_nums = {}
     num_mapping = {}
+    takenIDs = ""
     # Sometimes there are PDBs that have multiple residues with the same residue index
     # BioPython drops these, but it can lead to all kinds of problems later on
     # So I will keep a record of the backbone atoms of the current residue and if we encounter
@@ -1734,7 +1740,9 @@ def cleanPDB(pdbfile):
     f = open(pdbfile.strip(), "r")
     curr_res = "   0"
     for aline in f:
-	if (aline.startswith("ATOM") or aline.startswith("HETATM")):
+	if ((aline.startswith("ATOM") or aline.startswith("HETATM")) and not aline[21] in takenIDs):
+	    takenIDs += aline[21]
+	if ((aline.startswith("ATOM") or aline.startswith("HETATM")) and isAA(aline[17:20])):
 	    res = aline[22:27] # Includes residue indx + the optional alternate letter
 	    if (res[0:4] != curr_res[0:4]): # New residue indx
 		altlocs_taken = res[4] # Reset the taken altlocs
@@ -1788,12 +1796,30 @@ def cleanPDB(pdbfile):
 		    aline = aline[0:22] + num_mapping[chain+res] + " " + aline[27:]
 	    #data.append(aline.strip())
 	#else:
-	data.append(aline.strip())
+	# Change nucleic acid strings to what Rosetta expects
+	if (aline[17:20] == " DA"):
+	    data.append(aline[0:17] + "ADE" + aline[20:])
+	elif (aline[17:20] == " DC"):
+	    data.append(aline[0:17] + "CYT" + aline[20:])
+	elif (aline[17:20] == " DG"):
+	    data.append(aline[0:17] + "GUA" + aline[20:])
+	elif (aline[17:20] == " DT"):
+	    data.append(aline[0:17] + "THY" + aline[20:])
+	else:
+	    data.append(aline)
     f.close()
     # Now write the updated data out
+    blankID = ""
+    for char in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+	if (char not in takenIDs):
+	    blankID = char
+	    break
     f = open(pdbfile.strip(), "w")
     for aline in data:
-	f.write(aline + "\n")
+	if ((aline.startswith("ATOM") or aline.startswith("HETATM")) and aline[21] == " "):
+	    f.write(aline[0:21] + blankID + aline[22:])
+	else:
+	    f.write(aline)
     f.close()
     
 def fixPyMOLSave(pdbfile):
@@ -1894,3 +1920,10 @@ def deleteInputFiles():
     tempfiles = glob.glob("*.pdb")
     for tempfile in tempfiles:
 	os.remove(tempfile)
+	
+def isAA(resn):
+    if (len(resn) == 3 and resn in "ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR "):
+	return True
+    elif (len(resn) == 1 and resn in "ACDEFGHIKLMNPQRSTVWY"):
+	return True
+    return False

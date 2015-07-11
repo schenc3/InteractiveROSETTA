@@ -15,6 +15,102 @@ import numpy
 from threading import Thread
 from tools import *
 
+class SettingsDialog(wx.Dialog):
+    def __init__(self, parent):
+	if (platform.system() != "Linux"):
+	    wx.Dialog.__init__(self, parent, -1, "Constraint Default Settings", size=(330, 270))
+	else:
+	    wx.Dialog.__init__(self, parent, -1, "Constraint Default Settings", size=(330, 270))
+	
+	# Structure label
+	self.lblTitle = wx.StaticText(self, -1, "Constraint Default Settings", (0, 10), (320, 30))
+	self.lblTitle.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
+	resizeTextControlForUNIX(self.lblTitle, 0, 320)
+	
+	ypos = 35
+	if (platform.system() == "Windows"):
+	    self.lblFunction = wx.StaticText(self, -1, "Function Type:", (0, ypos+23), (160, 20), wx.ALIGN_CENTRE)
+	    self.lblFunction.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	elif (platform.system() == "Darwin"):
+	    self.lblFunction = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblFunction.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+23), size=(160, 20))
+	else:
+	    self.lblFunction = wx.StaticText(self, -1, "Function Type:", (0, ypos+23), style=wx.ALIGN_CENTRE)
+	    self.lblFunction.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	    resizeTextControlForUNIX(self.lblFunction, 0, 160)
+	self.menuFunctions = wx.ComboBox(self, pos=(160, ypos+20), size=(160, 25), choices=["Harmonic", "Gaussian", "Bounded", "Sigmoid"], style=wx.CB_READONLY)
+	self.menuFunctions.SetToolTipString("List of supported constraint function types")
+	self.menuFunctions.SetStringSelection(parent.dFunction)
+	if (platform.system() == "Windows"):
+	    self.lblIdealD = wx.StaticText(self, -1, "Ideal Distance (A):", (0, ypos+53), (200, 20), wx.ALIGN_CENTRE)
+	    self.lblIdealD.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	elif (platform.system() == "Darwin"):
+	    self.lblIdealD = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblIdealD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+53), size=(200, 20))
+	else:
+	    self.lblIdealD = wx.StaticText(self, -1, "Ideal Distance (A):", (0, ypos+53), style=wx.ALIGN_CENTRE)
+	    self.lblIdealD.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	    resizeTextControlForUNIX(self.lblIdealD, 0, 200)
+	self.txtIdealD = wx.TextCtrl(self, -1, pos=(200, ypos+50), size=(120, 25))
+	self.txtIdealD.SetValue(str(parent.dIdeal))
+	self.txtIdealD.SetToolTipString("Ideal distance between the residue and its partner residue/chain")
+	if (platform.system() == "Windows"):
+	    self.lblMaxD = wx.StaticText(self, -1, "Maximum Distance (A):", (0, ypos+83), (200, 20), wx.ALIGN_CENTRE)
+	    self.lblMaxD.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	elif (platform.system() == "Darwin"):
+	    self.lblMaxD = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblMaxD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+83), size=(200, 20))
+	else:
+	    self.lblMaxD = wx.StaticText(self, -1, "Maximum Distance (A):", (0, ypos+83), style=wx.ALIGN_CENTRE)
+	    self.lblMaxD.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	    resizeTextControlForUNIX(self.lblMaxD, 0, 200)
+	self.txtMaxD = wx.TextCtrl(self, -1, pos=(200, ypos+80), size=(120, 25))
+	self.txtMaxD.SetValue(str(parent.dMax))
+	self.txtMaxD.SetToolTipString("Maximum distance between the residue and its partner residue/chain")
+	if (platform.system() == "Windows"):
+	    self.lblMinD = wx.StaticText(self, -1, "Minimum Distance (A):", (0, ypos+113), (200, 20), wx.ALIGN_CENTRE)
+	    self.lblMinD.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	elif (platform.system() == "Darwin"):
+	    self.lblMinD = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblMinD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+113), size=(200, 20))
+	else:
+	    self.lblMinD = wx.StaticText(self, -1, "Minimum Distance (A):", (0, ypos+113), style=wx.ALIGN_CENTRE)
+	    self.lblMinD.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	    resizeTextControlForUNIX(self.lblMinD, 0, 200)
+	self.txtMinD = wx.TextCtrl(self, -1, pos=(200, ypos+110), size=(120, 25))
+	self.txtMinD.SetValue(str(parent.dMin))
+	self.txtMinD.SetToolTipString("Minimum distance between the residue and its partner residue/chain")
+	if (platform.system() == "Windows"):
+	    self.lblWeight = wx.StaticText(self, -1, "Weight:", (0, ypos+143), (200, 20), wx.ALIGN_CENTRE)
+	    self.lblWeight.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	elif (platform.system() == "Darwin"):
+	    self.lblWeight = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblWeight.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+143), size=(200, 20))
+	else:
+	    self.lblWeight = wx.StaticText(self, -1, "Weight:", (0, ypos+143), style=wx.ALIGN_CENTRE)
+	    self.lblWeight.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	    resizeTextControlForUNIX(self.lblWeight, 0, 200)
+	self.txtWeight = wx.TextCtrl(self, -1, pos=(200, ypos+140), size=(120, 25))
+	self.txtWeight.SetValue(str(parent.dWeight))
+	self.txtWeight.SetToolTipString("Relative weight of this constraint (constraints with higher weights are favored over those with lower weights)")
+	
+	# OK and Cancel buttons
+	self.btnOK = wx.Button(self, id=-1, label="OK", pos=(40, ypos+180), size=(100, 30))
+	self.btnOK.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	self.btnOK.Bind(wx.EVT_BUTTON, self.okDialog)
+	self.btnOK.SetToolTipString("Confirm current indicated default settings")
+	self.btnCancel = wx.Button(self, id=-1, label="Cancel", pos=(180, ypos+180), size=(100, 30))
+	self.btnCancel.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	self.btnCancel.Bind(wx.EVT_BUTTON, self.cancelDialog)
+	self.btnCancel.SetToolTipString("Cancel this operation")
+	
+	# Center the dialog in the middle of the screen
+	self.SetPosition((wx.GetDisplaySize()[0]/2-150, wx.GetDisplaySize()[1]/2-150))
+	    
+    # Return codes, the main script knows how to interpret these
+    def okDialog(self, event):
+	self.SetReturnCode(wx.OK)
+	self.EndModal(wx.OK)
+	
+    def cancelDialog(self, event):
+	self.SetReturnCode(wx.CANCEL)
+	self.EndModal(wx.CANCEL)
+
 class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def __init__(self, parent, W, H):
 	#if (platform.system() == "Windows"):
@@ -247,6 +343,34 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnSaveCST.SetToolTipString("Save the current constraints data to a real Rosetta constraints file")
 	ypos = self.btnSaveCST.GetPosition()[1] + self.btnSaveCST.GetSize()[1] + 10
 	
+	self.btnDefaults = wx.BitmapButton(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/wrench.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos-5), size=(25, 25))
+	self.btnDefaults.Bind(wx.EVT_BUTTON, self.configureDefaults)
+	self.btnDefaults.SetToolTipString("Configure the default settings for docking constraints")
+	self.dFunction = "Bounded"
+	self.dMax = 12.0
+	self.dMin = 6.0
+	self.dIdeal = 9.0
+	self.dWeight = 1.0
+	# Try to read the default settings from the cfg file
+	goToSandbox()
+	try:
+	    fin = open("docking.cfg", "r")
+	    for aline in fin:
+		if (len(aline.strip()) == 0):
+		    continue
+		if (aline.startswith("[FUNCTION]")):
+		    self.dFunction = aline.split("\t")[1].strip()
+		elif (aline.startswith("[IDEAL]")):
+		    self.dIdeal = float(aline.split("\t")[1].strip())
+		elif (aline.startswith("[MAX]")):
+		    self.dMax = float(aline.split("\t")[1].strip())
+		elif (aline.startswith("[MIN]")):
+		    self.dMin = float(aline.split("\t")[1].strip())
+		elif (aline.startswith("[WEIGHT]")):
+		    self.dWeight = float(aline.split("\t")[1].strip())
+	    fin.close()
+	except:
+	    pass
 	if (platform.system() == "Windows"):
 	    self.lblAdvanced = wx.StaticText(self, -1, "Advanced Options", (0, ypos), (320, 20), wx.ALIGN_CENTRE)
 	    self.lblAdvanced.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -653,6 +777,50 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 			self.selectedData.append([indx, r, seqpos, poseindx, chainID, chainoffset])
 	self.pruneConstraints()
     
+    def configureDefaults(self, event):
+	dlg = SettingsDialog(self)
+	if (dlg.ShowModal() == wx.OK):
+	    # Update the default settings, ignoring invalid values
+	    self.dFunction = dlg.menuFunctions.GetStringSelection()
+	    try:
+		val = float(dlg.txtIdealD.GetValue())
+		if (val <= 0):
+		    raise Exception()
+		self.dIdeal = val
+	    except:
+		pass
+	    try:
+		val = float(dlg.txtMaxD.GetValue())
+		if (val <= 0):
+		    raise Exception()
+		self.dMax = val
+	    except:
+		pass
+	    try:
+		val = float(dlg.txtMinD.GetValue())
+		if (val <= 0):
+		    raise Exception()
+		self.dMin = val
+	    except:
+		pass
+	    try:
+		val = float(dlg.txtWeight.GetValue())
+		if (val <= 0):
+		    raise Exception()
+		self.dWeight = val
+	    except:
+		pass
+	    # Save these settings
+	    goToSandbox()
+	    fout = open("docking.cfg", "w")
+	    fout.write("[FUNCTION]\t" + self.dFunction + "\n")
+	    fout.write("[IDEAL]\t" + str(self.dIdeal) + "\n")
+	    fout.write("[MAX]\t" + str(self.dMax) + "\n")
+	    fout.write("[MIN]\t" + str(self.dMin) + "\n")
+	    fout.write("[WEIGHT]\t" + str(self.dWeight) + "\n")
+	    fout.close()
+	dlg.Destroy()
+    
     def showChain(self, ID):
 	model = ID[0:len(ID)-2]
 	chain = ID[len(ID)-1]
@@ -1004,8 +1172,11 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		#    break
 	    if (not(alreadyIn)):
 		# Default parameters are added and the user can change these later
-		functionType = "Bounded"
-		functionArgs = "Max: 6, Min: 4, Weight: 1"
+		functionType = self.dFunction
+		if (functionType == "Bounded"):
+		    functionArgs = "Max: " + str(self.dMax) + ", Min: " + str(self.dMin) + ", Weight: " + str(self.dWeight)
+		else:
+		    functionArgs = "Ideal: " + str(self.dIdeal) + ", Weight: " + str(self.dWeight)
 		self.insertConstraint(self.constraintType, thisID, "", functionType, functionArgs, "")
 	self.updateConstraints()
 	
@@ -1259,12 +1430,12 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	if (self.menuFunctions.GetStringSelection() == "Bounded"):
 	    self.txtIdealD.SetValue("0")
 	    self.txtIdealD.Disable()
-	    self.txtMaxD.SetValue("12")
+	    self.txtMaxD.SetValue(str(self.dMax))
 	    self.txtMaxD.Enable()
-	    self.txtMinD.SetValue("6")
+	    self.txtMinD.SetValue(str(self.dMin))
 	    self.txtMinD.Enable()
 	else:
-	    self.txtIdealD.SetValue("9")
+	    self.txtIdealD.SetValue(str(self.dIdeal))
 	    self.txtIdealD.Enable()
 	    self.txtMaxD.SetValue("0")
 	    self.txtMaxD.Disable()
@@ -1658,6 +1829,8 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	f = open(filename, "w")
 	ambig_groups = {}
 	tagno = 1
+	# Ambiguous constraints have to come first before non-ambiguous ones, otherwise it
+	# crashes for no reason
 	for [constraintType, residue, partner, functionType, functionArgs, group] in self.constraints:
 	    if (len(partner.strip()) == 0):
 		# Ignore incomplete constraints when saving
@@ -1673,7 +1846,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    # Don't add entries for positions that do not have partners specified
 	    if (len(partner.strip()) == 0):
 		continue
-	    self.writeConstraint(f, constraintType, residue, partner, functionType, functionArgs, group, convertChains)
+	    #self.writeConstraint(f, constraintType, residue, partner, functionType, functionArgs, group, convertChains)
 	# Now write out the ambiguous constraints for grouped constraints
 	for group in ambig_groups:
 	    # "group" is a key
@@ -1683,6 +1856,17 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		self.writeConstraint(f, constraintType, residue, partner, functionType, functionArgs, group, convertChains)
 	    if (len(ambig_groups[group]) > 1):
 		f.write("END\n")
+	for [constraintType, residue, partner, functionType, functionArgs, group] in self.constraints:
+	    if (len(partner.strip()) == 0):
+		# Ignore incomplete constraints when saving
+		continue
+	    # Let's skip the grouped constraints
+	    if (len(group.strip()) > 0):
+		continue
+	    # Don't add entries for positions that do not have partners specified
+	    if (len(partner.strip()) == 0):
+		continue
+	    self.writeConstraint(f, constraintType, residue, partner, functionType, functionArgs, group, convertChains)
 	f.close()
     
     def writeSinglePDB(self):

@@ -1,5 +1,13 @@
 #!/bin/bash
 
+if [ -t 1 ]; then
+    echo "Installing InteractiveROSETTA"
+    echo ""
+else
+    notify-send "Please run this installer in a terminal"
+    exit
+fi
+
 if [ $EUID == 0 ]; then
     echo "Do not run this script as root.  You will be prompted for the root password when necessary."
     exit
@@ -138,6 +146,12 @@ cd /usr/local/InteractiveROSETTA
 
 # Get the molfile stuff
 sudo python molfile.py
+
+# Update the PyMOL splash screen
+SPLASHDIR=`python -c "import pymol; print pymol.__file__[0:pymol.__file__.rfind(\"/\")] + \"/pymol_path/data/pymol\""`
+sudo mv $SPLASHDIR/splash.png $SPLASHDIR/original_splash.png
+sudo cp images/pymol_splash.png $SPLASHDIR/splash.png
+
 cd "$REALOLDDIR"
 
 # Create a desktop shortcut

@@ -1017,7 +1017,7 @@ class SequenceWin(wx.Frame):
 	    self.SeqViewer.ClearSelection()
 	    self.PyMOLUpdateTimer.Stop()
 	    self.PyMOLUpdateTimer.Start(100)
-	elif (event.ControlDown() and int(event.GetKeyCode()) == 3):
+	elif ((platform.system() == "Linux" and event.ControlDown() and int(event.GetKeyCode()) == 3) or (event.ControlDown() and int(event.GetKeyCode()) == ord("C"))):
 	    # Copy the current selection to the clipboard as FASTA data
 	    copystr = ""
 	    amISelected = []
@@ -1288,6 +1288,39 @@ class SequenceWin(wx.Frame):
 	    for k in range(0, len(self.IDs)):
 		self.updateSeqViewer(rowToUpdate=k)
 	    self.regenerateLookupTable()
+	    
+    # Helper function for selecting the indicated residue
+    # Used by the comparative modeler
+    def selectNthResidue(self, r, indx, addToSelection=False, updateSelection=True):
+	count = 0
+	c = -1
+	for i in range(0, len(self.sequences[r])):
+	    if (self.sequences[r][i] != "-"):
+		count += 1
+	    if (count >= indx):
+		c = i
+		break
+	if (c < 0):
+	    return
+	self.SeqViewer.SelectBlock(r, c, r, c, addToSelection)
+	if (updateSelection):
+	    self.selectUpdate(updatePyMOL=True)
+	# Possibly move the scroll position to bring this residue into view
+	scrollpos = self.SeqViewer.GetScrollPos(wx.HORIZONTAL)
+	x = self.SeqViewer.CellToRect(r, c)[0]
+	w = self.SeqViewer.GetSize()[0] - self.SeqViewer.GetRowLabelSize() - 20
+	scrollunitconv = self.SeqViewer.GetScrollPixelsPerUnit()[0]
+	scrollpospx = scrollunitconv * scrollpos
+	if (x - scrollpospx >= w):
+	    shift = int((float(x) - float(scrollpospx)) / float(w))
+	    totalscroll = int(scrollpospx + shift * w)
+	    scrollunits = int(totalscroll / scrollunitconv)
+	    self.SeqViewer.Scroll(scrollunits, 0)
+	elif (x - scrollpospx <= 0):
+	    shift = int((float(scrollpospx) - float(x)) / float(w)) + 1
+	    totalscroll = int(scrollpospx - shift*w)
+	    scrollunits = int(totalscroll / scrollunitconv)
+	    self.SeqViewer.Scroll(max(0, scrollunits), 0)
 	    
     # Helper function for selecting things in PyMOL using PyMOL's cmd API
     def selectInPyMOL(self, r, c, model, chain, res, resend, first):
@@ -1993,7 +2026,7 @@ class SequenceWin(wx.Frame):
 	    if (currID == newID):
 		taken = True
 		break
-	# Sometimes I use special names for selections, and if the modelname is the same as
+	# Sometimes I use special names for selections, and if a modelname is the same as
 	# these selections it can screw things up
 	if (newID in ["temp", "sele", "seqsele", "params", "designed_view", "minimized_view"]):
 	    taken = True
@@ -2377,6 +2410,16 @@ class SequenceWin(wx.Frame):
 			if (newmodel == ID.split("|")[0] and newmodel != model):
 			    taken = True
 			    break
+		    # Sometimes I use special names for selections, and if a modelname is the same as
+		    # these selections it can screw things up
+		    if (newmodel in ["temp", "sele", "seqsele", "params", "designed_view", "minimized_view"]):
+			taken = True
+		    if (newmodel == "flexpeptide" and not(flexiblePeptide)):
+			taken = True
+		    # Replace whitespace with _ to avoid PyMOL issues
+		    newmodel = newmodel.replace(" ", "_")
+		    newmodel = newmodel.replace("\n", "_")
+		    newmodel = newmodel.replace("\t", "_")
 		    if (taken):
 			# Find a new ID that is not taken
 			for i in range(2, 1000):
@@ -3079,275 +3122,217 @@ class SequenceWin(wx.Frame):
 	f.close()
 	for i in range(0, len(self.activeJobs)):
 	    job = self.activeJobs[i]
-	    if (job.startswith("FRAGMENT")):
-		ID = job.split("\t")[1].strip()
-		URL = "http://www.robetta.org/downloads/fragments/" + ID
-		downloadfiles = []
-		try:
-		    downloadpage = urllib2.urlopen(URL, timeout=1)
-		    for aline in downloadpage:
-			# Look for the links
-			indx = aline.find("<a href")
-			if (indx < 0):
-			    continue
-			linkbegin = aline.find(">", indx+1) + 1
-			linkend = aline.find("</a>", indx+1)
-			if (not("Parent" in aline[linkbegin:linkend]) and not("Name" in aline[linkbegin:linkend])):
-			    if (aline[linkbegin:linkend].endswith(".200_v1_3")):
-				downloadfiles.append(aline[linkbegin:linkend])
-			    elif (aline[linkbegin:linkend].endswith(".fasta")):
-				downloadfiles.append(aline[linkbegin:linkend])
-			    elif (aline[linkbegin:linkend].endswith(".psipred")):
-				downloadfiles.append(aline[linkbegin:linkend])
-			    elif (aline[linkbegin:linkend].endswith(".psipred_ss2")):
-				downloadfiles.append(aline[linkbegin:linkend])
-		    downloadpage.close()
-		    dlg = wx.MessageDialog(self, "Your fragments package for job ID " + ID + " is ready.", "Fragments Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+	    #elif (job.startswith("MSD") or job.startswith("ANTIBODY") or job.startswith("DOCK") or job.startswith("PMUTSCAN") or job.startswith("BACKRUB") or job.startswith("KIC") or job.startswith("FLEXPEP")):
+	    jobtype = job.split("\t")[0]
+	    ID = job.split("\t")[1].strip()
+	    jobURL = job.split("\t")[3].strip()
+	    if (job.startswith("MSD")):
+		packageext = ".msdar"
+	    elif (job.startswith("PMUTSCAN")):
+		packageext = ".scan"
+	    else:
+		packageext = ".ensb"
+	    if (jobURL.lower().startswith("localhost")):
+		serverlocation = getServerName()[jobURL.find(":")+1:]
+		if (platform.system() == "Windows"):
+		    resultsdir = serverlocation + "\\results\\" + ID + "\\"
+		    filepath = resultsdir + "results" + packageext
+		else:
+		    resultsdir = serverlocation + "/results/" + ID + "/"
+		    filepath = resultsdir + "results" + packageext
+	    else:
+		serverlocation = None
+		URL = jobURL + "/results/" + ID + "/results" + packageext
+	    try:
+		if (serverlocation):
+		    if (not(os.path.isfile(filepath))):
+			raise Exception()
+		    if (jobtype == "MSD"):
+			dlg = wx.MessageDialog(self, "Your MSD package job ID " + ID + " is ready.", "MSD Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		    elif (jobtype == "ANTIBODY"):
+			dlg = wx.MessageDialog(self, "Your antibody package job ID " + ID + " is ready.", "Antibodies Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		    elif (jobtype == "COMPMODEL"):
+			dlg = wx.MessageDialog(self, "Your comparative modeling package job ID " + ID + " is ready.", "Structures Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		    elif (jobtype == "DOCK"):
+			dlg = wx.MessageDialog(self, "Your docking package job ID " + ID + " is ready.", "Docking Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		    elif (jobtype == "PMUTSCAN"):
+			dlg = wx.MessageDialog(self, "Your point mutant scanning job ID " + ID + " is ready.", "Point Mutants Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		    elif (jobtype == "BACKRUB"):
+			dlg = wx.MessageDialog(self, "Your backrub ensemble job ID " + ID + " is ready.", "Backrub Ensemble Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		    elif (jobtype == "KIC"):
+			dlg = wx.MessageDialog(self, "Your KIC ensemble job ID " + ID + " is ready.", "KIC Ensemble Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		    elif (jobtype == "FLEXPEP"):
+			dlg = wx.MessageDialog(self, "Your flexible peptide docking package job ID " + ID + " is ready.", "Flexible Peptide Docking Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 		    dlg.ShowModal()
 		    dlg.Destroy()
-		    while (True):
+		    os.rename(filepath, "results" + packageext)
+		else:
+		    downloadpage = urllib2.urlopen(URL, timeout=1) # To make sure its there before display the dialog
+		    downloadpage.close()
+		    if (jobtype == "MSD"):
+			dlg = wx.MessageDialog(self, "Your MSD package job ID " + ID + " is ready.", "MSD Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		    elif (jobtype == "ANTIBODY"):
+			dlg = wx.MessageDialog(self, "Your antibody package job ID " + ID + " is ready.", "Antibody Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		    elif (jobtype == "COMPMODEL"):
+			dlg = wx.MessageDialog(self, "Your comparative modeling package job ID " + ID + " is ready.", "Structure Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		    elif (jobtype == "DOCK"):
+			dlg = wx.MessageDialog(self, "Your docking package job ID " + ID + " is ready.", "Docking Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		    elif (jobtype == "PMUTSCAN"):
+			dlg = wx.MessageDialog(self, "Your point mutant scanning job ID " + ID + " is ready.", "Point Mutants Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		    elif (jobtype == "BACKRUB"):
+			dlg = wx.MessageDialog(self, "Your backrub ensemble job ID " + ID + " is ready.", "Backrub Ensemble Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		    elif (jobtype == "KIC"):
+			dlg = wx.MessageDialog(self, "Your KIC ensemble job ID " + ID + " is ready.", "KIC Ensemble Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		    elif (jobtype == "FLEXPEP"):
+			dlg = wx.MessageDialog(self, "Your flexible peptide docking package job ID " + ID + " is ready.", "Flexible Peptide Docking Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		    dlg.ShowModal()
+		    dlg.Destroy()
+		    if (jobtype == "MSD"):
+			busyDlg = wx.BusyInfo("Downloading MSD archive, please wait...")
+		    elif (jobtype == "ANTIBODY"):
+			busyDlg = wx.BusyInfo("Downloading antibody archive, please wait...")
+		    elif (jobtype == "COMPMODEL"):
+			busyDlg = wx.BusyInfo("Downloading structure archive, please wait...")
+		    elif (jobtype == "DOCK"):
+			busyDlg = wx.BusyInfo("Downloading docking archive, please wait...")
+		    elif (jobtype == "PMUTSCAN"):
+			busyDlg = wx.BusyInfo("Downloading point mutant scan report, please wait...")
+		    elif (jobtype == "BACKRUB"):
+			busyDlg = wx.BusyInfo("Downloading backrub archive, please wait...")
+		    elif (jobtype == "KIC"):
+			busyDlg = wx.BusyInfo("Downloading KIC archive, please wait...")
+		    elif (jobtype == "FLEXPEP"):
+			busyDlg = wx.BusyInfo("Downloading flexpep archive, please wait...")
+		    (oldfilename, info) = urllib.urlretrieve(URL, "results" + packageext)
+		    busyDlg.Destroy()
+		    del busyDlg
+		while (True):
+		    if (jobtype == "MSD"):
 			dlg = wx.FileDialog(
-			    self, message="Save the Frag File",
+			    self, message="Save the MSD package",
 			    defaultDir=self.cwd,
 			    defaultFile=ID,
-			    wildcard="Frag Files (*.frag)|*.frag",
+			    wildcard="MSD Archives (*.msdar)|*.msdar",
 			    style=wx.SAVE | wx.CHANGE_DIR)
-			if (dlg.ShowModal() == wx.ID_OK):
-			    if (platform.system() == "Darwin"):
-				paths = [dlg.GetPath()]
+		    elif (jobtype == "ANTIBODY"):
+			dlg = wx.FileDialog(
+			    self, message="Save the antibody package",
+			    defaultDir=self.cwd,
+			    defaultFile=ID,
+			    wildcard="Ensemble Archives (*.ensb)|*.ensb",
+			    style=wx.SAVE | wx.CHANGE_DIR)
+		    elif (jobtype == "COMPMODEL"):
+			dlg = wx.FileDialog(
+			    self, message="Save the structure package",
+			    defaultDir=self.cwd,
+			    defaultFile=ID,
+			    wildcard="Ensemble Archives (*.ensb)|*.ensb",
+			    style=wx.SAVE | wx.CHANGE_DIR)
+		    elif (jobtype == "DOCK"):
+			dlg = wx.FileDialog(
+			    self, message="Save the docking package",
+			    defaultDir=self.cwd,
+			    defaultFile=ID,
+			    wildcard="Ensemble Archives (*.ensb)|*.ensb",
+			    style=wx.SAVE | wx.CHANGE_DIR)
+		    elif (jobtype == "PMUTSCAN"):
+			dlg = wx.FileDialog(
+			    self, message="Save the scan file",
+			    defaultDir=self.cwd,
+			    defaultFile=ID,
+			    wildcard="Point Mutant Scan (*.scan)|*.scan",
+			    style=wx.SAVE | wx.CHANGE_DIR)
+		    elif (jobtype == "BACKRUB"):
+			dlg = wx.FileDialog(
+			    self, message="Save the backrub package",
+			    defaultDir=self.cwd,
+			    defaultFile=ID,
+			    wildcard="Ensemble Archives (*.ensb)|*.ensb",
+			    style=wx.SAVE | wx.CHANGE_DIR)
+		    elif (jobtype == "KIC"):
+			dlg = wx.FileDialog(
+			    self, message="Save the KIC package",
+			    defaultDir=self.cwd,
+			    defaultFile=ID,
+			    wildcard="Ensemble Archives (*.ensb)|*.ensb",
+			    style=wx.SAVE | wx.CHANGE_DIR)
+		    elif (jobtype == "FLEXPEP"):
+			dlg = wx.FileDialog(
+			    self, message="Save the flexpep package",
+			    defaultDir=self.cwd,
+			    defaultFile=ID,
+			    wildcard="Ensemble Archives (*.ensb)|*.ensb",
+			    style=wx.SAVE | wx.CHANGE_DIR)
+		    if (dlg.ShowModal() == wx.ID_OK):
+			if (platform.system() == "Darwin"):
+			    paths = [dlg.GetPath()]
+			else:
+			    paths = dlg.GetPaths()
+			# Change cwd to the last opened file
+			if (platform.system() == "Windows"):
+			    lastDirIndx = paths[len(paths)-1].rfind("\\")
+			else:
+			    lastDirIndx = paths[len(paths)-1].rfind("/")
+			self.cwd = str(paths[len(paths)-1][0:lastDirIndx])
+			self.saveWindowData(None)
+			filename = str(paths[0]).split(packageext)[0] + packageext
+			# Does it exist already?  If so, ask if the user really wants to overwrite it
+			if (os.path.isfile(filename)):
+			    dlg2 = wx.MessageDialog(self, "The file " + filename + " already exists.  Overwrite it?", "Filename Already Exists", wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
+			    if (dlg2.ShowModal() == wx.ID_NO):
+				dlg2.Destroy()
+				logInfo("Cancelled save operation due to filename already existing")
+				continue
 			    else:
-				paths = dlg.GetPaths()
-			    # Change cwd to the last opened file
-			    if (platform.system() == "Windows"):
-				lastDirIndx = paths[len(paths)-1].rfind("\\")
-			    else:
-				lastDirIndx = paths[len(paths)-1].rfind("/")
-			    self.cwd = str(paths[len(paths)-1][0:lastDirIndx])
-			    self.saveWindowData(None)
-			    # Load the PDBs into PyMOL
-			    filename = str(paths[0]).split(".frag")[0] + ".frag"
-			    # Does it exist already?  If so, ask if the user really wants to overwrite it
-			    if (os.path.isfile(filename)):
-				dlg2 = wx.MessageDialog(self, "The file " + filename + " already exists.  Overwrite it?", "Filename Already Exists", wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
-				if (dlg2.ShowModal() == wx.ID_NO):
-				    dlg2.Destroy()
-				    logInfo("Cancelled save operation due to filename already existing")
-				    continue
-				dlg2.Destroy() 
-			    break
-		    busyDlg = wx.BusyInfo("Downloading fragment file, please wait...")
-		    gzipfile = gzip.open(str(filename), "wb")
-		    for downloadfile in downloadfiles:
-			serverdata = urllib2.urlopen(URL + "/" + downloadfile)
-			gzipfile.write("BEGIN\t" + downloadfile + "\n")
-			gzipfile.writelines(serverdata)
-			gzipfile.write("END\t" + downloadfile + "\n")
-			serverdata.close()
-		    gzipfile.close()
-		    busyDlg = None
-		    changed = True
-		    removeJob[i] = True
-		except:
-		    # Not there yet
-		    pass
-	    elif (job.startswith("MSD") or job.startswith("ANTIBODY") or job.startswith("DOCK") or job.startswith("PMUTSCAN") or job.startswith("BACKRUB") or job.startswith("KIC") or job.startswith("FLEXPEP")):
-		jobtype = job.split("\t")[0]
-		ID = job.split("\t")[1].strip()
-		jobURL = job.split("\t")[3].strip()
-		if (job.startswith("MSD")):
-		    packageext = ".msdar"
-		elif (job.startswith("PMUTSCAN")):
-		    packageext = ".scan"
-		else:
-		    packageext = ".ensb"
-		if (jobURL.lower().startswith("localhost")):
-		    serverlocation = getServerName()[jobURL.find(":")+1:]
-		    if (platform.system() == "Windows"):
-			resultsdir = serverlocation + "\\results\\" + ID + "\\"
-			filepath = resultsdir + "results" + packageext
-		    else:
-			resultsdir = serverlocation + "/results/" + ID + "/"
-			filepath = resultsdir + "results" + packageext
-		else:
-		    serverlocation = None
-		    URL = jobURL + "/results/" + ID + "/results" + packageext
-		try:
-		    if (serverlocation):
-			if (not(os.path.isfile(filepath))):
-			    raise Exception()
-			if (jobtype == "MSD"):
-			    dlg = wx.MessageDialog(self, "Your MSD package job ID " + ID + " is ready.", "MSD Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
-			elif (jobtype == "ANTIBODY"):
-			    dlg = wx.MessageDialog(self, "Your antibody package job ID " + ID + " is ready.", "Antibodies Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
-			elif (jobtype == "DOCK"):
-			    dlg = wx.MessageDialog(self, "Your docking package job ID " + ID + " is ready.", "Docking Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
-			elif (jobtype == "PMUTSCAN"):
-			    dlg = wx.MessageDialog(self, "Your point mutant scanning job ID " + ID + " is ready.", "Point Mutants Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
-			elif (jobtype == "BACKRUB"):
-			    dlg = wx.MessageDialog(self, "Your backrub ensemble job ID " + ID + " is ready.", "Backrub Ensemble Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
-			elif (jobtype == "KIC"):
-			    dlg = wx.MessageDialog(self, "Your KIC ensemble job ID " + ID + " is ready.", "KIC Ensemble Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
-			elif (jobtype == "FLEXPEP"):
-			    dlg = wx.MessageDialog(self, "Your flexible peptide docking package job ID " + ID + " is ready.", "Flexible Peptide Docking Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
-			dlg.ShowModal()
-			dlg.Destroy()
-			os.rename(filepath, "results" + packageext)
-		    else:
-			downloadpage = urllib2.urlopen(URL, timeout=1) # To make sure its there before display the dialog
-			downloadpage.close()
-			if (jobtype == "MSD"):
-			    dlg = wx.MessageDialog(self, "Your MSD package job ID " + ID + " is ready.", "MSD Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
-			elif (jobtype == "ANTIBODY"):
-			    dlg = wx.MessageDialog(self, "Your antibody package job ID " + ID + " is ready.", "Antibody Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
-			elif (jobtype == "DOCK"):
-			    dlg = wx.MessageDialog(self, "Your docking package job ID " + ID + " is ready.", "Docking Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
-			elif (jobtype == "PMUTSCAN"):
-			    dlg = wx.MessageDialog(self, "Your point mutant scanning job ID " + ID + " is ready.", "Point Mutants Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
-			elif (jobtype == "BACKRUB"):
-			    dlg = wx.MessageDialog(self, "Your backrub ensemble job ID " + ID + " is ready.", "Backrub Ensemble Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
-			elif (jobtype == "KIC"):
-			    dlg = wx.MessageDialog(self, "Your KIC ensemble job ID " + ID + " is ready.", "KIC Ensemble Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
-			elif (jobtype == "FLEXPEP"):
-			    dlg = wx.MessageDialog(self, "Your flexible peptide docking package job ID " + ID + " is ready.", "Flexible Peptide Docking Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
-			dlg.ShowModal()
-			dlg.Destroy()
-			if (jobtype == "MSD"):
-			    busyDlg = wx.BusyInfo("Downloading MSD archive, please wait...")
-			elif (jobtype == "ANTIBODY"):
-			    busyDlg = wx.BusyInfo("Downloading antibody archive, please wait...")
-			elif (jobtype == "DOCK"):
-			    busyDlg = wx.BusyInfo("Downloading docking archive, please wait...")
-			elif (jobtype == "PMUTSCAN"):
-			    busyDlg = wx.BusyInfo("Downloading point mutant scan report, please wait...")
-			elif (jobtype == "BACKRUB"):
-			    busyDlg = wx.BusyInfo("Downloading backrub archive, please wait...")
-			elif (jobtype == "KIC"):
-			    busyDlg = wx.BusyInfo("Downloading KIC archive, please wait...")
-			elif (jobtype == "FLEXPEP"):
-			    busyDlg = wx.BusyInfo("Downloading flexpep archive, please wait...")
-			(oldfilename, info) = urllib.urlretrieve(URL, "results" + packageext)
-			busyDlg.Destroy()
-			del busyDlg
-		    while (True):
-			if (jobtype == "MSD"):
-			    dlg = wx.FileDialog(
-				self, message="Save the MSD package",
-				defaultDir=self.cwd,
-				defaultFile=ID,
-				wildcard="MSD Archives (*.msdar)|*.msdar",
-				style=wx.SAVE | wx.CHANGE_DIR)
-			elif (jobtype == "ANTIBODY"):
-			    dlg = wx.FileDialog(
-				self, message="Save the antibody package",
-				defaultDir=self.cwd,
-				defaultFile=ID,
-				wildcard="Ensemble Archives (*.ensb)|*.ensb",
-				style=wx.SAVE | wx.CHANGE_DIR)
-			elif (jobtype == "DOCK"):
-			    dlg = wx.FileDialog(
-				self, message="Save the docking package",
-				defaultDir=self.cwd,
-				defaultFile=ID,
-				wildcard="Ensemble Archives (*.ensb)|*.ensb",
-				style=wx.SAVE | wx.CHANGE_DIR)
-			elif (jobtype == "PMUTSCAN"):
-			    dlg = wx.FileDialog(
-				self, message="Save the scan file",
-				defaultDir=self.cwd,
-				defaultFile=ID,
-				wildcard="Point Mutant Scan (*.scan)|*.scan",
-				style=wx.SAVE | wx.CHANGE_DIR)
-			elif (jobtype == "BACKRUB"):
-			    dlg = wx.FileDialog(
-				self, message="Save the backrub package",
-				defaultDir=self.cwd,
-				defaultFile=ID,
-				wildcard="Ensemble Archives (*.ensb)|*.ensb",
-				style=wx.SAVE | wx.CHANGE_DIR)
-			elif (jobtype == "KIC"):
-			    dlg = wx.FileDialog(
-				self, message="Save the KIC package",
-				defaultDir=self.cwd,
-				defaultFile=ID,
-				wildcard="Ensemble Archives (*.ensb)|*.ensb",
-				style=wx.SAVE | wx.CHANGE_DIR)
-			elif (jobtype == "FLEXPEP"):
-			    dlg = wx.FileDialog(
-				self, message="Save the flexpep package",
-				defaultDir=self.cwd,
-				defaultFile=ID,
-				wildcard="Ensemble Archives (*.ensb)|*.ensb",
-				style=wx.SAVE | wx.CHANGE_DIR)
-			if (dlg.ShowModal() == wx.ID_OK):
-			    if (platform.system() == "Darwin"):
-				paths = [dlg.GetPath()]
-			    else:
-				paths = dlg.GetPaths()
-			    # Change cwd to the last opened file
-			    if (platform.system() == "Windows"):
-				lastDirIndx = paths[len(paths)-1].rfind("\\")
-			    else:
-				lastDirIndx = paths[len(paths)-1].rfind("/")
-			    self.cwd = str(paths[len(paths)-1][0:lastDirIndx])
-			    self.saveWindowData(None)
-			    filename = str(paths[0]).split(packageext)[0] + packageext
-			    # Does it exist already?  If so, ask if the user really wants to overwrite it
-			    if (os.path.isfile(filename)):
-				dlg2 = wx.MessageDialog(self, "The file " + filename + " already exists.  Overwrite it?", "Filename Already Exists", wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
-				if (dlg2.ShowModal() == wx.ID_NO):
-				    dlg2.Destroy()
-				    logInfo("Cancelled save operation due to filename already existing")
-				    continue
+				os.remove(str(filename))
+			    dlg2.Destroy() 
+			break
+		goToSandbox()
+		os.rename("results" + packageext, str(filename))
+		if (jobtype != "PMUTSCAN"):
+		    # Unpackage the files
+		    gzipfile = gzip.open(str(filename), "rb")
+		    prefix = filename.split(packageext)[0]
+		    readingData = False
+		    for aline in gzipfile:
+			if (aline.startswith("BEGIN PDB")):
+			    if (jobtype == "MSD"):
+				if (platform.system() == "Windows"):
+				    f = open(self.cwd + "\\" + aline.split()[len(aline.split())-1].strip(), "w")
 				else:
-				    os.remove(str(filename))
-				dlg2.Destroy() 
-			    break
-		    goToSandbox()
-		    os.rename("results" + packageext, str(filename))
-		    if (jobtype != "PMUTSCAN"):
-			# Unpackage the files
-			gzipfile = gzip.open(str(filename), "rb")
-			prefix = filename.split(packageext)[0]
-			readingData = False
-			for aline in gzipfile:
-			    if (aline.startswith("BEGIN PDB")):
-				if (jobtype == "MSD"):
-				    if (platform.system() == "Windows"):
-					f = open(self.cwd + "\\" + aline.split()[len(aline.split())-1].strip(), "w")
-				    else:
-					f = open(self.cwd + "/" + aline.split()[len(aline.split())-1].strip(), "w")
-				elif (jobtype == "ANTIBODY" or jobtype == "DOCK" or jobtype == "BACKRUB" or jobtype == "KIC" or jobtype == "FLEXPEP"):
-				    indx = aline[aline.rfind("_")+1:].strip()
-				    f = open(prefix + "_" + indx, "w")
-				readingData = True
-			    elif (aline.startswith("END PDB")):
-				f.close()
-				readingData = False
-			    elif (readingData):
-				f.write(aline.strip() + "\n")
-			gzipfile.close()
-		    changed = True
-		    removeJob[i] = True
-		except:
-		    # Not there yet
-		    pass
-		URL = jobURL + "/results/" + ID + "/errreport"
-		try:
-		    # Look for an error file
-		    if (serverlocation):
-			downloadpage = open(resultsdir + "errreport")
-		    else:
-			downloadpage = urllib2.urlopen(URL, timeout=1) # To make sure its there before display the dialog
-		    f = open("errreport", "w")
-		    for aline in downloadpage:
-			f.write(aline.strip() + "\n")
-		    downloadpage.close()
-		    f.close()
-		    self.recoverFromError(jobtype)
-		    changed = True
-		    removeJob[i] = True
-		except:
-		    pass
+				    f = open(self.cwd + "/" + aline.split()[len(aline.split())-1].strip(), "w")
+			    elif (jobtype in ["ANTIBODY", "DOCK", "BACKRUB", "KIC", "FLEXPEP", "COMPMODEL"]):
+				indx = aline[aline.rfind("_")+1:].strip()
+				f = open(prefix + "_" + indx, "w")
+			    readingData = True
+			elif (aline.startswith("END PDB")):
+			    f.close()
+			    readingData = False
+			elif (readingData):
+			    f.write(aline.strip() + "\n")
+		    gzipfile.close()
+		changed = True
+		removeJob[i] = True
+	    except:
+		# Not there yet
+		pass
+	    URL = jobURL + "/results/" + ID + "/errreport"
+	    try:
+		# Look for an error file
+		if (serverlocation):
+		    downloadpage = open(resultsdir + "errreport")
+		else:
+		    downloadpage = urllib2.urlopen(URL, timeout=1) # To make sure its there before display the dialog
+		f = open("errreport", "w")
+		for aline in downloadpage:
+		    f.write(aline.strip() + "\n")
+		downloadpage.close()
+		f.close()
+		self.recoverFromError(jobtype)
+		changed = True
+		removeJob[i] = True
+	    except:
+		pass
 	# If a change happened, update the "downloadwatch" file to take the completed jobs out
 	if (changed):
 	    goToSandbox()

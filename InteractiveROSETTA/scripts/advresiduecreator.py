@@ -15,7 +15,6 @@ except:
 	dlg = wx.MessageDialog(None, "ERROR: molfile_to_params not found\nDid you forget to unpack it?\n\nOSX/Linux: Perform \"sudo molfile.py\"", "Molfile_to_params Missing", wx.OK | wx.ICON_ERROR | wx.CENTRE)
     dlg.ShowModal()
     dlg.Destroy()
-    import molfile_to_params
 import webbrowser
 from tools import *
 
