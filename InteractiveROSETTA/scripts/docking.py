@@ -704,6 +704,8 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	
 	self.scrollh = self.btnDock.GetPosition()[1] + self.btnDock.GetSize()[1] + 5
 	self.SetScrollbars(1, 1, 320, self.scrollh)
+	self.winscrollpos = 0
+	self.Bind(wx.EVT_SCROLLWIN, self.scrolled)
     
     def showHelp(self, event):
 	# Open the help page
@@ -730,6 +732,10 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def setSelectWin(self, selectWin):
 	self.selectWin = selectWin
 	self.selectWin.setProtPanel(self)
+	
+    def scrolled(self, event):
+	self.winscrollpos = self.GetScrollPos(wx.VERTICAL)
+	event.Skip()
 	
     def activate(self):
 	# Get the list of all the chains in the sequence viewer
@@ -776,6 +782,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    if ("ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR".find(self.seqWin.poses[poseindx][0][chain][self.seqWin.indxToSeqPos[r][c]].resname) >= 0):
 			self.selectedData.append([indx, r, seqpos, poseindx, chainID, chainoffset])
 	self.pruneConstraints()
+	self.Scroll(0, self.winscrollpos)
     
     def configureDefaults(self, event):
 	dlg = SettingsDialog(self)
@@ -1047,6 +1054,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.updatePartnerList()
 
     def updateConstraints(self):
+	scrollpos = self.grdConstraints.GetScrollPos(wx.VERTICAL)
 	if (len(self.constraints) != self.grdConstraints.NumberRows):
 	    if (self.grdConstraints.NumberRows > 0):
 		self.grdConstraints.DeleteRows(0, self.grdConstraints.NumberRows)
@@ -1103,6 +1111,8 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	readOnly = wx.grid.GridCellAttr()
 	readOnly.SetReadOnly(False)
 	self.grdConstraints.SetColAttr(0, readOnly)
+	# If the vertical scroll position is given, scroll to that location
+	self.grdConstraints.Scroll(0, scrollpos)
 	
     def IDtoInt(self, ID):
 	# This function converts a residue atom ID to an integer for sorting purposes
@@ -2490,7 +2500,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    #if (platform.system() == "Windows"):
 		#newname = os.path.expanduser("~") + "\\InteractiveROSETTA\\" + newID
 	    #else:
-		#newname = os.path.expanduser("~") + "/InteractiveROSETTA/" + newID
+		#newname = os.path.expanduser("~") + "/.InteractiveROSETTA/" + newID
 	    for i in range(0, len(self.viewMenu.GetItems())):
 		if (self.selectedModel == self.viewMenu.GetItems()[i]):
 		    realID = newID + "_%4.4i" % (i+1)
@@ -2507,7 +2517,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 			if (platform.system() == "Windows"):
 			    print "The model is currently at " + self.selectedModel + " in " + os.path.expanduser("~") + "\\InteractiveROSETTA"
 			else:
-			    print "The model is currently at " + self.selectedModel + " in " + os.path.expanduser("~") + "/InteractiveROSETTA"
+			    print "The model is currently at " + self.selectedModel + " in " + os.path.expanduser("~") + "/.InteractiveROSETTA"
 	    try:
 		self.cmd.remove("dock_view")
 		self.cmd.delete("dock_view")
@@ -2537,7 +2547,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	if (platform.system() == "Windows"):
 	    sessioninfo = os.path.expanduser("~") + "\\InteractiveRosetta\\sessionlog"
 	else:
-	    sessioninfo = os.path.expanduser("~") + "/InteractiveRosetta/sessionlog"
+	    sessioninfo = os.path.expanduser("~") + "/.InteractiveRosetta/sessionlog"
 	errmsg = errmsg + "\n\nIf you don't know what caused this, send the file " + sessioninfo + " to a developer along with an explanation of what you did."
 	# You have to use a MessageDialog because the MessageBox doesn't always work for some reason
 	dlg = wx.MessageDialog(self, errmsg, "Error Encountered", wx.OK|wx.ICON_EXCLAMATION)
@@ -2626,6 +2636,12 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    if (self.serverOn):
 		try: 
 		    self.ID = sendToServer("coarsedockinput")
+		    dlg = wx.TextEntryDialog(None, "Enter a description for this submission:", "Job Description", "")
+		    if (dlg.ShowModal() == wx.ID_OK):
+			desc = dlg.GetValue()
+			desc = desc.replace("\t", " ").replace("\n", " ").strip()
+		    else:
+			desc = self.ID
 		    # First make sure this isn't a duplicate
 		    alreadythere = False
 		    try:
@@ -2639,9 +2655,9 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 			pass
 		    if (not(alreadythere)):
 			f = open("downloadwatch", "a")
-			f.write("DOCK\t" + self.ID.strip() + "\t" + str(datetime.datetime.now().strftime("%A, %B %d - %I:%M:%S %p")) + "\t" + getServerName() + "\n")
+			f.write("DOCK\t" + self.ID.strip() + "\t" + str(datetime.datetime.now().strftime("%A, %B %d - %I:%M:%S %p")) + "\t" + getServerName() + "\t" + desc + "\n")
 			f.close()
-		    dlg = wx.MessageDialog(self, "InteractiveROSETTA is now watching the server for job ID " + self.ID.strip() + ".  You will be notified when the package is available for download.", "Listening for Download", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		    dlg = wx.MessageDialog(self, "InteractiveROSETTA is now watching the server for job ID " + desc + ".  You will be notified when the package is available for download.", "Listening for Download", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 		    dlg.ShowModal()
 		    dlg.Destroy()
 		    # Re-enable everything since we're not waiting for the local daemon to do anything
@@ -2670,7 +2686,8 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 			self.seqWin.labelMsg.SetLabel("")
 		    logInfo("Coarse docking input sent to server daemon with ID " + self.ID)
 		    return
-		except:
+		except Exception as e:
+		    print e.message
 		    dlg = wx.MessageDialog(self, "The server could not be reached!  Ensure that you have specified a valid server and that you have an network connection.", "Server Could Not Be Reached", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 		    dlg.ShowModal()
 		    dlg.Destroy()

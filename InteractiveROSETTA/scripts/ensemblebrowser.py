@@ -94,6 +94,8 @@ class EnsembleBrowserPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	
 	scrollh = self.btnLeft.GetPosition()[1] + self.btnLeft.GetSize()[1] + 5
 	self.SetScrollbars(1, 1, 320, scrollh)
+	self.winscrollpos = 0
+	self.Bind(wx.EVT_SCROLLWIN, self.scrolled)
 
     def showHelp(self, event):
 	# Open the help page
@@ -115,6 +117,10 @@ class EnsembleBrowserPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.cmd = pymol.cmd
 	self.stored = pymol.stored
 
+    def scrolled(self, event):
+	self.winscrollpos = self.GetScrollPos(wx.VERTICAL)
+	event.Skip()
+
     def activate(self):
 	# Get the selected models from the sequence window
 	newmodels = self.seqWin.getSelectedModels()
@@ -133,6 +139,7 @@ class EnsembleBrowserPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		self.lblSelected.SetLabel(self.selectedModels[self.currentModel])
 	    if (platform.system() == "Linux"):
 		resizeTextControlForUNIX(self.lblSelected, 35, 250)
+	self.Scroll(0, self.winscrollpos)
 
     def updateView(self):
 	# Change the PyMOL view to only show the current model and optionally the base model that is

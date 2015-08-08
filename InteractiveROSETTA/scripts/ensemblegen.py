@@ -229,14 +229,14 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblPrefix.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	    resizeTextControlForUNIX(self.lblPrefix, 0, 230)
 	self.lblPrefix.SetForegroundColour("#FFFFFF")
-	self.txtPrefix = wx.TextCtrl(self, -1, pos=(00, 510), size=(230, 25))
+	self.txtPrefix = wx.TextCtrl(self, -1, pos=(00, 510), size=(210, 25))
 	self.txtPrefix.SetValue("")
 	self.txtPrefix.SetToolTipString("Filename prefix that will be used to generate the individual PDB files")
 	
 	if (platform.system() == "Darwin"):
 	    self.btnUnpack = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnUnpack.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(240, 510), size=(80, 25))
 	else:
-	    self.btnUnpack = wx.Button(self, id=-1, label="Unpack!", pos=(240, 510), size=(80, 25))
+	    self.btnUnpack = wx.Button(self, id=-1, label="Choose File", pos=(220, 510), size=(100, 25))
 	    self.btnUnpack.SetForegroundColour("#000000")
 	    self.btnUnpack.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	self.btnUnpack.Bind(wx.EVT_BUTTON, self.unpackClick)
@@ -244,6 +244,8 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	
 	self.scrollh = self.btnUnpack.GetPosition()[1] + self.btnUnpack.GetSize()[1] + 5
 	self.SetScrollbars(1, 1, 320, self.scrollh)
+	self.winscrollpos = 0
+	self.Bind(wx.EVT_SCROLLWIN, self.scrolled)
     
     def showHelp(self, event):
 	# Open the help page
@@ -271,6 +273,10 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.selectWin = selectWin
 	self.selectWin.setProtPanel(self)
 	
+    def scrolled(self, event):
+	self.winscrollpos = self.GetScrollPos(wx.VERTICAL)
+	event.Skip()
+	
     def activate(self):
 	# Update the menus with all the loaded models
 	models = []
@@ -281,6 +287,7 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.menuModelR.AppendItems(models)
 	self.menuModelB.Clear()
 	self.menuModelB.AppendItems(models)
+	self.Scroll(0, self.winscrollpos)
     
     def cancelRelax(self):
 	logInfo("Canceled structure relaxation operation")
@@ -382,7 +389,7 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	if (platform.system() == "Windows"):
 	    sessioninfo = os.path.expanduser("~") + "\\InteractiveRosetta\\sessionlog"
 	else:
-	    sessioninfo = os.path.expanduser("~") + "/InteractiveRosetta/sessionlog"
+	    sessioninfo = os.path.expanduser("~") + "/.InteractiveRosetta/sessionlog"
 	errmsg = errmsg + "\n\nIf you don't know what caused this, send the file " + sessioninfo + " to a developer along with an explanation of what you did."
 	# You have to use a MessageDialog because the MessageBox doesn't always work for some reason
 	dlg = wx.MessageDialog(self, errmsg, "Error Encountered", wx.OK|wx.ICON_EXCLAMATION)
@@ -670,6 +677,12 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    if (self.serverOn):
 		try: 
 		    self.ID = sendToServer("backrubinput")
+		    dlg = wx.TextEntryDialog(None, "Enter a description for this submission:", "Job Description", "")
+		    if (dlg.ShowModal() == wx.ID_OK):
+			desc = dlg.GetValue()
+			desc = desc.replace("\t", " ").replace("\n", " ").strip()
+		    else:
+			desc = self.ID
 		    # First make sure this isn't a duplicate
 		    alreadythere = False
 		    try:
@@ -683,9 +696,9 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 			pass
 		    if (not(alreadythere)):
 			f = open("downloadwatch", "a")
-			f.write("BACKRUB\t" + self.ID.strip() + "\t" + str(datetime.datetime.now().strftime("%A, %B %d - %I:%M:%S %p")) + "\t" + getServerName() + "\n")
+			f.write("BACKRUB\t" + self.ID.strip() + "\t" + str(datetime.datetime.now().strftime("%A, %B %d - %I:%M:%S %p")) + "\t" + getServerName() + "\t" + desc + "\n")
 			f.close()
-		    dlg = wx.MessageDialog(self, "InteractiveROSETTA is now watching the server for job ID " + self.ID.strip() + ".  You will be notified when the package is available for download.", "Listening for Download", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		    dlg = wx.MessageDialog(self, "InteractiveROSETTA is now watching the server for job ID " + desc.strip() + ".  You will be notified when the package is available for download.", "Listening for Download", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 		    dlg.ShowModal()
 		    dlg.Destroy()
 		    # Pop this message out of the queue

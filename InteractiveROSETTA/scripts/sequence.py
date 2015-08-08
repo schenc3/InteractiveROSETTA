@@ -4,6 +4,7 @@ import wx.grid
 import wx.lib.mixins.gridlabelrenderer as glr
 import os
 import os.path
+import shutil
 import glob
 import platform
 import urllib
@@ -17,11 +18,10 @@ import Bio.PDB
 import Bio.PDB.DSSP
 from Bio.Align.Applications import MuscleCommandline
 from tools import *
-try:
-    # This is needed for being able to copy the sequences to the clipboard as FASTA data
+if (platform.system() == "Windows"):
+    from Tkinter import Tk
+else:
     import pyperclip
-except:
-    print "pyperclip is not installed.  Installing it will allow you to copy segments of primary sequence as FASTA data"
 
 # There is apparently a libc bug on UNIX that caches DNS names that urllib2 tries to open
 # If the Internet connection is not valid the first time it tries to establish a connection, it caches this bad
@@ -39,9 +39,9 @@ if (platform.system() == "Linux"):
 class ProteinDialog(wx.Dialog):
     def __init__(self, parent, PDB, chains):
 	if (platform.system() != "Linux"):
-	    wx.Dialog.__init__(self, parent, -1, "Protein Loader", size=(305, 330))
+	    wx.Dialog.__init__(self, parent, -1, "Protein Loader", size=(305, 330), style=wx.DEFAULT_DIALOG_STYLE | wx.STAY_ON_TOP)
 	else:
-	    wx.Dialog.__init__(self, parent, -1, "Protein Loader", size=(300, 330))
+	    wx.Dialog.__init__(self, parent, -1, "Protein Loader", size=(300, 330), style=wx.DEFAULT_DIALOG_STYLE | wx.STAY_ON_TOP)
 	
 	# Structure label
 	self.lblPDB = wx.StaticText(self, -1, PDB, (0, 10), (300, 30))
@@ -250,7 +250,10 @@ class DownloadManagerDialog(wx.Dialog):
 		# This is the format for a job submission:
 		# jobType <tab> jobID <tab> dateUploaded <tab> remoteServer
 		jobType = aline.split("\t")[0].strip()
-		jobID = aline.split("\t")[1].strip()
+		if (len(aline.split("\t")) == 5):
+		    jobID = aline.split("\t")[4].strip()
+		else:
+		    jobID = aline.split("\t")[1].strip()
 		uploadDate = aline.split("\t")[2].strip()
 		server = aline.split("\t")[3].strip()
 		status = "Pending"
@@ -436,7 +439,7 @@ class SequenceWin(wx.Frame):
 	    if (platform.system() == "Windows"):
 		f = open(homedir + "\\InteractiveROSETTA\\seqwindow.cfg", "r")
 	    else:
-		f = open(homedir + "/InteractiveROSETTA/seqwindow.cfg", "r")
+		f = open(homedir + "/.InteractiveROSETTA/seqwindow.cfg", "r")
 	    for aline in f:
 		# We use offsets for the window sizes so that we can attempt to scale the window when the
 		# screen resolution changes
@@ -595,6 +598,9 @@ class SequenceWin(wx.Frame):
 	self.selectLookup = {}
 	# This boolean is set to True when a Rosetta protocol is active and we should not be able to tamper with the sequences
 	self.cannotDelete = False
+	# This boolean is set to True when a protocol view in PyMOL is active, so the selection
+	# panel knows it should be changing representations on the protocol_view only
+	self.protocol_view_active = False
 	
 	# These are the buttons to the right of the SeqViewer
 	xpos = self.SeqViewer.GetPosition()[0] + self.SeqViewer.GetSize()[0] + 5
@@ -770,7 +776,7 @@ class SequenceWin(wx.Frame):
 	    if (platform.system() == "Windows"):
 		f = open(homedir + "\\InteractiveROSETTA\\seqwindow.cfg", "r")
 	    else:
-		f = open(homedir + "/InteractiveROSETTA/seqwindow.cfg", "r")
+		f = open(homedir + "/.InteractiveROSETTA/seqwindow.cfg", "r")
 	    for aline in f:
 		data.append(aline)
 	    f.close()
@@ -779,7 +785,7 @@ class SequenceWin(wx.Frame):
 	if (platform.system() == "Windows"):
 	    f = open(homedir + "\\InteractiveROSETTA\\seqwindow.cfg", "w")
 	else:
-	    f = open(homedir + "/InteractiveROSETTA/seqwindow.cfg", "w")
+	    f = open(homedir + "/.InteractiveROSETTA/seqwindow.cfg", "w")
 	itemsFound = [False, False, False, False, False, False, False, False, False] # [offX, offY, offW, offH, offpw, offph cwd, serverName, primaryRender]
 	# Get the window position, size, and the PyMOL size (can't seem to get the PyMOL position)
 	(x, y) = self.GetPosition()
@@ -1046,10 +1052,17 @@ class SequenceWin(wx.Frame):
 				blocklen = 0
 				copystr += "\n"
 	    copystr = copystr.strip() + "\n"
-	    try:
+	    if (platform.system() == "Windows"):
+		try:
+		    r = Tk()
+		    r.withdraw()
+		    r.clipboard_clear()
+		    r.clipboard_append(copystr)
+		    r.destroy()
+		except:
+		    pass
+	    else:
 		pyperclip.copy(copystr)
-	    except:
-		pass
 	event.Skip()
 	
     # Left mouse click on SeqViewer cell
@@ -1259,6 +1272,10 @@ class SequenceWin(wx.Frame):
 		elif (not(modelfound)):
 		    # Easy, just rename it and fix PyMOL's IDs
 		    self.IDs[r] = dlg.return_model + "|" + dlg.return_chain
+		    # Detach that chain from the original pose
+		    poseindx = self.getPoseIndex(r)
+		    if (poseindx != r):
+			self.poses[poseindx][0].detach_child(chain)
 		    # Now change in PyMOL
 		    if (len(chain.strip()) == 0):
 			self.cmd.create(dlg.return_model, "model " + model)
@@ -1268,7 +1285,7 @@ class SequenceWin(wx.Frame):
 			self.cmd.remove("model " + model + " and chain " + chain)
 		    # Get the BioPython structure back
 		    self.cmd.save("temp.pdb", "model " + dlg.return_model)
-		    self.poses[r] = self.pdbreader.get_structure(dlg.return_model, "temp.pdb")
+		    self.poses[r] = self.pdbreader.get_structure(dlg.return_model, "temp.pdb")		    
 		model = dlg.return_model
 	    if (chain != dlg.return_chain):
 		# This is easy, just rename the chain in both the ID list and PyMOL
@@ -1968,6 +1985,23 @@ class SequenceWin(wx.Frame):
 	    try:
 		os.remove(pdbCode + ".pdb")
 	    except:
+		self.Enable()
+		self.protWin.Enable()
+		# Pop this message out of the queue
+		for i in range(0, len(self.msgQueue)):
+		    if (self.msgQueue[i].find("Loading PDB") >= 0):
+			self.msgQueue.pop(i)
+			break
+		for i in range(0, len(self.msgQueue)):
+		    if (self.msgQueue[i].find("Fetching PDB") >= 0):
+			self.msgQueue.pop(i)
+			break
+		if (len(self.msgQueue) > 0):
+		    self.labelMsg.SetLabel(self.msgQueue[len(self.msgQueue)-1])
+		else:
+		    self.labelMsg.SetLabel("")
+		self.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+		self.labelMsg.SetForegroundColour("#FFFFFF")
 		pass
     
     # Helper function for loading a PDBfile into PyMOL
@@ -1982,7 +2016,7 @@ class SequenceWin(wx.Frame):
 	pdbfile = str(pdbfile)
 	# Check the PDB for duplicate atoms
 	# We want to rename dupliates otherwise BioPython will drop them
-	cleanPDB(pdbfile)
+	#cleanPDB(pdbfile)
 	# Set the ID of this PDB as the filename without the .pdb extension
 	if (platform.system() == "Windows"):
 	    startindx = pdbfile.rfind("\\") + 1
@@ -2057,27 +2091,40 @@ class SequenceWin(wx.Frame):
 	for aline in f:
 	    data.append(aline)
 	f.close
-	if (platform.system() == "Windows"):
-	    f = open(os.path.expanduser("~") + "\\InteractiveROSETTA\\" + newID + ".pdb", "w")
-	else:
-	    f = open(os.path.expanduser("~") + "/InteractiveROSETTA/" + newID + ".pdb", "w")
-	offset = 0
-	for aline in data:
+	try:
+	    if (platform.system() == "Windows"):
+		shutil.copyfile(pdbfile, os.path.expanduser("~") + "\\InteractiveROSETTA\\" + newID + ".pdb")
+	    else:
+		shutil.copyfile(pdbfile, os.path.expanduser("~") + "/.InteractiveROSETTA/" + newID + ".pdb")
+	except:
+	    # This happens when you attempt to fetch the PDB and a copy is already downloaded
+	    # to the sandbox
+	    pass
+	#offset = 0
+	#for aline in data:
 	    #if (aline[0:3] != "TER"):
 	    # Take out the unrecognized residues
-	    if ((aline[0:4] == "ATOM" or aline[0:6] == "HETATM") and not(aline[17:20].strip() in getRecognizedTypes())):
-		offset = offset + 1
-	    elif (aline[0:4] == "ATOM" or aline[0:6] == "HETATM" or aline[0:3] == "TER"):
-		try:
-		    atomno = int(aline[7:11])
-		    atomno = atomno - offset
-		    aline = aline[0:7] + ("%4i" % atomno) + aline[11:]
-		except:
-		    pass
-		f.write(aline)
-	    else:
-		f.write(aline)
-	f.close()
+	#    if ((aline[0:4] == "ATOM" or aline[0:6] == "HETATM") and not(aline[17:20].strip() in getRecognizedTypes())):
+	#	offset = offset + 1
+	#    elif (aline[0:4] == "ATOM" or aline[0:6] == "HETATM" or aline[0:3] == "TER"):
+	#	try:
+	#	    atomno = int(aline[7:11])
+	#	    atomno = atomno - offset
+	#	    aline = aline[0:7] + ("%4i" % atomno) + aline[11:]
+	#	except:
+	#	    pass
+	#	f.write(aline)
+	#    else:
+	#	f.write(aline)
+	#f.close()
+	# Check the PDB for duplicate atoms
+	# We want to rename dupliates otherwise BioPython will drop them
+	# This will only modify the sandbox PDB and not the actual PDB
+	# Of course, if the users save their PDBfile it will reflect these changes
+	if (platform.system() == "Windows"):
+	    pdbdata = cleanPDB(os.path.expanduser("~") + "/InteractiveROSETTA/" + newID + ".pdb")
+	else:
+	    pdbdata = cleanPDB(os.path.expanduser("~") + "/.InteractiveROSETTA/" + newID + ".pdb")
 	# Separate out the chain sequences, but keep the whole pose intact for later Rosetta operations
 	try:
 	    biopdb = self.pdbreader.get_structure(newID, newID + ".pdb")
@@ -2165,9 +2212,19 @@ class SequenceWin(wx.Frame):
 		# Save it for PyMOL, since atoms and/or chains may have been removed
 		self.pdbwriter.set_structure(biopdb)
 		self.pdbwriter.save(newID + ".pdb")
+		# Take the waters/HETATMs out of the data if requested
+		for i in range(len(pdbdata)-1, -1, -1):
+		    if (len(pdbdata[i]) >= 20 and pdbdata[i][17:20] == "HOH" and not(self.keepWaters)):
+			pdbdata.pop(i)
+		    elif (pdbdata[i].startswith("HETATM") and not(self.keepHETATMs)):
+			pdbdata.pop(i)
+		    elif (pdbdata[i].startswith("HETATM") or pdbdata[i].startswith("ATOM")):
+			if (pdbdata[i][21] == " " and "_" in self.chainsToDelete):
+			    pdbdata.pop(i)
+			elif (pdbdata[i][21] in self.chainsToDelete):
+			    pdbdata.pop(i)
 	if (not(doNotLoad)):
 	    self.poses.append(biopdb)
-	    self.cmd.load(newID + ".pdb", newID)
 	    # Use DSSP if available to characterize secondary structure
 	    if (self.dsspexe != "N/A"):
 		try:
@@ -2191,6 +2248,7 @@ class SequenceWin(wx.Frame):
 		    self.AlignBtn.SetLabel(self.alignType)
 	    else:
 		retoggle = False
+	    ssdata = {}
 	    for c in biopdb[0]:
 		if (not(first)):
 		    self.poses.append(None) # Just to keep all the lists the same size
@@ -2223,15 +2281,49 @@ class SequenceWin(wx.Frame):
 			    elif (ss == "-"):
 				# Loop
 				ss = "L"
-			    if (c.id != " "):
-				self.cmd.alter("model " + newID + " and chain " + c.id + " and resi " + str(r.id[1]), "ss=\"" + ss + "\"")
-			    else:
-				self.cmd.alter("model " + newID + " and resi " + str(r.id[1]), "ss=\"" + ss + "\"")
+			    elif (ss == "T"):
+				ss = "B"
+			    elif (ss == "I"):
+				ss = "G"
+			    #if (c.id != " "):
+				#self.cmd.alter("model " + newID + " and chain " + c.id + " and resi " + str(r.id[1]), "ss=\"" + ss + "\"")
+			    #else:
+				#self.cmd.alter("model " + newID + " and resi " + str(r.id[1]), "ss=\"" + ss + "\"")
 			except:
-			    ss = "S"
+			    ss = "L"
+			ssdata[c.id + ("%4i" % r.id[1]) + r.id[2]] = ss
 		    ires = ires + 1
 		i = i + 1
 		self.updateSeqViewer()
+	    # Rewrite the PDB with B-factors that encode secondary structure coloring
+	    fout = open(newID + ".pdb", "w")
+	    for aline in pdbdata:
+		if (aline.startswith("ATOM") or aline.startswith("HETATM")):
+		    ID = aline[21] + aline[22:27]
+		    if (aline[12:16] == " CA "):
+			if (ssdata[ID] == "H"):
+			    fout.write(aline[0:60] + "  30.0" + aline[66:])
+			elif (ssdata[ID] == "S"):
+			    fout.write(aline[0:60] + "  70.0" + aline[66:])
+			else:
+			    fout.write(aline[0:60] + "  50.0" + aline[66:])
+		    elif (aline[12:16] == " C  "):
+			if (ssdata[ID] == "B"):
+			    fout.write(aline[0:60] + "  30.0" + aline[66:])
+			elif (ssdata[ID] == "G"):
+			    fout.write(aline[0:60] + "  70.0" + aline[66:])
+			else:
+			    fout.write(aline[0:60] + "  50.0" + aline[66:])
+		    else:
+			fout.write(aline)
+		else:
+		    fout.write(aline)
+	    fout.close()
+	    self.cmd.load(newID + ".pdb", newID)
+	    self.cmd.alter("byres model " + newID + " and b < 50 and name ca", "ss=\"H\"")
+	    self.cmd.alter("byres model " + newID + " and b > 50 and name ca", "ss=\"S\"")
+	    self.cmd.alter("byres model " + newID + " and b < 50 and name c", "ss=\"B\"")
+	    self.cmd.alter("byres model " + newID + " and b > 50 and name c", "ss=\"G\"")
 	    if (retoggle):
 		self.realignToggle(None)
 	    # Have PyMOL load from this duplicated PDB file so when protocols are run on the PDB we can easily dump
@@ -2776,11 +2868,13 @@ class SequenceWin(wx.Frame):
 		model = self.getModelForChain(r)
 		chain = self.IDs[r][len(self.IDs[r])-1]
 		if (chain != "_" and chain != " " and chain != ""):
-		    self.cmd.select("colorsele", "model " + model + " and chain " + chain)
+		    #self.cmd.select("colorsele", "model " + model + " and chain " + chain)
+		    colorsele = "model " + model + " and chain " + chain
 		else:
-		    self.cmd.select("colorsele", "model " + model)
+		    #self.cmd.select("colorsele", "model " + model)
+		    colorsele = "colorsele", "model " + model
 		self.stored.selected = []
-		self.cmd.iterate_state(1, "colorsele and name ca", "stored.selected.append(str(resi)+\"|\"+ss)")
+		self.cmd.iterate_state(1, colorsele + " and name ca", "stored.selected.append(str(resi)+\"|\"+ss)")
 		#self.stored.selected = list(set(self.stored.selected))
 		for code in self.stored.selected:
 		    resi = int(code.split("|")[0])
@@ -2792,7 +2886,7 @@ class SequenceWin(wx.Frame):
 			    break
 		    self.SeqViewer.SetCellBackgroundColour(r, c, color)
 		    self.SeqViewer.SetCellTextColour(r, c, tcolor)
-	    self.cmd.delete("colorsele")
+	    #self.cmd.delete("colorsele")
 	elif (self.colorMode == "BFactor"):
 	    # A B-Factor of 0 is blue, 100 is red, and everything else is a gradient in between
 	    # Default everything to white
@@ -3094,7 +3188,7 @@ class SequenceWin(wx.Frame):
 	if (platform.system() == "Windows"):
 	    sessioninfo = os.path.expanduser("~") + "\\InteractiveRosetta\\sessionlog"
 	else:
-	    sessioninfo = os.path.expanduser("~") + "/InteractiveRosetta/sessionlog"
+	    sessioninfo = os.path.expanduser("~") + "/.InteractiveRosetta/sessionlog"
 	errmsg = errmsg + "\n\nIf you don't know what caused this, send the file " + sessioninfo + " to a developer along with an explanation of what you did."
 	# You have to use a MessageDialog because the MessageBox doesn't always work for some reason
 	dlg = wx.MessageDialog(self, errmsg, "Error Encountered", wx.OK|wx.ICON_EXCLAMATION)
@@ -3126,6 +3220,10 @@ class SequenceWin(wx.Frame):
 	    jobtype = job.split("\t")[0]
 	    ID = job.split("\t")[1].strip()
 	    jobURL = job.split("\t")[3].strip()
+	    if (len(job.split("\t")) == 5):
+		desc = job.split("\t")[4].strip()
+	    else:
+		desc = ID
 	    if (job.startswith("MSD")):
 		packageext = ".msdar"
 	    elif (job.startswith("PMUTSCAN")):
@@ -3145,46 +3243,66 @@ class SequenceWin(wx.Frame):
 		URL = jobURL + "/results/" + ID + "/results" + packageext
 	    try:
 		if (serverlocation):
-		    if (not(os.path.isfile(filepath))):
+		    print 
+		    if (not(os.path.isfile(filepath)) and not(os.path.isfile(filepath.split(packageext)[0] + ".gz"))):
 			raise Exception()
 		    if (jobtype == "MSD"):
-			dlg = wx.MessageDialog(self, "Your MSD package job ID " + ID + " is ready.", "MSD Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+			dlg = wx.MessageDialog(self, "Your MSD package job ID " + desc + " is ready.", "MSD Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 		    elif (jobtype == "ANTIBODY"):
-			dlg = wx.MessageDialog(self, "Your antibody package job ID " + ID + " is ready.", "Antibodies Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+			dlg = wx.MessageDialog(self, "Your antibody package job ID " + desc + " is ready.", "Antibodies Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 		    elif (jobtype == "COMPMODEL"):
-			dlg = wx.MessageDialog(self, "Your comparative modeling package job ID " + ID + " is ready.", "Structures Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+			dlg = wx.MessageDialog(self, "Your comparative modeling package job ID " + desc + " is ready.", "Structures Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 		    elif (jobtype == "DOCK"):
-			dlg = wx.MessageDialog(self, "Your docking package job ID " + ID + " is ready.", "Docking Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+			dlg = wx.MessageDialog(self, "Your docking package job ID " + desc + " is ready.", "Docking Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 		    elif (jobtype == "PMUTSCAN"):
-			dlg = wx.MessageDialog(self, "Your point mutant scanning job ID " + ID + " is ready.", "Point Mutants Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+			dlg = wx.MessageDialog(self, "Your point mutant scanning job ID " + desc + " is ready.", "Point Mutants Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 		    elif (jobtype == "BACKRUB"):
-			dlg = wx.MessageDialog(self, "Your backrub ensemble job ID " + ID + " is ready.", "Backrub Ensemble Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+			dlg = wx.MessageDialog(self, "Your backrub ensemble job ID " + desc + " is ready.", "Backrub Ensemble Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 		    elif (jobtype == "KIC"):
-			dlg = wx.MessageDialog(self, "Your KIC ensemble job ID " + ID + " is ready.", "KIC Ensemble Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+			dlg = wx.MessageDialog(self, "Your KIC ensemble job ID " + desc + " is ready.", "KIC Ensemble Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 		    elif (jobtype == "FLEXPEP"):
-			dlg = wx.MessageDialog(self, "Your flexible peptide docking package job ID " + ID + " is ready.", "Flexible Peptide Docking Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+			dlg = wx.MessageDialog(self, "Your flexible peptide docking package job ID " + desc + " is ready.", "Flexible Peptide Docking Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		    else:
+			# CUSTOM MODULE
+			dlg = wx.MessageDialog(self, "Your " + jobtype + " package job ID " + desc + " is ready.", jobtype + " Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 		    dlg.ShowModal()
 		    dlg.Destroy()
-		    os.rename(filepath, "results" + packageext)
+		    try:
+			os.rename(filepath, "results" + packageext)
+		    except:
+			# Not there, maybe it's a custom .gz file
+			os.rename(filepath.split(packageext)[0] + ".gz", "results.gz")
+			filepath = filepath.split(packageext)[0] + ".gz"
+			packageext = ".gz"
 		else:
-		    downloadpage = urllib2.urlopen(URL, timeout=1) # To make sure its there before display the dialog
-		    downloadpage.close()
+		    try:
+			downloadpage = urllib2.urlopen(URL, timeout=1) # To make sure its there before display the dialog
+			downloadpage.close()
+		    except:
+			downloadpage = urllib2.urlopen(URL.split(packageext)[0] + ".gz", timeout=1) # To make sure its there before display the dialog
+			downloadpage.close()
+			URL = URL.split(packageext)[0] + ".gz"
+			packageext = ".gz"
+			# Maybe it's a custom module that uses a .gz extension
 		    if (jobtype == "MSD"):
-			dlg = wx.MessageDialog(self, "Your MSD package job ID " + ID + " is ready.", "MSD Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+			dlg = wx.MessageDialog(self, "Your MSD package job ID " + desc + " is ready.", "MSD Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 		    elif (jobtype == "ANTIBODY"):
-			dlg = wx.MessageDialog(self, "Your antibody package job ID " + ID + " is ready.", "Antibody Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+			dlg = wx.MessageDialog(self, "Your antibody package job ID " + desc + " is ready.", "Antibody Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 		    elif (jobtype == "COMPMODEL"):
-			dlg = wx.MessageDialog(self, "Your comparative modeling package job ID " + ID + " is ready.", "Structure Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+			dlg = wx.MessageDialog(self, "Your comparative modeling package job ID " + desc + " is ready.", "Structure Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 		    elif (jobtype == "DOCK"):
-			dlg = wx.MessageDialog(self, "Your docking package job ID " + ID + " is ready.", "Docking Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+			dlg = wx.MessageDialog(self, "Your docking package job ID " + desc + " is ready.", "Docking Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 		    elif (jobtype == "PMUTSCAN"):
-			dlg = wx.MessageDialog(self, "Your point mutant scanning job ID " + ID + " is ready.", "Point Mutants Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+			dlg = wx.MessageDialog(self, "Your point mutant scanning job ID " + desc + " is ready.", "Point Mutants Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 		    elif (jobtype == "BACKRUB"):
-			dlg = wx.MessageDialog(self, "Your backrub ensemble job ID " + ID + " is ready.", "Backrub Ensemble Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+			dlg = wx.MessageDialog(self, "Your backrub ensemble job ID " + desc + " is ready.", "Backrub Ensemble Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 		    elif (jobtype == "KIC"):
-			dlg = wx.MessageDialog(self, "Your KIC ensemble job ID " + ID + " is ready.", "KIC Ensemble Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+			dlg = wx.MessageDialog(self, "Your KIC ensemble job ID " + desc + " is ready.", "KIC Ensemble Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 		    elif (jobtype == "FLEXPEP"):
-			dlg = wx.MessageDialog(self, "Your flexible peptide docking package job ID " + ID + " is ready.", "Flexible Peptide Docking Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+			dlg = wx.MessageDialog(self, "Your flexible peptide docking package job ID " + desc + " is ready.", "Flexible Peptide Docking Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		    else:
+			# CUSTOM MODULE
+			dlg = wx.MessageDialog(self, "Your " + jobtype + " package job ID " + desc + " is ready.", jobtype + " Download Ready", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 		    dlg.ShowModal()
 		    dlg.Destroy()
 		    if (jobtype == "MSD"):
@@ -3203,10 +3321,14 @@ class SequenceWin(wx.Frame):
 			busyDlg = wx.BusyInfo("Downloading KIC archive, please wait...")
 		    elif (jobtype == "FLEXPEP"):
 			busyDlg = wx.BusyInfo("Downloading flexpep archive, please wait...")
+		    else:
+			# CUSTOM MODULE
+			busyDlg = wx.BusyInfo("Downloading " + jobtype + " archive, please wait...")
 		    (oldfilename, info) = urllib.urlretrieve(URL, "results" + packageext)
 		    busyDlg.Destroy()
 		    del busyDlg
 		while (True):
+		    custom_module = False
 		    if (jobtype == "MSD"):
 			dlg = wx.FileDialog(
 			    self, message="Save the MSD package",
@@ -3263,6 +3385,23 @@ class SequenceWin(wx.Frame):
 			    defaultFile=ID,
 			    wildcard="Ensemble Archives (*.ensb)|*.ensb",
 			    style=wx.SAVE | wx.CHANGE_DIR)
+		    else:
+			# CUSTOM MODULE
+			custom_module = True
+			if (packageext == ".ensb"):
+			    dlg = wx.FileDialog(
+				self, message="Save the results package",
+				defaultDir=self.cwd,
+				defaultFile=ID,
+				wildcard="Ensemble Archives (*.ensb)|*.ensb",
+				style=wx.SAVE | wx.CHANGE_DIR)
+			else:
+			    dlg = wx.FileDialog(
+				self, message="Save the results package",
+				defaultDir=self.cwd,
+				defaultFile=ID,
+				wildcard="GZipped Archives (*.gz)|*.gz",
+				style=wx.SAVE | wx.CHANGE_DIR)
 		    if (dlg.ShowModal() == wx.ID_OK):
 			if (platform.system() == "Darwin"):
 			    paths = [dlg.GetPath()]
@@ -3301,11 +3440,17 @@ class SequenceWin(wx.Frame):
 				    f = open(self.cwd + "\\" + aline.split()[len(aline.split())-1].strip(), "w")
 				else:
 				    f = open(self.cwd + "/" + aline.split()[len(aline.split())-1].strip(), "w")
-			    elif (jobtype in ["ANTIBODY", "DOCK", "BACKRUB", "KIC", "FLEXPEP", "COMPMODEL"]):
+			    elif (jobtype in ["ANTIBODY", "DOCK", "BACKRUB", "KIC", "FLEXPEP", "COMPMODEL"] or custom_module):
 				indx = aline[aline.rfind("_")+1:].strip()
 				f = open(prefix + "_" + indx, "w")
 			    readingData = True
+			elif (aline.startswith("BEGIN FILE")):
+			    f = open(self.cwd + "/" + aline.split("BEGIN FILE")[1].strip(), "w")
+			    readingData = True
 			elif (aline.startswith("END PDB")):
+			    f.close()
+			    readingData = False
+			elif (aline.startswith("END FILE")):
 			    f.close()
 			    readingData = False
 			elif (readingData):
@@ -3385,7 +3530,7 @@ class SequenceWin(wx.Frame):
     def getSelectedResidues(self):
 	# Useful function for getting selected information
 	# First we have to update the selection in case the user was fiddling in PyMOL and
-	# then when straight to a protocol.  The sequence window doesn't know about the PyMOL
+	# then went straight to a protocol.  The sequence window doesn't know about the PyMOL
 	# changes yet but the protocols read selections from it
 	self.selectUpdate(None)
 	topLefts = self.SeqViewer.GetSelectionBlockTopLeft()

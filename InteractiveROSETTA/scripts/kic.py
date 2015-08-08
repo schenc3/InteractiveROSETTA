@@ -95,6 +95,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.lblBegin.SetForegroundColour("#FFFFFF")
 	self.beginMenu = wx.ComboBox(self, pos=(10, 160), size=(140, 25), choices=[], style=wx.CB_READONLY)
 	self.beginMenu.Bind(wx.EVT_COMBOBOX, self.beginMenuSelect)
+	self.beginMenu.Bind(wx.EVT_RIGHT_DOWN, self.rightClick)
 	self.beginMenu.SetToolTipString("Loop N-terminus")
 	self.loopBegin = -1
 	
@@ -110,6 +111,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.lblEnd.SetForegroundColour("#FFFFFF")
 	self.endMenu = wx.ComboBox(self, pos=(170, 160), size=(140, 25), choices=[], style=wx.CB_READONLY)
 	self.endMenu.Bind(wx.EVT_COMBOBOX, self.endMenuSelect)
+	self.endMenu.Bind(wx.EVT_RIGHT_DOWN, self.rightClick)
 	self.endMenu.SetToolTipString("Loop C-terminus")
 	self.loopEnd = -1
 	
@@ -327,6 +329,8 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	
 	self.scrollh = self.btnKIC.GetPosition()[1] + self.btnKIC.GetSize()[1] + 5
 	self.SetScrollbars(1, 1, 320, self.scrollh)
+	self.winscrollpos = 0
+	self.Bind(wx.EVT_SCROLLWIN, self.scrolled)
     
     def showHelp(self, event):
 	# Open the help page
@@ -353,6 +357,10 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def setSelectWin(self, selectWin):
 	self.selectWin = selectWin
 	self.selectWin.setProtPanel(self)
+	
+    def scrolled(self, event):
+	self.winscrollpos = self.GetScrollPos(wx.VERTICAL)
+	event.Skip()
 	
     def activate(self):
 	# Get the list of all the models in the sequence viewer
@@ -387,6 +395,48 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    if (len(self.beginMenu.GetItems()) != naa-1):
 		self.selectedModel = ""
 		self.modelMenuSelect(None)
+	self.Scroll(0, self.winscrollpos)
+    
+    def rightClick(self, event):
+	# Attempt to fill in loop values from a selection to bypass having to use the ComboBox
+	try:
+	    topLefts = self.seqWin.SeqViewer.GetSelectionBlockTopLeft()
+	    bottomRights = self.seqWin.SeqViewer.GetSelectionBlockBottomRight()
+	    row = topLefts[0][0]
+	    begin = 9999999
+	    end = 0
+	    for i in range(0, len(topLefts)):
+		for r in range(topLefts[i][0], bottomRights[i][0]+1):
+		    if (r != row):
+			continue
+		    for c in range(topLefts[i][1], bottomRights[i][1]+1):
+			if (c > end and self.seqWin.sequences[row][c] != "-"):
+			    end = c
+			if (c < begin and self.seqWin.sequences[row][c] != "-"):
+			    begin = c
+	    model = self.seqWin.IDs[row]
+	    chain = model[len(model)-1]
+	    model = model[:len(model)-2]
+	    beginres = chain + ":" + self.seqWin.sequences[row][begin] + str(self.seqWin.indxToSeqPos[row][begin][1])
+	    endres = chain + ":" + self.seqWin.sequences[row][end] + str(self.seqWin.indxToSeqPos[row][end][1])
+	    mindx = self.modelMenu.GetItems().index(model)
+	    bindx = self.beginMenu.GetItems().index(beginres)
+	    eindx = self.endMenu.GetItems().index(endres)
+	    self.modelMenu.SetSelection(mindx)
+	    self.beginMenu.SetSelection(bindx)
+	    self.endMenu.SetSelection(eindx)
+	    chain = self.beginMenu.GetStringSelection()[0]
+	    seqpos = self.beginMenu.GetStringSelection()[3:].strip()
+	    rindx = self.seqWin.getRosettaIndex(self.selectedModel, chain, seqpos)
+	    self.loopBegin = rindx
+	    chain = self.endMenu.GetStringSelection()[0]
+	    seqpos = self.endMenu.GetStringSelection()[3:].strip()
+	    rindx = self.seqWin.getRosettaIndex(self.selectedModel, chain, seqpos)
+	    self.loopEnd = rindx
+	    self.focusView(self.endMenu.GetStringSelection(), self.selectedModel)
+	    self.populatePivots()
+	except:
+	    pass
     
     def gridClick(self, event):
 	# Set the selected residue's row to blue so it is easy to see what the selection is
@@ -608,6 +658,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	
     def updateLoops(self):
 	# Redraw the loops grid with current loop information
+	scrollpos = self.grdLoops.GetScrollPos(wx.VERTICAL)
 	if (self.grdLoops.NumberRows > 0):
 	    self.grdLoops.DeleteRows(0, self.grdLoops.NumberRows)
 	if (len(self.loops) > 0):
@@ -634,6 +685,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    readOnly.SetBackgroundColour("#FFFFFF")
 	    self.grdLoops.SetRowAttr(row, readOnly)
 	    row += 1
+	self.grdLoops.Scroll(0, scrollpos)
 	
     def add(self, event):
 	# Is the loop valid?
@@ -988,7 +1040,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	if (platform.system() == "Windows"):
 	    sessioninfo = os.path.expanduser("~") + "\\InteractiveRosetta\\sessionlog"
 	else:
-	    sessioninfo = os.path.expanduser("~") + "/InteractiveRosetta/sessionlog"
+	    sessioninfo = os.path.expanduser("~") + "/.InteractiveRosetta/sessionlog"
 	errmsg = errmsg + "\n\nIf you don't know what caused this, send the file " + sessioninfo + " to a developer along with an explanation of what you did."
 	# You have to use a MessageDialog because the MessageBox doesn't always work for some reason
 	dlg = wx.MessageDialog(self, errmsg, "Error Encountered", wx.OK|wx.ICON_EXCLAMATION)
@@ -1078,6 +1130,12 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    if (self.serverOn):
 		try: 
 		    self.ID = sendToServer("coarsekicinput")
+		    dlg = wx.TextEntryDialog(None, "Enter a description for this submission:", "Job Description", "")
+		    if (dlg.ShowModal() == wx.ID_OK):
+			desc = dlg.GetValue()
+			desc = desc.replace("\t", " ").replace("\n", " ").strip()
+		    else:
+			desc = self.ID
 		    # First make sure this isn't a duplicate
 		    alreadythere = False
 		    try:
@@ -1091,9 +1149,9 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 			pass
 		    if (not(alreadythere)):
 			f = open("downloadwatch", "a")
-			f.write("KIC\t" + self.ID.strip() + "\t" + str(datetime.datetime.now().strftime("%A, %B %d - %I:%M:%S %p")) + "\t" + getServerName() + "\n")
+			f.write("KIC\t" + self.ID.strip() + "\t" + str(datetime.datetime.now().strftime("%A, %B %d - %I:%M:%S %p")) + "\t" + getServerName() + "\t" + desc + "\n")
 			f.close()
-		    dlg = wx.MessageDialog(self, "InteractiveROSETTA is now watching the server for job ID " + self.ID.strip() + ".  You will be notified when the package is available for download.", "Listening for Download", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+		    dlg = wx.MessageDialog(self, "InteractiveROSETTA is now watching the server for job ID " + desc.strip() + ".  You will be notified when the package is available for download.", "Listening for Download", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 		    dlg.ShowModal()
 		    dlg.Destroy()
 		    # Re-enable everything since we're not waiting for the local daemon to do anything
@@ -1113,6 +1171,7 @@ class KICPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    self.btnKIC.SetToolTipString("Perform KIC simulation with selected parameters")
 		    self.cmd.label("all", "")
 		    self.seqWin.cannotDelete = False
+		    self.parent.GoBtn.Enable()
 		    # Pop this message out of the queue
 		    for i in range(0, len(self.seqWin.msgQueue)):
 			if (self.seqWin.msgQueue[i].find("Performing KIC loop modeling") >= 0):

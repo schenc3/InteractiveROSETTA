@@ -221,6 +221,8 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	#self.SetupScrolling()
 	self.scrollh = self.btnMinimize.GetPosition()[1] + self.btnMinimize.GetSize()[1] + 5
 	self.SetScrollbars(1, 1, 320, self.scrollh)
+	self.winscrollpos = 0
+	self.Bind(wx.EVT_SCROLLWIN, self.scrolled)
     
     def showHelp(self, event):
 	# Open the help page
@@ -256,6 +258,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
     def updateMinMap(self):
 	# This function redraws the minmap grid to reflect changes to self.minmap
+	scrollpos = self.grdMinMap.GetScrollPos(wx.VERTICAL)
 	self.minMenu.Clear()
 	self.selectedModel = ""
 	if ("minimized_view" in self.cmd.get_names("objects")):
@@ -298,9 +301,14 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	# Resize columns if necessary
 	fitGridColumn(self.grdMinMap, 0, 150)
 	fitGridColumn(self.grdMinMap, 1, 90)
+	self.grdMinMap.Scroll(0, scrollpos)
 	# Recolor the grid if after a minimization
 	if (self.buttonState != "Minimize!"):
 	    self.recolorGrid(self.minposes, self.residue_E, self.grdMinMap, self.scoretypeMenu.GetStringSelection())
+
+    def scrolled(self, event):
+	self.winscrollpos = self.GetScrollPos(wx.VERTICAL)
+	event.Skip()
 
     def activate(self):
 	# It's possible that the user could have deleted chains/residues that are currently in the minmap
@@ -341,6 +349,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    # Don't add any NCAAs or HETATMs for now
 		    if ("ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR".find(self.seqWin.poses[poseindx][0][chain][self.seqWin.indxToSeqPos[r][c]].resname) >= 0):
 			self.selectedData.append([indx, r, seqpos, poseindx, chainoffset])
+	self.Scroll(0, self.winscrollpos)
     
     def selectBB(self, event):
 	self.addType = "BB"
@@ -378,8 +387,9 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.btnAddBoth.SetForegroundColour("#FF0000")
 	logInfo("The add type was changed to Both")
     
-    def add(self, event):
-	#self.activate()
+    def add(self, event, updateSelection=True):
+	if (updateSelection):
+	    self.activate()
 	# For each of the selected entries, first verify that this entry is not already in the minmap and if it
 	# isn't then add it in
 	logInfo("Add button clicked")
@@ -467,7 +477,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    allData.append([indx, r, seqpos, poseindx, chainoffset])
 	saveit = self.selectedData
 	self.selectedData = allData
-	self.add(event)
+	self.add(event, updateSelection=False)
 	self.selectedData = saveit
     
     def clear(self, event):
@@ -892,7 +902,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	if (platform.system() == "Windows"):
 	    sessioninfo = os.path.expanduser("~") + "\\InteractiveRosetta\\sessionlog"
 	else:
-	    sessioninfo = os.path.expanduser("~") + "/InteractiveRosetta/sessionlog"
+	    sessioninfo = os.path.expanduser("~") + "/.InteractiveRosetta/sessionlog"
 	errmsg = errmsg + "\n\nIf you don't know what caused this, send the file " + sessioninfo + " to a developer along with an explanation of what you did."
 	# You have to use a MessageDialog because the MessageBox doesn't always work for some reason
 	dlg = wx.MessageDialog(self, errmsg, "Error Encountered", wx.OK|wx.ICON_EXCLAMATION)
@@ -970,6 +980,9 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    f.write("MINTYPE\t" + self.minType + "\n")
 	    f.write("SCOREFXN\t" + self.selectWin.weightsfile + "\n")
 	    f.close()
+	    # Get PyMOL ready for minimization viewing
+	    self.cmd.copy("protocol_view", pdbfile.split(".pdb")[0])
+	    self.cmd.hide("everything", "not protocol_view")
 	    appendScorefxnParamsInfoToFile("minimizeinputtemp", self.selectWin.weightsfile)
 	    if (useServer):
 		try: 
@@ -986,6 +999,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		self.usingServer = False
 		logInfo("Minimization input uploaded locally at minimizeinput")
 	    self.stage = 2
+	    self.seqWin.protocol_view_active = True
 	    self.tmrMinimize.Start(1000)
 	else:
 	    if (self.usingServer):
@@ -1007,6 +1021,11 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    logInfo("Server took too long to respond so the local daemon was used")
 		self.tmrMinimize.Start(1000)
 	    if (os.path.isfile("minimizeoutput")):
+		try:
+		    self.cmd.copy("minimized_view", "protocol_view")
+		    self.cmd.remove("protocol_view")
+		except:
+		    pass
 		self.tmrMinimize.Stop()
 		# Read the output dumped by the child process
 		self.minposes = []
@@ -1081,6 +1100,12 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		self.btnMinimize.SetToolTipString("Accept or reject the results of this protocol")
 		os.remove("minimizeoutput")
 		self.recolorGrid(self.minposes, self.residue_E, self.grdMinMap, self.scoretypeMenu.GetStringSelection())
+		self.seqWin.protocol_view_active = False
 	    elif (os.path.isfile("errreport")):
 		self.tmrMinimize.Stop()
 		self.recoverFromError()
+		self.seqWin.protocol_view_active = False
+		try:
+		    self.cmd.remove("protocol_view")
+		except:
+		    pass

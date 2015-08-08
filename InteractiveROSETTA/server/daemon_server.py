@@ -961,6 +961,23 @@ def doThread(inputfile):
     # The Python script will handle everything from here
     # Get back to where we were
     os.chdir("../..")
+    
+def doCustom(inputfile, protocol):
+    # Make a new results folder and unpack the data there
+    try:
+	os.mkdir("results/" + ID)
+    except:
+	shutil.rmtree("results/" + ID, ignore_errors=True)
+	os.mkdir("results/" + ID)
+    os.chdir("results/" + ID)
+    # Move the input file here
+    os.rename("../../" + inputfile, inputfile.split("-")[1])
+    # Submit it to the queue
+    
+    sub = subprocess.Popen(["python", "../../rosetta_submit.py", protocol, ID])
+    # The Python script will handle everything from here
+    # Get back to where we were
+    os.chdir("../..")
 
 def writeError(msg, inputfile="None-"):
     # Open a file and write out the error message so the main GUI can tell the user what happened
@@ -1183,6 +1200,23 @@ while (True):
 		os.remove(inputfile)
 	    except:
 		pass
+	else:
+	    try:
+		# It'll grab any file in the jobfiles directory, so it might throw an error
+		# if a weird file is in there
+		if ("-" in hostname):
+		    inputtype = inputfile.split("-")[len(inputfile.split("-"))-2]
+		    # If the hostname has - in it, it will screw up the splitting later on, so fix it here
+		    os.rename(inputfile, "jobfiles/" + hostname.replace("-", "") + "-" + inputtype + "-" + ID)
+		    inputfile = "jobfiles/" + hostname.replace("-", "") + "-" + inputtype + "-" + ID
+		else:
+		    inputtype = inputfile.split("-")[1]
+	    except:
+		# Delete this file so it doesn't keep crashing every second
+		print "Unable to process file: " + inputfile.strip() + ".  Moving it to the errors folder..."
+		os.rename(inputfile, "errors/" + inputfile[inputfile.rfind("/")+1:])
+	    print "Daemon starting custom job..."
+	    doCustom(inputfile, inputtype.split("input")[0])
     time.sleep(1)
     elapsed = datetime.datetime.now() - begintime
     if (elapsed.seconds >= 60*60*24):

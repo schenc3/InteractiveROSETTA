@@ -19,7 +19,10 @@ except:
     # If it failed, then try to find Rosetta
     # If this already happened once already, then we should have saved the Rosetta path, so let's try to import from there
     print "Rosetta could not be imported.  Attempting to locate the PyRosetta install.  Please be patient..."
-    cfgfile = os.path.expanduser("~") + "/InteractiveROSETTA/seqwindow.cfg"
+    if (platform.system() == "Windows"):
+	cfgfile = os.path.expanduser("~") + "/InteractiveROSETTA/seqwindow.cfg"
+    else:
+	cfgfile = os.path.expanduser("~") + "/.InteractiveROSETTA/seqwindow.cfg"
     try:
 	f = open(cfgfile.strip(), "r")
 	rosettadir = "Not Found"

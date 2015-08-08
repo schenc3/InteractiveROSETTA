@@ -558,6 +558,8 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	
 	self.scrollh = self.btnMSD.GetPosition()[1] + self.btnMSD.GetSize()[1] + 5
 	self.SetScrollbars(1, 1, 320, self.scrollh)
+	self.winscrollpos = 0
+	self.Bind(wx.EVT_SCROLLWIN, self.scrolled)
     
     def showHelp(self, event):
 	# Open the help page
@@ -586,6 +588,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.selectWin.setProtPanel(self)
 
     def updateResfile(self):
+	scrollpos = self.grdResfile.GetScrollPos(wx.VERTICAL)
 	if (self.grdResfile.NumberRows > 0):
 	    self.grdResfile.DeleteRows(0, self.grdResfile.NumberRows)
 	row = 0
@@ -615,10 +618,12 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.grdResfile.SetRowAttr(row, readOnly)
 	    # Now update the drop down menu so the user can tweak the settings of individual residues in the minmap
 	    row = row + 1
+	self.grdResfile.Scroll(0, scrollpos)
 	
     def redrawEntity(self):
 	# Function for redrawing the entity grid
 	# Figure out the number of columns = 1 + #models (the extra 1 is for the residue option)
+	scrollpos = self.grdEntity.GetScrollPos(wx.VERTICAL)
 	ncols = 1 + len(self.states)
 	if (self.grdEntity.NumberCols < ncols):
 	    self.grdEntity.AppendCols(ncols-self.grdEntity.NumberCols)
@@ -655,7 +660,12 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.grdEntity.SetColSize(0, 190)
 	for i in range(1, ncols):
 	    fitGridColumn(self.grdEntity, i, 90)
+	self.grdEntity.Scroll(0, scrollpos)
 	self.grdEntity.Refresh()
+	
+    def scrolled(self, event):
+	self.winscrollpos = self.GetScrollPos(wx.VERTICAL)
+	event.Skip()
 	
     def activate(self):
 	# This function assumes that everything currently loaded in the Sequence Window is eligible for MSD
@@ -802,6 +812,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    # Don't add any NCAAs or HETATMs for now
 		    if ("ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR".find(self.seqWin.poses[poseindx][0][chain][self.seqWin.indxToSeqPos[r][c]].resname) >= 0):
 			self.selectedData.append([indx, r, seqpos, poseindx, chainID, chainoffset])
+	self.Scroll(0, self.winscrollpos)
     
     def addEntityPosition(self, event):
 	# Do nothing if nothing is in the palette (since we can't default to WT since there is no WT in MSD)
@@ -2089,8 +2100,9 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		self.btnAminoW.SetForegroundColour("#FF0000")
 		self.btnAminoY.SetForegroundColour("#FF0000")
     
-    def add(self, event):
-	#self.activate()
+    def add(self, event, updateSelection=True):
+	if (updateSelection):
+	    self.activate()
 	logInfo("Add button clicked")
 	# For each of the selected entries, first verify that this entry is not already in the resfile and if it
 	# isn't then add it in
@@ -2179,7 +2191,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    allData.append([indx, r, seqpos, poseindx, chainID, chainoffset])
 	saveit = self.selectedData
 	self.selectedData = allData
-	self.add(event)
+	self.add(event, updateSelection=False)
 	self.selectedData = saveit
     
     def clear(self, event):
@@ -2412,6 +2424,12 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	# Send it to the server
 	try: 
 	    self.ID = sendToServer("msdinput")
+	    dlg = wx.TextEntryDialog(None, "Enter a description for this submission:", "Job Description", "")
+	    if (dlg.ShowModal() == wx.ID_OK):
+		desc = dlg.GetValue()
+		desc = desc.replace("\t", " ").replace("\n", " ").strip()
+	    else:
+		desc = self.ID
 	    # Now write this to a text file
 	    # A timer on the SequenceWindow will use this information to look for the files to appear on the server
 	    goToSandbox()
@@ -2428,9 +2446,9 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		pass
 	    if (not(alreadythere)):
 		f = open("downloadwatch", "a")
-		f.write("MSD\t" + self.ID.strip() + "\t" + str(datetime.datetime.now().strftime("%A, %B %d - %I:%M:%S %p")) + "\t" + getServerName() + "\n")
+		f.write("MSD\t" + self.ID.strip() + "\t" + str(datetime.datetime.now().strftime("%A, %B %d - %I:%M:%S %p")) + "\t" + getServerName() + "\t" + desc + "\n")
 		f.close()
-	    dlg = wx.MessageDialog(self, "InteractiveROSETTA is now watching the server for job ID " + self.ID.strip() + ".  You will be notified when the package is available for download.", "Listening for Download", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+	    dlg = wx.MessageDialog(self, "InteractiveROSETTA is now watching the server for job ID " + desc.strip() + ".  You will be notified when the package is available for download.", "Listening for Download", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 	    dlg.ShowModal()
 	    dlg.Destroy()
 	    logInfo("MSD design input sent to server daemon with ID " + self.ID)
@@ -2455,7 +2473,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	if (platform.system() == "Windows"):
 	    sessioninfo = os.path.expanduser("~") + "\\InteractiveRosetta\\sessionlog"
 	else:
-	    sessioninfo = os.path.expanduser("~") + "/InteractiveRosetta/sessionlog"
+	    sessioninfo = os.path.expanduser("~") + "/.InteractiveRosetta/sessionlog"
 	errmsg = errmsg + "\n\nIf you don't know what caused this, send the file " + sessioninfo + " to a developer along with an explanation of what you did."
 	# You have to use a MessageDialog because the MessageBox doesn't always work for some reason
 	dlg = wx.MessageDialog(self, errmsg, "Error Encountered", wx.OK|wx.ICON_EXCLAMATION)

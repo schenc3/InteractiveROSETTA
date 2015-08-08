@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 # ================================================================================================================
 # DSSP License Agreement (http://swift.cmbi.ru.nl/gv/dssp)
 #
@@ -89,58 +89,14 @@ def cleanUp():
     # Delete any input/output files from a last run because if these are still hanging around from
     # last time they can really screw things up
     goToSandbox()
-    if (os.path.isfile("minimizeinput")):
-	os.remove("minimizeinput")
-    if (os.path.isfile("minimizeoutput")):
-	os.remove("minimizeoutput")
-    if (os.path.isfile("designinput")):
-	os.remove("designinput")
-    if (os.path.isfile("designoutput")):
-	os.remove("designoutput")
-    if (os.path.isfile("scoreinput")):
-	os.remove("scoreinput")
-    if (os.path.isfile("scoreoutput")):
-	os.remove("scoreoutput")
-    if (os.path.isfile("scaninput")):
-	os.remove("scaninput")
-    if (os.path.isfile("scanoutput")):
-	os.remove("scanoutput")
-    if (os.path.isfile("relaxinput")):
-	os.remove("relaxinput")
-    if (os.path.isfile("relaxoutput")):
-	os.remove("relaxoutput")
-    if (os.path.isfile("backrubinput")):
-	os.remove("backrubinput")
-    if (os.path.isfile("backruboutput")):
-	os.remove("backruboutput")
-    if (os.path.isfile("rotamerinput")):
-	os.remove("rotamerinput")
-    if (os.path.isfile("rotameroutput")):
-	os.remove("rotameroutput")
-    if (os.path.isfile("coarsekicinput")):
-	os.remove("coarsekicinput")
-    if (os.path.isfile("coarsekicoutput")):
-	os.remove("coarsekicoutput")
-    if (os.path.isfile("kicoutput")):
-	os.remove("kicoutput")
-    if (os.path.isfile("repackme.pdb")):
-	os.remove("repackme.pdb")
-    if (os.path.isfile("finekicinput")):
-	os.remove("finekicinput")
-    if (os.path.isfile("errreport")):
-	os.remove("errreport")
-    if (os.path.isfile("coarsedockinput")):
-	os.remove("coarsedockinput")
-    if (os.path.isfile("finedockinput")):
-	os.remove("finedockinput")
-    if (os.path.isfile("dockoutput")):
-	os.remove("dockoutput")
-    if (os.path.isfile("dock_progress")):
-	os.remove("dock_progress")
-    if (os.path.isfile("threadinput")):
-	os.remove("threadinput")
-    if (os.path.isfile("threadoutput")):
-	os.remove("threadoutput")
+    # Remove the input files
+    tempfiles = glob.glob("*input")
+    for tempfile in tempfiles:
+	os.remove(tempfile)
+    # Remove the output files
+    tempfiles = glob.glob("*output")
+    for tempfile in tempfiles:
+	os.remove(tempfile)
     tempfiles = glob.glob("*temp")
     for tempfile in tempfiles:
 	try:
@@ -175,7 +131,10 @@ def importModules(wxpython=False):
 	except:
 	    # Let's find it
 	    # Did we find it already and save it?
-	    cfgfile = os.path.expanduser("~") + "/InteractiveROSETTA/seqwindow.cfg"
+	    if (platform.system() == "Windows"):
+		cfgfile = os.path.expanduser("~") + "/InteractiveROSETTA/seqwindow.cfg"
+	    else:
+		cfgfile = os.path.expanduser("~") + "/.InteractiveROSETTA/seqwindow.cfg"
 	    try:
 		f = open(cfgfile.strip(), "r")
 		rosettadir = "Not Found"
@@ -402,6 +361,7 @@ def importModules(wxpython=False):
 if (__name__ == "__main__"):
     import os
     import os.path
+    import shutil
     import sys
     import platform
     import __main__
@@ -415,6 +375,44 @@ if (__name__ == "__main__"):
     import wx.lib.scrolledpanel
     import wx.lib.dialogs
     
+    # If PDBs are passed as arguments, load them automatically in PyMOL
+    # On Windows, we'll assume that there is only one PDB file, since this is probably happening
+    # due to a double-click on a pdbfile
+    if (platform.system() == "Windows"):
+	args = ["python"]
+	argument = ""
+	if (len(sys.argv) >= 2):
+	    for arg in sys.argv[1:]:
+		argument += arg.strip() + " "
+	    args.append(argument.strip())
+    else:
+	args = sys.argv[:]
+    pdbargs = []
+    if (len(args) >= 2):
+	for arg in args[1:]:
+	    if (arg.strip().startswith("\"") and arg.strip().endswith("\"")):
+		arg = arg.strip()[1:len(arg.strip())-1]
+	    if (not(arg.endswith(".pdb"))):
+		continue
+	    absolute = False
+	    if (platform.system() == "Windows"):
+		if (len(arg.strip()) >= 3 and arg.strip()[1:3] == ":\\"):
+		    absolute = True
+	    else:
+		if (arg.strip()[0] == "/"):
+		    absolute = True
+	    if (absolute):
+		pdbargs.append(arg.strip())
+	    else:
+		if (platform.system() == "Windows"):
+		    pdbargs.append(os.getcwd() + "\\" + arg.strip())
+		else:
+		    pdbargs.append(os.getcwd() + "/" + arg.strip())
+    
+    if (platform.system() == "Windows"):
+	import ctypes
+	FILE_ATTRIBUTE_HIDDEN = 0x02
+    
     # Change the directory to the one the InteractiveROSETTA.py script is in
     # It can be annoying because on Windows directories are delimited by \ instead of /
     homedir = os.path.expanduser("~")
@@ -425,12 +423,17 @@ if (__name__ == "__main__"):
 	    # Create the main config file
 	    f = open(homedir + "\\InteractiveROSETTA\\seqwindow.cfg", "w")
 	    f.close()
+	    # Make this folder hidden
+	    try:
+		ret = ctypes.windll.kernel32.SetFileAttributesW(unicode(homedir) + u"\\InteractiveROSETTA", FILE_ATTRIBUTE_HIDDEN)
+	    except:
+		print "Failed to hide the sandbox folder"
     else:
 	# Create the sandbox if this is the first time running
-	if (not(os.path.exists(homedir + "/InteractiveROSETTA"))):
+	if (not(os.path.exists(homedir + "/.InteractiveROSETTA"))):
 	    # Create the main config file
-	    os.makedirs(homedir + "/InteractiveROSETTA")
-	    f = open(homedir + "/InteractiveROSETTA/seqwindow.cfg", "w")
+	    os.makedirs(homedir + "/.InteractiveROSETTA")
+	    f = open(homedir + "/.InteractiveROSETTA/seqwindow.cfg", "w")
 	    f.close()
     
     # Figure out the location of this script by reading sys.argv[0]
@@ -454,6 +457,26 @@ if (__name__ == "__main__"):
 	scriptdir = scriptdir + "/" + tempdir
     # Change to this directory so we can import everything in the scripts directory later on
     os.chdir(scriptdir)
+    # Better yet, let's just add those locations to the PYTHONPATH now
+    sys.path.append(scriptdir + "/scripts")
+    # Get the template module
+    try:
+	if (platform.system() == "Windows"):
+	    shutil.rmtree(homedir + "/InteractiveROSETTA/modules/template")
+	else:
+	    shutil.rmtree(homedir + "/.InteractiveROSETTA/modules/template")
+    except:
+	pass
+    try:
+	olddir = os.getcwd()
+	if (platform.system() == "Windows"):
+	    os.chdir(homedir + "/InteractiveROSETTA/modules")
+	else:
+	    os.chdir(homedir + "/.InteractiveROSETTA/modules")
+	shutil.copytree(scriptdir + "/data/template", "template")
+	os.chdir(olddir)
+    except:
+	os.chdir(scriptdir)
     
     # Start wxPython in case we're accepting the license
     importModules(wxpython=True)
@@ -568,7 +591,7 @@ if (__name__ == "__main__"):
 	if (platform.system() == "Windows"):
 	    f = open(homedir + "\\InteractiveROSETTA\\seqwindow.cfg", "r")
 	else:
-	    f = open(homedir + "/InteractiveROSETTA/seqwindow.cfg", "r")
+	    f = open(homedir + "/.InteractiveROSETTA/seqwindow.cfg", "r")
 	for aline in f:
 	    if (aline.find("[OFFSET X]") >= 0):
 		pymolx = pymolx + int(aline.split()[len(aline.split())-1])
@@ -642,14 +665,14 @@ if (__name__ == "__main__"):
 	    f2.close()
 	    f.close()
     else:
-	if (not(os.path.exists(homedir + "/InteractiveROSETTA/params"))):
-	    os.makedirs(homedir + "/InteractiveROSETTA/params")
+	if (not(os.path.exists(homedir + "/.InteractiveROSETTA/params"))):
+	    os.makedirs(homedir + "/.InteractiveROSETTA/params")
 	# Now let's take the metal ions and waters that Rosetta already provides, just because
 	# these HETATMS are so common
 	water = os.environ["PYROSETTA_DATABASE"] + "/chemical/residue_type_sets/fa_standard/residue_types/water/HOH.params"
-	if (not(os.path.isfile(homedir + "/InteractiveROSETTA/params/HOH.fa.params"))):
+	if (not(os.path.isfile(homedir + "/.InteractiveROSETTA/params/HOH.fa.params"))):
 	    f = open(water, "r")
-	    f2 = open(homedir + "/InteractiveROSETTA/params/HOH.fa.params", "w")
+	    f2 = open(homedir + "/.InteractiveROSETTA/params/HOH.fa.params", "w")
 	    for aline in f:
 		f2.write(aline.strip() + "\n")
 	    f2.close()
@@ -661,6 +684,8 @@ if (__name__ == "__main__"):
     if (platform.system() == "Windows"):
 	if (not(os.path.exists(homedir + "\\InteractiveROSETTA\\data"))):
 	    os.makedirs(homedir + "\\InteractiveROSETTA\\data")
+	if (not(os.path.exists(homedir + "\\InteractiveROSETTA\\modules"))):
+	    os.makedirs(homedir + "\\InteractiveROSETTA\\modules")
 	# Copy over the residue factory PDB
 	if (not(os.path.isfile(homedir + "\\InteractiveROSETTA\\data\\residues.pdb"))):
 	    f = open("data\\residues.pdb", "r")
@@ -678,20 +703,22 @@ if (__name__ == "__main__"):
 	    f.close()
 	    f2.close()
     else:
-	if (not(os.path.exists(homedir + "/InteractiveROSETTA/data"))):
-	    os.makedirs(homedir + "/InteractiveROSETTA/data")
+	if (not(os.path.exists(homedir + "/.InteractiveROSETTA/data"))):
+	    os.makedirs(homedir + "/.InteractiveROSETTA/data")
+	if (not(os.path.exists(homedir + "/.InteractiveROSETTA/modules"))):
+	    os.makedirs(homedir + "/.InteractiveROSETTA/modules")
 	# Copy over the residue factory PDB
-	if (not(os.path.isfile(homedir + "/InteractiveROSETTA/data/residues.pdb"))):
+	if (not(os.path.isfile(homedir + "/.InteractiveROSETTA/data/residues.pdb"))):
 	    f = open("data/residues.pdb", "r")
-	    f2 = open(homedir + "/InteractiveROSETTA/data/residues.pdb", "w")
+	    f2 = open(homedir + "/.InteractiveROSETTA/data/residues.pdb", "w")
 	    for aline in f:
 		f2.write(aline)
 	    f.close()
 	    f2.close()
-	if (not(os.path.isfile(homedir + "/InteractiveROSETTA/data/bigPDB.pdb"))):
+	if (not(os.path.isfile(homedir + "/.InteractiveROSETTA/data/bigPDB.pdb"))):
 	    # Copy over the initializer PDB
 	    f = open("data/bigPDB.pdb", "r")
-	    f2 = open(homedir + "/InteractiveROSETTA/data/bigPDB.pdb", "w")
+	    f2 = open(homedir + "/.InteractiveROSETTA/data/bigPDB.pdb", "w")
 	    for aline in f:
 		f2.write(aline)
 	    f.close()
@@ -714,6 +741,11 @@ if (__name__ == "__main__"):
     ProtocolsFrame = ProtocolsWin(screenW, screenH, scriptdir)
     pymol.finish_launching()
     pymol.cmd.set("label_size", 28)
+    # Start the PyMOL PyRosetta server
+    if (os.path.isfile(os.environ["PYROSETTA_DATABASE"] + "/../PyMOLPyRosettaServer2.py")):
+	pymol.cmd.do("run " + os.environ["PYROSETTA_DATABASE"] + "/../PyMOLPyRosettaServer2.py")
+    elif (os.path.isfile(os.environ["PYROSETTA_DATABASE"] + "/../PyMOLPyRosettaServer.py")):
+	pymol.cmd.do("run " + os.environ["PYROSETTA_DATABASE"] + "/../PyMOLPyRosettaServer.py")
 
     # Make all of these windows aware of PyMOL
     SequenceFrame.setPyMOL(pymol)
@@ -721,5 +753,15 @@ if (__name__ == "__main__"):
     ProtocolsFrame.Protocols.setPyMOL(pymol)
     ProtocolsFrame.setSeqWin(SequenceFrame)
     SequenceFrame.setProtWin(ProtocolsFrame)
-    splash.Destroy()
+    try:
+	splash.Destroy()
+    except:
+	pass
+    # Load the PDBs given at the command line
+    for pdb in pdbargs:
+	try:
+	    # In case something bad happens...
+	    SequenceFrame.PyMOLPDBLoad(1, pdb, "Show")
+	except:
+	    pass
     app.MainLoop()### LICENSE ACCEPTED ###

@@ -39,7 +39,7 @@ try:
         elif (aline.find("Content") < 0):
             filedata.append(aline.strip())
     # Make sure the filename is something we'd be expecting to see from InteractiveROSETTA
-    if (not(filename in ["minimizeinput", "designinput", "scoreinput", "rotamerinput", "coarsekicinput", "msdinput", "testinput", "coarsedockinput", "antibodyinput", "scaninput", "killinput", "backrubinput", "flexpepinput", "threadinput"])):
+    if (not(filename.endswith("input"))):
         raise Exception()
     if (filename == "testinput"):
         print "InteractiveROSETTA Upload Successful"

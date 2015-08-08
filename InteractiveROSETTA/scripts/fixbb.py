@@ -331,6 +331,8 @@ class FixbbPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	
 	self.scrollh = self.btnDesign.GetPosition()[1] + self.btnDesign.GetSize()[1] + 5
 	self.SetScrollbars(1, 1, 320, self.scrollh)
+	self.winscrollpos = 0
+	self.Bind(wx.EVT_SCROLLWIN, self.scrolled)
     
     def showHelp(self, event):
 	# Open the help page
@@ -366,6 +368,7 @@ class FixbbPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
     def updateResfile(self):
 	# This function redraws the resfile grid to reflect changes to self.resfile
+	scrollpos = self.grdResfile.GetScrollPos(wx.VERTICAL)
 	self.desMenu.Clear()
 	self.selectedModel = ""
 	#try:
@@ -421,9 +424,14 @@ class FixbbPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	# Resize columns if necessary
 	fitGridColumn(self.grdResfile, 0, 150)
 	fitGridColumn(self.grdResfile, 1, 90)
+	self.grdResfile.Scroll(0, scrollpos)
 	# Update the coloring if after a design
 	if (self.buttonState != "Design!"):
 	    self.recolorGrid(self.designedView, self.residue_E, self.grdResfile, self.scoretypeMenu.GetStringSelection())
+	
+    def scrolled(self, event):
+	self.winscrollpos = self.GetScrollPos(wx.VERTICAL)
+	event.Skip()
 	
     def activate(self):
 	# It's possible that the user could have deleted chains/residues that are currently in the minmap
@@ -465,6 +473,7 @@ class FixbbPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    # Don't add any NCAAs or HETATMs for now
 		    if ("ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR".find(self.seqWin.poses[poseindx][0][chain][self.seqWin.indxToSeqPos[r][c]].resname) >= 0):
 			self.selectedData.append([indx, r, seqpos, poseindx, chainID, chainoffset])
+	self.Scroll(0, self.winscrollpos)
     
     def checkIfNewModel(self):
 	# This function asks whether the user is attempting to add things to the resfile from another model
@@ -943,9 +952,10 @@ class FixbbPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		self.btnAminoW.SetForegroundColour("#FF0000")
 		self.btnAminoY.SetForegroundColour("#FF0000")
     
-    def add(self, event):
-	#self.activate()
-	logInfo("Add button clicked")
+    def add(self, event, updateSelection=True):
+	if (updateSelection):
+	    self.activate()
+	#logInfo("Add button clicked")
 	if (len(self.selectedData) == 0):
 	    return
 	if (self.checkIfNewModel()):
@@ -1073,7 +1083,7 @@ class FixbbPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    allData.append([indx, r, seqpos, poseindx, chainID, chainoffset])
 	saveit = self.selectedData
 	self.selectedData = allData
-	self.add(event)
+	self.add(event, updateSelection=False)
 	self.selectedData = saveit
     
     def clear(self, event):
@@ -1660,7 +1670,7 @@ class FixbbPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	if (platform.system() == "Windows"):
 	    sessioninfo = os.path.expanduser("~") + "\\InteractiveRosetta\\sessionlog"
 	else:
-	    sessioninfo = os.path.expanduser("~") + "/InteractiveRosetta/sessionlog"
+	    sessioninfo = os.path.expanduser("~") + "/.InteractiveRosetta/sessionlog"
 	errmsg = errmsg + "\n\nIf you don't know what caused this, send the file " + sessioninfo + " to a developer along with an explanation of what you did."
 	# You have to use a MessageDialog because the MessageBox doesn't always work for some reason
 	dlg = wx.MessageDialog(self, errmsg, "Error Encountered", wx.OK|wx.ICON_EXCLAMATION)

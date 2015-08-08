@@ -186,6 +186,8 @@ class SurfacesPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	
 	self.scrollh = self.btnDraw.GetPosition()[1] + self.btnDraw.GetSize()[1] + 5
 	self.SetScrollbars(1, 1, 320, self.scrollh)
+	self.winscrollpos = 0
+	self.Bind(wx.EVT_SCROLLWIN, self.scrolled)
 
     def showHelp(self, event):
 	# Open the help page
@@ -221,11 +223,12 @@ class SurfacesPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		items.append(name[10:])
 	self.menuSurfaces.AppendItems(items)
 
+    def scrolled(self, event):
+	self.winscrollpos = self.GetScrollPos(wx.VERTICAL)
+	event.Skip()
+
     def activate(self):
-	# Update the sequence window with PyMOL selections first
-	#print "here i am"
-	#self.seqWin.selectUpdate()
-	pass
+	self.Scroll(0, self.winscrollpos)
 
     def recpSetSelection(self, event):
 	self.seqWin.selectUpdate()

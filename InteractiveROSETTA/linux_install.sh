@@ -44,18 +44,18 @@ echo "Looking for PyRosetta in "$NEWROSETTA
 if [ $NEWROSETTA != "" ]; then
     # This is obnoxious...there is a colon in the Ubuntu PyRosetta directory name
     # and it messes up : delimited paths, so create an appropriate symlink
-    if [[ $ROSETTA_VER == "Ubuntu" ]]; then
-	OLDROSETTA=$NEWROSETTA
-	NEWROSETTA=`echo $OLDROSETTA | awk -F "/SetPyRosetta" '{print $1}' | awk -F ":" '{print $1}'`
-	sudo unlink $NEWROSETTA
-	sudo ln -s $OLDROSETTA $NEWROSETTA
+    #if [[ $ROSETTA_VER == "Ubuntu" ]]; then
+	#OLDROSETTA=$NEWROSETTA
+	#NEWROSETTA=`echo $OLDROSETTA | awk -F "/SetPyRosetta" '{print $1}' | awk -F ":" '{print $1}'`
+	#sudo unlink $NEWROSETTA
+	#sudo ln -s $OLDROSETTA $NEWROSETTA
 	# Move the so files to rosetta because it cannot find them in PyRosetta root
-	sudo mv $NEWROSETTA/*.so* $NEWROSETTA/rosetta
-    fi
+	#sudo mv $NEWROSETTA/*.so* $NEWROSETTA/rosetta
+    #fi
     echo "" >> ~/.bashrc
     echo "source $NEWROSETTA/SetPyRosettaEnvironment.sh" >> ~/.bashrc
     OLDDIR=`pwd`
-    source ~/.bashrc
+    source ~/.bashrc > /dev/null 2> /dev/null
     cd "$OLDDIR"
 else
     echo "A PyRosetta installation was not detected."
@@ -69,59 +69,57 @@ if hash python 2> /dev/null; then
     echo "Python installation detected"
 else
     echo "Installing Python 2.7"
-    $PMGR"python"
+    $PMGR"python" > /dev/null 2> /dev/null
 fi
 
-PYTHON_MAJOR=`python -c "import sys; print sys.version_info[0]";`
-PYTHON_MINOR=`python -c "import sys; print sys.version_info[1]"`
-if (( $PYTHON_MAJOR != 2 )); then
+PYTHON_MAJOR=`python -c "import sys; print sys.version_info[0]"` > /dev/null 2> /dev/null
+PYTHON_MINOR=`python -c "import sys; print sys.version_info[1]"` > /dev/null 2> /dev/null
+if [[ $PYTHON_MAJOR != 2 ]]; then
     echo "Python 2 is not detected.  Installing it..."
-    $PMGR"python"
+    $PMGR"python" > /dev/null 2> /dev/null
 fi
-if (( $PYTHON_MINOR != 7 )); then
+if [[ $PYTHON_MINOR != 7 ]]; then
     echo "Python 2.7 is not detected.  InteractiveROSETTA has not been tested on versions of Python earlier than 2.7"
     echo "Continuing to install, but be warned that you may encounter some unexpected behavior"
 fi
 
 echo "Installing wxPython..."
 if [[ $ROSETTA_VER == "Ubuntu" ]]; then
-    $PMGR"python-wxgtk2.8"
+    $PMGR"python-wxgtk2.8" > /dev/null 2> /dev/null
 else
-    $PMGR"wxPython"
+    $PMGR"wxPython" > /dev/null 2> /dev/null
 fi
 echo "Installing setuptools..."
-$PMGR"python-setuptools"
-$PMGR"python-dev"
+$PMGR"python-setuptools" > /dev/null 2> /dev/null
+$PMGR"python-dev" > /dev/null 2> /dev/null
 echo "Installing PyMOL..."
-$PMGR"pymol"
+$PMGR"pymol" > /dev/null 2> /dev/null
 echo "Installing BioPython..."
-$PMGR"python-biopython"
+$PMGR"python-biopython" > /dev/null 2> /dev/null
 if [[ $ROSETTA_VER == "Ubuntu" ]]; then
-	$PMGR"python-dev"
+    $PMGR"python-dev" > /dev/null 2> /dev/null
 else
-	$PMGR"python-devel"
+    $PMGR"python-devel" > /dev/null 2> /dev/null
 fi
 echo "Installing psutil..."
-sudo easy_install -q psutil
+sudo easy_install -q psutil > /dev/null 2> /dev/null
 echo "Installing poster..."
-sudo easy_install -q poster
+sudo easy_install -q poster > /dev/null 2> /dev/null
 echo "Installing requests..."
-sudo easy_install -q requests
+sudo easy_install -q requests > /dev/null 2> /dev/null
 echo "Installing pyperclip..."
-sudo easy_install -q pyperclip
+sudo easy_install -q pyperclip > /dev/null 2> /dev/null
 echo "Downloading OpenBabel..."
-rm -f openbabel-2.3.1.tar.gz
-$PMGR"wget"
 if [[ $ROSETTA_VER == "Ubuntu" ]]; then
-	$PMGR"python-openbabel"
+    $PMGR"python-openbabel" > /dev/null 2> /dev/null
 else
-	$PMGR"openbabel"
-	$PMGR"python-openbabel"
+    $PMGR"openbabel" > /dev/null 2> /dev/null
+    $PMGR"python-openbabel" > /dev/null 2> /dev/null
 fi
 
 # Unpack molfile2params if it has not been done yet (i.e. this is the first time this script has been run)
 if [ ! -e "$SCRIPTDIR/scripts/rosetta_py" ]; then
-    cp $ROSETTADIR/toolbox/molfile2params.tar.gz $SCRIPTDIR/scripts
+    cp $NEWROSETTA/toolbox/molfile2params.tar.gz $SCRIPTDIR/scripts
     tar zxvf $SCRIPTDIR/scripts/molfile2params.tar.gz > /dev/null 2> /dev/null # This throws an error even though it appears to do everything right
     rm $SCRIPTDIR/scripts/molfile2params.tar.gz
     mv molfile2params/* $SCRIPTDIR/scripts
@@ -133,7 +131,7 @@ echo "Generating PyRosetta binary files..."
 OLDDIR=`pwd`
 cd "$NEWROSETTA"
 sudo cp "$OLDDIR/data/bigPDB.pdb" .
-sudo python -c "from rosetta import *; init(extra_options='-ignore_unrecognized_res'); pose=pose_from_pdb('bigPDB.pdb'); scorefxn=create_score_function('talaris2013'); scorefxn(pose);"
+sudo python -c "from rosetta import *; init(extra_options='-ignore_unrecognized_res'); pose=pose_from_pdb('bigPDB.pdb'); scorefxn=create_score_function('talaris2013'); scorefxn(pose);" > /dev/null 2> /dev/null
 sudo rm bigPDB.pdb
 cd "$REALOLDDIR"
 
@@ -144,11 +142,8 @@ echo "InteractiveROSETTA was installed to /usr/local/InteractiveROSETTA!"
 echo "Run it by executing: python /usr/local/InteractiveROSETTA/InteractiveROSETTA.py"
 cd /usr/local/InteractiveROSETTA
 
-# Get the molfile stuff
-sudo python molfile.py
-
 # Update the PyMOL splash screen
-SPLASHDIR=`python -c "import pymol; print pymol.__file__[0:pymol.__file__.rfind(\"/\")] + \"/pymol_path/data/pymol\""`
+SPLASHDIR=`python -c "import pymol; print pymol.__file__[0:pymol.__file__.rfind(\"/\")] + \"/pymol_path/data/pymol\""` > /dev/null 2> /dev/null
 sudo mv $SPLASHDIR/splash.png $SPLASHDIR/original_splash.png
 sudo cp images/pymol_splash.png $SPLASHDIR/splash.png
 
@@ -163,3 +158,10 @@ echo "Exec=python /usr/local/InteractiveROSETTA/InteractiveROSETTA.py" >> ~/Desk
 echo "Type=Application" >> ~/Desktop/InteractiveROSETTA.desktop
 echo "Icon=/usr/local/InteractiveROSETTA/images/icon.png" >> ~/Desktop/InteractiveROSETTA.desktop
 echo "Categories=Science;Education;" >> ~/Desktop/InteractiveROSETTA.desktop
+
+# Try to update the MIME database to have fancy icons for the file extensions
+echo "Updating MIME database..."
+cd "$SCRIPTDIR"
+sudo python extensions.py "$SCRIPTDIR" > /dev/null 2> /dev/null
+cd "$REALOLDDIR"
+

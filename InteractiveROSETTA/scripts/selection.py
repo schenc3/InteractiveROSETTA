@@ -27,7 +27,10 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	try:
 	    os.environ["PYROSETTA_DATABASE"]
 	except:
-	    cfgfile = os.path.expanduser("~") + "/InteractiveROSETTA/seqwindow.cfg"
+	    if (platform.system() == "Windows"):
+		cfgfile = os.path.expanduser("~") + "/InteractiveROSETTA/seqwindow.cfg"
+	    else:
+		cfgfile = os.path.expanduser("~") + "/.InteractiveROSETTA/seqwindow.cfg"
 	    f = open(cfgfile.strip(), "r")
 	    rosettadb = "Not Found"
 	    for aline in f:
@@ -101,13 +104,21 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.AtomStandardBtn.SetToolTipString("Change to default colors for selected atoms")
 	
 	if (platform.system() == "Darwin"):
-	    self.AtomChainBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/AtomChainBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 189), size=(70, 20))
+	    self.AtomChainBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/AtomChainBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 189), size=(35, 20))
 	else:
-	    self.AtomChainBtn = wx.Button(self, id=-1, label="Chain", pos=(5, 189), size=(70, 20))
+	    self.AtomChainBtn = wx.Button(self, id=-1, label="Ch", pos=(5, 189), size=(35, 20))
 	    self.AtomChainBtn.SetForegroundColour("#000000")
 	    self.AtomChainBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.AtomChainBtn.Bind(wx.EVT_BUTTON, self.atomChainColor)
 	self.AtomChainBtn.SetToolTipString("Color selected atoms by chain")
+	if (platform.system() == "Darwin"):
+	    self.AtomTermBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/AtomTermBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(40, 189), size=(35, 20))
+	else:
+	    self.AtomTermBtn = wx.Button(self, id=-1, label="Ter", pos=(40, 189), size=(35, 20))
+	    self.AtomTermBtn.SetForegroundColour("#000000")
+	    self.AtomTermBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	self.AtomTermBtn.Bind(wx.EVT_BUTTON, self.atomTermini)
+	self.AtomTermBtn.SetToolTipString("Color selected atoms by termini")
 	
 	if (platform.system() == "Darwin"):
 	    self.LabelOffBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/LabelOffBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 209), size=(35, 20))
@@ -173,14 +184,23 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.RibbonStandardBtn.SetToolTipString("Color selected ribbons by standard secondary structure coloring")
 	
 	if (platform.system() == "Darwin"):
-	    self.RibbonChainBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/AtomChainBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(85, 189), size=(70, 20))
+	    self.RibbonChainBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/AtomChainBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(85, 189), size=(35, 20))
 	else:
-	    self.RibbonChainBtn = wx.Button(self, id=-1, label="Chain", pos=(85, 189), size=(70, 20))
+	    self.RibbonChainBtn = wx.Button(self, id=-1, label="Ch", pos=(85, 189), size=(35, 20))
 	    #self.RibbonChainBtn.SetBackgroundColour("#000000")
 	    self.RibbonChainBtn.SetForegroundColour("#000000")
 	    self.RibbonChainBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.RibbonChainBtn.Bind(wx.EVT_BUTTON, self.ribbonChainColor)
 	self.RibbonChainBtn.SetToolTipString("Color selected ribbons by chain")
+	if (platform.system() == "Darwin"):
+	    self.RibbonTermBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/AtomTerminiBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(120, 189), size=(35, 20))
+	else:
+	    self.RibbonTermBtn = wx.Button(self, id=-1, label="Ter", pos=(120, 189), size=(35, 20))
+	    #self.RibbonTermBtn.SetBackgroundColour("#000000")
+	    self.RibbonTermBtn.SetForegroundColour("#000000")
+	    self.RibbonTermBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	self.RibbonTermBtn.Bind(wx.EVT_BUTTON, self.ribbonTermini)
+	self.RibbonTermBtn.SetToolTipString("Color selected ribbons by termini")
 	
 	if (platform.system() == "Darwin"):
 	    self.ToggleSurfBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/ToggleSurfBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(85, 209), size=(70, 20))
@@ -722,148 +742,180 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	logInfo("Turned atom display off")
     
     def atomLines(self, event):
+	if (self.seqWin.protocol_view_active):
+	    bonus = " and protocol_view"
+	else:
+	    bonus = ""
 	try:
-	    self.cmd.hide("spheres", "seqsele")
-	    self.cmd.show("sticks", "seqsele")
-	    self.cmd.set_bond("stick_radius", 0.1, "seqsele")
-	    self.cmd.set_bond("stick_transparency", 0, "seqsele")
+	    self.cmd.hide("spheres", "seqsele" + bonus)
+	    self.cmd.show("sticks", "seqsele" + bonus)
+	    self.cmd.set_bond("stick_radius", 0.1, "seqsele" + bonus)
+	    self.cmd.set_bond("stick_transparency", 0, "seqsele" + bonus)
 	except:
-	    self.cmd.hide("spheres", "all")
-	    self.cmd.show("sticks", "all")
-	    self.cmd.set_bond("stick_radius", 0.1, "all")
-	    self.cmd.set_bond("stick_transparency", 0, "all")
+	    self.cmd.hide("spheres", "all" + bonus)
+	    self.cmd.show("sticks", "all" + bonus)
+	    self.cmd.set_bond("stick_radius", 0.1, "all" + bonus)
+	    self.cmd.set_bond("stick_transparency", 0, "all" + bonus)
 	logInfo("Turned atom line display on")
     
     def atomSticks(self, event):
+	if (self.seqWin.protocol_view_active):
+	    bonus = " and protocol_view"
+	else:
+	    bonus = ""
 	try:
-	    self.cmd.show("sticks", "seqsele")
-	    self.cmd.set_bond("stick_radius", 0.25, "seqsele")
-	    self.cmd.set_bond("stick_transparency", 0, "seqsele")
-	    self.cmd.hide("spheres", "seqsele")
+	    self.cmd.show("sticks", "seqsele" + bonus)
+	    self.cmd.set_bond("stick_radius", 0.25, "seqsele" + bonus)
+	    self.cmd.set_bond("stick_transparency", 0, "seqsele" + bonus)
+	    self.cmd.hide("spheres", "seqsele" + bonus)
 	except:
-	    self.cmd.show("sticks", "all")
-	    self.cmd.set_bond("stick_radius", 0.25, "all")
-	    self.cmd.set_bond("stick_transparency", 0, "all")
-	    self.cmd.hide("spheres", "all")
+	    self.cmd.show("sticks", "all" + bonus)
+	    self.cmd.set_bond("stick_radius", 0.25, "all" + bonus)
+	    self.cmd.set_bond("stick_transparency", 0, "all" + bonus)
+	    self.cmd.hide("spheres", "all" + bonus)
 	logInfo("Turned atom stick display on")
 	#self.cmd.hide("lines", "sele")
 	
     def atomBallsLines(self, event):
+	if (self.seqWin.protocol_view_active):
+	    bonus = " and protocol_view"
+	else:
+	    bonus = ""
 	try:
-	    self.cmd.show("spheres", "seqsele")
-	    self.cmd.show("sticks", "seqsele")
-	    self.cmd.set_bond("stick_radius", 0.1, "seqsele")
-	    self.cmd.set_bond("stick_transparency", 0, "seqsele")
-	    self.cmd.set("sphere_scale", 0.15, "seqsele")
-	    self.cmd.set("sphere_transparency", 0, "seqsele")
+	    self.cmd.show("spheres", "seqsele" + bonus)
+	    self.cmd.show("sticks", "seqsele" + bonus)
+	    self.cmd.set_bond("stick_radius", 0.1, "seqsele" + bonus)
+	    self.cmd.set_bond("stick_transparency", 0, "seqsele" + bonus)
+	    self.cmd.set("sphere_scale", 0.15, "seqsele" + bonus)
+	    self.cmd.set("sphere_transparency", 0, "seqsele" + bonus)
 	except:
-	    self.cmd.show("spheres", "all")
-	    self.cmd.show("sticks", "all")
-	    self.cmd.set_bond("stick_radius", 0.1, "all")
-	    self.cmd.set_bond("stick_transparency", 0, "all")
-	    self.cmd.set("sphere_scale", 0.15, "all")
-	    self.cmd.set("sphere_transparency", 0, "all")
+	    self.cmd.show("spheres", "all" + bonus)
+	    self.cmd.show("sticks", "all" + bonus)
+	    self.cmd.set_bond("stick_radius", 0.1, "all" + bonus)
+	    self.cmd.set_bond("stick_transparency", 0, "all" + bonus)
+	    self.cmd.set("sphere_scale", 0.15, "all" + bonus)
+	    self.cmd.set("sphere_transparency", 0, "all" + bonus)
 	logInfo("Turned atom balls and lines display on")
     
     def atomBallsSticks(self, event):
+	if (self.seqWin.protocol_view_active):
+	    bonus = " and protocol_view"
+	else:
+	    bonus = ""
 	try:
-	    self.cmd.show("spheres", "seqsele")
-	    self.cmd.show("sticks", "seqsele")
-	    self.cmd.set_bond("stick_radius", 0.25, "seqsele")
-	    self.cmd.set_bond("stick_transparency", 0, "seqsele")
-	    self.cmd.set("sphere_scale", 0.3, "seqsele")
-	    self.cmd.set("sphere_transparency", 0, "seqsele")
+	    self.cmd.show("spheres", "seqsele" + bonus)
+	    self.cmd.show("sticks", "seqsele" + bonus)
+	    self.cmd.set_bond("stick_radius", 0.25, "seqsele" + bonus)
+	    self.cmd.set_bond("stick_transparency", 0, "seqsele" + bonus)
+	    self.cmd.set("sphere_scale", 0.3, "seqsele" + bonus)
+	    self.cmd.set("sphere_transparency", 0, "seqsele" + bonus)
 	except:
-	    self.cmd.show("spheres", "all")
-	    self.cmd.show("sticks", "all")
-	    self.cmd.set_bond("stick_radius", 0.25, "all")
-	    self.cmd.set_bond("stick_transparency", 0, "all")
-	    self.cmd.set("sphere_scale", 0.3, "all")
-	    self.cmd.set("sphere_transparency", 0, "all")
+	    self.cmd.show("spheres", "all" + bonus)
+	    self.cmd.show("sticks", "all" + bonus)
+	    self.cmd.set_bond("stick_radius", 0.25, "all" + bonus)
+	    self.cmd.set_bond("stick_transparency", 0, "all" + bonus)
+	    self.cmd.set("sphere_scale", 0.3, "all" + bonus)
+	    self.cmd.set("sphere_transparency", 0, "all" + bonus)
 	logInfo("Turned atom balls and sticks display on")
 	
     def atomVDW(self, event):
+	if (self.seqWin.protocol_view_active):
+	    bonus = " and protocol_view"
+	else:
+	    bonus = ""
 	try:
-	    self.cmd.hide("sticks", "seqsele")
-	    self.cmd.show("spheres", "seqsele")
+	    self.cmd.hide("sticks", "seqsele" + bonus)
+	    self.cmd.show("spheres", "seqsele" + bonus)
 	    # Sphere transparency uses "set", stick transparency uses "set_bond" :/
-	    self.cmd.set("sphere_transparency", 0, "seqsele")
-	    self.cmd.set("sphere_scale", 1, "seqsele")
+	    self.cmd.set("sphere_transparency", 0, "seqsele" + bonus)
+	    self.cmd.set("sphere_scale", 1, "seqsele" + bonus)
 	except:
-	    self.cmd.hide("sticks", "all")
-	    self.cmd.show("spheres", "all")
+	    self.cmd.hide("sticks", "all" + bonus)
+	    self.cmd.show("spheres", "all" + bonus)
 	    # Sphere transparency uses "set", stick transparency uses "set_bond" :/
-	    self.cmd.set("sphere_transparency", 0, "all")
-	    self.cmd.set("sphere_scale", 1, "all")
+	    self.cmd.set("sphere_transparency", 0, "all" + bonus)
+	    self.cmd.set("sphere_scale", 1, "all" + bonus)
 	logInfo("Turned atom VDW display on")
 	
     def atomRecolor(self, event):
 	logInfo("Click on the atom recolor button")
+	if (self.seqWin.protocol_view_active):
+	    bonus = " and protocol_view"
+	else:
+	    bonus = ""
 	dlg = wx.ColourDialog(self)
 	dlg.GetColourData().SetChooseFull(True)
 	if (dlg.ShowModal() == wx.ID_OK):
 	    data = dlg.GetColourData()
 	    mycolor = "0x%02x%02x%02x" % data.GetColour().Get()
 	    try:
-		self.cmd.color(mycolor, "seqsele and symbol c")
+		self.cmd.color(mycolor, "seqsele and symbol c" + bonus)
 		try:
 		    # Save the fact that these residues are not colored by chain in case the colors get moved around later
 		    # (i.e. chains were deleted and other chains were moved up)
-		    self.cmd.select("atomcolorsele", "atomcolorsele and not seqsele")
+		    self.cmd.select("atomcolorsele", "atomcolorsele and not seqsele" + bonus)
 		except:
 		    pass
 	    except:
-		self.cmd.color(mycolor, "all and symbol c")
+		self.cmd.color(mycolor, "all and symbol c" + bonus)
 		self.cmd.delete("atomcolorsele")
 	    logInfo("Set atom colors to " + mycolor)
 	dlg.Destroy()
 
     def atomStandardColor(self, event):
+	if (self.seqWin.protocol_view_active):
+	    bonus = " and protocol_view"
+	else:
+	    bonus = ""
 	try:
-	    self.cmd.select("temp", "symbol c in seqsele")
+	    self.cmd.select("temp", "symbol c in seqsele" + bonus)
 	    self.cmd.color("gray", "temp")
-	    self.cmd.select("temp", "symbol n in seqsele")
+	    self.cmd.select("temp", "symbol n in seqsele" + bonus)
 	    self.cmd.color("blue", "temp")
-	    self.cmd.select("temp", "symbol o in seqsele")
+	    self.cmd.select("temp", "symbol o in seqsele" + bonus)
 	    self.cmd.color("red", "temp")
-	    self.cmd.select("temp", "symbol s in seqsele")
+	    self.cmd.select("temp", "symbol s in seqsele" + bonus)
 	    self.cmd.color("yellow", "temp")
-	    self.cmd.select("temp", "symbol p in seqsele")
+	    self.cmd.select("temp", "symbol p in seqsele" + bonus)
 	    self.cmd.color("violet", "temp")
-	    self.cmd.select("temp", "symbol h in seqsele")
+	    self.cmd.select("temp", "symbol h in seqsele" + bonus)
 	    self.cmd.color("white", "temp")
 	    self.cmd.delete("temp")
 	    try:
 		# Save the fact that these residues are not colored by chain in case the colors get moved around later
 		# (i.e. chains were deleted and other chains were moved up)
-		self.cmd.select("atomcolorsele", "atomcolorsele and not seqsele")
+		self.cmd.select("atomcolorsele", "atomcolorsele and not seqsele" + bonus)
 	    except:
 		pass
 	    self.cmd.enable("seqsele")
 	except:
-	    self.cmd.select("temp", "symbol c")
+	    self.cmd.select("temp", "symbol c" + bonus)
 	    self.cmd.color("gray", "temp")
-	    self.cmd.select("temp", "symbol n")
+	    self.cmd.select("temp", "symbol n" + bonus)
 	    self.cmd.color("blue", "temp")
-	    self.cmd.select("temp", "symbol o")
+	    self.cmd.select("temp", "symbol o" + bonus)
 	    self.cmd.color("red", "temp")
-	    self.cmd.select("temp", "symbol s")
+	    self.cmd.select("temp", "symbol s" + bonus)
 	    self.cmd.color("yellow", "temp")
-	    self.cmd.select("temp", "symbol p")
+	    self.cmd.select("temp", "symbol p" + bonus)
 	    self.cmd.color("violet", "temp")
-	    self.cmd.select("temp", "symbol h")
+	    self.cmd.select("temp", "symbol h" + bonus)
 	    self.cmd.color("white", "temp")
 	    self.cmd.delete("temp")
 	    self.cmd.delete("atomcolorsele")
 	logInfo("Turned atom coloring to standard")
 	
     def atomChainColor(self, event):
+	if (self.seqWin.protocol_view_active):
+	    bonus = " and protocol_view"
+	else:
+	    bonus = ""
 	# Color the selected atoms according to chain where the color of the chain
 	# is the result of a hash of the model+chain string
 	self.pymol.stored.selected = []
 	try:
 	    self.cmd.select("temp", "seqsele")
-	    self.cmd.iterate_state(1, "seqsele", "stored.selected.append(model+\"|\"+chain)")
+	    self.cmd.iterate_state(1, "seqsele" + bonus, "stored.selected.append(model+\"|\"+chain)")
 	    # Get the unique set of model|chain pairs
 	    self.pymol.stored.selected.sort()
 	    IDs = list(set(self.pymol.stored.selected))
@@ -891,9 +943,9 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    row = self.seqWin.IDs.index(modelchain)
 	    color = getChainColor(row)
 	    if (chain != "_" and chain != " " and chain != ""):
-		self.cmd.select("temp", "model " + model + " and chain " + chain + " and " + selection + " and symbol c")
+		self.cmd.select("temp", "model " + model + " and chain " + chain + " and " + selection + " and symbol c" + bonus)
 	    else:
-		self.cmd.select("temp", "model " + model + " and " + selection + " and symbol c")
+		self.cmd.select("temp", "model " + model + " and " + selection + " and symbol c" + bonus)
 	    self.cmd.color(color, "temp")
 	try:
 	    # Save the fact that these residues are colored by chain in case the colors get moved around later
@@ -909,6 +961,65 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.cmd.enable("seqsele")
 	logInfo("Colored atoms by chain")
 	
+    def atomTermini(self, event):
+	if (self.seqWin.protocol_view_active):
+	    bonus = " and protocol_view"
+	else:
+	    bonus = ""
+	# Color the atoms such that residues become more blue or red as they approach the
+	# N and C termini respectively
+	topLefts = self.seqWin.SeqViewer.GetSelectionBlockTopLeft()
+	bottomRights = self.seqWin.SeqViewer.GetSelectionBlockBottomRight()
+	if (len(topLefts) == 0):
+	    for r in range(0, len(self.seqWin.IDs)):
+		for c in range(0, len(self.seqWin.sequences[r])):
+		    if (self.seqWin.sequences[r][c] == "-"):
+			continue
+		    modelchain = self.seqWin.IDs[r]
+		    model = modelchain[0:len(modelchain)-2]
+		    chain = modelchain[len(modelchain)-1]
+		    indx = str(self.seqWin.indxToSeqPos[r][c][1])
+		    if (chain == "_"):
+			sel = "model " + model + " and resi " + indx + " and symbol c" + bonus
+		    else:
+			sel = "model " + model + " and chain " + chain + " and resi " + indx + " and symbol c" + bonus
+		    pos = float(c) / float(len(self.seqWin.sequences[r]))
+		    if (pos < 0.5):
+			blue = 255
+			red = 510 * pos
+			green = red
+		    else:
+			red = 255
+			blue = 510 * (1.0 - pos)
+			green = blue
+		    color = "0x%02x%02x%02x" % (red, green, blue)
+		    self.cmd.color(color, sel)
+	else:
+	    for i in range(0, len(topLefts)):
+		for r in range(topLefts[i][0], bottomRights[i][0]+1):
+		    for c in range(topLefts[i][1], bottomRights[i][1]+1):
+			if (self.seqWin.sequences[r][c] == "-"):
+			    continue
+			modelchain = self.seqWin.IDs[r]
+			model = modelchain[0:len(modelchain)-2]
+			chain = modelchain[len(modelchain)-1]
+			indx = str(self.seqWin.indxToSeqPos[r][c][1])
+			if (chain == "_"):
+			    sel = "model " + model + " and resi " + indx + bonus
+			else:
+			    sel = "model " + model + " and chain " + chain + " and resi " + indx + bonus
+			pos = float(c) / float(len(self.seqWin.sequences[r]))
+			if (pos < 0.5):
+			    blue = 255
+			    red = 510 * pos
+			    green = red
+			else:
+			    red = 255
+			    blue = 510 * (1.0 - pos)
+			    green = blue
+			color = "0x%02x%02x%02x" % (red, green, blue)
+			self.cmd.color(color, sel)
+	
     def labelsOff(self, event):
 	try:
 	    self.cmd.label("seqsele", "\"\"")
@@ -917,9 +1028,13 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	logInfo("Turned atom VDW display on")
 	
     def labelResidues(self, event):
+	if (self.seqWin.protocol_view_active):
+	    bonus = " and protocol_view"
+	else:
+	    bonus = ""
 	self.pymol.stored.selected = []
 	try:
-	    self.cmd.iterate_state(1, "seqsele", "stored.selected.append(model+\" \"+chain+\" \"+resi+\" \"+resn+\" \"+name)")
+	    self.cmd.iterate_state(1, "seqsele" + bonus, "stored.selected.append(model+\" \"+chain+\" \"+resi+\" \"+resn+\" \"+name)")
 	    # Get the unique set of model|chain pairs
 	    self.pymol.stored.selected.sort()
 	    IDs = list(set(self.pymol.stored.selected))
@@ -999,18 +1114,26 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	logInfo("Turned ribbon displays off")
 	
     def ribbonsCartoon(self, event):
+	if (self.seqWin.protocol_view_active):
+	    bonus = " and protocol_view"
+	else:
+	    bonus = ""
 	try:
-	    self.cmd.hide("ribbon", "seqsele")
-	    self.cmd.show("cartoon", "seqsele")
+	    self.cmd.hide("ribbon", "seqsele" + bonus)
+	    self.cmd.show("cartoon", "seqsele" + bonus)
 	except:
-	    self.cmd.hide("ribbon", "all")
-	    self.cmd.show("cartoon", "all")
+	    self.cmd.hide("ribbon", "all" + bonus)
+	    self.cmd.show("cartoon", "all" + bonus)
 	logInfo("Turned cartoon display on")
 	
     def ribbonsRibbon(self, event):
+	if (self.seqWin.protocol_view_active):
+	    bonus = " and protocol_view"
+	else:
+	    bonus = ""
 	try:
-	    self.cmd.show("ribbon", "seqsele")
-	    self.cmd.hide("cartoon", "seqsele")
+	    self.cmd.show("ribbon", "seqsele" + bonus)
+	    self.cmd.hide("cartoon", "seqsele" + bonus)
 	except:
 	    self.cmd.show("ribbon", "all")
 	    self.cmd.hide("cartoon", "all")
@@ -1018,14 +1141,18 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	
     def ribbonRecolor(self, event):
 	logInfo("Clicked on the ribbon recoloring button")
+	if (self.seqWin.protocol_view_active):
+	    bonus = " and protocol_view"
+	else:
+	    bonus = ""
 	dlg = wx.ColourDialog(self)
 	dlg.GetColourData().SetChooseFull(True)
 	if (dlg.ShowModal() == wx.ID_OK):
 	    data = dlg.GetColourData()
 	    mycolor = "0x%02x%02x%02x" % data.GetColour().Get()
 	    try:
-		self.cmd.set("ribbon_color", mycolor, "seqsele")
-		self.cmd.set("cartoon_color", mycolor, "seqsele")
+		self.cmd.set("ribbon_color", mycolor, "seqsele" + bonus)
+		self.cmd.set("cartoon_color", mycolor, "seqsele" + bonus)
 		try:
 		    # Save the fact that these residues are not colored by chain in case the colors get moved around later
 		    # (i.e. chains were deleted and other chains were moved up)
@@ -1043,22 +1170,31 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	dlg.Destroy()
 
     def ribbonStandardColor(self, event):
+	if (self.seqWin.protocol_view_active):
+	    bonus = " and protocol_view"
+	else:
+	    bonus = ""
 	try:
-	    self.cmd.select("temp", "seqsele")
-	    self.cmd.set("ribbon_color", "white", "temp")
-	    self.cmd.set("cartoon_color", "white", "temp")
-	    self.cmd.select("temp", "ss s in seqsele")
-	    self.cmd.set("ribbon_color", "yellow", "temp")
-	    self.cmd.set("cartoon_color", "yellow", "temp")
-	    self.cmd.select("temp", "ss h in seqsele")
-	    self.cmd.set("ribbon_color", "red", "temp")
-	    self.cmd.set("cartoon_color", "red", "temp")
-	    self.cmd.select("temp", "(ss b or ss t) and seqsele")
-	    self.cmd.set("ribbon_color", "blue", "temp")
-	    self.cmd.set("cartoon_color", "blue", "temp")
-	    self.cmd.select("temp", "(ss g or ss i) and seqsele")
-	    self.cmd.set("ribbon_color", "orange", "temp")
-	    self.cmd.set("cartoon_color", "orange", "temp")
+	    temp = "seqsele" + bonus
+	    #self.cmd.select("temp", "seqsele")
+	    self.cmd.set("ribbon_color", "white", temp)
+	    self.cmd.set("cartoon_color", "white", temp)
+	    #self.cmd.select("temp", "ss s in seqsele")
+	    temp = "ss s in seqsele" + bonus
+	    self.cmd.set("ribbon_color", "yellow", temp)
+	    self.cmd.set("cartoon_color", "yellow", temp)
+	    #self.cmd.select("temp", "ss h in seqsele")
+	    temp = "ss h in seqsele" + bonus
+	    self.cmd.set("ribbon_color", "red", temp)
+	    self.cmd.set("cartoon_color", "red", temp)
+	    #self.cmd.select("temp", "(ss b or ss t) and seqsele")
+	    temp = "(ss b or ss t) and seqsele" + bonus
+	    self.cmd.set("ribbon_color", "blue", temp)
+	    self.cmd.set("cartoon_color", "blue", temp)
+	    #self.cmd.select("temp", "(ss g or ss i) and seqsele")
+	    temp = "(ss g or ss i) and seqsele" + bonus
+	    self.cmd.set("ribbon_color", "orange", temp)
+	    self.cmd.set("cartoon_color", "orange", temp)
 	    try:
 		# Save the fact that these residues are not colored by chain in case the colors get moved around later
 		# (i.e. chains were deleted and other chains were moved up)
@@ -1098,12 +1234,16 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.cmd.disable("seqsele")
 	
     def ribbonChainColor(self, event):
+	if (self.seqWin.protocol_view_active):
+	    bonus = " and protocol_view"
+	else:
+	    bonus = ""
 	# Color the selected ribbons according to chain where the color of the chain
 	# is the result of a hash of the model+chain string
 	self.pymol.stored.selected = []
 	try:
 	    self.cmd.select("temp", "seqsele")
-	    self.cmd.iterate_state(1, "seqsele", "stored.selected.append(model+\"|\"+chain)")
+	    self.cmd.iterate_state(1, "seqsele" + bonus, "stored.selected.append(model+\"|\"+chain)")
 	    # Get the unique set of model|chain pairs
 	    self.pymol.stored.selected.sort()
 	    IDs = list(set(self.pymol.stored.selected))
@@ -1114,7 +1254,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		modelchain = ID[0:len(ID)-2] + "|" + ID[len(ID)-1]
 		if (not(modelchain) in IDs):
 		    IDs.append(modelchain)
-	    selection = "all"
+	    selection = "all" + bonus
 	for modelchain in IDs:
 	    if (modelchain[len(modelchain)-1] == " " or modelchain[len(modelchain)-1] == "|"):
 		modelchain = modelchain.strip() + "_"
@@ -1135,9 +1275,9 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    row = self.seqWin.IDs.index(modelchain)
 	    color = getChainColor(row)
 	    if (chain != "_" and chain != " " and chain != ""):
-		self.cmd.select("temp", "model " + model + " and chain " + chain + " and " + selection)
+		self.cmd.select("temp", "model " + model + " and chain " + chain + " and " + selection + bonus)
 	    else:
-		self.cmd.select("temp", "model " + model + " and " + selection)
+		self.cmd.select("temp", "model " + model + " and " + selection + bonus)
 	    self.cmd.set("ribbon_color", color, "temp")
 	    self.cmd.set("cartoon_color", color, "temp")
 	try:
@@ -1154,6 +1294,65 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	if (selection == "seqsele"):
 	    self.cmd.enable("seqsele")
 	logInfo("Colored ribbons by chain")
+    
+    def ribbonTermini(self, event):
+	if (self.seqWin.protocol_view_active):
+	    bonus = " and protocol_view"
+	else:
+	    bonus = ""
+	# Color the ribbons such that residues become more blue or red as they approach the
+	# N and C termini respectively
+	topLefts = self.seqWin.SeqViewer.GetSelectionBlockTopLeft()
+	bottomRights = self.seqWin.SeqViewer.GetSelectionBlockBottomRight()
+	if (len(topLefts) == 0):
+	    for r in range(0, len(self.seqWin.IDs)):
+		for c in range(0, len(self.seqWin.sequences[r])):
+		    if (self.seqWin.sequences[r][c] == "-"):
+			continue
+		    modelchain = self.seqWin.IDs[r]
+		    model = modelchain[0:len(modelchain)-2]
+		    chain = modelchain[len(modelchain)-1]
+		    indx = str(self.seqWin.indxToSeqPos[r][c][1])
+		    if (chain == "_"):
+			sel = "model " + model + " and resi " + indx + bonus
+		    else:
+			sel = "model " + model + " and chain " + chain + " and resi " + indx + bonus
+		    pos = float(c) / float(len(self.seqWin.sequences[r]))
+		    if (pos < 0.5):
+			blue = 255
+			red = 510 * pos
+			green = red
+		    else:
+			red = 255
+			blue = 510 * (1.0 - pos)
+			green = blue
+		    color = "0x%02x%02x%02x" % (red, green, blue)
+		    self.cmd.set("cartoon_color", color, sel)
+	else:
+	    for i in range(0, len(topLefts)):
+		for r in range(topLefts[i][0], bottomRights[i][0]+1):
+		    for c in range(topLefts[i][1], bottomRights[i][1]+1):
+			if (self.seqWin.sequences[r][c] == "-"):
+			    continue
+			modelchain = self.seqWin.IDs[r]
+			model = modelchain[0:len(modelchain)-2]
+			chain = modelchain[len(modelchain)-1]
+			indx = str(self.seqWin.indxToSeqPos[r][c][1])
+			if (chain == "_"):
+			    sel = "model " + model + " and resi " + indx + bonus
+			else:
+			    sel = "model " + model + " and chain " + chain + " and resi " + indx + bonus
+			pos = float(c) / float(len(self.seqWin.sequences[r]))
+			if (pos < 0.5):
+			    blue = 255
+			    red = 510 * pos
+			    green = red
+			else:
+			    red = 255
+			    blue = 510 * (1.0 - pos)
+			    green = blue
+			color = "0x%02x%02x%02x" % (red, green, blue)
+			self.cmd.set("cartoon_color", color, sel)
     
     def displaySurfaces(self):
 	# Use the selection information to display pre-configured surfaces from the molecular surfaces protocol

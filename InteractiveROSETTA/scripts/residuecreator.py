@@ -223,6 +223,8 @@ class ResidueCreatorPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.SetScrollbars(1, 1, 320, scrollh)
 	self.grdParamsAtoms.SetColSize(0, int(self.grdParamsAtoms.GetSize()[0] / 2))
 	self.grdParamsAtoms.SetRowLabelSize(int(self.grdParamsAtoms.GetSize()[0] / 2))
+	self.winscrollpos = 0
+	self.Bind(wx.EVT_SCROLLWIN, self.scrolled)
 
     def showHelp(self, event):
 	# Open the help page
@@ -249,8 +251,12 @@ class ResidueCreatorPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.atomMenuSelect(event)
 	event.Skip()
 
+    def scrolled(self, event):
+	self.winscrollpos = self.GetScrollPos(wx.VERTICAL)
+	event.Skip()
+
     def activate(self):
-	pass
+	self.Scroll(0, self.winscrollpos)
 
     def loadMOL2(self, event):
 	# Get the structure from a MOL2 file and load it into PyMOL

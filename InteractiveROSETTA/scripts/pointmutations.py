@@ -194,6 +194,8 @@ class PointMutationsPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	
 	self.tmrScore = wx.Timer(self)
 	self.Bind(wx.EVT_TIMER, self.threadScore, self.tmrScore)
+	self.winscrollpos = 0
+	self.Bind(wx.EVT_SCROLLWIN, self.scrolled)
     
     def showHelp(self, event):
 	# Open the help page
@@ -285,6 +287,10 @@ class PointMutationsPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
 	self.seqWin.msgQueue.append("Calculating energies, please be patient...")
 	
+    def scrolled(self, event):
+	self.winscrollpos = self.GetScrollPos(wx.VERTICAL)
+	event.Skip()
+	
     def activate(self):
 	# Get the list of all the models in the sequence viewer
 	modelList = []
@@ -297,6 +303,7 @@ class PointMutationsPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.modelMenu.Clear()
 	    self.modelMenu.AppendItems(modelList)
 	    self.selectedModel = ""
+	self.Scroll(0, self.winscrollpos)
 	    
     def relabelEnergies(self, seqpos="none"):
 	# This function displays the residue energy on the CA of the selected residue or all visible residues
@@ -875,7 +882,7 @@ class PointMutationsPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	if (platform.system() == "Windows"):
 	    sessioninfo = os.path.expanduser("~") + "\\InteractiveRosetta\\sessionlog"
 	else:
-	    sessioninfo = os.path.expanduser("~") + "/InteractiveRosetta/sessionlog"
+	    sessioninfo = os.path.expanduser("~") + "/.InteractiveRosetta/sessionlog"
 	errmsg = errmsg + "\n\nIf you don't know what caused this, send the file " + sessioninfo + " to a developer along with an explanation of what you did."
 	# You have to use a MessageDialog because the MessageBox doesn't always work for some reason
 	dlg = wx.MessageDialog(self, errmsg, "Error Encountered", wx.OK|wx.ICON_EXCLAMATION)

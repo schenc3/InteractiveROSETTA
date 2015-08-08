@@ -1276,57 +1276,73 @@ icon = PyEmbeddedImage(
 def defaultPyMOLView(cmd, model=None):
     # Useful function for setting the default view of a model in PyMOL
     if (model):
-	cmd.select("dsele", "model " + model)
+	#cmd.select("dsele", "model " + model)
+	dsele = "model " + model
 	# Set to a default view
-	cmd.hide("lines", "dsele")
-	cmd.show(primaryRender[0], "dsele")
-	cmd.hide(primaryRender[1], "dsele")
-	cmd.select("dsele", "metal and model " + model)
-	cmd.show("spheres", "dsele")
-	cmd.select("dsele", "symbol c and model " + model)
-	cmd.color("gray", "dsele")
-	cmd.select("dsele", "model " + model)
-	cmd.set("ribbon_color", "white", "dsele")
-	cmd.set("cartoon_color", "white", "dsele")
-	cmd.select("dsele", "ss s and model " + model)
-	cmd.set("ribbon_color", "yellow", "dsele")
-	cmd.set("cartoon_color", "yellow", "dsele")
-	cmd.select("dsele", "ss h and model " + model)
-	cmd.set("ribbon_color", "red", "dsele")
-	cmd.set("cartoon_color", "red", "dsele")
-	cmd.select("dsele", "(ss b or ss t) and model " + model)
-	cmd.set("ribbon_color", "blue", "dsele")
-	cmd.set("cartoon_color", "blue", "dsele")
-	cmd.select("dsele", "(ss g or ss i) and model " + model)
-	cmd.set("ribbon_color", "orange", "dsele")
-	cmd.set("cartoon_color", "orange", "dsele")
-	cmd.delete("dsele")
+	cmd.hide("lines", dsele)
+	cmd.show(primaryRender[0], dsele)
+	cmd.hide(primaryRender[1], dsele)
+	#cmd.select("dsele", "metal and model " + model)
+	dsele = "metal and model " + model
+	cmd.show("spheres", dsele)
+	#cmd.select("dsele", "symbol c and model " + model)
+	dsele = "symbol c and model " + model
+	cmd.color("gray", dsele)
+	#cmd.select("dsele", "model " + model)
+	dsele = "model " + model
+	cmd.set("ribbon_color", "white", dsele)
+	cmd.set("cartoon_color", "white", dsele)
+	#cmd.select("dsele", "ss s and model " + model)
+	dsele = "ss s and model " + model
+	cmd.set("ribbon_color", "yellow", dsele)
+	cmd.set("cartoon_color", "yellow", dsele)
+	#cmd.select("dsele", "ss h and model " + model)
+	dsele = "ss h and model " + model
+	cmd.set("ribbon_color", "red", dsele)
+	cmd.set("cartoon_color", "red", dsele)
+	#cmd.select("dsele", "(ss b or ss t) and model " + model)
+	dsele = "(ss b or ss t) and model " + model
+	cmd.set("ribbon_color", "blue", dsele)
+	cmd.set("cartoon_color", "blue", dsele)
+	#cmd.select("dsele", "(ss g or ss i) and model " + model)
+	dsele = "(ss g or ss i) and model " + model
+	cmd.set("ribbon_color", "orange", dsele)
+	cmd.set("cartoon_color", "orange", dsele)
+	#cmd.delete("dsele")
     else:
 	cmd.select("dsele", "all")
+	dsele = "all"
 	# Set to a default view
 	cmd.hide("lines", "dsele")
-	cmd.show(primaryRender[0], "dsele")
-	cmd.hide(primaryRender[1], "dsele")
+	cmd.show(primaryRender[0], dsele)
+	cmd.hide(primaryRender[1], dsele)
 	cmd.select("dsele", "metal")
-	cmd.show("spheres", "dsele")
+	dsele = "metal"
+	cmd.show("spheres", dsele)
 	cmd.select("dsele", "symbol c")
-	cmd.color("gray", "dsele")
+	dsele = "symbol c"
+	cmd.color("gray", dsele)
 	cmd.select("dsele", "all")
-	cmd.set("ribbon_color", "white", "dsele")
-	cmd.set("cartoon_color", "white", "dsele")
+	dsele = "all"
+	cmd.set("ribbon_color", "white", dsele)
+	cmd.set("cartoon_color", "white", dsele)
 	cmd.select("dsele", "ss s")
-	cmd.set("ribbon_color", "yellow", "dsele")
-	cmd.set("cartoon_color", "yellow", "dsele")
+	dsele = "ss s"
+	cmd.set("ribbon_color", "yellow", dsele)
+	cmd.set("cartoon_color", "yellow", dsele)
 	cmd.select("dsele", "ss h")
-	cmd.set("ribbon_color", "red", "dsele")
-	cmd.set("cartoon_color", "red", "dsele")
+	dsele = "ss h"
+	cmd.set("ribbon_color", "red", dsele)
+	cmd.set("cartoon_color", "red", dsele)
 	cmd.select("dsele", "ss b or ss t")
-	cmd.set("ribbon_color", "blue", "dsele")
-	cmd.set("cartoon_color", "blue", "dsele")
+	dsele = "ss b or ss t"
+	cmd.set("ribbon_color", "blue", dsele)
+	cmd.set("cartoon_color", "blue", dsele)
 	cmd.select("dsele", "ss g or ss i")
-	cmd.set("ribbon_color", "orange", "dsele")
-	cmd.set("cartoon_color", "orange", "dsele")
-	cmd.delete("dsele")
+	dsele = "ss g or ss i"
+	cmd.set("ribbon_color", "orange", dsele)
+	cmd.set("cartoon_color", "orange", dsele)
+	#cmd.delete("dsele")
     
 def goToSandbox(extra=""):
     # Easily gets us back to the sandbox location
@@ -1338,7 +1354,7 @@ def goToSandbox(extra=""):
     else:
 	if (len(extra) > 0):
 	    extra = "/" + extra
-	os.chdir(homedir + "/InteractiveROSETTA" + extra)
+	os.chdir(homedir + "/.InteractiveROSETTA" + extra)
 	
 def AA3to1(resn):
     indx3 = "ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR HOH ADE CYT GUA THY RAD RCY RGU URA ".find(resn)
@@ -1586,30 +1602,40 @@ def appendScorefxnParamsInfoToFile(filename, weightsfile):
     f.close()
     os.chdir(curdir)
 
-def sendToServer(inputfile):
+def sendToServer(inputfile, remoteServer=None):
     # This function attempts to send the inputfile to a server running PyRosetta using HTTP POST
     home = os.path.expanduser("~")
-    serverpath = serverName[0]
+    serverpath = ""
+    if (platform.system() == "Windows"):
+	fin = open(home + "/InteractiveROSETTA/seqwindow.cfg", "r")
+    else:
+	fin = open(home + "/.InteractiveROSETTA/seqwindow.cfg", "r")
+    for aline in fin:
+	if (aline.startswith("[SERVER]")):
+	    serverpath = aline.split("\t")[1].strip()
+    fin.close()
     if (inputfile == "testinput"):
 	if (platform.system() == "Windows"):
 	    f = open(home + "\\InteractiveROSETTA\\testinputtemp", "w")
 	else:
-	    f = open(home + "/InteractiveROSETTA/testinputtemp", "w")
+	    f = open(home + "/.InteractiveROSETTA/testinputtemp", "w")
 	f.write("THIS IS A TEST")
 	f.close()
     elif (inputfile.startswith("kill")):
 	if (platform.system() == "Windows"):
 	    f = open(home + "\\InteractiveROSETTA\\killinputtemp", "w")
 	else:
-	    f = open(home + "/InteractiveROSETTA/killinputtemp", "w")
+	    f = open(home + "/.InteractiveROSETTA/killinputtemp", "w")
 	f.write(inputfile.split("|")[1])
 	serverpath = inputfile.split("|")[2]
 	inputfile = "killinput"
 	f.close()
+    if (remoteServer is not None):
+	serverpath = remoteServer
     if (platform.system() == "Windows"):
 	f = open(home + "\\InteractiveROSETTA\\" + inputfile + "temp", "rb")
     else:
-	f = open(home + "/InteractiveROSETTA/" + inputfile + "temp", "rb")
+	f = open(home + "/.InteractiveROSETTA/" + inputfile + "temp", "rb")
     # Added support for a server running on the client's machine, using the keyword "localhost"
     if (serverpath.lower().strip().startswith("localhost")):
 	serverlocation = serverpath[serverpath.find(":")+1:]
@@ -1618,7 +1644,7 @@ def sendToServer(inputfile):
 	    if (platform.system() == "Windows"):
 		os.rename(home + "\\InteractiveROSETTA\\" + inputfile + "temp", serverlocation + "\\jobfiles\\" + socket.gethostname() + "-" + inputfile + "-" + myID)
 	    else:
-		os.rename(home + "/InteractiveROSETTA/" + inputfile + "temp", serverlocation + "/jobfiles/" + socket.gethostname() + "-" + inputfile + "-" + myID)
+		os.rename(home + "/.InteractiveROSETTA/" + inputfile + "temp", serverlocation + "/jobfiles/" + socket.gethostname() + "-" + inputfile + "-" + myID)
 	    response = "InteractiveROSETTA Upload Successful"
 	except:
 	    response = "Failed"
@@ -1731,18 +1757,60 @@ def cleanPDB(pdbfile):
     taken_nums = {}
     num_mapping = {}
     takenIDs = ""
+    # First we have to get a list of all chainIDs that are currently taken
+    # We need to do this so that when we are cleaning up the PDB file, we can rename
+    # blank chain IDs to something else
+    # Sometimes PDB files have multiple chains with no ID and they are distinguished solely
+    # by a TER line in between the coordinate secions, but Rosetta needs to have valid IDs
+    # in order to do anything with the chains, and BioPython will freak out when it sees multiple
+    # residues with blank chainIDs and the same residue positions
+    fin = open(pdbfile.strip(), "r")
+    data = []
+    for aline in fin:
+	if ((aline.startswith("ATOM") or aline.startswith("HETATM")) and not aline[21] in takenIDs):
+	    takenIDs += aline[21]
+	data.append(aline)
+    fin.close()
+    blankID = ""
+    for char in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+	if (char not in takenIDs):
+	    blankID = char
+	    break
     # Sometimes there are PDBs that have multiple residues with the same residue index
     # BioPython drops these, but it can lead to all kinds of problems later on
     # So I will keep a record of the backbone atoms of the current residue and if we encounter
     # a BB atom with the same residue index, we will assume it's a new residue and renumber the residue
     lastBBatoms = []
     altlocs_taken = ""
-    f = open(pdbfile.strip(), "r")
+    #f = open(pdbfile.strip(), "r")
     curr_res = "   0"
-    for aline in f:
-	if ((aline.startswith("ATOM") or aline.startswith("HETATM")) and not aline[21] in takenIDs):
-	    takenIDs += aline[21]
+    offset = 0
+    counter = 0
+    while (counter < len(data)):
+    #for counter in range(0, len(data)):
+	aline = data[counter]
+	if (aline.startswith("TER")):
+	    takenIDs += blankID
+	    blankID = ""
+	    for char in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+		if (char not in takenIDs):
+		    blankID = char
+		    break
+	if ((aline[0:4] == "ATOM" or aline[0:6] == "HETATM") and not(aline[17:20].strip() in getRecognizedTypes())):
+	    offset = offset + 1
+	    data.pop(counter)
+	    continue
+	elif (aline[0:4] == "ATOM" or aline[0:6] == "HETATM" or aline[0:3] == "TER"):
+	    try:
+		atomno = int(aline[7:11])
+		atomno = atomno - offset
+		aline = aline[0:7] + ("%4i" % atomno) + aline[11:]
+	    except:
+		pass
 	if ((aline.startswith("ATOM") or aline.startswith("HETATM")) and isAA(aline[17:20])):
+	    # Rewrite blank chain IDs
+	    if (aline[21] == " "):
+		aline = aline[0:21] + blankID + aline[22:]
 	    res = aline[22:27] # Includes residue indx + the optional alternate letter
 	    if (res[0:4] != curr_res[0:4]): # New residue indx
 		altlocs_taken = res[4] # Reset the taken altlocs
@@ -1798,29 +1866,27 @@ def cleanPDB(pdbfile):
 	#else:
 	# Change nucleic acid strings to what Rosetta expects
 	if (aline[17:20] == " DA"):
-	    data.append(aline[0:17] + "ADE" + aline[20:])
+	    data[counter] = aline[0:17] + "ADE" + aline[20:]
+	    #data.append(aline[0:17] + "ADE" + aline[20:])
 	elif (aline[17:20] == " DC"):
-	    data.append(aline[0:17] + "CYT" + aline[20:])
+	    data[counter] = aline[0:17] + "CYT" + aline[20:]
+	    #data.append(aline[0:17] + "CYT" + aline[20:])
 	elif (aline[17:20] == " DG"):
-	    data.append(aline[0:17] + "GUA" + aline[20:])
+	    data[counter] = aline[0:17] + "GUA" + aline[20:]
+	    #data.append(aline[0:17] + "GUA" + aline[20:])
 	elif (aline[17:20] == " DT"):
-	    data.append(aline[0:17] + "THY" + aline[20:])
+	    data[counter] = aline[0:17] + "THY" + aline[20:]
+	    #data.append(aline[0:17] + "THY" + aline[20:])
 	else:
-	    data.append(aline)
-    f.close()
-    # Now write the updated data out
-    blankID = ""
-    for char in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
-	if (char not in takenIDs):
-	    blankID = char
-	    break
+	    data[counter] = aline
+	    #data.append(aline)
+	counter += 1
+    #f.close()
     f = open(pdbfile.strip(), "w")
     for aline in data:
-	if ((aline.startswith("ATOM") or aline.startswith("HETATM")) and aline[21] == " "):
-	    f.write(aline[0:21] + blankID + aline[22:])
-	else:
-	    f.write(aline)
+	f.write(aline)
     f.close()
+    return data
     
 def fixPyMOLSave(pdbfile):
     # Read in the data first

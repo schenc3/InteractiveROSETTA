@@ -1,14 +1,13 @@
 import wx
 import os
 import os.path
+import sys
 import platform
 import subprocess
 import multiprocessing
 import psutil
 from daemon import daemonLoop
-from tools import resizeTextControlForUNIX
-from tools import logInfo
-from tools import icon
+from tools import *
 from selection import SelectPanel
 from superimposition import SuperimpositionPanel
 from minimization import MinimizationPanel
@@ -38,6 +37,8 @@ from surfaces import SurfacesPanel
 from antibody import AntibodyPanel
 from ensemblegen import EnsembleGenPanel
 from flexpepdock import FlexPepDockPanel
+from modulemanager import ModuleManagerPanel
+import glob
 
 class ProtocolsPanel(wx.Panel):
     def __init__(self, parent, W, H):
@@ -59,13 +60,20 @@ class ProtocolsPanel(wx.Panel):
 	    resizeTextControlForUNIX(self.label, 0, self.GetSize()[0])
 	self.label.SetForegroundColour("#FFFFFF")
 	
-	self.protocols = ["Antibody Modeling", 
+	if (platform.system() == "Darwin"):
+	    self.protMenu = wx.ComboBox(self, pos=(5, 30), size=(230, 25), choices=[], style=wx.CB_READONLY)
+	else:
+	    self.protMenu = wx.ComboBox(self, pos=(5, 30), size=(230, 25), choices=[], style=wx.CB_READONLY | wx.CB_SORT)
+	self.protMenu.SetToolTipString("List of currently available protocols")
+	
+	self.default_protocols = ["Antibody Modeling", 
 		   "Docking", 
 		   "Energy Minimization", 
 		   "Ensemble Browser", 
 		   "Ensemble Generation",
 		   "Flexible Peptide Docking",
 		   "Loop Modeling (KIC)",
+		   "Module Manager",
 		   "Molecular Surfaces", 
 		   "Point Mutant Scan", 
 		   "Point Mutations", 
@@ -74,12 +82,8 @@ class ProtocolsPanel(wx.Panel):
 		   "Residue/Ligand Creator", 
 		   "Structure Prediction (Comparative Modeling)", 
 		   "Superimposition"]
-	if (platform.system() == "Darwin"):
-	    self.protMenu = wx.ComboBox(self, pos=(5, 30), size=(230, 25), choices=self.protocols, style=wx.CB_READONLY)
-	else:
-	    self.protMenu = wx.ComboBox(self, pos=(5, 30), size=(230, 25), choices=self.protocols, style=wx.CB_READONLY | wx.CB_SORT)
+	self.readModules()
 	self.protMenu.SetSelection(self.protocols.index("Superimposition"))
-	self.protMenu.SetToolTipString("List of currently available protocols")
 	
 	if (platform.system() == "Darwin"):
 	    self.GoBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/GoBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(240, 30), size=(100, 25))
@@ -92,6 +96,73 @@ class ProtocolsPanel(wx.Panel):
 	self.currentProtocol = "Superimposition"
 	
 	self.protPanel = SuperimpositionPanel(self, W, H)
+	
+    def readModules(self):
+	self.protocols = self.default_protocols[:]
+	# Let's see if there are any custom modules to import
+	# Everything needs to be in a try/except block to prevent corrupted modules from 
+	# crashing the whole program
+	# Ignore anything that does not import properly and write a message out to the terminal
+	olddir = os.getcwd()
+	goToSandbox("modules")
+	sys.path.append(os.getcwd())
+	moduledirs = glob.glob("*")
+	self.modules = {}
+	for moduledir in moduledirs:
+	    # Ignore the template
+	    if (moduledir == "template"):
+		continue
+	    try:
+		module = __import__(moduledir)
+	    except:
+		print "Failed to import " + moduledir + ", does " + moduledir + "/__init__.py exist?"
+		continue
+	    try:
+		# Does the panel exist?
+		module.ModulePanel
+	    except:
+		print "Failed to import " + moduledir + ", could not find the class \"ModulePanel\""
+		continue
+	    # Look for the name of the protocol in the comments of the module's script
+	    # If the name does not exist, just use the directory name
+	    modulename = moduledir
+	    fin = open(moduledir + "/__init__.py", "r")
+	    for aline in fin:
+		if (aline.startswith("### PROTOCOL NAME:")):
+		    modulename = aline.split("### PROTOCOL NAME:")[1].strip()
+		    break
+	    fin.close()
+	    # Does this name exist already
+	    nameTaken = False
+	    for name in self.protocols:
+		if (name.strip() == modulename.strip()):
+		    nameTaken = True
+		    break
+	    if (nameTaken):
+		i = 2
+		while (True):
+		    nameTaken = False
+		    for name in self.protocols:
+			if (name.strip() == modulename.strip() + " (" + str(i) + ")"):
+			    nameTaken = True
+			    break
+		    if (not(nameTaken)):
+			modulename = modulename.strip() + " (" + str(i) + ")"
+			break
+		    i += 1
+	    # Add it into the list of protocols
+	    addedIn = False
+	    for i in range(0, len(self.protocols)):
+		if (modulename < self.protocols[i]):
+		    addedIn = True
+		    self.protocols.insert(i, modulename)
+		    break
+	    if (not(addedIn)):
+		self.protocols.append(modulename)
+	    self.modules[modulename] = module
+	os.chdir(olddir)
+	self.protMenu.Clear()
+	self.protMenu.AppendItems(self.protocols)
 	
     def changeProtocol(self, event):
 	logInfo("Go button clicked")
@@ -122,6 +193,9 @@ class ProtocolsPanel(wx.Panel):
 		self.protPanel.Destroy()
 		del self.protPanel
 	    elif (self.currentProtocol == "Ensemble Browser"):
+		self.protPanel.Destroy()
+		del self.protPanel
+	    elif (self.currentProtocol == "Module Manager"):
 		self.protPanel.Destroy()
 		del self.protPanel
 	    elif (self.currentProtocol == "Ensemble Generation"):
@@ -257,6 +331,10 @@ class ProtocolsPanel(wx.Panel):
 	    elif (self.currentProtocol == "Flexible Peptide Docking"):
 		self.protPanel.Destroy()
 		del self.protPanel
+	    else:
+		# Must be a custom module
+		self.protPanel.Destroy()
+		del self.protPanel
 	    self.currentProtocol = selectedProtocol
 	    self.seqWin.cannotDelete = False
 	    # Restart the Rosetta daemon to clear its memory up
@@ -269,6 +347,8 @@ class ProtocolsPanel(wx.Panel):
 		self.protPanel.setSelectWin(self.selectWin)
 	    elif (selectedProtocol == "Ensemble Browser"):
 		self.protPanel = EnsembleBrowserPanel(self, self.W, self.H)
+	    elif (selectedProtocol == "Module Manager"):
+		self.protPanel = ModuleManagerPanel(self, self.W, self.H)
 	    elif (selectedProtocol == "Ensemble Generation"):
 		self.protPanel = EnsembleGenPanel(self, self.W, self.H)
 		self.protPanel.setSelectWin(self.selectWin)
@@ -303,6 +383,13 @@ class ProtocolsPanel(wx.Panel):
 	    elif (selectedProtocol == "Flexible Peptide Docking"):
 		self.protPanel = FlexPepDockPanel(self, self.W, self.H)
 		self.protPanel.setSelectWin(self.selectWin)
+	    else:
+		# Custom module
+		# Custom modules are aware of PyMOL, the Sequence Window, and the SelectionPanel
+		# They also know about the Protocols Window through the parent variable
+		# They also will receive activation events
+		self.protPanel = self.modules[selectedProtocol].ModulePanel(self, self.modules[selectedProtocol].__file__, self.W, self.H)
+		self.protPanel.setSelectWin(self.selectWin)
 	    self.protPanel.setSeqWin(self.seqWin)
 	    self.protPanel.setPyMOL(self.pymol)
 	    self.protPanel.activate()
@@ -324,7 +411,11 @@ class ProtocolsPanel(wx.Panel):
 	
     def activate(self):
 	self.cmd.enable("seqsele")
-	self.protPanel.activate()
+	try:
+	    self.protPanel.activate()
+	except:
+	    # Probably a custom module that does not have the activate function implemented
+	    print "WARNING: Could not activate the ProtocolPanel for " + self.currentProtocol
 
 class ProtocolsWin(wx.Frame):
     def __init__(self, W, H, scriptdir):
@@ -343,7 +434,7 @@ class ProtocolsWin(wx.Frame):
 	    if (platform.system() == "Windows"):
 		f = open(homedir + "\\InteractiveROSETTA\\protwindow.cfg", "r")
 	    else:
-		f = open(homedir + "/InteractiveROSETTA/protwindow.cfg", "r")
+		f = open(homedir + "/.InteractiveROSETTA/protwindow.cfg", "r")
 	    for aline in f:
 		if (aline.find("[OFFSET X]") >= 0):
 		    winx = winx + int(aline.split()[len(aline.split())-1])
@@ -486,7 +577,7 @@ class ProtocolsWin(wx.Frame):
 	    if (platform.system() == "Windows"):
 		f = open(homedir + "\\InteractiveROSETTA\\protwindow.cfg", "r")
 	    else:
-		f = open(homedir + "/InteractiveROSETTA/protwindow.cfg", "r")
+		f = open(homedir + "/.InteractiveROSETTA/protwindow.cfg", "r")
 	    for aline in f:
 		data.append(aline)
 	    f.close()
@@ -495,7 +586,7 @@ class ProtocolsWin(wx.Frame):
 	if (platform.system() == "Windows"):
 	    f = open(homedir + "\\InteractiveROSETTA\\protwindow.cfg", "w")
 	else:
-	    f = open(homedir + "/InteractiveROSETTA/protwindow.cfg", "w")
+	    f = open(homedir + "/.InteractiveROSETTA/protwindow.cfg", "w")
 	itemsFound = [False, False, False, False] # [offX, offY, offW, offH]
 	(x, y) = self.GetPosition()
 	(w, h) = self.GetSize()

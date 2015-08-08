@@ -126,6 +126,8 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	
 	self.scrollh = self.btnSuperimpose.GetPosition()[1] + self.btnSuperimpose.GetSize()[1] + 5
 	self.SetScrollbars(1, 1, 320, self.scrollh)
+	self.winscrollpos = 0
+	self.Bind(wx.EVT_SCROLLWIN, self.scrolled)
 
     def showHelp(self, event):
 	# Open the help page
@@ -146,6 +148,10 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.pymol = pymol
 	self.cmd = pymol.cmd
 	self.stored = pymol.stored
+
+    def scrolled(self, event):
+	self.winscrollpos = self.GetScrollPos(wx.VERTICAL)
+	event.Skip()
 
     def activate(self):
 	if (self.seqWin):		
@@ -182,6 +188,7 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		self.baseModel = self.models[0]
 	    else:
 		self.baseModel = ""
+	self.Scroll(0, self.winscrollpos)
 
     def modelClick(self, event):
 	self.alignBy = "Model"
@@ -264,7 +271,7 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	if (platform.system() == "Windows"):
 	    os.chdir(homedir + "\\InteractiveROSETTA")
 	else:
-	    os.chdir(homedir + "/InteractiveROSETTA")
+	    os.chdir(homedir + "/.InteractiveROSETTA")
 	if (self.grdRMSDResults.NumberRows > 0):
 	    self.grdRMSDResults.DeleteRows(0, self.grdRMSDResults.NumberRows)
 	if (self.RMSDtype == "CA"):

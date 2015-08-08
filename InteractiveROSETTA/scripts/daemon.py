@@ -47,7 +47,10 @@ except:
     # If it failed, then try to find Rosetta
     # If this already happened once already, then we should have saved the Rosetta path, so let's try to import from there
     print "Rosetta could not be imported.  Attempting to locate the PyRosetta install.  Please be patient..."
-    cfgfile = os.path.expanduser("~") + "/InteractiveROSETTA/seqwindow.cfg"
+    if (platform.system() == "Windows"):
+	cfgfile = os.path.expanduser("~") + "/InteractiveROSETTA/seqwindow.cfg"
+    else:
+	cfgfile = os.path.expanduser("~") + "/.InteractiveROSETTA/seqwindow.cfg"
     try:
 	# The main GUI should have already found PyRosetta, so let's look in the config file first
 	f = open(cfgfile.strip(), "r")
@@ -176,7 +179,7 @@ from tools import AA3to1
 # Function for initializing Rosetta with the parameters files in the params folder in the sandbox
 def initializeRosetta(addOn="", extraMutes=""):
     # Grab the params files in the user's personal directory
-    goToSandbox("params")
+    os.chdir("params")
     faparamsstr = ""
     faParamsFiles = glob.glob("*.fa.params")
     for params in faParamsFiles:
@@ -184,12 +187,8 @@ def initializeRosetta(addOn="", extraMutes=""):
     if (len(faParamsFiles) > 0):
 	faparamsstr = "-extra_res_fa " + faparamsstr.strip()
     paramsstr = faparamsstr
-    # DO NOT EVER MUTE THIS OR YOU WILL BREAK KIC!!!
-    # If the loop is too short, then the maximum number of build attempts will be used
-    # A thread is supposed to be reading the standard output to detect that this has happened
-    # so if you mute it then it will listen forever
     init(extra_options=paramsstr + " -mute core.kinematics.AtomTree " + extraMutes + " -ignore_unrecognized_res -ignore_zero_occupancy false " + addOn)
-    goToSandbox()
+    os.chdir("..")
 
 # This class is used to grab standard output from pmutscan, which is the only output of that protocol
 class ScanCapturing(list):
@@ -249,9 +248,13 @@ def doMinimization():
     except:
 	raise Exception("ERROR: The scoring function weights could not be initialized!")
     f = open("minimizeoutputtemp", "w")
+    pyobs = PyMOL_Observer()
     for [pdbfile, minmapstart, minmapend] in jobs:
 	# Get a Rosetta pose of the file
 	minpose = pose_from_pdb(pdbfile)
+	minpose.pdb_info().name("protocol_view")
+	pyobs.add_observer(minpose)
+	pyobs.pymol.update_energy(True)
 	# Create the minmap
 	mm = MoveMap()
 	mm.set_bb(False)
@@ -1655,6 +1658,17 @@ def doThread(scriptdir):
     # So the main GUI doesn't attempt to read the file before the daemon finishes writing its contents
     os.rename("threadoutputtemp", "threadoutput")
 
+def doCustom(jobtype):
+    # Runs a custom protocol
+    # Let's get the module first (it should be at modules/<jobtype>/daemon/__init__.py
+    try:
+	sys.path.append(os.getcwd() + "/modules/" + jobtype)
+	module = __import__("job")
+	sys.path.pop()
+    except:
+	raise Exception("Could not import modules/" + jobtype + "/job!\nDoes modules/" + jobtype + "/job/__init__.py exist?")
+    module.runJob(jobtype)
+
 def writeError(msg):
     # Open a file and write out the error message so the main GUI can tell the user what happened
     # The main GUI needs to check to see if an errreport gets generated and recover from the error
@@ -1666,6 +1680,7 @@ def writeError(msg):
 def daemonLoop():
     scriptdir = os.getcwd()
     goToSandbox()
+    sys.path.append(os.getcwd() + "/modules")
     stillrunning = True
     while (stillrunning):
 	if (os.path.isfile("minimizeinput")):
@@ -1846,6 +1861,18 @@ def daemonLoop():
 		print "The daemon crashed while performing the threading job!"
 		writeError(e.message)
 	    os.remove("threadinput")
+	else:
+	    # CUSTOM MODULE
+	    for inputfile in glob.glob("*input"):
+		jobtype = inputfile.split("input")[0]
+		print "Daemon starting " + jobtype + " job..."
+		try:
+		    doCustom(jobtype)
+		    print "Daemon completed " + jobtype + " job"
+		except Exception as e:
+		    print "The daemon crashed while performing the " + jobtype + " job!"
+		    writeError(e.message)
+		os.remove(inputfile)
 	time.sleep(1)
 	# See if the main GUI is still running and have the daemon terminate if the main GUI was closed
 	# Since this is a separate process, the user can exit out of the main GUI but this daemon
