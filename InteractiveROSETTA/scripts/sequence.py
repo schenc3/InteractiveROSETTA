@@ -10,6 +10,16 @@ import platform
 import urllib
 import urllib2
 import gzip
+import numpy as np
+try:
+    if (platform.system() == "Windows"):
+	import hmmstr4py_win as hmmstr4py
+    elif (platform.system() == "Darwin"):
+	import hmmstr4py_darwin as hmmstr4py
+    else:
+	import hmmstr4py
+except:
+    print "HMMSTR not installed"
 import math
 import ctypes
 import webbrowser
@@ -19,9 +29,22 @@ import Bio.PDB.DSSP
 from Bio.Align.Applications import MuscleCommandline
 from tools import *
 if (platform.system() == "Windows"):
+    # pyperclip and clipboard don't seem to work, use Tk
     from Tkinter import Tk
+elif (platform.system() == "Darwin"):
+    # Do not use Tkinter on OSX, it crashes the whole program, use pyperclip instead
+    try:
+	import pyperclip
+    except:
+	print "pyperclip not installed, sequence copying is disabled"
+	print "You can install it by executing: sudo easy_install pyperclip"
 else:
-    import pyperclip
+    # pyperclip crashes Linux and Tk does not work, use clipboard
+    try:
+	import clipboard
+    except:
+	print "clipboard not installed, sequence copying is disabled"
+	print "You can install it by executing: sudo easy_install clipboard"
 
 # There is apparently a libc bug on UNIX that caches DNS names that urllib2 tries to open
 # If the Internet connection is not valid the first time it tries to establish a connection, it caches this bad
@@ -30,6 +53,9 @@ else:
 if (platform.system() == "Linux"):
     libc = ctypes.cdll.LoadLibrary("libc.so.6")
     res_init = libc.__res_init
+elif (platform.system() == "Darwin"):
+    libc = ctypes.cdll.LoadLibrary("libc.dylib")
+    res_init = libc.res_init
 
 # ===========================================================================================================
 # STRUCTURE LOADER CLASS
@@ -37,11 +63,12 @@ if (platform.system() == "Linux"):
 # and if waters/HETATMs should be loaded
 
 class ProteinDialog(wx.Dialog):
-    def __init__(self, parent, PDB, chains):
+    def __init__(self, parent, PDB, chains, scriptdir):
 	if (platform.system() != "Linux"):
 	    wx.Dialog.__init__(self, parent, -1, "Protein Loader", size=(305, 330), style=wx.DEFAULT_DIALOG_STYLE | wx.STAY_ON_TOP)
 	else:
 	    wx.Dialog.__init__(self, parent, -1, "Protein Loader", size=(300, 330), style=wx.DEFAULT_DIALOG_STYLE | wx.STAY_ON_TOP)
+	self.scriptdir = scriptdir
 	
 	# Structure label
 	self.lblPDB = wx.StaticText(self, -1, PDB, (0, 10), (300, 30))
@@ -61,22 +88,36 @@ class ProteinDialog(wx.Dialog):
 	    self.chkChains[i].SetValue(True)
 	
 	# Toggle buttons for loading water and HETATMs
-	self.btnWater = wx.Button(self, id=-1, label="Load Waters", pos=(5, 230), size=(140, 30))
-	self.btnWater.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	if (platform.system() == "Darwin"):
+	    self.btnWater = wx.BitmapButton(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/btnWater_Load.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (5, 230), (140, 30))
+	else:
+	    self.btnWater = wx.Button(self, id=-1, label="Load Waters", pos=(5, 230), size=(140, 30))
+	    self.btnWater.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnWater.Bind(wx.EVT_BUTTON, self.waterToggle)
 	self.btnWater.SetToolTipString("Load the protein with waters present")
-	self.btnHETATM = wx.Button(self, id=-1, label="Load HETATMs", pos=(155, 230), size=(140, 30))
-	self.btnHETATM.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	self.waterState = "Load Waters"
+	if (platform.system() == "Darwin"):
+	    self.btnHETATM = wx.BitmapButton(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/btnHETATM_Load.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (155, 230), (140, 30))
+	else:
+	    self.btnHETATM = wx.Button(self, id=-1, label="Load HETATMs", pos=(155, 230), size=(140, 30))
+	    self.btnHETATM.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnHETATM.Bind(wx.EVT_BUTTON, self.HETATMToggle)
 	self.btnHETATM.SetToolTipString("Load the protein with heteroatoms present")
+	self.hetatmState = "Load HETATMs"
 	
 	# OK and Cancel buttons
-	self.btnOK = wx.Button(self, id=-1, label="OK", pos=(5, 265), size=(140, 30))
-	self.btnOK.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	if (platform.system() == "Darwin"):
+	    self.btnOK = wx.BitmapButton(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/btnOK_Protein.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (5, 265), (140, 30))
+	else:
+	    self.btnOK = wx.Button(self, id=-1, label="OK", pos=(5, 265), size=(140, 30))
+	    self.btnOK.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnOK.Bind(wx.EVT_BUTTON, self.okDialog)
 	self.btnOK.SetToolTipString("Confirm load operation")
-	self.btnCancel = wx.Button(self, id=-1, label="Cancel", pos=(155, 265), size=(140, 30))
-	self.btnCancel.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	if (platform.system() == "Darwin"):
+	    self.btnCancel = wx.BitmapButton(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/btnCancel_Protein.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (155, 265), (140, 30))
+	else:
+	    self.btnCancel = wx.Button(self, id=-1, label="Cancel", pos=(155, 265), size=(140, 30))
+	    self.btnCancel.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnCancel.Bind(wx.EVT_BUTTON, self.cancelDialog)
 	self.btnCancel.SetToolTipString("Cancel this load operation")
 	
@@ -85,21 +126,37 @@ class ProteinDialog(wx.Dialog):
 	
     def waterToggle(self, event):
 	# Toggle loading waters on and off
-	if (self.btnWater.GetLabel() == "Load Waters"):
-	    self.btnWater.SetLabel("No Waters")
-	    self.btnWater.SetToolTipString("Load the protein while ignoring waters")
+	if (platform.system() == "Darwin"):
+	    if (self.waterState == "Load Waters"):
+		self.btnWater.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/btnWater_No.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnWater.SetToolTipString("Load the protein while ignoring waters")
+	    else:
+		self.btnWater.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/btnWater_Load.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnWater.SetToolTipString("Load the protein with waters present")
 	else:
-	    self.btnWater.SetLabel("Load Waters")
-	    self.btnWater.SetToolTipString("Load the protein with waters present")
+	    if (self.btnWater.GetLabel() == "Load Waters"):
+		self.btnWater.SetLabel("No Waters")
+		self.btnWater.SetToolTipString("Load the protein while ignoring waters")
+	    else:
+		self.btnWater.SetLabel("Load Waters")
+		self.btnWater.SetToolTipString("Load the protein with waters present")
     
     def HETATMToggle(self, event):
 	# Toggle loading HETATMs on and off
-	if (self.btnHETATM.GetLabel() == "Load HETATMs"):
-	    self.btnHETATM.SetLabel("No HETATMs")
-	    self.btnHETATM.SetToolTipString("Load the protein while ignoring heteroatoms")
+	if (platform.system() == "Darwin"):
+	    if (self.hetatmState == "Load Waters"):
+		self.btnHETATM.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/btnHETATM_No.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnHETATM.SetToolTipString("Load the protein while ignoring heteroatoms")
+	    else:
+		self.btnHETATM.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/btnHETATM_Load.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnHETATM.SetToolTipString("Load the protein with heteroatoms present")
 	else:
-	    self.btnHETATM.SetLabel("Load HETATMs")
-	    self.btnHETATM.SetToolTipString("Load the protein with heteroatoms present")
+	    if (self.btnHETATM.GetLabel() == "Load HETATMs"):
+		self.btnHETATM.SetLabel("No HETATMs")
+		self.btnHETATM.SetToolTipString("Load the protein while ignoring heteroatoms")
+	    else:
+		self.btnHETATM.SetLabel("Load HETATMs")
+		self.btnHETATM.SetToolTipString("Load the protein with heteroatoms present")
 	    
     # Return codes, the main script knows how to interpret these
     def okDialog(self, event):
@@ -116,11 +173,12 @@ class ProteinDialog(wx.Dialog):
 # change the model name and/or the chain ID
 
 class ModelDialog(wx.Dialog):
-    def __init__(self, parent, model, chain):
+    def __init__(self, parent, model, chain, scriptdir):
 	if (platform.system() != "Linux"):
 	    wx.Dialog.__init__(self, parent, -1, "Modify Model Data", size=(305, 150))
 	else:
 	    wx.Dialog.__init__(self, parent, -1, "Modify Model Data", size=(300, 150))
+	self.scriptdir = scriptdir
 	
 	# We need to have a handle on the parent (the SeqViewer) so we can see the parent's data
 	self.parent = parent
@@ -133,26 +191,38 @@ class ModelDialog(wx.Dialog):
 	    self.inputID = model + "|" + chain
 	
 	# Label and text box for the model name
-	self.lblModel = wx.StaticText(self, -1, "Model:", (5, 13), (60, 30))
-	self.lblModel.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	if (platform.system() == "Darwin"):
+	    self.lblModel = wx.StaticBitmap(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/lblModel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 13), size=(60, 30))
+	else:
+	    self.lblModel = wx.StaticText(self, -1, "Model:", (5, 13), (60, 30))
+	    self.lblModel.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.txtModel = wx.TextCtrl(self, -1, pos=(70, 10), size=(225, 25))
 	self.txtModel.SetValue(model)
 	self.txtModel.SetToolTipString("The name of the protein")
 	
 	# Label and text box for the chain ID
-	self.lblChain = wx.StaticText(self, -1, "Chain Identifier:", (5, 53), (140, 30))
-	self.lblChain.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	if (platform.system() == "Darwin"):
+	    self.lblChain = wx.StaticBitmap(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/lblChain.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 53), size=(140, 30))
+	else:
+	    self.lblChain = wx.StaticText(self, -1, "Chain Identifier:", (5, 53), (140, 30))
+	    self.lblChain.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.txtChain = wx.TextCtrl(self, -1, pos=(150, 50), size=(145, 25))
 	self.txtChain.SetValue(chain)
 	self.txtChain.SetToolTipString("The identifier of the chain")
 	
 	# OK and Cancel buttons
-	self.btnOK = wx.Button(self, id=-1, label="OK", pos=(5, 90), size=(140, 30))
-	self.btnOK.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	if (platform.system() == "Darwin"):
+	    self.btnOK = wx.BitmapButton(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/btnOK_Protein.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (5, 90), (140, 30))
+	else:
+	    self.btnOK = wx.Button(self, id=-1, label="OK", pos=(5, 90), size=(140, 30))
+	    self.btnOK.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnOK.Bind(wx.EVT_BUTTON, self.okDialog)
 	self.btnOK.SetToolTipString("Confirm model data alteration")
-	self.btnCancel = wx.Button(self, id=-1, label="Cancel", pos=(155, 90), size=(140, 30))
-	self.btnCancel.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	if (platform.system() == "Darwin"):
+	    self.btnCancel = wx.BitmapButton(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/btnCancel_Protein.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (155, 90), (140, 30))
+	else:
+	    self.btnCancel = wx.Button(self, id=-1, label="Cancel", pos=(155, 90), size=(140, 30))
+	    self.btnCancel.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnCancel.Bind(wx.EVT_BUTTON, self.cancelDialog)
 	self.btnCancel.SetToolTipString("Cancel this operation")
 	
@@ -208,11 +278,12 @@ class ModelDialog(wx.Dialog):
 # and if waters/HETATMs should be loaded
 
 class DownloadManagerDialog(wx.Dialog):
-    def __init__(self, parent, serverURL):
+    def __init__(self, parent, serverURL, scriptdir):
 	if (platform.system() != "Linux"):
 	    wx.Dialog.__init__(self, parent, -1, "Download Manager", size=(405, 330))
 	else:
 	    wx.Dialog.__init__(self, parent, -1, "Download Manager", size=(400, 330))
+	self.scriptdir = scriptdir
 	
 	# Save the parent, to access the parent's data
 	self.parent = parent
@@ -220,19 +291,28 @@ class DownloadManagerDialog(wx.Dialog):
 	self.inURL = serverURL
 	
 	# Label, text box, and test button for specifying a remote server URL
-	self.lblServerName = wx.StaticText(self, -1, "Server Name", (5, 7), (395, 23))
-	self.lblServerName.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	if (platform.system() == "Darwin"):
+	    self.lblServerName = wx.StaticBitmap(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/lblServerName.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 7), size=(395, 23))
+	else:
+	    self.lblServerName = wx.StaticText(self, -1, "Server Name", (5, 7), (395, 23))
+	    self.lblServerName.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	self.txtServerName = wx.TextCtrl(self, -1, pos=(5, 30), size=(310, 25))
 	self.txtServerName.SetValue(serverURL)
 	self.txtServerName.SetToolTipString("Enter the HTTP address of the remote server")
-	self.btnTest = wx.Button(self, id=-1, label="Test", pos=(320, 30), size=(70, 25))
-	self.btnTest.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	if (platform.system() == "Darwin"):
+	    self.btnTest = wx.BitmapButton(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/btnTest.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (320, 30), (70, 25))
+	else:
+	    self.btnTest = wx.Button(self, id=-1, label="Test", pos=(320, 30), size=(70, 25))
+	    self.btnTest.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnTest.Bind(wx.EVT_BUTTON, self.testConnection)
 	self.btnTest.SetToolTipString("Test that InteractiveROSETTA can connect to this server")
 	
 	# Set up a scrollable area for displaying all of the jobs that have been sent to the server
-	self.lblActive = wx.StaticText(self, -1, "Active Submissions:", (5, 60), (395, 30))
-	self.lblActive.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	if (platform.system() == "Darwin"):
+	    self.lblActive = wx.StaticBitmap(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/lblActive.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 60), size=(395, 30))
+	else:
+	    self.lblActive = wx.StaticText(self, -1, "Active Submissions:", (5, 60), (395, 30))
+	    self.lblActive.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	
 	self.scroll = wx.ScrolledWindow(self, -1, pos=(0, 80))
 	self.scroll.SetSize((self.GetSize()[0], 180))
@@ -242,6 +322,7 @@ class DownloadManagerDialog(wx.Dialog):
 	    jobs = 0
 	    self.lblDownloads = []
 	    self.btnRemoveJob = []
+	    self.realJobIDs = []
 	    goToSandbox()
 	    fin = open("downloadwatch", "r")
 	    for aline in fin:
@@ -254,6 +335,7 @@ class DownloadManagerDialog(wx.Dialog):
 		    jobID = aline.split("\t")[4].strip()
 		else:
 		    jobID = aline.split("\t")[1].strip()
+		self.realJobIDs.append(aline.split("\t")[1].strip())
 		uploadDate = aline.split("\t")[2].strip()
 		server = aline.split("\t")[3].strip()
 		status = "Pending"
@@ -294,8 +376,11 @@ class DownloadManagerDialog(wx.Dialog):
 		# Button to send a cancel request for this job
 		# The name field is important because it contains the index of this specific cancel button
 		# so when one is clicked, we can figure out which one was clicked by looking at the event's name
-		self.btnRemoveJob.append(wx.Button(self.scroll, id=-1, label="X", pos=(355, jobs*100), size=(25, 25), name=str(jobs)))
-		self.btnRemoveJob[jobs].SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+		if (platform.system() == "Darwin"):
+		    self.btnRemoveJob.append(wx.BitmapButton(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/btnRemoveJob.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (355, jobs*100), (25, 25)))
+		else:
+		    self.btnRemoveJob.append(wx.Button(self.scroll, id=-1, label="X", pos=(355, jobs*100), size=(25, 25), name=str(jobs)))
+		    self.btnRemoveJob[jobs].SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 		self.btnRemoveJob[jobs].Bind(wx.EVT_BUTTON, self.cancelJob)
 		self.btnRemoveJob[jobs].SetToolTipString("Remove this job from the download manager")
 		jobs += 1
@@ -305,12 +390,18 @@ class DownloadManagerDialog(wx.Dialog):
 	    # The file downloadwatch didn't exist or was corrupt, so we are not aware of any outstanding submissions
 	    pass
 	# OK and Cancel buttons
-	self.btnOK = wx.Button(self, id=-1, label="OK", pos=(40, 265), size=(140, 30))
-	self.btnOK.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	if (platform.system() == "Darwin"):
+	    self.btnOK = wx.BitmapButton(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/btnOK_Protein.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (40, 265), (140, 30))
+	else:
+	    self.btnOK = wx.Button(self, id=-1, label="OK", pos=(40, 265), size=(140, 30))
+	    self.btnOK.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnOK.Bind(wx.EVT_BUTTON, self.okDialog)
 	self.btnOK.SetToolTipString("Confirm downloader settings")
-	self.btnCancel = wx.Button(self, id=-1, label="Cancel", pos=(220, 265), size=(140, 30))
-	self.btnCancel.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	if (platform.system() == "Darwin"):
+	    self.btnCancel = wx.BitmapButton(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/btnCancel_Protein.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (220, 265), (140, 30))
+	else:
+	    self.btnCancel = wx.Button(self, id=-1, label="Cancel", pos=(220, 265), size=(140, 30))
+	    self.btnCancel.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnCancel.Bind(wx.EVT_BUTTON, self.cancelDialog)
 	self.btnCancel.SetToolTipString("Cancel this operation")
 	
@@ -337,7 +428,7 @@ class DownloadManagerDialog(wx.Dialog):
 		# Usually the character - delimits fields, but the server name might actually have - in it
 		# so use | instead
 		# sendToServer knows how to deal specifically with kill requests
-		sendToServer("kill|" + jobID + "|" + server)
+		sendToServer("kill|" + self.realJobIDs[indx] + "|" + server)
 	    except:
 		# Don't remove it from our list if the kill request failed
 		dlg2 = wx.MessageDialog(self, "InteractiveROSETTA was unable to communicate with the server to remove this job!", "Job Not Terminated", wx.OK | wx.ICON_ERROR | wx.CENTRE)
@@ -351,7 +442,7 @@ class DownloadManagerDialog(wx.Dialog):
 	    for aline in fin:
 		if (len(aline.strip()) == 0):
 		    continue
-		if (aline.split("\t")[1].strip() == jobID.strip()):
+		if (aline.split("\t")[1].strip() == self.realJobIDs[indx]):
 		    continue
 		data.append(aline)
 	    fin.close()
@@ -368,7 +459,7 @@ class DownloadManagerDialog(wx.Dialog):
 	setServerName(self.txtServerName.GetValue().strip())
 	# Send test input
 	try:
-	    sendToServer("testinput")
+	    sendToServer("testinput", remoteServer=self.txtServerName.GetValue().strip())
 	    dlg2 = wx.MessageDialog(self, "Server test succeeded!", "Server Successful", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 	    dlg2.ShowModal()
 	    dlg2.Destroy()
@@ -483,7 +574,7 @@ class SequenceWin(wx.Frame):
 	
 	# Load PDBs button
 	if (platform.system() == "Darwin"):
-	    self.LoadPDBsBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/LoadPDBsBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 10), size=(100, 25))
+	    self.LoadPDBsBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/LoadPDBsBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 10), size=(100, 25))
 	else:
 	    self.LoadPDBsBtn = wx.Button(self.scroll, id=-1, label="Load PDBs", pos=(10, 10), size=(100, 25))
 	    self.LoadPDBsBtn.SetForegroundColour("#000000")
@@ -493,7 +584,7 @@ class SequenceWin(wx.Frame):
 	
 	# Label and text box for searching RCSB for structures
 	if (platform.system() == "Darwin"):
-	    self.labelRCSB = wx.StaticBitmap(self.scroll, -1, wx.Image(self.scriptdir + "/images/osx/labelRSCB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(115, 13), size=(43, 25))
+	    self.labelRCSB = wx.StaticBitmap(self.scroll, -1, wx.Image(self.scriptdir + "/images/osx/sequence/labelRCSB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(115, 13), size=(43, 25))
 	else:
 	    self.labelRCSB = wx.StaticText(self.scroll, -1, "RCSB:", (115, 13), (43, 25))
 	    self.labelRCSB.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -504,7 +595,7 @@ class SequenceWin(wx.Frame):
 	
 	# Fetch PDB button to get the structures from RCSB
 	if (platform.system() == "Darwin"):
-	    self.FetchBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/FetchPDBBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(210, 10), size=(100, 25))
+	    self.FetchBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/FetchPDBBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(210, 10), size=(100, 25))
 	else:
 	    self.FetchBtn = wx.Button(self.scroll, id=-1, label="Fetch PDB", pos=(210, 10), size=(100, 25))
 	    self.FetchBtn.SetForegroundColour("#000000")
@@ -514,7 +605,7 @@ class SequenceWin(wx.Frame):
 	
 	# Close button to close selected chains, or all chains
 	if (platform.system() == "Darwin"):
-	    self.CloseBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/CloseBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(310, 10), size=(100, 25))
+	    self.CloseBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/CloseBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(310, 10), size=(100, 25))
 	else:
 	    self.CloseBtn = wx.Button(self.scroll, id=-1, label="Close", pos=(310, 10), size=(100, 25))
 	    self.CloseBtn.SetForegroundColour("#000000")
@@ -524,7 +615,7 @@ class SequenceWin(wx.Frame):
 	
 	# Save button for saving the selected models, or all models
 	if (platform.system() == "Darwin"):
-	    self.SaveBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/SaveBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(410, 10), size=(100, 25))
+	    self.SaveBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/SaveBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(410, 10), size=(100, 25))
 	else:
 	    self.SaveBtn = wx.Button(self.scroll, id=-1, label="Save PDB", pos=(410, 10), size=(100, 25))
 	    self.SaveBtn.SetForegroundColour("#000000")
@@ -534,7 +625,7 @@ class SequenceWin(wx.Frame):
 	
 	# Save Image button, for taking a picture of the current PyMOL view
 	if (platform.system() == "Darwin"):
-	    self.SaveImageBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/SaveImageBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(510, 10), size=(100, 25))
+	    self.SaveImageBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/SaveImageBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(510, 10), size=(100, 25))
 	else:
 	    self.SaveImageBtn = wx.Button(self.scroll, id=-1, label="Save Image", pos=(510, 10), size=(100, 25))
 	    self.SaveImageBtn.SetForegroundColour("#000000")
@@ -544,7 +635,7 @@ class SequenceWin(wx.Frame):
 	
 	# Join button, for joining two selected chains into one
 	if (platform.system() == "Darwin"):
-	    self.JoinBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/JoinChainsBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(610, 10), size=(100, 25))
+	    self.JoinBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/JoinChainsBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(610, 10), size=(100, 25))
 	else:
 	    self.JoinBtn = wx.Button(self.scroll, id=-1, label="Join Chains", pos=(610, 10), size=(100, 25))
 	    self.JoinBtn.SetForegroundColour("#000000")
@@ -554,7 +645,7 @@ class SequenceWin(wx.Frame):
 	
 	# Renumber button, for renumbering a chain sequence from one starting with the selected residue
 	if (platform.system() == "Darwin"):
-	    self.RenumberBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/RenumberBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(710, 10), size=(100, 25))
+	    self.RenumberBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/RenumberBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(710, 10), size=(100, 25))
 	else:
 	    self.RenumberBtn = wx.Button(self.scroll, id=-1, label="Renumber", pos=(710, 10), size=(100, 25))
 	    self.RenumberBtn.SetForegroundColour("#000000")
@@ -564,7 +655,7 @@ class SequenceWin(wx.Frame):
 	
 	# Server button, for displaying the download manager dialog, above
 	if (platform.system() == "Darwin"):
-	    self.ServerBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/ServerBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(max(810, W-445), 10), size=(25, 25))
+	    self.ServerBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/ServerBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(max(810, W-445), 10), size=(25, 25))
 	else:
 	    self.ServerBtn = wx.Button(self.scroll, id=-1, label="S", pos=(max(810, W-445), 10), size=(25, 25))
 	    self.ServerBtn.SetForegroundColour("#000000")
@@ -610,7 +701,7 @@ class SequenceWin(wx.Frame):
 	self.BGRecolorBtn.SetToolTipString("Change PyMOL background color")
 	# Stereo button, for switching between stereo modes in PyMOL
 	if (platform.system() == "Darwin"):
-	    self.StereoBtn = wx.BitmapButton(self.scroll, -1, wx.Image(self.scriptdir + "/images/osx/StereoBtn_Mono.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (xpos, 90), (70, 35))
+	    self.StereoBtn = wx.BitmapButton(self.scroll, -1, wx.Image(self.scriptdir + "/images/osx/sequence/StereoBtn_Mono.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (xpos, 90), (70, 35))
 	else:
 	    self.StereoBtn = wx.Button(self.scroll, id=-1, label="Mono", pos=(xpos, 90), size=(70, 35))
 	    self.StereoBtn.SetForegroundColour("#000000")
@@ -619,7 +710,7 @@ class SequenceWin(wx.Frame):
 	self.StereoBtn.SetToolTipString("Toggle stereo view on/off")
 	# Coloring button, for changing the colors of cells in the SeqViewer
 	if (platform.system() == "Darwin"):
-	    self.ColoringBtn = wx.BitmapButton(self.scroll, -1, wx.Image(self.scriptdir + "/images/osx/ColoringBtn_NoColor.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (xpos, 130), (70, 35))
+	    self.ColoringBtn = wx.BitmapButton(self.scroll, -1, wx.Image(self.scriptdir + "/images/osx/sequence/ColoringBtn_NoColor.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (xpos, 130), (70, 35))
 	else:
 	    self.ColoringBtn = wx.Button(self.scroll, id=-1, label="No Color", pos=(xpos, 130), size=(70, 35))
 	    self.ColoringBtn.SetForegroundColour("#000000")
@@ -628,7 +719,7 @@ class SequenceWin(wx.Frame):
 	self.ColoringBtn.SetToolTipString("Color primary sequence by secondary structure/B-factor or turn off coloring")
 	# Align button, for changing the numbering of the SeqViewer columns
 	if (platform.system() == "Darwin"):
-	    self.AlignBtn = wx.BitmapButton(self.scroll, -1, wx.Image(self.scriptdir + "/images/osx/AlignBtn_From1.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (xpos, 170), (70, 35))
+	    self.AlignBtn = wx.BitmapButton(self.scroll, -1, wx.Image(self.scriptdir + "/images/osx/sequence/AlignBtn_From1.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (xpos, 170), (70, 35))
 	else:
 	    self.AlignBtn = wx.Button(self.scroll, id=-1, label="From 1", pos=(xpos, 170), size=(70, 35))
 	    self.AlignBtn.SetForegroundColour("#000000")
@@ -700,6 +791,8 @@ class SequenceWin(wx.Frame):
 	try:
 	    if (platform.system() == "Windows"):
 		self.dsspexe = glob.glob(self.scriptdir + "\\bin\\dssp_win*")[0]
+	    elif (platform.system() == "Darwin"):
+		self.dsspexe = glob.glob(self.scriptdir + "/bin/dssp_darwin*")[0]
 	    else:
 		self.dsspexe = glob.glob(self.scriptdir + "/bin/dssp_unix*")[0]
 	except:
@@ -1052,17 +1145,19 @@ class SequenceWin(wx.Frame):
 				blocklen = 0
 				copystr += "\n"
 	    copystr = copystr.strip() + "\n"
-	    if (platform.system() == "Windows"):
-		try:
+	    try:
+		if (platform.system() == "Windows"):
 		    r = Tk()
 		    r.withdraw()
 		    r.clipboard_clear()
 		    r.clipboard_append(copystr)
 		    r.destroy()
-		except:
-		    pass
-	    else:
-		pyperclip.copy(copystr)
+		elif (platform.system() == "Darwin"):
+		    pyperclip.copy(copystr)
+		else:
+		    clipboard.copy(copystr)
+	    except:
+		pass
 	event.Skip()
 	
     # Left mouse click on SeqViewer cell
@@ -1159,7 +1254,7 @@ class SequenceWin(wx.Frame):
 	chain = ID[len(ID)-1]
 	if (chain == "_"):
 	    chain = " "
-	dlg = ModelDialog(self, model, chain)
+	dlg = ModelDialog(self, model, chain, self.scriptdir)
 	if (dlg.ShowModal() == wx.OK):
 	    # Now we might need to shuffle some things around
 	    # First, model name is new
@@ -1500,6 +1595,10 @@ class SequenceWin(wx.Frame):
 		self.cmd.select("seqsele", "temp")
 		self.cmd.delete("temp")
 		self.cmd.delete("sele")
+		# The newest version of PyMOL (1.7.6) does not update the selection until the
+		# PyMOL camera is moved, so the following fixes the problem
+		self.cmd.turn("x", "1")
+		self.cmd.turn("x", "-1")
 	else:
 	    # Take the selection data from PyMOL and select those residues in the SequenceWindow
 	    for atom in self.stored.selected:
@@ -1820,7 +1919,7 @@ class SequenceWin(wx.Frame):
     
     def fetchClick(self, event):
 	# You have to do this on Linux due to the libc bug
-	if (platform.system() == "Linux"):
+	if (platform.system() != "Windows"):
 	    res_init()
 	# Attempt to get a PDB directly from RCSB so the user doesn't have to download it manually
 	pdbCode = str(self.RCSBTxt.GetValue().strip()[0:4])
@@ -2170,7 +2269,7 @@ class SequenceWin(wx.Frame):
 		else:
 		    chains.append(ch.id)
 	    if (showDialog == "Show"): # Otherwise this is an NMR ensemble and the options from the first model should be applied to all
-		dlg = ProteinDialog(self, pdbID + ".pdb", chains)
+		dlg = ProteinDialog(self, pdbID + ".pdb", chains, self.scriptdir)
 		if (dlg.ShowModal() != wx.OK):
 		    # Canceled or closed, do nothing
 		    doNotLoad = True
@@ -2243,7 +2342,7 @@ class SequenceWin(wx.Frame):
 		retoggle = True
 		self.alignType = "From 1"
 		if (platform.system() == "Darwin"):
-		    self.AlignBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/AlignBtn_From1.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		    self.AlignBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/AlignBtn_From1.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		else:
 		    self.AlignBtn.SetLabel(self.alignType)
 	    else:
@@ -2354,6 +2453,13 @@ class SequenceWin(wx.Frame):
 	    msg = "Are you sure you want to close the selected chains?"
 	dlg = wx.MessageDialog(self, msg, "Close PDBs", wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
 	if (dlg.ShowModal() == wx.ID_YES):
+	    # Go back to renumbering from 1
+	    self.alignType = "From 1"
+	    if (platform.system() == "Darwin"):
+		self.AlignBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/AlignBtn_From1.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    else:
+		self.AlignBtn.SetLabel(self.alignType)
+	    self.regenerateLookupTable()
 	    # Take off the rows backwards so the renumbering doesn't screw things up
 	    while (len(selectedRows) > 0):
 		currRow = selectedRows.pop()
@@ -2762,7 +2868,7 @@ class SequenceWin(wx.Frame):
     def configureServer(self, event):
 	# This button allows the user to give a name for the remote server
 	# After submission, a test will be made and the user will be notified if the test was sucessful
-	dlg = DownloadManagerDialog(self, getServerName())
+	dlg = DownloadManagerDialog(self, getServerName(), self.scriptdir)
 	#dlg = wx.TextEntryDialog(self, "Enter the URL of the remote server:", "Configure Remote Server", "", style=wx.OK | wx.CANCEL)
         #dlg.SetValue(getServerName())
         if (dlg.ShowModal() == wx.OK):
@@ -2799,7 +2905,7 @@ class SequenceWin(wx.Frame):
 	if (self.viewMode == "Mono"):
 	    self.viewMode = "Crosseye"
 	    if (platform.system() == "Darwin"):
-		self.StereoBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/StereoBtn_Crosseye.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.StereoBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/StereoBtn_Crosseye.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.StereoBtn.SetLabel(self.viewMode)
 	    self.cmd.stereo("crosseye")
@@ -2807,7 +2913,7 @@ class SequenceWin(wx.Frame):
 	elif (self.viewMode == "Crosseye"):
 	    self.viewMode = "Walleye"
 	    if (platform.system() == "Darwin"):
-		self.StereoBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/StereoBtn_Walleye.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.StereoBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/StereoBtn_Walleye.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.StereoBtn.SetLabel(self.viewMode)
 	    self.cmd.stereo("walleye")
@@ -2815,7 +2921,7 @@ class SequenceWin(wx.Frame):
 	elif (self.viewMode == "Walleye"):
 	    self.viewMode = "Quadbuffer"
 	    if (platform.system() == "Darwin"):
-		self.StereoBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/StereoBtn_Quadbuffer.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.StereoBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/StereoBtn_Quadbuffer.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.StereoBtn.SetLabel(self.viewMode)
 	    self.cmd.stereo("quadbuffer")
@@ -2823,7 +2929,7 @@ class SequenceWin(wx.Frame):
 	else:
 	    self.viewMode = "Mono"
 	    if (platform.system() == "Darwin"):
-		self.StereoBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/StereoBtn_Mono.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.StereoBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/StereoBtn_Mono.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.StereoBtn.SetLabel(self.viewMode)
 	    self.cmd.stereo("off")
@@ -2833,21 +2939,37 @@ class SequenceWin(wx.Frame):
 	if (self.colorMode == "No Color"):
 	    self.colorMode = "SS"
 	    if (platform.system() == "Darwin"):
-		self.ColoringBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/ColoringBtn_SS.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.ColoringBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/ColoringBtn_SS.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.ColoringBtn.SetLabel(self.colorMode)
 	    logInfo("Colored residues by SS")
 	elif (self.colorMode == "SS"):
 	    self.colorMode = "BFactor"
 	    if (platform.system() == "Darwin"):
-		self.ColoringBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/ColoringBtn_BFactor.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.ColoringBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/ColoringBtn_BFactor.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.ColoringBtn.SetLabel(self.colorMode)
 	    logInfo("Colored residues by B-factor")
+	elif (self.colorMode == "BFactor"):
+	    try:
+		hmmstr4py
+		self.colorMode = "HMMSTR"
+		if (platform.system() == "Darwin"):
+		    self.ColoringBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/ColoringBtn_HMMSTR.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		else:
+		    self.ColoringBtn.SetLabel(self.colorMode)
+		logInfo("Colored residues by HMMSTR")
+	    except:
+		self.colorMode = "No Color"
+		if (platform.system() == "Darwin"):
+		    self.ColoringBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/ColoringBtn_NoColor.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		else:
+		    self.ColoringBtn.SetLabel(self.colorMode)
+		logInfo("Turned residue coloring off")
 	else:
 	    self.colorMode = "No Color"
 	    if (platform.system() == "Darwin"):
-		self.ColoringBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/ColoringBtn_NoColor.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.ColoringBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/ColoringBtn_NoColor.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.ColoringBtn.SetLabel(self.colorMode)
 	    logInfo("Turned residue coloring off")
@@ -2920,6 +3042,93 @@ class SequenceWin(wx.Frame):
 			r = r + 1
 		else:
 		    r = r + 1
+	elif (self.colorMode == "HMMSTR"):
+	    ### =================================================================================
+	    ### Author: Oluwadamilola Lawal
+	    ### PI: Prof. Chris Bystroff
+	    ### Rosetta Summer Intern, 2015
+	    ### =================================================================================
+	    # A HMMSTR of 0 is blue, 1 is red, and everything else is a gradient in between
+	    # Default everything to white
+	    for r in range(0, self.SeqViewer.NumberRows):
+		for c in range(0, self.SeqViewer.NumberCols):
+		    self.SeqViewer.SetCellBackgroundColour(r, c, "white")
+		    self.SeqViewer.SetCellTextColour(r, c, "black")
+    
+	    AA_list2 = ['A','C','D','E','F','G','H','I','K','L','M','N','P','Q','R','S','T','V','W','Y']
+    
+	    AA_list = ['ALA','CYS','ASP','GLU','PHE','GLY','HIS','ILE','LYS','LEU',
+	'MET','ASN','PRO','GLN','ARG','SER','THR','VAL','TRP','TYR']
+	
+	    background = [0.0828,0.0194,0.0586,0.0599,0.0401,0.0809,0.0227,0.0555,0.0596,0.0802,0.0207,0.0473,0.0460,0.0373,0.0464,0.0625,0.0589,0.0687,0.0151,0.0376]
+	    
+	    r = 0
+	    while (r < self.SeqViewer.NumberRows):
+		if (self.poses[r]):
+		    # Skip over the blank entries
+		    #Get all non-water residue as indexed in AA_list into a list
+		    for ch in self.poses[r][0]:
+			seq = []
+			for res in ch:
+			    if (res.resname != 'HOH') and (res.resname in AA_list): 
+				seq.append(AA_list.index(res.resname)+1)
+			    elif (res.resname != 'HOH'): 
+				seq.append(21)
+			nres = len(seq)
+			np.asarray(seq)
+			#Get the xyz coordinates of 'N', 'CA', 'C', 'O'
+			backbone = np.zeros([3,(4*nres)],dtype=np.float32,order='F')
+			backbone[:,:] = 999.0
+			n = 0
+			for res in ch:
+			    if res.resname in AA_list:
+				backbone[:,(n)] = res["N"].get_coord()
+				backbone[:,(n+1)] = res["CA"].get_coord()
+				backbone[:,(n+2)] = res["C"].get_coord()
+				backbone[:,(n+3)] = res["O"].get_coord()
+				n = n + 4
+			    else: 
+				n = n + 4
+			#Send seq and backbone information to HMMSTR, and return gamma sequence profile
+			if(platform.system() == "Windows"):
+			    gprofile = hmmstr4py.hmmstr.hmmstr_gamma(self.scriptdir + "\\data\\model_R.hmm",seq,backbone)
+			else:
+			    gprofile = hmmstr4py.hmmstr.hmmstr_gamma(self.scriptdir + "/data/model_R.hmm",seq,backbone)
+			#get the corresponding gamma value for each residue in the sequence
+			llratio = []
+			for pos in xrange(len(seq)):
+			    if seq[pos] != 21:
+				gp = gprofile[pos,(seq[pos]-1)]
+				bg = background[(seq[pos]-1)]
+				llrt = np.log(gp/bg)
+				if llrt > 3.0:
+				    llratio.append(3.0)
+				elif llrt < -3.0:
+				    llratio.append(-3.0)
+				else:
+				    llratio.append(llrt)
+			    else:
+				gamma_seq.append(21)
+			#Use HMMSTR gamma value to generate a color
+			c = 0
+			for residue in ch:
+			    if residue.resname != 'HOH':
+				try:
+				    bfactor = residue["CA"].get_bfactor()
+				except:
+				    c = c + 1
+				    continue
+			
+				green = int(128 + (llratio[c] * 42))
+				red = 254 - green
+				color = "#%02x%02x%02x" % (red, green, 0)
+				(row, col) = self.selectLookup[(self.IDs[r], residue.id[1])]
+				self.SeqViewer.SetCellBackgroundColour(row, col, color.upper())
+				self.SeqViewer.SetCellTextColour(row, col, "white")
+				c = c + 1
+			r = r + 1
+		else:
+		    r = r + 1
 	else:
 	    # Default everything to white
 	    for r in range(0, self.SeqViewer.NumberRows):
@@ -2933,7 +3142,7 @@ class SequenceWin(wx.Frame):
 	if (self.alignType == "From 1"):
 	    self.alignType = "PDB #"
 	    if (platform.system() == "Darwin"):
-		self.AlignBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/AlignBtn_PDB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.AlignBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/AlignBtn_PDB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.AlignBtn.SetLabel(self.alignType)
 	    self.regenerateLookupTable()
@@ -2943,7 +3152,7 @@ class SequenceWin(wx.Frame):
 	else:
 	    self.alignType = "From 1"
 	    if (platform.system() == "Darwin"):
-		self.AlignBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/AlignBtn_From1.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.AlignBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/AlignBtn_From1.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.AlignBtn.SetLabel(self.alignType)
 	    self.regenerateLookupTable()
@@ -2958,6 +3167,8 @@ class SequenceWin(wx.Frame):
 	    try:
 		if (platform.system() == "Windows"):
 		    muscle = glob.glob(self.scriptdir + "\\bin\\muscle_win*")[0]
+		elif (platform.system() == "Darwin"):
+		    muscle = glob.glob(self.scriptdir + "/bin/muscle_darwin*")[0]
 		else:
 		    muscle = glob.glob(self.scriptdir + "/bin/muscle_unix*")[0]
 	    except:
@@ -3243,7 +3454,6 @@ class SequenceWin(wx.Frame):
 		URL = jobURL + "/results/" + ID + "/results" + packageext
 	    try:
 		if (serverlocation):
-		    print 
 		    if (not(os.path.isfile(filepath)) and not(os.path.isfile(filepath.split(packageext)[0] + ".gz"))):
 			raise Exception()
 		    if (jobtype == "MSD"):

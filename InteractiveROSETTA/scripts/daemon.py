@@ -66,6 +66,7 @@ except:
 	    # Nope, wasn't in there
 	    raise Exception
 	else:
+	    print "Trying to import from " + rosettapath + "..."
 	    sys.path.append(rosettapath)
 	    olddir = os.getcwd()
 	    os.chdir(rosettapath)
@@ -92,6 +93,7 @@ except:
 	    f.close()
 	except:
 	    pass
+	raise Exception()
 	# Okay, we still didn't get it, so let's traverse the filesystem looking for it...
 	foundIt = False
 	# Remember that root is C: on Windows, not /
@@ -151,7 +153,7 @@ except:
 		try:
 		    f = open(cfgfile, "r")
 		    for aline in f:
-			if (not("[ROSETTAPATH]" in aline) and not("[ROSETTADB]") in aline):
+			if (not("[ROSETTAPATH]" in aline) and not("[ROSETTADB]" in aline)):
 			    data.append(aline.strip())
 		    f.close()
 		except:
@@ -268,6 +270,8 @@ def doMinimization():
 	minmover = MinMover(mm, scorefxn, "dfpmin", 0.01, True)
 	if (minType == "Cartesian"):
 	    minmover.cartesian(True)
+	    scorefxn.set_weight(cart_bonded, 0.5)
+	    scorefxn.set_weight(pro_close, 0)
 	try:
 	    minmover.apply(minpose)
 	except:
@@ -807,6 +811,10 @@ def doRotamerSearch():
     phi = pose.phi(indx)
     psi = pose.psi(indx)
     # Read the rotamers
+    fout = open("progress", "w")
+    fout.write("0/10\n")
+    fout.write("Reading rotamer libraries...\n")
+    fout.close()
     if (restype != "ALA" and restype != "GLY"):
 	if (platform.system() == "Windows"):
 	    libfile = os.getenv("PYROSETTA_DATABASE") + "\\rotamer\\ExtendedOpt1-5\\" + restype.lower() + ".bbdep.rotamers.lib.gz"
@@ -821,6 +829,9 @@ def doRotamerSearch():
 		lphi = int(aline.split()[1])
 		lpsi = int(aline.split()[2])
 		chis = aline.split()[9:13]
+		if (restype == "PRO"):
+		    chis[2] = "-999.0"
+		    chis[3] = "-999.0"
 		if (math.fabs(lphi-phi) < 10 and math.fabs(lpsi-psi) < 10):
 		    chivals.append(chis)
 		    Elist.append(0.0)
@@ -850,6 +861,12 @@ def doRotamerSearch():
     # Search all the chi values and score them
     k = 0
     nonzero_scoretypes = scorefxn.get_nonzero_weighted_scoretypes()
+    atompos = []
+    fout = open("progress", "w")
+    fout.write("0/" + str(len(chivals)) + "\n")
+    fout.write("Scoring rotamers...\n")
+    fout.close()
+    count = 0
     for chis in chivals:
 	if (chis[0] != "-999"):
 	    for i in range(0, pose.residue(indx).nchi()):
@@ -860,12 +877,23 @@ def doRotamerSearch():
 	Elist[k] = [emap.get(total_score)]
 	for scoretype in nonzero_scoretypes:
 	    Elist[k].append(emap.get(scoretype))
+	atomstr = ""
+	for i in range(1, pose.residue(indx).natoms()+1):
+	    atomstr = atomstr + pose.residue(indx).atom_name(i).strip() + " " + str(pose.residue(indx).atom(i).xyz()[0]) + " " + str(pose.residue(indx).atom(i).xyz()[1]) + " " + str(pose.residue(indx).atom(i).xyz()[2]) + "\t"
+	atomstr = atomstr.strip()
+	atompos.append(atomstr)
 	k = k + 1
 	# The following line must be here
 	# Sometimes after doing multiple set_chis the structure gets really messed up (don't know if I am
 	# doing something wrong or if it is a Rosetta bug, it only happens in special occasions) so we have
 	# to revert back to the original structure so errors are not propagated
 	pose.replace_residue(indx, res_mutate.clone(), True)
+	count += 1
+	if (count % 10 == 0):
+	    fout = open("progress", "w")
+	    fout.write(str(count) + "/" + str(len(chivals)) + "\n")
+	    fout.write("Scoring rotamers...\n")
+	    fout.close()
     # Now sort according to increasing score
     for i in range(0, len(chivals)-1):
 	lowest = i
@@ -881,6 +909,9 @@ def doRotamerSearch():
 	temp = rotanames[i]
 	rotanames[i] = rotanames[lowest]
 	rotanames[lowest] = temp
+	temp = atompos[i]
+	atompos[i] = atompos[lowest]
+	atompos[lowest] = temp
     # Dump the output
     outputpdb = pdbfile.split(".pdb")[0] + "_R.pdb"
     pose.dump_pdb(outputpdb)
@@ -892,9 +923,13 @@ def doRotamerSearch():
 	f.write("_" + str(info.number(indx)) + "\n")
     else:
 	f.write(info.chain(indx) + str(info.number(indx)) + "\n")
-    for ichi in range(1, pose.residue(indx).nchi()+1):
-	chiatoms = pose.residue(indx).chi_atoms()[ichi]
-	f.write("CHIATOMS\t" + pose.residue(indx).atom_name(chiatoms[1]).strip() + " " + pose.residue(indx).atom_name(chiatoms[2]).strip() + " " + pose.residue(indx).atom_name(chiatoms[3]).strip() + " " + pose.residue(indx).atom_name(chiatoms[4]).strip() + "\n")
+    if (restype == "PRO"):
+	nchi = 2
+    else:
+	nchi = pose.residue(indx).nchi()
+    #for ichi in range(1, nchi+1):
+	#chiatoms = pose.residue(indx).chi_atoms()[ichi]
+	#f.write("CHIATOMS\t" + pose.residue(indx).atom_name(chiatoms[1]).strip() + " " + pose.residue(indx).atom_name(chiatoms[2]).strip() + " " + pose.residue(indx).atom_name(chiatoms[3]).strip() + " " + pose.residue(indx).atom_name(chiatoms[4]).strip() + "\n")
     f.write("ENERGY\ttotal_score")
     for scoretype in nonzero_scoretypes:
 	f.write("\t" + str(scoretype))
@@ -905,7 +940,8 @@ def doRotamerSearch():
 	for j in range(1, len(Elist[i])):
 	    f.write("\t" + str(Elist[i][j]))
 	f.write("\n")
-	f.write("CHI\t" + chivals[i][0] + "\t" + chivals[i][1] + "\t" + chivals[i][2] + "\t" + chivals[i][3] + "\n")
+	#f.write("CHI\t" + chivals[i][0] + "\t" + chivals[i][1] + "\t" + chivals[i][2] + "\t" + chivals[i][3] + "\n")
+	f.write("ROTAMER\t" + atompos[i] + "\n")
     f.close()
     # So the main GUI doesn't attempt to read the file before the daemon finishes writing its contents
     os.rename("rotameroutputtemp", "rotameroutput")

@@ -3,19 +3,29 @@ import wx.grid
 import wx.lib.scrolledpanel
 import os
 import os.path
+import sys
 import platform
 import glob
 import webbrowser
 try:
+    # It may have been installed locally in the sandbox
+    if (platform.system() == "Windows"):
+	sys.path.append(os.path.expanduser("~") + "\\InteractiveROSETTA\\molfile2params")
+    else:
+	sys.path.append(os.path.expanduser("~") + "/.InteractiveROSETTA/molfile2params")
     import molfile_to_params
 except:
-    if (platform.system() == "Windows"):
-	dlg = wx.MessageDialog(None, "ERROR: molfile_to_params not found\nDid you forget to unpack it?\n\nWindows: Right-click on \"molfile.bat\" and select \"Run as Administrator\"", "Molfile_to_params Missing", wx.OK | wx.ICON_ERROR | wx.CENTRE)
-    else:
-	dlg = wx.MessageDialog(None, "ERROR: molfile_to_params not found\nDid you forget to unpack it?\n\nOSX/Linux: Perform \"sudo molfile.py\"", "Molfile_to_params Missing", wx.OK | wx.ICON_ERROR | wx.CENTRE)
+    try:
+	if (platform.system() == "Windows"):
+	    shutil.rmtree(os.path.expanduser("~") + "\\InteractiveROSETTA\\molfile2params")
+	else:
+	    shutil.rmtree(os.path.expanduser("~") + "/.InteractiveROSETTA/molfile2params")
+    except:
+	pass
+    dlg = wx.MessageDialog(None, "InteractiveROSETTA was unable to import molfile2params!\nInteractiveROSETTA attempted to remove the previous molfile2params install.  Run InteractiveROSETTA again to reinstall it automatically.  If it still does not import, please contact the developer.", "Molfile2Params Missing", wx.OK | wx.ICON_ERROR | wx.CENTRE)
     dlg.ShowModal()
     dlg.Destroy()
-    import molfile_to_params
+    exit()
 from tools import *
 
 class ResidueCreatorPanel(wx.lib.scrolledpanel.ScrolledPanel):
@@ -37,7 +47,7 @@ class ResidueCreatorPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblProt = wx.StaticText(self, -1, "Residue/Ligand Creator", (25, 15), (270, 25), style=wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblLigand.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
+	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/advresiduecreator/lblLigand.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
 	else:
 	    self.lblProt = wx.StaticText(self, -1, "Residue/Ligand Creator", pos=(60, 15), style=wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -57,7 +67,7 @@ class ResidueCreatorPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblInst = wx.StaticText(self, -1, "Upload a PDB file containing unrecognized atoms.\nThen select unrecognized residue types to parameterize.", (0, 45), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstLigand.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 50))
+	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/advresiduecreator/lblInstLigand.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 50))
 	else:
 	    self.lblInst = wx.StaticText(self, -1, "Upload a PDB file containing unrecognized atoms.\nThen select unrecognized residue types to parameterize.", pos=(0, 45), style=wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -70,7 +80,7 @@ class ResidueCreatorPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    resizeTextControlForUNIX(self.lblMOL2, 10, 180)
 	self.lblMOL2.SetForegroundColour("#FFFFFF")
 	if (platform.system() == "Darwin"):
-	    self.btnLoad = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLoadMOL2.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(200, 100), size=(110, 25))
+	    self.btnLoad = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/advresiduecreator/btnLoadMOL2.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(200, 100), size=(110, 25))
 	else:
 	    self.btnLoad = wx.Button(self, id=-1, label="Load .MOL2", pos=(200, 100), size=(110, 25))
 	    self.btnLoad.SetForegroundColour("#000000")
@@ -79,7 +89,7 @@ class ResidueCreatorPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnLoad.SetToolTipString("Load a .mol2 file containing a ligand/NCAA")
 	
 	if (platform.system() == "Darwin"):
-	    self.btnType = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnType_Ligand.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(40, 140), size=(100, 25))
+	    self.btnType = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/advresiduecreator/btnType_Ligand.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(40, 140), size=(100, 25))
 	else:
 	    self.btnType = wx.Button(self, id=-1, label="Ligand", pos=(40, 140), size=(100, 25))
 	    self.btnType.SetForegroundColour("#000000")
@@ -87,7 +97,7 @@ class ResidueCreatorPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnType.Bind(wx.EVT_BUTTON, self.typeToggle)
 	self.btnType.SetToolTipString("Uploaded .mol2 file represents a ligand")
 	if (platform.system() == "Darwin"):
-	    self.btnCreate = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnCreate.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(180, 140), size=(100, 25))
+	    self.btnCreate = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/advresiduecreator/btnCreate.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(180, 140), size=(100, 25))
 	else:
 	    self.btnCreate = wx.Button(self, id=-1, label="Create!", pos=(180, 140), size=(100, 25))
 	    self.btnCreate.SetForegroundColour("#000000")
@@ -144,7 +154,7 @@ class ResidueCreatorPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.atomtypes["ZN"] = ["Zn2p"]
 	
 	if (platform.system() == "Darwin"):
-	    self.lblNterm = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblNterm.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, ypos+35), size=(40, 25))
+	    self.lblNterm = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/advresiduecreator/lblNterm.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, ypos+35), size=(40, 25))
 	else:
 	    self.lblNterm = wx.StaticText(self, -1, "Nterm:", pos=(10, ypos+35), size=(40, 25))
 	    self.lblNterm.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -153,7 +163,7 @@ class ResidueCreatorPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.NtermMenu.Bind(wx.EVT_COMBOBOX, self.atomMenuSelect)
 	self.NtermMenu.SetToolTipString("N-terminus atom for NCAAs")
 	if (platform.system() == "Darwin"):
-	    self.lblCterm = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblCterm.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(170, ypos+35), size=(40, 25))
+	    self.lblCterm = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/advresiduecreator/lblCterm.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(170, ypos+35), size=(40, 25))
 	else:
 	    self.lblCterm = wx.StaticText(self, -1, "Cterm:", pos=(170, ypos+35), size=(40, 25))
 	    self.lblCterm.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -168,7 +178,7 @@ class ResidueCreatorPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.CtermMenu.Disable()
 	
 	if (platform.system() == "Darwin"):
-	    self.lblCode = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblCode.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, ypos+65), size=(40, 25))
+	    self.lblCode = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/advresiduecreator/lblCode.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, ypos+65), size=(40, 25))
 	else:
 	    self.lblCode = wx.StaticText(self, -1, "Code:", pos=(10, ypos+65), size=(40, 25))
 	    self.lblCode.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -177,7 +187,7 @@ class ResidueCreatorPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.txtCode.SetValue("UNK")
 	self.txtCode.SetToolTipString("Three-letter amino acid code for the ligand/NCAA")
 	if (platform.system() == "Darwin"):
-	    self.btnAdd = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAddDB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(110, ypos+60), size=(200, 25))
+	    self.btnAdd = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/advresiduecreator/btnAddDB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(110, ypos+60), size=(200, 25))
 	else:
 	    self.btnAdd = wx.Button(self, id=-1, label="Add to Database", pos=(110, ypos+60), size=(200, 25))
 	    self.btnAdd.SetForegroundColour("#000000")
@@ -190,7 +200,7 @@ class ResidueCreatorPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblLine = wx.StaticText(self, -1, "==========================", (0, ypos+90), (320, 20), wx.ALIGN_CENTRE)
 	    self.lblLine.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblLine = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblLine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+90), size=(320, 20))
+	    self.lblLine = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/advresiduecreator/lblLine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+90), size=(320, 20))
 	else:
 	    self.lblLine = wx.StaticText(self, -1, "==========================", (0, ypos+90), style=wx.ALIGN_CENTRE)
 	    self.lblLine.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
@@ -201,7 +211,7 @@ class ResidueCreatorPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.removeMenu.Bind(wx.EVT_COMBOBOX, self.resMenuSelect)
 	self.removeMenu.SetToolTipString("Select residues already parameterized for removal")
 	if (platform.system() == "Darwin"):
-	    self.btnRemove = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnRemoveDB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(110, ypos+110), size=(200, 25))
+	    self.btnRemove = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/advresiduecreator/btnRemoveDB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(110, ypos+110), size=(200, 25))
 	else:
 	    self.btnRemove = wx.Button(self, id=-1, label="Remove from DB", pos=(110, ypos+110), size=(200, 25))
 	    self.btnRemove.SetForegroundColour("#000000")
@@ -309,7 +319,7 @@ class ResidueCreatorPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.NtermMenu.Enable()
 	    self.CtermMenu.Enable()
 	    if (platform.system() == "Darwin"):
-		self.btnType.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnType_Polymer.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnType.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/advresiduecreator/btnType_Polymer.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnType.SetLabel(self.paramsType)
 	    self.btnType.SetToolTipString("Uploaded .mol2 file represents an NCAA embedded as part of a polypeptide sequence")
@@ -318,7 +328,7 @@ class ResidueCreatorPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.NtermMenu.Disable()
 	    self.CtermMenu.Disable()
 	    if (platform.system() == "Darwin"):
-		self.btnType.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnType_Ligand.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnType.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/advresiduecreator/btnType_Ligand.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnType.SetLabel(self.paramsType)
 	    self.btnType.SetToolTipString("Uploaded .mol2 file represents a ligand")

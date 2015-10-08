@@ -2,14 +2,17 @@ import wx
 import os
 import os.path
 import platform
+import sys
 from wx.lib.embeddedimage import PyEmbeddedImage
-from poster.encode import multipart_encode
-from poster.streaminghttp import register_openers
+sys.path.append("/home/balto/VirtualBox VMs/shared/InteractiveROSETTA/dist/InteractiveROSETTA/eggs")
+import poster
+#from poster.encode import multipart_encode
+#from poster.streaminghttp import register_openers
 import urllib2
 import glob
 import socket
 
-register_openers()
+poster.streaminghttp.register_openers()
 if (platform.system() == "Windows"):
     # The reason for the slowness at Rosetta launch is because it's loading the Dunbrack rotamers
     # from text files.  It attempts to write out a binary file of these rotamers after loading them
@@ -1649,7 +1652,7 @@ def sendToServer(inputfile, remoteServer=None):
 	except:
 	    response = "Failed"
     else:
-	datagen, headers = multipart_encode({inputfile: f})
+	datagen, headers = poster.encode.multipart_encode({inputfile: f})
 	for line in datagen:
 	    if (line[0:2] == "--"):
 		myID = line[2:len(line.strip())-2]
@@ -1746,7 +1749,7 @@ def getRecognizedTypes():
     os.chdir(curdir)
     return recognized
 
-def cleanPDB(pdbfile):
+def cleanPDB(pdbfile, acceptNCAAs=False):
     # This function will look for and remove duplicate atoms
     # It will permanently modify the PDB that the user loaded 
     # This shouldn't cause problems for other programs though
@@ -1796,7 +1799,7 @@ def cleanPDB(pdbfile):
 		if (char not in takenIDs):
 		    blankID = char
 		    break
-	if ((aline[0:4] == "ATOM" or aline[0:6] == "HETATM") and not(aline[17:20].strip() in getRecognizedTypes())):
+	if ((aline[0:4] == "ATOM" or aline[0:6] == "HETATM") and not(aline[17:20].strip() in getRecognizedTypes()) and not(acceptNCAAs)):
 	    offset = offset + 1
 	    data.pop(counter)
 	    continue
@@ -1807,10 +1810,10 @@ def cleanPDB(pdbfile):
 		aline = aline[0:7] + ("%4i" % atomno) + aline[11:]
 	    except:
 		pass
-	if ((aline.startswith("ATOM") or aline.startswith("HETATM")) and isAA(aline[17:20])):
+	if ((aline.startswith("ATOM") or aline.startswith("HETATM")) and aline[21] == " "):
 	    # Rewrite blank chain IDs
-	    if (aline[21] == " "):
-		aline = aline[0:21] + blankID + aline[22:]
+	    aline = aline[0:21] + blankID + aline[22:]
+	if ((aline.startswith("ATOM") or aline.startswith("HETATM")) and isAA(aline[17:20])):
 	    res = aline[22:27] # Includes residue indx + the optional alternate letter
 	    if (res[0:4] != curr_res[0:4]): # New residue indx
 		altlocs_taken = res[4] # Reset the taken altlocs
@@ -1977,6 +1980,18 @@ def deleteInputFiles():
     if (os.path.isfile("threadoutput")):
 	os.remove("threadoutput")
     tempfiles = glob.glob("*temp")
+    for tempfile in tempfiles:
+	try:
+	    os.remove(tempfile)
+	except:
+	    pass
+    tempfiles = glob.glob("*input")
+    for tempfile in tempfiles:
+	try:
+	    os.remove(tempfile)
+	except:
+	    pass
+    tempfiles = glob.glob("*output")
     for tempfile in tempfiles:
 	try:
 	    os.remove(tempfile)

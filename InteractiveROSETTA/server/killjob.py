@@ -1,7 +1,6 @@
 import commands
 import sys
 import shutil
-import glob
 
 if (len(sys.argv) != 2):
     print "Usage: python killjob.py jobID"
@@ -18,5 +17,3 @@ for process in psoutput.split("\n"):
     pid = process.split()[1]
     res, output = commands.getstatusoutput("kill -9 " + pid)
 shutil.rmtree(scriptdir + "/results/" + sys.argv[1].strip(), ignore_errors=True)
-for jobfile in glob.glob(scriptdir + "/jobfiles/*" + sys.argv[1].strip() + "*"):
-    os.remove(jobfile)

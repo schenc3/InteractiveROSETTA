@@ -28,7 +28,7 @@ class AntibodyPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblProt = wx.StaticText(self, -1, "Antibody Modeling", (25, 15), (270, 25), wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblAntibody.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
+	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/antibody/lblAntibody.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
 	else:
 	    self.lblProt = wx.StaticText(self, -1, "Antibody Modeling", (70, 15), style=wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -48,7 +48,7 @@ class AntibodyPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblInst = wx.StaticText(self, -1, "Model antibodies on a remote server", (0, 45), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstAntibody.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 25))
+	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/antibody/lblInstAntibody.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 25))
 	else:
 	    self.lblInst = wx.StaticText(self, -1, "Model antibodies on a remote server", (5, 45), style=wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -59,7 +59,7 @@ class AntibodyPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblLightChain = wx.StaticText(self, -1, "Variable Light Chain Sequence:", (10, 90), (320, 20), wx.ALIGN_LEFT)
 	    self.lblLightChain.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblLightChain = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblLightChain.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 90), size=(320, 20))
+	    self.lblLightChain = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/antibody/lblLightChain.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 90), size=(320, 20))
 	else:
 	    self.lblLightChain = wx.StaticText(self, -1, "Variable Light Chain Sequence:", (10, 90), style=wx.ALIGN_LEFT)
 	    self.lblLightChain.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -72,7 +72,7 @@ class AntibodyPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblHeavyChain = wx.StaticText(self, -1, "Variable Heavy Chain Sequence:", (10, 200), (320, 20), wx.ALIGN_LEFT)
 	    self.lblHeavyChain.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblHeavyChain = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblHeavyChain.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 200), size=(320, 20))
+	    self.lblHeavyChain = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/antibody/lblHeavyChain.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 200), size=(320, 20))
 	else:
 	    self.lblHeavyChain = wx.StaticText(self, -1, "Variable Heavy Chain Sequence:", (10, 200), style=wx.ALIGN_LEFT)
 	    self.lblHeavyChain.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -85,7 +85,7 @@ class AntibodyPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblNumModels = wx.StaticText(self, -1, "Models to Generate:", (0, 313), (260, 20), wx.ALIGN_CENTRE)
 	    self.lblNumModels.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblNumModels = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblNumModels.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 313), size=(260, 20))
+	    self.lblNumModels = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/antibody/lblNumModels.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 313), size=(260, 20))
 	else:
 	    self.lblNumModels = wx.StaticText(self, -1, "Models to Generate:", (0, 313), style=wx.ALIGN_CENTRE)
 	    self.lblNumModels.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -96,7 +96,7 @@ class AntibodyPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.txtNumModels.SetToolTipString("Number of antibody models to generate (1-100)")
 	
 	if (platform.system() == "Darwin"):
-	    self.btnImmunize = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnImmunize.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(110, 350), size=(100, 25))
+	    self.btnImmunize = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/antibody/btnImmunize.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(110, 350), size=(100, 25))
 	else:
 	    self.btnImmunize = wx.Button(self, id=-1, label="Immunize!", pos=(110, 350), size=(100, 25))
 	    self.btnImmunize.SetForegroundColour("#000000")

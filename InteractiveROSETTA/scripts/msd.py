@@ -28,7 +28,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblProt = wx.StaticText(self, -1, "Multi-State Design", (25, 15), (270, 25), wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblMSD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
+	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/lblMSD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
 	else:
 	    self.lblProt = wx.StaticText(self, -1, "Multi-State Design", (70, 15), style=wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -48,7 +48,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblInst = wx.StaticText(self, -1, "Generate MSD inputs to run on a server", (0, 45), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstMSD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 25))
+	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/lblInstMSD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 25))
 	else:
 	    self.lblInst = wx.StaticText(self, -1, "Generate MSD inputs to run on a server", (5, 45), style=wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -59,7 +59,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblEntity = wx.StaticText(self, -1, "Entity MSD Resfile", (0, 70), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblEntity.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblEntity = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblEntity.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 70), size=(270, 25))
+	    self.lblEntity = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/lblEntity.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 70), size=(270, 25))
 	else:
 	    self.lblEntity = wx.StaticText(self, -1, "Entity MSD Resfile", (70, 70), style=wx.ALIGN_CENTRE)
 	    self.lblEntity.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -69,7 +69,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblEntityInst = wx.StaticText(self, -1, "Specify which state positions are equivalent", (0, 100), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblEntityInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblEntityInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstEntity.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 100), size=(320, 25))
+	    self.lblEntityInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/lblInstEntity.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 100), size=(320, 25))
 	else:
 	    self.lblEntityInst = wx.StaticText(self, -1, "Specify which state positions are equivalent", (5, 100), style=wx.ALIGN_CENTRE)
 	    self.lblEntityInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -77,147 +77,147 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.lblEntityInst.SetForegroundColour("#FFFFFF")
 	
 	if (platform.system() == "Darwin"):
-	    self.btnAminoA = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnA.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(7, 130), size=(42, 25))
+	    self.btnAminoA = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnA.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(7, 130), size=(42, 25))
 	else:
 	    self.btnAminoA = wx.Button(self, id=-1, label="A", pos=(7, 130), size=(42, 25))
 	    self.btnAminoA.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnAminoA.Bind(wx.EVT_BUTTON, self.aminoA)
 	self.btnAminoA.SetToolTipString("Add ALA to the design palette")
 	if (platform.system() == "Darwin"):
-	    self.btnAminoC = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(51, 130), size=(42, 25))
+	    self.btnAminoC = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(51, 130), size=(42, 25))
 	else:
 	    self.btnAminoC = wx.Button(self, id=-1, label="C", pos=(51, 130), size=(42, 25))
 	    self.btnAminoC.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnAminoC.Bind(wx.EVT_BUTTON, self.aminoC)
 	self.btnAminoC.SetToolTipString("Add CYS to the design palette")
 	if (platform.system() == "Darwin"):
-	    self.btnAminoD = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(95, 130), size=(42, 25))
+	    self.btnAminoD = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(95, 130), size=(42, 25))
 	else:
 	    self.btnAminoD = wx.Button(self, id=-1, label="D", pos=(95, 130), size=(42, 25))
 	    self.btnAminoD.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnAminoD.Bind(wx.EVT_BUTTON, self.aminoD)
 	self.btnAminoD.SetToolTipString("Add ASP to the design palette")
 	if (platform.system() == "Darwin"):
-	    self.btnAminoE = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnE.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(139, 130), size=(42, 25))
+	    self.btnAminoE = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnE.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(139, 130), size=(42, 25))
 	else:
 	    self.btnAminoE = wx.Button(self, id=-1, label="E", pos=(139, 130), size=(42, 25))
 	    self.btnAminoE.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnAminoE.Bind(wx.EVT_BUTTON, self.aminoE)
 	self.btnAminoE.SetToolTipString("Add GLU to the design palette")
 	if (platform.system() == "Darwin"):
-	    self.btnAminoF = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnF.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(183, 130), size=(42, 25))
+	    self.btnAminoF = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnF.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(183, 130), size=(42, 25))
 	else:
 	    self.btnAminoF = wx.Button(self, id=-1, label="F", pos=(183, 130), size=(42, 25))
 	    self.btnAminoF.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnAminoF.Bind(wx.EVT_BUTTON, self.aminoF)
 	self.btnAminoF.SetToolTipString("Add PHE to the design palette")
 	if (platform.system() == "Darwin"):
-	    self.btnAminoG = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnG.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(227, 130), size=(42, 25))
+	    self.btnAminoG = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnG.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(227, 130), size=(42, 25))
 	else:
 	    self.btnAminoG = wx.Button(self, id=-1, label="G", pos=(227, 130), size=(42, 25))
 	    self.btnAminoG.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnAminoG.Bind(wx.EVT_BUTTON, self.aminoG)
 	self.btnAminoG.SetToolTipString("Add GLY to the design palette")
 	if (platform.system() == "Darwin"):
-	    self.btnAminoH = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnH.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(271, 130), size=(42, 25))
+	    self.btnAminoH = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnH.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(271, 130), size=(42, 25))
 	else:
 	    self.btnAminoH = wx.Button(self, id=-1, label="H", pos=(271, 130), size=(42, 25))
 	    self.btnAminoH.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnAminoH.Bind(wx.EVT_BUTTON, self.aminoH)
 	self.btnAminoH.SetToolTipString("Add HIS to the design palette")
 	if (platform.system() == "Darwin"):
-	    self.btnAminoI = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnI.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(7, 160), size=(42, 25))
+	    self.btnAminoI = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnI.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(7, 160), size=(42, 25))
 	else:
 	    self.btnAminoI = wx.Button(self, id=-1, label="I", pos=(7, 160), size=(42, 25))
 	    self.btnAminoI.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnAminoI.Bind(wx.EVT_BUTTON, self.aminoI)
 	self.btnAminoI.SetToolTipString("Add ILE to the design palette")
 	if (platform.system() == "Darwin"):
-	    self.btnAminoK = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnK.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(51, 160), size=(42, 25))
+	    self.btnAminoK = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnK.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(51, 160), size=(42, 25))
 	else:
 	    self.btnAminoK = wx.Button(self, id=-1, label="K", pos=(51, 160), size=(42, 25))
 	    self.btnAminoK.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnAminoK.Bind(wx.EVT_BUTTON, self.aminoK)
 	self.btnAminoK.SetToolTipString("Add LYS to the design palette")
 	if (platform.system() == "Darwin"):
-	    self.btnAminoL = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnL.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(95, 160), size=(42, 25))
+	    self.btnAminoL = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnL.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(95, 160), size=(42, 25))
 	else:
 	    self.btnAminoL = wx.Button(self, id=-1, label="L", pos=(95, 160), size=(42, 25))
 	    self.btnAminoL.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnAminoL.Bind(wx.EVT_BUTTON, self.aminoL)
 	self.btnAminoL.SetToolTipString("Add LEU to the design palette")
 	if (platform.system() == "Darwin"):
-	    self.btnAminoM = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnM.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(139, 160), size=(42, 25))
+	    self.btnAminoM = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnM.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(139, 160), size=(42, 25))
 	else:
 	    self.btnAminoM = wx.Button(self, id=-1, label="M", pos=(139, 160), size=(42, 25))
 	    self.btnAminoM.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnAminoM.Bind(wx.EVT_BUTTON, self.aminoM)
 	self.btnAminoM.SetToolTipString("Add MET to the design palette")
 	if (platform.system() == "Darwin"):
-	    self.btnAminoN = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnN.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(183, 160), size=(42, 25))
+	    self.btnAminoN = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnN.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(183, 160), size=(42, 25))
 	else:
 	    self.btnAminoN = wx.Button(self, id=-1, label="N", pos=(183, 160), size=(42, 25))
 	    self.btnAminoN.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnAminoN.Bind(wx.EVT_BUTTON, self.aminoN)
 	self.btnAminoN.SetToolTipString("Add ASN to the design palette")
 	if (platform.system() == "Darwin"):
-	    self.btnAminoP = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnP.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(227, 160), size=(42, 25))
+	    self.btnAminoP = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnP.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(227, 160), size=(42, 25))
 	else:
 	    self.btnAminoP = wx.Button(self, id=-1, label="P", pos=(227, 160), size=(42, 25))
 	    self.btnAminoP.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnAminoP.Bind(wx.EVT_BUTTON, self.aminoP)
 	self.btnAminoP.SetToolTipString("Add PRO to the design palette")
 	if (platform.system() == "Darwin"):
-	    self.btnAminoQ = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnQ.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(271, 160), size=(42, 25))
+	    self.btnAminoQ = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnQ.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(271, 160), size=(42, 25))
 	else:
 	    self.btnAminoQ = wx.Button(self, id=-1, label="Q", pos=(271, 160), size=(42, 25))
 	    self.btnAminoQ.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnAminoQ.Bind(wx.EVT_BUTTON, self.aminoQ)
 	self.btnAminoQ.SetToolTipString("Add GLN to the design palette")
 	if (platform.system() == "Darwin"):
-	    self.btnAminoR = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnR.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(7, 190), size=(42, 25))
+	    self.btnAminoR = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnR.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(7, 190), size=(42, 25))
 	else:
 	    self.btnAminoR = wx.Button(self, id=-1, label="R", pos=(7, 190), size=(42, 25))
 	    self.btnAminoR.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnAminoR.Bind(wx.EVT_BUTTON, self.aminoR)
 	self.btnAminoR.SetToolTipString("Add ARG to the design palette")
 	if (platform.system() == "Darwin"):
-	    self.btnAminoS = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnS.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(51, 190), size=(42, 25))
+	    self.btnAminoS = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnS.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(51, 190), size=(42, 25))
 	else:
 	    self.btnAminoS = wx.Button(self, id=-1, label="S", pos=(51, 190), size=(42, 25))
 	    self.btnAminoS.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnAminoS.Bind(wx.EVT_BUTTON, self.aminoS)
 	self.btnAminoS.SetToolTipString("Add SER to the design palette")
 	if (platform.system() == "Darwin"):
-	    self.btnAminoT = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnT.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(95, 190), size=(42, 25))
+	    self.btnAminoT = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnT.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(95, 190), size=(42, 25))
 	else:
 	    self.btnAminoT = wx.Button(self, id=-1, label="T", pos=(95, 190), size=(42, 25))
 	    self.btnAminoT.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnAminoT.Bind(wx.EVT_BUTTON, self.aminoT)
 	self.btnAminoT.SetToolTipString("Add THR to the design palette")
 	if (platform.system() == "Darwin"):
-	    self.btnAminoV = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnV.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(139, 190), size=(42, 25))
+	    self.btnAminoV = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnV.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(139, 190), size=(42, 25))
 	else:
 	    self.btnAminoV = wx.Button(self, id=-1, label="V", pos=(139, 190), size=(42, 25))
 	    self.btnAminoV.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnAminoV.Bind(wx.EVT_BUTTON, self.aminoV)
 	self.btnAminoV.SetToolTipString("Add VAL to the design palette")
 	if (platform.system() == "Darwin"):
-	    self.btnAminoW = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnW.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(183, 190), size=(42, 25))
+	    self.btnAminoW = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnW.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(183, 190), size=(42, 25))
 	else:
 	    self.btnAminoW = wx.Button(self, id=-1, label="W", pos=(183, 190), size=(42, 25))
 	    self.btnAminoW.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnAminoW.Bind(wx.EVT_BUTTON, self.aminoW)
 	self.btnAminoW.SetToolTipString("Add TRP to the design palette")
 	if (platform.system() == "Darwin"):
-	    self.btnAminoY = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnY.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(227, 190), size=(42, 25))
+	    self.btnAminoY = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnY.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(227, 190), size=(42, 25))
 	else:
 	    self.btnAminoY = wx.Button(self, id=-1, label="Y", pos=(227, 190), size=(42, 25))
 	    self.btnAminoY.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnAminoY.Bind(wx.EVT_BUTTON, self.aminoY)
 	self.btnAminoY.SetToolTipString("Add TYR to the design palette")
 	if (platform.system() == "Darwin"):
-	    self.btnAminoX = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnX.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(271, 190), size=(42, 25))
+	    self.btnAminoX = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnX.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(271, 190), size=(42, 25))
 	else:
 	    self.btnAminoX = wx.Button(self, id=-1, label="X", pos=(271, 190), size=(42, 25))
 	    self.btnAminoX.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -227,7 +227,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	
 	self.states = []
 	if (platform.system() == "Darwin"):
-	    self.btnAddEntity = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAddEntity.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 220), size=(100, 25))
+	    self.btnAddEntity = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnAddEntity.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 220), size=(100, 25))
 	else:
 	    self.btnAddEntity = wx.Button(self, id=-1, label="Add Entry", pos=(0, 220), size=(100, 25))
 	    self.btnAddEntity.SetForegroundColour("#000000")
@@ -237,7 +237,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.entityMenu = wx.ComboBox(self, pos=(110, 220), size=(100, 25), choices=[], style=wx.CB_READONLY)
 	self.entityMenu.SetToolTipString("Select entity resfile entries to remove")
 	if (platform.system() == "Darwin"):
-	    self.btnRemoveEntity = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnRemoveEntity.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(220, 220), size=(100, 25))
+	    self.btnRemoveEntity = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnRemoveEntity.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(220, 220), size=(100, 25))
 	else:
 	    self.btnRemoveEntity = wx.Button(self, id=-1, label="Remove", pos=(220, 220), size=(100, 25))
 	    self.btnRemoveEntity.SetForegroundColour("#000000")
@@ -283,7 +283,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.resEntityMenu = wx.ComboBox(self, pos=(7, 540), size=(119, 25), choices=self.AAlist, style=wx.CB_READONLY | wx.CB_SORT)
 	self.resEntityMenu.SetToolTipString("Amino acid type to add/remove from the selected entity resfile entry")
 	if (platform.system() == "Darwin"):
-	    self.btnAddRes = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAddRes.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(131, 540), size=(88, 25))
+	    self.btnAddRes = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnAddRes.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(131, 540), size=(88, 25))
 	else:
 	    self.btnAddRes = wx.Button(self, id=-1, label="Add", pos=(131, 540), size=(88, 25))
 	    self.btnAddRes.SetForegroundColour("#000000")
@@ -291,7 +291,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnAddRes.Bind(wx.EVT_BUTTON, self.addRes)
 	self.btnAddRes.SetToolTipString("Add the selected amino acid to the selected entity resfile entry")
 	if (platform.system() == "Darwin"):
-	    self.btnRemoveRes = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnRemoveRes.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(224, 540), size=(88, 25))
+	    self.btnRemoveRes = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnRemoveRes.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(224, 540), size=(88, 25))
 	else:
 	    self.btnRemoveRes = wx.Button(self, id=-1, label="Remove", pos=(224, 540), size=(88, 25))
 	    self.btnRemoveRes.SetForegroundColour("#000000")
@@ -303,7 +303,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblSecondary = wx.StaticText(self, -1, "Secondary Resfiles (Optional)", (0, 570), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblSecondary.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblSecondary = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblSecondary.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 570), size=(270, 25))
+	    self.lblSecondary = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/lblSecondary.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 570), size=(270, 25))
 	else:
 	    self.lblSecondary = wx.StaticText(self, -1, "Secondary Resfiles (Optional)", (70, 570), style=wx.ALIGN_CENTRE)
 	    self.lblSecondary.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -313,7 +313,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblSecondaryInst = wx.StaticText(self, -1, "Specify if other residues should be repacked\non each PDB. Defaults to NATRO.", (0, 600), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblSecondaryInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblSecondaryInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstSecondary.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 600), size=(320, 35))
+	    self.lblSecondaryInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/lblInstSecondary.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 600), size=(320, 35))
 	else:
 	    self.lblSecondaryInst = wx.StaticText(self, -1, "Specify if other residues should be repacked\non each PDB. Defaults to NATRO.", (5, 600), style=wx.ALIGN_CENTRE)
 	    self.lblSecondaryInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -333,7 +333,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.modelMenu.SetToolTipString("Choose a state whose secondary behavior will be edited")
 	
 	if (platform.system() == "Darwin"):
-	    self.btnAdd = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAdd.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(7, 665), size=(57, 25))
+	    self.btnAdd = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnAdd.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(7, 665), size=(57, 25))
 	else:
 	    self.btnAdd = wx.Button(self, id=-1, label="Add", pos=(7, 665), size=(57, 25))
 	    self.btnAdd.SetForegroundColour("#000000")
@@ -341,7 +341,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnAdd.Bind(wx.EVT_BUTTON, self.add)
 	self.btnAdd.SetToolTipString("Add selected residues to the resfile")
 	if (platform.system() == "Darwin"):
-	    self.btnRemove = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnRemove.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(69, 665), size=(57, 25))
+	    self.btnRemove = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnRemove.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(69, 665), size=(57, 25))
 	else:
 	    self.btnRemove = wx.Button(self, id=-1, label="Remove", pos=(69, 665), size=(57, 25))
 	    self.btnRemove.SetForegroundColour("#000000")
@@ -349,7 +349,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnRemove.Bind(wx.EVT_BUTTON, self.remove)
 	self.btnRemove.SetToolTipString("Remove selected residues from the resfile")
 	if (platform.system() == "Darwin"):
-	    self.btnRestrict = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnRestrict.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(131, 665), size=(57, 25))
+	    self.btnRestrict = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnRestrict.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(131, 665), size=(57, 25))
 	else:
 	    self.btnRestrict = wx.Button(self, id=-1, label="Restrict", pos=(131, 665), size=(57, 25))
 	    self.btnRestrict.SetForegroundColour("#000000")
@@ -357,7 +357,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnRestrict.Bind(wx.EVT_BUTTON, self.restrict)
 	self.btnRestrict.SetToolTipString("Restrict the resfile contents to the selected residues")
 	if (platform.system() == "Darwin"):
-	    self.btnAll = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAll.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(193, 665), size=(57, 25))
+	    self.btnAll = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnAll.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(193, 665), size=(57, 25))
 	else:
 	    self.btnAll = wx.Button(self, id=-1, label="All", pos=(193, 665), size=(57, 25))
 	    self.btnAll.SetForegroundColour("#000000")
@@ -365,7 +365,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnAll.Bind(wx.EVT_BUTTON, self.addAll)
 	self.btnAll.SetToolTipString("Add all residues from the selected model to the resfile")
 	if (platform.system() == "Darwin"):
-	    self.btnClear = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnClear.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(255, 665), size=(57, 25))
+	    self.btnClear = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnClear.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(255, 665), size=(57, 25))
 	else:
 	    self.btnClear = wx.Button(self, id=-1, label="Clear", pos=(255, 665), size=(57, 25))
 	    self.btnClear.SetForegroundColour("#000000")
@@ -395,7 +395,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblStates = wx.StaticText(self, -1, "Define States", (0, ypos), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblStates.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblStates = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblStates.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, ypos), size=(270, 25))
+	    self.lblStates = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/lblStates.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, ypos), size=(270, 25))
 	else:
 	    self.lblStates = wx.StaticText(self, -1, "Define States", (0, ypos), style=wx.ALIGN_CENTRE)
 	    self.lblStates.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -405,7 +405,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblStatesInst = wx.StaticText(self, -1, "Group PDBs into distinct states.  Click on the\ngraph to change the state to which each PDB\nbelongs.  Multiple conformations of the same\nstructure should be in a single state.", (0, ypos+30), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblStatesInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblStatesInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstStates.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+30), size=(320, 70))
+	    self.lblStatesInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/lblInstStates.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+30), size=(320, 70))
 	else:
 	    self.lblStatesInst = wx.StaticText(self, -1, "Group PDBs into distinct states.  Click on the\ngraph to change the state to which each PDB\nbelongs.  Multiple conformations of the same\nstructure should be in a single state.", (5, ypos+30), style=wx.ALIGN_CENTRE)
 	    self.lblStatesInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -430,7 +430,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblVectorInst = wx.StaticText(self, -1, "If there are multiple conformations in a state,\nwill the score of the state be the minimum or\nmaximum score of the conformations?", (0, ypos+10), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblVectorInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	if (platform.system() == "Darwin"):
-	    self.lblVectorInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstVector.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+10), size=(320, 50))
+	    self.lblVectorInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/lblInstVector.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+10), size=(320, 50))
 	else:
 	    self.lblVectorInst = wx.StaticText(self, -1, "If there are multiple conformations in a state,\nwill the score of the state be the minimum or\nmaximum score of the conformations?", (5, ypos+10), style=wx.ALIGN_CENTRE)
 	    self.lblVectorInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -441,7 +441,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.vectorMenu.Bind(wx.EVT_COMBOBOX, self.vectorMenuSelect)
 	self.vectorMenu.SetToolTipString("Specify the state for which to alter the vector function")
 	if (platform.system() == "Darwin"):
-	    self.btnMin = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnMin_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(165, ypos+60), size=(70, 25))
+	    self.btnMin = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnMin_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(165, ypos+60), size=(70, 25))
 	else:
 	    self.btnMin = wx.Button(self, id=-1, label="MIN", pos=(165, ypos+60), size=(70, 25))
 	    self.btnMin.SetForegroundColour("#FF0000")
@@ -449,7 +449,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnMin.Bind(wx.EVT_BUTTON, self.vectorMin)
 	self.btnMin.SetToolTipString("Apply a minimization operation to this state")
 	if (platform.system() == "Darwin"):
-	    self.btnMax = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnMax.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(245, ypos+60), size=(70, 25))
+	    self.btnMax = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnMax.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(245, ypos+60), size=(70, 25))
 	else:
 	    self.btnMax = wx.Button(self, id=-1, label="MAX", pos=(245, ypos+60), size=(70, 25))
 	    self.btnMax.SetForegroundColour("#000000")
@@ -462,7 +462,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblFitness = wx.StaticText(self, -1, "Fitness Function", (0, ypos+90), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblFitness.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblFitness = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblFitness.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, ypos+90), size=(270, 25))
+	    self.lblFitness = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/lblFitness.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, ypos+90), size=(270, 25))
 	else:
 	    self.lblFitness = wx.StaticText(self, -1, "Fitness Function", (0, ypos+90), style=wx.ALIGN_CENTRE)
 	    self.lblFitness.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -472,7 +472,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblFitnessInst = wx.StaticText(self, -1, "Define the mathematical relationship between\nthe scores of each of the states when\ndetermining fitness.", (0, ypos+120), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblFitnessInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblFitnessInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstFitness.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+120), size=(320, 50))
+	    self.lblFitnessInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/lblInstFitness.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+120), size=(320, 50))
 	else:
 	    self.lblFitnessInst = wx.StaticText(self, -1, "Define the mathematical relationship between\nthe scores of each of the states when\ndetermining fitness.", (5, ypos+120), style=wx.ALIGN_CENTRE)
 	    self.lblFitnessInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -488,7 +488,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblStateLiteral = wx.StaticText(self, -1, "State/Literal Value", (0, ypos+233), (160, 25), wx.ALIGN_CENTRE)
 	    self.lblStateLiteral.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblStateLiteral = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblStateLiteral.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+233), size=(160, 25))
+	    self.lblStateLiteral = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/lblStateLiteral.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+233), size=(160, 25))
 	else:
 	    self.lblStateLiteral = wx.StaticText(self, -1, "State/Literal Value", (5, ypos+233), style=wx.ALIGN_CENTRE)
 	    self.lblStateLiteral.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -511,7 +511,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.numCommas = {"abs": 0, "exp": 0, "ln": 0, "pow": 1, "sqrt": 1, "eq": 1, "gt": 1, "gte": 1, "lt": 1,
 		   "lte": 1, "and": 1, "or": 1, "not": 0, "ite": 2}
 	if (platform.system() == "Darwin"):
-	    self.btnAddOp = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAddOp.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(165, ypos+260), size=(70, 25))
+	    self.btnAddOp = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnAddOp.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(165, ypos+260), size=(70, 25))
 	else:
 	    self.btnAddOp = wx.Button(self, id=-1, label="Add", pos=(165, ypos+260), size=(70, 25))
 	    self.btnAddOp.SetForegroundColour("#000000")
@@ -519,7 +519,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnAddOp.Bind(wx.EVT_BUTTON, self.addOperation)
 	self.btnAddOp.SetToolTipString("Apply a minimization operation to this state")
 	if (platform.system() == "Darwin"):
-	    self.btnRemoveOp = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnRemoveOp.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(245, ypos+260), size=(70, 25))
+	    self.btnRemoveOp = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnRemoveOp.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(245, ypos+260), size=(70, 25))
 	else:
 	    self.btnRemoveOp = wx.Button(self, id=-1, label="Remove", pos=(245, ypos+260), size=(70, 25))
 	    self.btnRemoveOp.SetForegroundColour("#000000")
@@ -530,7 +530,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.fitness = self.txtFitness.GetText()
 	
 	if (platform.system() == "Darwin"):
-	    self.btnLoadMSD = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLoadMSD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, ypos+290), size=(120, 25))
+	    self.btnLoadMSD = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnLoadMSD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, ypos+290), size=(120, 25))
 	else:
 	    self.btnLoadMSD = wx.Button(self, id=-1, label="Load MSD", pos=(20, ypos+290), size=(120, 25))
 	    self.btnLoadMSD.SetForegroundColour("#000000")
@@ -538,7 +538,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnLoadMSD.Bind(wx.EVT_BUTTON, self.loadMSD)
 	self.btnLoadMSD.SetToolTipString("Load data stored in an MSD file")
 	if (platform.system() == "Darwin"):
-	    self.btnSaveMSD = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnSaveMSD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(175, ypos+290), size=(120, 25))
+	    self.btnSaveMSD = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnSaveMSD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(175, ypos+290), size=(120, 25))
 	else:
 	    self.btnSaveMSD = wx.Button(self, id=-1, label="Save MSD", pos=(175, ypos+290), size=(120, 25))
 	    self.btnSaveMSD.SetForegroundColour("#000000")
@@ -547,7 +547,7 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnSaveMSD.SetToolTipString("Save the MSD setup to a file for later use")
 	
 	if (platform.system() == "Darwin"):
-	    self.btnMSD = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnMSD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(100, ypos+320), size=(120, 25))
+	    self.btnMSD = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnMSD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(100, ypos+320), size=(120, 25))
 	else:
 	    self.btnMSD = wx.Button(self, id=-1, label="Run MSD!", pos=(100, ypos+320), size=(120, 25))
 	    self.btnMSD.SetForegroundColour("#000000")
@@ -1030,8 +1030,8 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	
     def vectorMin(self, event):
 	if (platform.system() == "Darwin"):
-	    self.btnMin.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnMin_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-	    self.btnMax.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnMax.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnMin.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnMin_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnMax.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnMax.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	else:
 	    self.btnMin.SetForegroundColour("#FF0000")
 	    self.btnMax.SetForegroundColour("#000000")
@@ -1039,8 +1039,8 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
     
     def vectorMax(self, event):
 	if (platform.system() == "Darwin"):
-	    self.btnMin.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnMin.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-	    self.btnMax.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnMax_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnMin.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnMin.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnMax.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnMax_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	else:
 	    self.btnMin.SetForegroundColour("#000000")
 	    self.btnMax.SetForegroundColour("#FF0000")
@@ -1711,13 +1711,13 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def aminoA(self, event):
 	if ("A" in self.palette):
 	    if (platform.system() == "Darwin"):
-		self.btnAminoA.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnA.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoA.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnA.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoA.SetForegroundColour("#000000")
 	    logInfo("Removed ALA from palette")
 	else:
 	    if (platform.system() == "Darwin"):
-		self.btnAminoA.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnA_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoA.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnA_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoA.SetForegroundColour("#FF0000")
 	    logInfo("Added ALA to palette")
@@ -1726,13 +1726,13 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def aminoC(self, event):
 	if ("C" in self.palette):
 	    if (platform.system() == "Darwin"):
-		self.btnAminoC.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoC.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoC.SetForegroundColour("#000000")
 	    logInfo("Removed CYS from palette")
 	else:
 	    if (platform.system() == "Darwin"):
-		self.btnAminoC.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnC_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoC.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnC_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoC.SetForegroundColour("#FF0000")
 	    logInfo("Added CYS to palette")
@@ -1741,13 +1741,13 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def aminoD(self, event):
 	if ("D" in self.palette):
 	    if (platform.system() == "Darwin"):
-		self.btnAminoD.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoD.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoD.SetForegroundColour("#000000")
 	    logInfo("Removed ASP from palette")
 	else:
 	    if (platform.system() == "Darwin"):
-		self.btnAminoD.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnD_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoD.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnD_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoD.SetForegroundColour("#FF0000")
 	    logInfo("Added ASP to palette")
@@ -1756,13 +1756,13 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def aminoE(self, event):
 	if ("E" in self.palette):
 	    if (platform.system() == "Darwin"):
-		self.btnAminoE.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnE.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoE.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnE.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoE.SetForegroundColour("#000000")
 	    logInfo("Removed GLU from palette")
 	else:
 	    if (platform.system() == "Darwin"):
-		self.btnAminoE.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnE_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoE.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnE_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoE.SetForegroundColour("#FF0000")
 	    logInfo("Added GLU to palette")
@@ -1771,13 +1771,13 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def aminoF(self, event):
 	if ("F" in self.palette):
 	    if (platform.system() == "Darwin"):
-		self.btnAminoF.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnF.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoF.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnF.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoF.SetForegroundColour("#000000")
 	    logInfo("Removed PHE from palette")
 	else:
 	    if (platform.system() == "Darwin"):
-		self.btnAminoF.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnF_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoF.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnF_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoF.SetForegroundColour("#FF0000")
 	    logInfo("Added PHE to palette")
@@ -1786,13 +1786,13 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def aminoG(self, event):
 	if ("G" in self.palette):
 	    if (platform.system() == "Darwin"):
-		self.btnAminoG.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnG.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoG.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnG.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoG.SetForegroundColour("#000000")
 	    logInfo("Removed GLY from palette")
 	else:
 	    if (platform.system() == "Darwin"):
-		self.btnAminoG.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnG_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoG.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnG_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoG.SetForegroundColour("#FF0000")
 	    logInfo("Added GLY to palette")
@@ -1801,13 +1801,13 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def aminoH(self, event):
 	if ("H" in self.palette):
 	    if (platform.system() == "Darwin"):
-		self.btnAminoH.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnH.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoH.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnH.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoH.SetForegroundColour("#000000")
 	    logInfo("Removed HIS from palette")
 	else:
 	    if (platform.system() == "Darwin"):
-		self.btnAminoH.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnH_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoH.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnH_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoH.SetForegroundColour("#FF0000")
 	    logInfo("Added HIS to palette")
@@ -1816,13 +1816,13 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def aminoI(self, event):
 	if ("I" in self.palette):
 	    if (platform.system() == "Darwin"):
-		self.btnAminoI.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnI.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoI.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnI.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoI.SetForegroundColour("#000000")
 	    logInfo("Removed ILE from palette")
 	else:
 	    if (platform.system() == "Darwin"):
-		self.btnAminoI.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnI_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoI.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnI_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoI.SetForegroundColour("#FF0000")
 	    logInfo("Added ILE to palette")
@@ -1831,13 +1831,13 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def aminoK(self, event):
 	if ("K" in self.palette):
 	    if (platform.system() == "Darwin"):
-		self.btnAminoK.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnK.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoK.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnK.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoK.SetForegroundColour("#000000")
 	    logInfo("Removed LYS from palette")
 	else:
 	    if (platform.system() == "Darwin"):
-		self.btnAminoK.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnK_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoK.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnK_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoK.SetForegroundColour("#FF0000")
 	    logInfo("Added LYS to palette")
@@ -1846,13 +1846,13 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def aminoL(self, event):
 	if ("L" in self.palette):
 	    if (platform.system() == "Darwin"):
-		self.btnAminoL.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnL.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoL.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnL.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoL.SetForegroundColour("#000000")
 	    logInfo("Removed LEU from palette")
 	else:
 	    if (platform.system() == "Darwin"):
-		self.btnAminoL.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnL_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoL.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnL_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoL.SetForegroundColour("#FF0000")
 	    logInfo("Added LEU to palette")
@@ -1861,13 +1861,13 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def aminoM(self, event):
 	if ("M" in self.palette):
 	    if (platform.system() == "Darwin"):
-		self.btnAminoM.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnM.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoM.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnM.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoM.SetForegroundColour("#000000")
 	    logInfo("Removed MET from palette")
 	else:
 	    if (platform.system() == "Darwin"):
-		self.btnAminoM.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnM_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoM.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnM_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoM.SetForegroundColour("#FF0000")
 	    logInfo("Added MET to palette")
@@ -1876,13 +1876,13 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def aminoN(self, event):
 	if ("N" in self.palette):
 	    if (platform.system() == "Darwin"):
-		self.btnAminoN.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnN.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoN.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnN.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoN.SetForegroundColour("#000000")
 	    logInfo("Removed ASN from palette")
 	else:
 	    if (platform.system() == "Darwin"):
-		self.btnAminoN.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnN_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoN.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnN_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoN.SetForegroundColour("#FF0000")
 	    logInfo("Added ASN to palette")
@@ -1891,13 +1891,13 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def aminoP(self, event):
 	if ("P" in self.palette):
 	    if (platform.system() == "Darwin"):
-		self.btnAminoP.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnP.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoP.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnP.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoP.SetForegroundColour("#000000")
 	    logInfo("Removed PRO from palette")
 	else:
 	    if (platform.system() == "Darwin"):
-		self.btnAminoP.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnP_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoP.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnP_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoP.SetForegroundColour("#FF0000")
 	    logInfo("Added PRO to palette")
@@ -1906,13 +1906,13 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def aminoQ(self, event):
 	if ("Q" in self.palette):
 	    if (platform.system() == "Darwin"):
-		self.btnAminoQ.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnQ.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoQ.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnQ.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoQ.SetForegroundColour("#000000")
 	    logInfo("Removed GLN from palette")
 	else:
 	    if (platform.system() == "Darwin"):
-		self.btnAminoQ.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnQ_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoQ.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnQ_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoQ.SetForegroundColour("#FF0000")
 	    logInfo("Added GLN to palette")
@@ -1921,13 +1921,13 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def aminoR(self, event):
 	if ("R" in self.palette):
 	    if (platform.system() == "Darwin"):
-		self.btnAminoR.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnR.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoR.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnR.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoR.SetForegroundColour("#000000")
 	    logInfo("Removed ARG from palette")
 	else:
 	    if (platform.system() == "Darwin"):
-		self.btnAminoR.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnR_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoR.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnR_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoR.SetForegroundColour("#FF0000")
 	    logInfo("Added ARG to palette")
@@ -1936,13 +1936,13 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def aminoS(self, event):
 	if ("S" in self.palette):
 	    if (platform.system() == "Darwin"):
-		self.btnAminoS.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnS.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoS.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnS.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoS.SetForegroundColour("#000000")
 	    logInfo("Removed SER from palette")
 	else:
 	    if (platform.system() == "Darwin"):
-		self.btnAminoS.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnS_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoS.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnS_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoS.SetForegroundColour("#FF0000")
 	    logInfo("Added SER to palette")
@@ -1951,13 +1951,13 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def aminoT(self, event):
 	if ("T" in self.palette):
 	    if (platform.system() == "Darwin"):
-		self.btnAminoT.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnT.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoT.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnT.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoT.SetForegroundColour("#000000")
 	    logInfo("Removed THR from palette")
 	else:
 	    if (platform.system() == "Darwin"):
-		self.btnAminoT.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnT_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoT.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnT_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoT.SetForegroundColour("#FF0000")
 	    logInfo("Added THR to palette")
@@ -1966,13 +1966,13 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def aminoV(self, event):
 	if ("V" in self.palette):
 	    if (platform.system() == "Darwin"):
-		self.btnAminoV.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnV.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoV.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnV.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoV.SetForegroundColour("#000000")
 	    logInfo("Removed VAL from palette")
 	else:
 	    if (platform.system() == "Darwin"):
-		self.btnAminoV.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnV_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoV.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnV_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoV.SetForegroundColour("#FF0000")
 	    logInfo("Added VAL to palette")
@@ -1981,13 +1981,13 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def aminoW(self, event):
 	if ("W" in self.palette):
 	    if (platform.system() == "Darwin"):
-		self.btnAminoW.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnW.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoW.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnW.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoW.SetForegroundColour("#000000")
 	    logInfo("Removed TRP from palette")
 	else:
 	    if (platform.system() == "Darwin"):
-		self.btnAminoW.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnW_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoW.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnW_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoW.SetForegroundColour("#FF0000")
 	    logInfo("Added TRP to palette")
@@ -1996,13 +1996,13 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def aminoY(self, event):
 	if ("Y" in self.palette):
 	    if (platform.system() == "Darwin"):
-		self.btnAminoY.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnY.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoY.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnY.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoY.SetForegroundColour("#000000")
 	    logInfo("Removed TYR from palette")
 	else:
 	    if (platform.system() == "Darwin"):
-		self.btnAminoY.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnY_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoY.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnY_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoY.SetForegroundColour("#FF0000")
 	    logInfo("Added TYR to palette")
@@ -2014,26 +2014,26 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	if (len(self.palette) == 20):
 	    self.palette = ""
 	    if (platform.system() == "Darwin"):
-		self.btnAminoA.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnA.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoC.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoD.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoE.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnE.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoF.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnF.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoG.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnG.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoH.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnH.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoI.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnI.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoK.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnK.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoL.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnL.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoM.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnM.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoN.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnN.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoP.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnP.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoQ.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnQ.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoR.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnR.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoS.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnS.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoT.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnT.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoV.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnV.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoW.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnW.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoY.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnY.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoA.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnA.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoC.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoD.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoE.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnE.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoF.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnF.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoG.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnG.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoH.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnH.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoI.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnI.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoK.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnK.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoL.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnL.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoM.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnM.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoN.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnN.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoP.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnP.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoQ.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnQ.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoR.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnR.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoS.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnS.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoT.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnT.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoV.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnV.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoW.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnW.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoY.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnY.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoA.SetForegroundColour("#000000")
 		self.btnAminoC.SetForegroundColour("#000000")
@@ -2058,26 +2058,26 @@ class MSDPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	else:
 	    self.palette = "ACDEFGHIKLMNPQRSTVWY"
 	    if (platform.system() == "Darwin"):
-		self.btnAminoA.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnA_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoC.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnC_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoD.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnD_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoE.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnE_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoF.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnF_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoG.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnG_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoH.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnH_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoI.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnI_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoK.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnK_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoL.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnL_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoM.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnM_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoN.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnN_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoP.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnP_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoQ.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnQ_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoR.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnR_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoS.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnS_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoT.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnT_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoV.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnV_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoW.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnW_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnAminoY.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnY_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoA.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnA_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoC.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnC_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoD.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnD_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoE.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnE_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoF.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnF_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoG.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnG_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoH.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnH_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoI.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnI_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoK.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnK_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoL.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnL_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoM.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnM_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoN.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnN_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoP.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnP_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoQ.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnQ_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoR.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnR_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoS.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnS_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoT.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnT_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoV.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnV_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoW.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnW_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnAminoY.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/msd/btnY_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnAminoA.SetForegroundColour("#FF0000")
 		self.btnAminoC.SetForegroundColour("#FF0000")
