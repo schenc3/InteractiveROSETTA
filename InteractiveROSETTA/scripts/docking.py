@@ -32,7 +32,7 @@ class SettingsDialog(wx.Dialog):
 	    self.lblFunction = wx.StaticText(self, -1, "Function Type:", (0, ypos+23), (160, 20), wx.ALIGN_CENTRE)
 	    self.lblFunction.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblFunction = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblFunction.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+23), size=(160, 20))
+	    self.lblFunction = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblFunction_Dialog.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+23), size=(160, 20))
 	else:
 	    self.lblFunction = wx.StaticText(self, -1, "Function Type:", (0, ypos+23), style=wx.ALIGN_CENTRE)
 	    self.lblFunction.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -44,7 +44,7 @@ class SettingsDialog(wx.Dialog):
 	    self.lblIdealD = wx.StaticText(self, -1, "Ideal Distance (A):", (0, ypos+53), (200, 20), wx.ALIGN_CENTRE)
 	    self.lblIdealD.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblIdealD = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblIdealD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+53), size=(200, 20))
+	    self.lblIdealD = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblIdealD_Dialog.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+53), size=(200, 20))
 	else:
 	    self.lblIdealD = wx.StaticText(self, -1, "Ideal Distance (A):", (0, ypos+53), style=wx.ALIGN_CENTRE)
 	    self.lblIdealD.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -56,7 +56,7 @@ class SettingsDialog(wx.Dialog):
 	    self.lblMaxD = wx.StaticText(self, -1, "Maximum Distance (A):", (0, ypos+83), (200, 20), wx.ALIGN_CENTRE)
 	    self.lblMaxD.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblMaxD = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblMaxD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+83), size=(200, 20))
+	    self.lblMaxD = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblMaxD_Dialog.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+83), size=(200, 20))
 	else:
 	    self.lblMaxD = wx.StaticText(self, -1, "Maximum Distance (A):", (0, ypos+83), style=wx.ALIGN_CENTRE)
 	    self.lblMaxD.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -68,7 +68,7 @@ class SettingsDialog(wx.Dialog):
 	    self.lblMinD = wx.StaticText(self, -1, "Minimum Distance (A):", (0, ypos+113), (200, 20), wx.ALIGN_CENTRE)
 	    self.lblMinD.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblMinD = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblMinD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+113), size=(200, 20))
+	    self.lblMinD = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblMinD_Dialog.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+113), size=(200, 20))
 	else:
 	    self.lblMinD = wx.StaticText(self, -1, "Minimum Distance (A):", (0, ypos+113), style=wx.ALIGN_CENTRE)
 	    self.lblMinD.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -80,7 +80,7 @@ class SettingsDialog(wx.Dialog):
 	    self.lblWeight = wx.StaticText(self, -1, "Weight:", (0, ypos+143), (200, 20), wx.ALIGN_CENTRE)
 	    self.lblWeight.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblWeight = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblWeight.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+143), size=(200, 20))
+	    self.lblWeight = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblWeight_Dialog.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+143), size=(200, 20))
 	else:
 	    self.lblWeight = wx.StaticText(self, -1, "Weight:", (0, ypos+143), style=wx.ALIGN_CENTRE)
 	    self.lblWeight.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -126,7 +126,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblProt = wx.StaticText(self, -1, "Docking", (25, 15), (270, 25), wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblDocking.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
+	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblDocking.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 15), size=(320, 25))
 	else:
 	    self.lblProt = wx.StaticText(self, -1, "Docking", (70, 15), style=wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -146,7 +146,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblInst = wx.StaticText(self, -1, "Dock proteins and/or ligands to receptor proteins", (0, 45), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstDocking.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 25))
+	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblInstDocking.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 25))
 	else:
 	    self.lblInst = wx.StaticText(self, -1, "Dock proteins and/or ligands to receptor proteins", (5, 45), style=wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -157,7 +157,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblStatic = wx.StaticText(self, -1, "Static Chains", (0, 90), (155, 20), wx.ALIGN_CENTRE)
 	    self.lblStatic.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblStatic = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblStatic.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 90), size=(155, 20))
+	    self.lblStatic = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblStatic.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 90), size=(155, 20))
 	else:
 	    self.lblStatic = wx.StaticText(self, -1, "Static Chains", (0, 90), style=wx.ALIGN_CENTRE)
 	    self.lblStatic.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -170,7 +170,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblMoving = wx.StaticText(self, -1, "Movable Chains", (165, 90), (155, 20), wx.ALIGN_CENTRE)
 	    self.lblMoving.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblMoving = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblMoving.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(165, 90), size=(155, 20))
+	    self.lblMoving = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblMoving.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(165, 90), size=(155, 20))
 	else:
 	    self.lblMoving = wx.StaticText(self, -1, "Movable Chains", (165, 90), style=wx.ALIGN_CENTRE)
 	    self.lblMoving.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -181,7 +181,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.movingMenu.SetToolTipString("Select chains that will be docked to the static chains")
 	
 	if (platform.system() == "Darwin"):
-	    self.btnAddStatic = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAddChain.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 140), size=(77, 25))
+	    self.btnAddStatic = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnAddChain.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 140), size=(77, 25))
 	else:
 	    self.btnAddStatic = wx.Button(self, id=-1, label="Add", pos=(0, 140), size=(77, 25))
 	    self.btnAddStatic.SetForegroundColour("#000000")
@@ -189,7 +189,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnAddStatic.Bind(wx.EVT_BUTTON, self.addStatic)
 	self.btnAddStatic.SetToolTipString("Add selected chain to the list of static receptor chains")
 	if (platform.system() == "Darwin"):
-	    self.btnRemoveStatic = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnRemoveChain.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(77, 140), size=(78, 25))
+	    self.btnRemoveStatic = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnRemoveChain.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(77, 140), size=(78, 25))
 	else:
 	    self.btnRemoveStatic = wx.Button(self, id=-1, label="Remove", pos=(77, 140), size=(78, 25))
 	    self.btnRemoveStatic.SetForegroundColour("#000000")
@@ -199,7 +199,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.staticChains = []
 	
 	if (platform.system() == "Darwin"):
-	    self.btnAddMoving = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAddChain.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(165, 140), size=(77, 25))
+	    self.btnAddMoving = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnAddChain.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(165, 140), size=(77, 25))
 	else:
 	    self.btnAddMoving = wx.Button(self, id=-1, label="Add", pos=(165, 140), size=(77, 25))
 	    self.btnAddMoving.SetForegroundColour("#000000")
@@ -207,7 +207,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnAddMoving.Bind(wx.EVT_BUTTON, self.addMoving)
 	self.btnAddMoving.SetToolTipString("Add selected chain to the list of static receptor chains")
 	if (platform.system() == "Darwin"):
-	    self.btnRemoveMoving = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnRemoveChain.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(242, 140), size=(78, 25))
+	    self.btnRemoveMoving = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnRemoveChain.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(242, 140), size=(78, 25))
 	else:
 	    self.btnRemoveMoving = wx.Button(self, id=-1, label="Remove", pos=(242, 140), size=(78, 25))
 	    self.btnRemoveMoving.SetForegroundColour("#000000")
@@ -232,7 +232,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblProt2 = wx.StaticText(self, -1, "Constraints (Recommended)", (0, ypos), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblProt2.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblProt2 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblConstraints.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, ypos), size=(270, 25))
+	    self.lblProt2 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblConstraints.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, ypos), size=(270, 25))
 	else:
 	    self.lblProt2 = wx.StaticText(self, -1, "Constraints (Recommended)", (70, ypos), style=wx.ALIGN_CENTRE)
 	    self.lblProt2.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -243,7 +243,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblInst2 = wx.StaticText(self, -1, "Specify which elements of the proteins interact.\n\nAtom Pair Constraint - Specify residue contacts\nSite Constraint - Residue to chain interactions\nUse the default settings unless you understand\nwhat you are doing.", (0, ypos+30), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblInst2.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblInst2 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstConstraints.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+30), size=(320, 95))
+	    self.lblInst2 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblInstConstraints.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+30), size=(320, 95))
 	else:
 	    self.lblInst2 = wx.StaticText(self, -1, "Specify which elements of the proteins interact.\n\nAtom Pair Constraint - Specify residue contacts\nSite Constraint - Residue to chain interactions\nUse the default settings unless you understand\nwhat you are doing.", (5, ypos+30), style=wx.ALIGN_CENTRE)
 	    self.lblInst2.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -251,7 +251,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.lblInst2.SetForegroundColour("#FFFFFF")
 	
 	if (platform.system() == "Darwin"):
-	    self.btnAdd = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAddConstraint.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+130), size=(100, 25))
+	    self.btnAdd = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnAddConstraint.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+130), size=(100, 25))
 	else:
 	    self.btnAdd = wx.Button(self, id=-1, label="Add", pos=(0, ypos+130), size=(100, 25))
 	    self.btnAdd.SetForegroundColour("#000000")
@@ -259,7 +259,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnAdd.Bind(wx.EVT_BUTTON, self.add)
 	self.btnAdd.SetToolTipString("Add the selected residues to the list of constraints")
 	if (platform.system() == "Darwin"):
-	    self.btnRemove = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnRemoveConstraint.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(110, ypos+130), size=(100, 25))
+	    self.btnRemove = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnRemoveConstraint.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(110, ypos+130), size=(100, 25))
 	else:
 	    self.btnRemove = wx.Button(self, id=-1, label="Remove", pos=(110, ypos+130), size=(100, 25))
 	    self.btnRemove.SetForegroundColour("#000000")
@@ -267,7 +267,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnRemove.Bind(wx.EVT_BUTTON, self.remove)
 	self.btnRemove.SetToolTipString("Remove the selected residues from the list of constraints")
 	if (platform.system() == "Darwin"):
-	    self.btnClear = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnClearConstraints.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(220, ypos+130), size=(100, 25))
+	    self.btnClear = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnClearConstraints.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(220, ypos+130), size=(100, 25))
 	else:
 	    self.btnClear = wx.Button(self, id=-1, label="Clear", pos=(220, ypos+130), size=(100, 25))
 	    self.btnClear.SetForegroundColour("#000000")
@@ -276,7 +276,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnClear.SetToolTipString("Clear the list of constraints")
 	
 	if (platform.system() == "Darwin"):
-	    self.btnAtomPairConstraint = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAtomPairConstraint_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+160), size=(150, 25))
+	    self.btnAtomPairConstraint = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnAtomPairConstraint_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+160), size=(150, 25))
 	else:
 	    self.btnAtomPairConstraint = wx.Button(self, id=-1, label="Atom Pair", pos=(5, ypos+160), size=(150, 25))
 	    self.btnAtomPairConstraint.SetForegroundColour("#FF0000")
@@ -284,7 +284,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnAtomPairConstraint.Bind(wx.EVT_BUTTON, self.toggleAtomPair)
 	self.btnAtomPairConstraint.SetToolTipString("Constrain a contact between two residues")
 	if (platform.system() == "Darwin"):
-	    self.btnSiteConstraint = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnSiteConstraint.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(165, ypos+160), size=(150, 25))
+	    self.btnSiteConstraint = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnSiteConstraint.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(165, ypos+160), size=(150, 25))
 	else:
 	    self.btnSiteConstraint = wx.Button(self, id=-1, label="Site", pos=(165, ypos+160), size=(150, 25))
 	    self.btnSiteConstraint.SetForegroundColour("#000000")
@@ -326,7 +326,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	
 	ypos = self.grdConstraints.GetPosition()[1] + self.grdConstraints.GetSize()[1] + 10
 	if (platform.system() == "Darwin"):
-	    self.btnLoadCST = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLoadCST.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, ypos), size=(120, 25))
+	    self.btnLoadCST = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnLoadCST.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, ypos), size=(120, 25))
 	else:
 	    self.btnLoadCST = wx.Button(self, id=-1, label="Load CST", pos=(20, ypos), size=(120, 25))
 	    self.btnLoadCST.SetForegroundColour("#000000")
@@ -334,7 +334,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnLoadCST.Bind(wx.EVT_BUTTON, self.loadCST)
 	self.btnLoadCST.SetToolTipString("Load the data in a premade constraints file")
 	if (platform.system() == "Darwin"):
-	    self.btnSaveCST = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnSaveCST.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(175, ypos), size=(120, 25))
+	    self.btnSaveCST = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnSaveCST.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(175, ypos), size=(120, 25))
 	else:
 	    self.btnSaveCST = wx.Button(self, id=-1, label="Save CST", pos=(175, ypos), size=(120, 25))
 	    self.btnSaveCST.SetForegroundColour("#000000")
@@ -375,7 +375,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblAdvanced = wx.StaticText(self, -1, "Advanced Options", (0, ypos), (320, 20), wx.ALIGN_CENTRE)
 	    self.lblAdvanced.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblAdvanced = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblAdvanced.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos), size=(320, 20))
+	    self.lblAdvanced = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblAdvanced.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos), size=(320, 20))
 	else:
 	    self.lblAdvanced = wx.StaticText(self, -1, "Advanced Options", (0, ypos), style=wx.ALIGN_CENTRE)
 	    self.lblAdvanced.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -385,7 +385,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblFunction = wx.StaticText(self, -1, "Function Type:", (0, ypos+23), (160, 20), wx.ALIGN_CENTRE)
 	    self.lblFunction.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblFunction = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblFunction.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+23), size=(160, 20))
+	    self.lblFunction = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblFunction.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+23), size=(160, 20))
 	else:
 	    self.lblFunction = wx.StaticText(self, -1, "Function Type:", (0, ypos+23), style=wx.ALIGN_CENTRE)
 	    self.lblFunction.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -399,7 +399,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblIdealD = wx.StaticText(self, -1, "Ideal Distance (A):", (0, ypos+53), (200, 20), wx.ALIGN_CENTRE)
 	    self.lblIdealD.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblIdealD = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblIdealD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+53), size=(200, 20))
+	    self.lblIdealD = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblIdealD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+53), size=(200, 20))
 	else:
 	    self.lblIdealD = wx.StaticText(self, -1, "Ideal Distance (A):", (0, ypos+53), style=wx.ALIGN_CENTRE)
 	    self.lblIdealD.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -414,7 +414,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblMaxD = wx.StaticText(self, -1, "Maximum Distance (A):", (0, ypos+83), (200, 20), wx.ALIGN_CENTRE)
 	    self.lblMaxD.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblMaxD = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblMaxD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+83), size=(200, 20))
+	    self.lblMaxD = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblMaxD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+83), size=(200, 20))
 	else:
 	    self.lblMaxD = wx.StaticText(self, -1, "Maximum Distance (A):", (0, ypos+83), style=wx.ALIGN_CENTRE)
 	    self.lblMaxD.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -429,7 +429,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblMinD = wx.StaticText(self, -1, "Minimum Distance (A):", (0, ypos+113), (200, 20), wx.ALIGN_CENTRE)
 	    self.lblMinD.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblMinD = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblMinD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+113), size=(200, 20))
+	    self.lblMinD = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblMinD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+113), size=(200, 20))
 	else:
 	    self.lblMinD = wx.StaticText(self, -1, "Minimum Distance (A):", (0, ypos+113), style=wx.ALIGN_CENTRE)
 	    self.lblMinD.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -444,7 +444,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblWeight = wx.StaticText(self, -1, "Weight:", (0, ypos+143), (200, 20), wx.ALIGN_CENTRE)
 	    self.lblWeight.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblWeight = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblWeight.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+143), size=(200, 20))
+	    self.lblWeight = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblWeight.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+143), size=(200, 20))
 	else:
 	    self.lblWeight = wx.StaticText(self, -1, "Weight:", (0, ypos+143), style=wx.ALIGN_CENTRE)
 	    self.lblWeight.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -459,7 +459,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblResidueAtom = wx.StaticText(self, -1, "Residue Atom", (0, ypos+170), (160, 20), wx.ALIGN_CENTRE)
 	    self.lblResidueAtom.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblResidueAtom = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblResidueAtom.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+170), size=(160, 20))
+	    self.lblResidueAtom = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblResidueAtom.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+170), size=(160, 20))
 	else:
 	    self.lblResidueAtom = wx.StaticText(self, -1, "Residue Atom", (0, ypos+170), style=wx.ALIGN_CENTRE)
 	    self.lblResidueAtom.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -469,7 +469,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblPartnerAtom = wx.StaticText(self, -1, "Partner Atom", (160, ypos+170), (160, 20), wx.ALIGN_CENTRE)
 	    self.lblPartnerAtom.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblPartnerAtom = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblPartnerAtom.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(160, ypos+170), size=(160, 20))
+	    self.lblPartnerAtom = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblPartnerAtom.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(160, ypos+170), size=(160, 20))
 	else:
 	    self.lblPartnerAtom = wx.StaticText(self, -1, "Partner Atom", (160, ypos+170), style=wx.ALIGN_CENTRE)
 	    self.lblPartnerAtom.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -488,7 +488,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblLine = wx.StaticText(self, -1, "==========================", (0, ypos+220), (320, 20), wx.ALIGN_CENTRE)
 	    self.lblLine.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblLine = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblLine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+220), size=(320, 20))
+	    self.lblLine = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblLine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+220), size=(320, 20))
 	else:
 	    self.lblLine = wx.StaticText(self, -1, "==========================", (0, ypos+220), style=wx.ALIGN_CENTRE)
 	    self.lblLine.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
@@ -500,9 +500,9 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblProt3 = wx.StaticText(self, -1, "Ensemble Docking (Optional)", (0, ypos), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblProt3.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblProt3 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblEnsembleDocking.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, ypos), size=(270, 25))
+	    self.lblProt3 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblEnsembleDocking.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos), size=(320, 25))
 	else:
-	    self.lblProt3 = wx.StaticText(self, -1, "Ensemble Docking (Optional)", (70, ypos), style=wx.ALIGN_CENTRE)
+	    self.lblProt3 = wx.StaticText(self, -1, "Ensemble Docking (Optional)", (0, ypos), style=wx.ALIGN_CENTRE)
 	    self.lblProt3.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	    resizeTextControlForUNIX(self.lblProt3, 0, self.GetSize()[0]-20)
 	self.lblProt3.SetForegroundColour("#FFFFFF")
@@ -511,7 +511,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblInst3 = wx.StaticText(self, -1, "Rosetta can represent the static and/or moving\nmodels as ensembles rather than single models.\nProvide an ensemble archive (.ensb) as input for\neither structure to activate ensemble docking.", (0, ypos+30), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblInst3.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblInst3 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstConstraints.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+30), size=(320, 95))
+	    self.lblInst3 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblInstEnsembleDocking.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+30), size=(320, 75))
 	else:
 	    self.lblInst3 = wx.StaticText(self, -1, "Rosetta can represent the static and/or moving\nmodels as ensembles rather than single models.\nProvide an ensemble archive (.ensb) as input for\neither structure to activate ensemble docking.", (5, ypos+30), style=wx.ALIGN_CENTRE)
 	    self.lblInst3.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -522,14 +522,14 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblStaticEnsb = wx.StaticText(self, -1, "Static Ensemble:", (0, ypos+103), (160, 20), wx.ALIGN_CENTRE)
 	    self.lblStaticEnsb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblStaticEnsb = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblStaticEnsb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+103), size=(160, 20))
+	    self.lblStaticEnsb = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblStaticEnsb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+103), size=(160, 20))
 	else:
 	    self.lblStaticEnsb = wx.StaticText(self, -1, "Static Ensemble:", (0, ypos+103), style=wx.ALIGN_CENTRE)
 	    self.lblStaticEnsb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	    resizeTextControlForUNIX(self.lblStaticEnsb, 0, 160)
 	self.lblStaticEnsb.SetForegroundColour("#FFFFFF")
 	if (platform.system() == "Darwin"):
-	    self.btnLoadStaticEnsb = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLoadStaticEnsb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(170, ypos+100), size=(70, 25))
+	    self.btnLoadStaticEnsb = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnLoadStaticEnsb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(170, ypos+100), size=(70, 25))
 	else:
 	    self.btnLoadStaticEnsb = wx.Button(self, id=-1, label="Load", pos=(170, ypos+100), size=(70, 25))
 	    self.btnLoadStaticEnsb.SetForegroundColour("#000000")
@@ -537,7 +537,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnLoadStaticEnsb.Bind(wx.EVT_BUTTON, self.loadStaticEnsb)
 	self.btnLoadStaticEnsb.SetToolTipString("Load an ensemble archive for the static chains")
 	if (platform.system() == "Darwin"):
-	    self.btnDeleteStaticEnsb = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLoadStaticEnsb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(250, ypos+100), size=(70, 25))
+	    self.btnDeleteStaticEnsb = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnDeleteStaticEnsb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(250, ypos+100), size=(70, 25))
 	else:
 	    self.btnDeleteStaticEnsb = wx.Button(self, id=-1, label="Delete", pos=(250, ypos+100), size=(70, 25))
 	    self.btnDeleteStaticEnsb.SetForegroundColour("#000000")
@@ -557,14 +557,14 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblMovingEnsb = wx.StaticText(self, -1, "Moving Ensemble:", (0, ypos+163), (160, 20), wx.ALIGN_CENTRE)
 	    self.lblMovingEnsb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblMovingEnsb = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblMovingEnsb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+163), size=(160, 20))
+	    self.lblMovingEnsb = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblMovingEnsb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+163), size=(160, 20))
 	else:
 	    self.lblMovingEnsb = wx.StaticText(self, -1, "Moving Ensemble:", (0, ypos+163), style=wx.ALIGN_CENTRE)
 	    self.lblMovingEnsb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	    resizeTextControlForUNIX(self.lblMovingEnsb, 0, 160)
 	self.lblMovingEnsb.SetForegroundColour("#FFFFFF")
 	if (platform.system() == "Darwin"):
-	    self.btnLoadMovingEnsb = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLoadMovingEnsb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(170, ypos+160), size=(70, 25))
+	    self.btnLoadMovingEnsb = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnLoadStaticEnsb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(170, ypos+160), size=(70, 25))
 	else:
 	    self.btnLoadMovingEnsb = wx.Button(self, id=-1, label="Load", pos=(170, ypos+160), size=(70, 25))
 	    self.btnLoadMovingEnsb.SetForegroundColour("#000000")
@@ -572,7 +572,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnLoadMovingEnsb.Bind(wx.EVT_BUTTON, self.loadMovingEnsb)
 	self.btnLoadMovingEnsb.SetToolTipString("Load an ensemble archive for the moving chains")
 	if (platform.system() == "Darwin"):
-	    self.btnDeleteMovingEnsb = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLoadMovingEnsb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(250, ypos+160), size=(70, 25))
+	    self.btnDeleteMovingEnsb = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnDeleteStaticEnsb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(250, ypos+160), size=(70, 25))
 	else:
 	    self.btnDeleteMovingEnsb = wx.Button(self, id=-1, label="Delete", pos=(250, ypos+160), size=(70, 25))
 	    self.btnDeleteMovingEnsb.SetForegroundColour("#000000")
@@ -594,7 +594,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblLine2 = wx.StaticText(self, -1, "==========================", (0, ypos+220), (320, 20), wx.ALIGN_CENTRE)
 	    self.lblLine2.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblLine2 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblLine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+220), size=(320, 20))
+	    self.lblLine2 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblLine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+220), size=(320, 20))
 	else:
 	    self.lblLine2 = wx.StaticText(self, -1, "==========================", (0, ypos+220), style=wx.ALIGN_CENTRE)
 	    self.lblLine2.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
@@ -605,7 +605,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblInst4 = wx.StaticText(self, -1, "If you know the interface on the static chains,\nselect it and reorient the interface to point\ntowards the ligand.", (0, ypos+240), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblInst4.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblInst4 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstInterface.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+240), size=(320, 95))
+	    self.lblInst4 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblInstInterface.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+240), size=(320, 60))
 	else:
 	    self.lblInst4 = wx.StaticText(self, -1, "If you know the interface on the static chains,\nselect it and reorient the interface to point\ntowards the ligand.", (5, ypos+240), style=wx.ALIGN_CENTRE)
 	    self.lblInst4.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -613,7 +613,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.lblInst4.SetForegroundColour("#FFFFFF")
 	
 	if (platform.system() == "Darwin"):
-	    self.btnReorient = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnReorient.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(110, ypos+290), size=(100, 25))
+	    self.btnReorient = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnReorient.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(60, ypos+290), size=(200, 25))
 	else:
 	    self.btnReorient = wx.Button(self, id=-1, label="Re-orient Partners", pos=(60, ypos+290), size=(200, 25))
 	    self.btnReorient.SetForegroundColour("#000000")
@@ -625,7 +625,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblCoarse = wx.StaticText(self, -1, "Coarse Models", (0, ypos+320), (155, 20), wx.ALIGN_CENTRE)
 	    self.lblCoarse.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblCoarse = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblCoarse.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+320), size=(155, 20))
+	    self.lblCoarse = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblCoarse.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+320), size=(155, 20))
 	else:
 	    self.lblCoarse = wx.StaticText(self, -1, "Coarse Models", (0, ypos+320), style=wx.ALIGN_CENTRE)
 	    self.lblCoarse.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -638,7 +638,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblRefined = wx.StaticText(self, -1, "Refined Models", (165, ypos+320), (155, 20), wx.ALIGN_CENTRE)
 	    self.lblRefined.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblRefined = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblRefined.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(165, ypos+320), size=(155, 20))
+	    self.lblRefined = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblRefined.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(165, ypos+320), size=(155, 20))
 	else:
 	    self.lblRefined = wx.StaticText(self, -1, "Refined Models", (165, ypos+320), style=wx.ALIGN_CENTRE)
 	    self.lblRefined.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -652,7 +652,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblPostDock = wx.StaticText(self, -1, "Post-Docking", (0, ypos+370), (320, 20), wx.ALIGN_CENTRE)
 	    self.lblPostDock.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblPostDock = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblPostDock.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+370), size=(320, 20))
+	    self.lblPostDock = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblPostDock.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+370), size=(320, 20))
 	else:
 	    self.lblPostDock = wx.StaticText(self, -1, "Post-Docking", (0, ypos+370), style=wx.ALIGN_CENTRE)
 	    self.lblPostDock.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -663,7 +663,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblModelView = wx.StaticText(self, -1, "View Structures:", (20, ypos+398), (120, 20), wx.ALIGN_CENTRE)
 	    self.lblModelView.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblModelView = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblModelView.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, ypos+398), size=(120, 20))
+	    self.lblModelView = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/lblModelView.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, ypos+398), size=(120, 20))
 	else:
 	    self.lblModelView = wx.StaticText(self, -1, "View Structures:", (20, ypos+398), style=wx.ALIGN_CENTRE)
 	    self.lblModelView.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -675,7 +675,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.viewMenu.SetToolTipString("Select docked positions to view in PyMOL")
 	
 	if (platform.system() == "Darwin"):
-	    self.btnServerToggle = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnServerOff.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+430), size=(100, 25))
+	    self.btnServerToggle = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnServer_Off.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+430), size=(100, 25))
 	else:
 	    self.btnServerToggle = wx.Button(self, id=-1, label="Server Off", pos=(0, ypos+430), size=(100, 25))
 	    self.btnServerToggle.SetForegroundColour("#000000")
@@ -684,7 +684,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnServerToggle.SetToolTipString("Perform docking simulations locally")
 	self.serverOn = False
 	if (platform.system() == "Darwin"):
-	    self.btnStarting = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnStarting_Global.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(110, ypos+430), size=(100, 25))
+	    self.btnStarting = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnStarting_Global.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(110, ypos+430), size=(100, 25))
 	else:
 	    self.btnStarting = wx.Button(self, id=-1, label="Global", pos=(110, ypos+430), size=(100, 25))
 	    self.btnStarting.SetForegroundColour("#000000")
@@ -693,7 +693,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnStarting.SetToolTipString("Perform a global dock, where the orientations of both partners is unknown")
 	self.startingType = "Global"
 	if (platform.system() == "Darwin"):
-	    self.btnDock = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnDock.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(220, ypos+430), size=(100, 25))
+	    self.btnDock = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnDock.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(220, ypos+430), size=(100, 25))
 	else:
 	    self.btnDock = wx.Button(self, id=-1, label="Dock!", pos=(220, ypos+430), size=(100, 25))
 	    self.btnDock.SetForegroundColour("#000000")
@@ -927,8 +927,8 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	
     def toggleAtomPair(self, event):
 	if (platform.system() == "Darwin"):
-	    self.btnAtomPairConstraint.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAtomPairConstraint_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-	    self.btnSiteConstraint.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnSiteConstraint.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnAtomPairConstraint.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnAtomPairConstraint_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnSiteConstraint.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnSiteConstraint.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	else:
 	    self.btnAtomPairConstraint.SetForegroundColour("#FF0000")
 	    self.btnSiteConstraint.SetForegroundColour("#000000")
@@ -937,8 +937,8 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	
     def toggleSite(self, event):
 	if (platform.system() == "Darwin"):
-	    self.btnAtomPairConstraint.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAtomPairConstraint.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-	    self.btnSiteConstraint.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnSiteConstraint_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnAtomPairConstraint.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnAtomPairConstraint.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnSiteConstraint.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnSiteConstraint_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	else:
 	    self.btnSiteConstraint.SetForegroundColour("#FF0000")
 	    self.btnAtomPairConstraint.SetForegroundColour("#000000")
@@ -1932,28 +1932,28 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	if (self.startingType == "Global"):
 	    self.startingType = "Fix Stat"
 	    if (platform.system() == "Darwin"):
-		self.btnStarting.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnStarting_FixStat.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnStarting.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnStarting_FixStat.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnStarting.SetLabel(self.startingType)
 	    self.btnStarting.SetToolTipString("Use the current orientation of the static chains, but the orientation of the moving chains is unknown")
 	elif (self.startingType == "Fix Stat"):
 	    self.startingType = "Fix Mov"
 	    if (platform.system() == "Darwin"):
-		self.btnStarting.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnStarting_FixMov.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnStarting.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnStarting_FixMov.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnStarting.SetLabel(self.startingType)
 	    self.btnStarting.SetToolTipString("Use the current orientation of the moving chains, but the orientation of the static chains is unknown")
 	elif (self.startingType == "Fix Mov"):
 	    self.startingType = "Fix Both"
 	    if (platform.system() == "Darwin"):
-		self.btnStarting.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnStarting_FixBoth.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnStarting.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnStarting_FixBoth.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnStarting.SetLabel(self.startingType)
 	    self.btnStarting.SetToolTipString("Use the current orientations of both partners")
 	else:
 	    self.startingType = "Global"
 	    if (platform.system() == "Darwin"):
-		self.btnStarting.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnStarting_Global.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnStarting.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnStarting_Global.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnStarting.SetLabel(self.startingType)
 	    self.btnStarting.SetToolTipString("Perform a global dock, where the orientations of both partners is unknown")
@@ -1962,12 +1962,18 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def serverToggle(self, event):
 	if (self.serverOn):
 	    self.serverOn = False
-	    self.btnServerToggle.SetLabel("Server Off")
+	    if (platform.system() == "Darwin"):
+		self.btnServerToggle.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnServer_Off.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    else:
+		self.btnServerToggle.SetLabel("Server Off")
 	    self.btnServerToggle.SetToolTipString("Perform docking simulations locally")
 	    logInfo("Turned off docking server usage")
 	else:
 	    self.serverOn = True
-	    self.btnServerToggle.SetLabel("Server On")
+	    if (platform.system() == "Darwin"):
+		self.btnServerToggle.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnServer_On.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    else:
+		self.btnServerToggle.SetLabel("Server On")
 	    self.btnServerToggle.SetToolTipString("Perform docking simulations on a remote server")
 	    logInfo("Turned on docking server usage")
     
@@ -2309,7 +2315,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnRemoveMoving.Enable()
 	self.btnStarting.Enable()
 	if (platform.system() == "Darwin"):
-	    self.btnDock.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnDock.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnDock.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnDock.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	else:
 	    self.btnDock.SetLabel("Dock!")
 	self.buttonState = "Dock!"
@@ -2394,7 +2400,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.btnRemoveMoving.Disable()
 	    self.btnStarting.Disable()
 	    if (platform.system() == "Darwin"):
-		self.btnDock.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnDock_Cancel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnDock.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnDock_Cancel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnDock.SetLabel("Cancel!")
 	    self.buttonState = "Cancel!"
@@ -2471,7 +2477,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.btnStarting.Enable()
 	    self.grdDocking.ClearGrid()
 	    if (platform.system() == "Darwin"):
-		self.btnDock.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnDock.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnDock.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnDock.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnDock.SetLabel("Dock!")
 	    self.buttonState = "Dock!"
@@ -2561,7 +2567,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnRemoveMoving.Enable()
 	self.btnDock.Enable()
 	if (platform.system() == "Darwin"):
-	    self.btnDock.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnDock.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnDock.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnDock.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	else:
 	    self.btnDock.SetLabel("Dock!")
 	self.buttonState = "Dock!"
@@ -2669,7 +2675,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    self.btnRemoveMoving.Enable()
 		    self.btnStarting.Enable()
 		    if (platform.system() == "Darwin"):
-			self.btnDock.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnDock.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+			self.btnDock.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnDock.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		    else:
 			self.btnDock.SetLabel("Dock!")
 		    self.buttonState = "Dock!"
@@ -2862,7 +2868,7 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		#self.enableControls()
 		#self.selectedModel = ""
 		if (platform.system() == "Darwin"):
-		    self.btnDock.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnDock_Finalize.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		    self.btnDock.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/docking/btnDock_Finalize.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		else:
 		    self.btnDock.SetLabel("Finalize!")
 		self.buttonState = "Finalize!"

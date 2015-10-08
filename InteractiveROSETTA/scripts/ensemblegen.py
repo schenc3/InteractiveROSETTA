@@ -29,7 +29,7 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblProt = wx.StaticText(self, -1, "Ensemble Generation", (25, 15), (270, 25), wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblEnsembleGeneration.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
+	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/lblEnsembleGeneration.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 15), size=(320, 25))
 	else:
 	    self.lblProt = wx.StaticText(self, -1, "Ensemble Generation", (70, 15), style=wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -49,7 +49,7 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblInst = wx.StaticText(self, -1, "Create structural ensembles for a model.\n\nRelax - Generate structural diversity\nusing minor perturbations.\n\nBackrub - Generate extensive structural diversity\nup to a given RMSD", (0, 45), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstPointMutantScan.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 25))
+	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/lblInstEnsembleGeneration.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 90))
 	else:
 	    self.lblInst = wx.StaticText(self, -1, "Create structural ensembles for a model.\n\nRelax - Generate structural diversity\nusing minor perturbations.\n\nBackrub - Generate extensive structural diversity\nup to a given RMSD", (5, 45), style=wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -60,7 +60,7 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblLine = wx.StaticText(self, -1, "==========================", (0, 160), (320, 20), wx.ALIGN_CENTRE)
 	    self.lblLine.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblLine = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblLine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 160), size=(320, 20))
+	    self.lblLine = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/lblLine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 160), size=(320, 20))
 	else:
 	    self.lblLine = wx.StaticText(self, -1, "==========================", (0, 160), style=wx.ALIGN_CENTRE)
 	    self.lblLine.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
@@ -71,7 +71,7 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblRelax = wx.StaticText(self, -1, "Relax Ensemble", (0, 180), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblRelax.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblRelax = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblRelax.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 180), size=(320, 25))
+	    self.lblRelax = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/lblRelax.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 180), size=(320, 25))
 	else:
 	    self.lblRelax = wx.StaticText(self, -1, "Relax Ensemble", (0, 180), style=wx.ALIGN_CENTRE)
 	    self.lblRelax.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -82,7 +82,7 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblModelR = wx.StaticText(self, -1, "Base Model", (0, 210), (230, 20), wx.ALIGN_CENTRE)
 	    self.lblModelR.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblModelR = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblModelR.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 210), size=(230, 20))
+	    self.lblModelR = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/lblModelR.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 210), size=(230, 20))
 	else:
 	    self.lblModelR = wx.StaticText(self, -1, "Base Model", (0, 210), style=wx.ALIGN_CENTRE)
 	    self.lblModelR.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -95,7 +95,7 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblNModelsR = wx.StaticText(self, -1, "# Models", (240, 210), (80, 20), wx.ALIGN_CENTRE)
 	    self.lblNModelsR.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblNModelsR = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblNModelsR.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(240, 210), size=(80, 20))
+	    self.lblNModelsR = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/lblNModelsR.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(240, 210), size=(80, 20))
 	else:
 	    self.lblNModelsR = wx.StaticText(self, -1, "# Models", (240, 210), style=wx.ALIGN_CENTRE)
 	    self.lblNModelsR.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -106,7 +106,7 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.txtNModelsR.SetToolTipString("Number of models to generate")
 	
 	if (platform.system() == "Darwin"):
-	    self.btnRelax = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnRelax.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(110, 270), size=(100, 25))
+	    self.btnRelax = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/btnRelax.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(110, 270), size=(100, 25))
 	else:
 	    self.btnRelax = wx.Button(self, id=-1, label="Relax!", pos=(110, 270), size=(100, 25))
 	    self.btnRelax.SetForegroundColour("#000000")
@@ -119,7 +119,7 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblLine2 = wx.StaticText(self, -1, "==========================", (0, 300), (320, 20), wx.ALIGN_CENTRE)
 	    self.lblLine2.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblLine2 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblLine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 300), size=(320, 20))
+	    self.lblLine2 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/lblLine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 300), size=(320, 20))
 	else:
 	    self.lblLine2 = wx.StaticText(self, -1, "==========================", (0, 300), style=wx.ALIGN_CENTRE)
 	    self.lblLine2.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
@@ -130,7 +130,7 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblBackrub = wx.StaticText(self, -1, "Backrub Ensemble", (0, 320), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblBackrub.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblBackrub = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblBackrub.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 320), size=(320, 25))
+	    self.lblBackrub = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/lblBackrub.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 320), size=(320, 25))
 	else:
 	    self.lblBackrub = wx.StaticText(self, -1, "Backrub Ensemble", (0, 320), style=wx.ALIGN_CENTRE)
 	    self.lblBackrub.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -141,7 +141,7 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblModelB = wx.StaticText(self, -1, "Base Model", (0, 350), (160, 20), wx.ALIGN_CENTRE)
 	    self.lblModelB.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblModelB = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblModelB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 350), size=(230, 20))
+	    self.lblModelB = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/lblModelR.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 350), size=(230, 20))
 	else:
 	    self.lblModelB = wx.StaticText(self, -1, "Base Model", (0, 350), style=wx.ALIGN_CENTRE)
 	    self.lblModelB.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -154,7 +154,7 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblNModelsB = wx.StaticText(self, -1, "# Models", (170, 350), (70, 20), wx.ALIGN_CENTRE)
 	    self.lblNModelsB.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblNModelsB = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblNModelsB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(170, 350), size=(70, 20))
+	    self.lblNModelsB = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/lblNModelsR.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(170, 350), size=(70, 20))
 	else:
 	    self.lblNModelsB = wx.StaticText(self, -1, "# Models", (170, 350), style=wx.ALIGN_CENTRE)
 	    self.lblNModelsB.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -168,7 +168,7 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblMaxRMSD = wx.StaticText(self, -1, "maxRMSD", (250, 350), (70, 20), wx.ALIGN_CENTRE)
 	    self.lblMaxRMSD.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblMaxRMSD = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblMaxRMSD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(250, 350), size=(70, 20))
+	    self.lblMaxRMSD = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/lblMaxRMSD.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(250, 350), size=(70, 20))
 	else:
 	    self.lblMaxRMSD = wx.StaticText(self, -1, "maxRMSD", (250, 350), style=wx.ALIGN_CENTRE)
 	    self.lblMaxRMSD.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -179,7 +179,7 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.txtMaxRMSD.SetToolTipString("Number of models to generate")
 	
 	if (platform.system() == "Darwin"):
-	    self.btnServerToggle = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnServerOff.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(40, 410), size=(100, 25))
+	    self.btnServerToggle = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/btnServer_Off.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(40, 410), size=(100, 25))
 	else:
 	    self.btnServerToggle = wx.Button(self, id=-1, label="Server Off", pos=(40, 410), size=(100, 25))
 	    self.btnServerToggle.SetForegroundColour("#000000")
@@ -189,7 +189,7 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.serverOn = False
 	
 	if (platform.system() == "Darwin"):
-	    self.btnBackrub = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnBackrub.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(180, 410), size=(100, 25))
+	    self.btnBackrub = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/btnBackrub.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(180, 410), size=(100, 25))
 	else:
 	    self.btnBackrub = wx.Button(self, id=-1, label="Backrub!", pos=(180, 410), size=(100, 25))
 	    self.btnBackrub.SetForegroundColour("#000000")
@@ -201,7 +201,7 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblLine3 = wx.StaticText(self, -1, "==========================", (0, 440), (320, 20), wx.ALIGN_CENTRE)
 	    self.lblLine3.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblLine3 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblLine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 440), size=(320, 20))
+	    self.lblLine3 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/lblLine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 440), size=(320, 20))
 	else:
 	    self.lblLine3 = wx.StaticText(self, -1, "==========================", (0, 440), style=wx.ALIGN_CENTRE)
 	    self.lblLine3.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
@@ -212,7 +212,7 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblUnpack = wx.StaticText(self, -1, "Unpack Ensemble", (0, 460), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblUnpack.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblUnpack = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblUnpack.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 320), size=(460, 25))
+	    self.lblUnpack = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/lblUnpack.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 460), size=(460, 25))
 	else:
 	    self.lblUnpack = wx.StaticText(self, -1, "Unpack Ensemble", (0, 460), style=wx.ALIGN_CENTRE)
 	    self.lblUnpack.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -223,7 +223,7 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblPrefix = wx.StaticText(self, -1, "Filename Prefix", (0, 490), (230, 20), wx.ALIGN_CENTRE)
 	    self.lblPrefix.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblPrefix = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblPrefix.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 490), size=(230, 20))
+	    self.lblPrefix = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/lblPrefix.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 490), size=(230, 20))
 	else:
 	    self.lblPrefix = wx.StaticText(self, -1, "Filename Prefix", (0, 490), style=wx.ALIGN_CENTRE)
 	    self.lblPrefix.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -234,7 +234,7 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.txtPrefix.SetToolTipString("Filename prefix that will be used to generate the individual PDB files")
 	
 	if (platform.system() == "Darwin"):
-	    self.btnUnpack = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnUnpack.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(240, 510), size=(80, 25))
+	    self.btnUnpack = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/btnUnpack.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(240, 510), size=(100, 25))
 	else:
 	    self.btnUnpack = wx.Button(self, id=-1, label="Choose File", pos=(220, 510), size=(100, 25))
 	    self.btnUnpack.SetForegroundColour("#000000")
@@ -303,7 +303,7 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.seqWin.cannotDelete = False
 	self.btnBackrub.Enable()
 	if (platform.system() == "Darwin"):
-	    self.btnRelax.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnRelax.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnRelax.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/btnRelax.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	else:
 	    self.btnRelax.SetLabel("Relax!")
 	self.btnRelax.SetToolTipString("Begin relax protocol to generate a structural ensemble")
@@ -360,7 +360,7 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.seqWin.cannotDelete = True
 	    self.stage = 1
 	    if (platform.system() == "Darwin"):
-		self.btnRelax.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnRelax_Cancel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnRelax.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/btnRelax_Cancel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnRelax.SetLabel("Cancel!")
 	    self.buttonState = "Cancel!"
@@ -401,11 +401,11 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnRelax.Enable()
 	self.btnBackrub.Enable()
 	if (platform.system() == "Darwin"):
-	    self.btnRelax.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnRelax.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnRelax.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/btnRelax.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	else:
 	    self.btnRelax.SetLabel("Scan!")
 	if (platform.system() == "Darwin"):
-	    self.btnBackrub.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnBackrub.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnBackrub.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/btnBackrub.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	else:
 	    self.btnBackrub.SetLabel("Scan!")
 	self.buttonState = "Ensemble!"
@@ -517,7 +517,7 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		self.parent.GoBtn.Enable()
 		self.btnBackrub.Enable()
 		if (platform.system() == "Darwin"):
-		    self.btnRelax.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnRelax.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		    self.btnRelax.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/btnRelax.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		else:
 		    self.btnRelax.SetLabel("Relax!")
 		self.buttonState = "Ensemble!"
@@ -556,7 +556,7 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.seqWin.cannotDelete = False
 	self.btnRelax.Enable()
 	if (platform.system() == "Darwin"):
-	    self.btnBackrub.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnBackrub.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnBackrub.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/btnBackrub.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	else:
 	    self.btnBackrub.SetLabel("Backrub!")
 	self.btnRelax.SetToolTipString("Begin backrub protocol to generate a structural ensemble")
@@ -578,12 +578,18 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def serverToggle(self, event):
 	if (self.serverOn):
 	    self.serverOn = False
-	    self.btnServerToggle.SetLabel("Server Off")
+	    if (platform.system() == "Darwin"):
+		self.btnServerToggle.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/btnServer_Off.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    else:
+		self.btnServerToggle.SetLabel("Server Off")
 	    self.btnServerToggle.SetToolTipString("Perform backrub simulations locally")
 	    logInfo("Turned off backrub server usage")
 	else:
 	    self.serverOn = True
-	    self.btnServerToggle.SetLabel("Server On")
+	    if (platform.system() == "Darwin"):
+		self.btnServerToggle.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/btnServer_On.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    else:
+		self.btnServerToggle.SetLabel("Server On")
 	    self.btnServerToggle.SetToolTipString("Perform backrub simulations on a remote server")
 	    logInfo("Turned on backrub server usage")
 
@@ -636,7 +642,7 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.seqWin.cannotDelete = True
 	    self.stage = 1
 	    if (platform.system() == "Darwin"):
-		self.btnBackrub.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnBackrub_Cancel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnBackrub.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/btnBackrub_Cancel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnBackrub.SetLabel("Cancel!")
 	    self.buttonState = "Cancel!"
@@ -715,7 +721,7 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    self.parent.GoBtn.Enable()
 		    self.btnRelax.Enable()
 		    if (platform.system() == "Darwin"):
-			self.btnBackrub.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnBackrub.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+			self.btnBackrub.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/btnBackrub.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		    else:
 			self.btnBackrub.SetLabel("Backrub!")
 		    self.buttonState = "Ensemble!"
@@ -797,7 +803,7 @@ class EnsembleGenPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		self.parent.GoBtn.Enable()
 		self.btnRelax.Enable()
 		if (platform.system() == "Darwin"):
-		    self.btnBackrub.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnBackrub.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		    self.btnBackrub.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblegen/btnBackrub.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		else:
 		    self.btnBackrub.SetLabel("Backrub!")
 		self.buttonState = "Ensemble!"
