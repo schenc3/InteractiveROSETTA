@@ -23,7 +23,7 @@ class SurfacesPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblProt = wx.StaticText(self, -1, "Molecular Surfaces", (25, 15), (270, 25), style=wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblSurfaces.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
+	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/surfaces/lblSurfaces.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 15), size=(320, 25))
 	else:
 	    self.lblProt = wx.StaticText(self, -1, "Molecular Surfaces", pos=(90, 15), style=wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -43,7 +43,7 @@ class SurfacesPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblInst = wx.StaticText(self, -1, "Draw and configure structural surfaces", (0, 45), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstSuperimposition.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 25))
+	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/surfaces/lblInstSurfaces.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 25))
 	else:
 	    self.lblInst = wx.StaticText(self, -1, "Draw and configure structural surfaces", pos=(20, 45), style=wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -54,7 +54,7 @@ class SurfacesPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblReceptor = wx.StaticText(self, -1, "Receptor", (0, 90), (155, 20), wx.ALIGN_CENTRE)
 	    self.lblReceptor.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblReceptor = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblReceptor.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 90), size=(155, 20))
+	    self.lblReceptor = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/surfaces/lblReceptor.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 90), size=(155, 20))
 	else:
 	    self.lblReceptor = wx.StaticText(self, -1, "Receptor", (0, 90), style=wx.ALIGN_CENTRE)
 	    self.lblReceptor.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -64,7 +64,7 @@ class SurfacesPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblLigand = wx.StaticText(self, -1, "Ligand", (160, 90), (155, 20), wx.ALIGN_CENTRE)
 	    self.lblLigand.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblLigand = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblLigand.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(160, 90), size=(155, 20))
+	    self.lblLigand = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/surfaces/lblLigand.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(160, 90), size=(155, 20))
 	else:
 	    self.lblLigand = wx.StaticText(self, -1, "Ligand", (160, 90), style=wx.ALIGN_CENTRE)
 	    self.lblLigand.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -72,7 +72,7 @@ class SurfacesPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.lblLigand.SetForegroundColour("#FFFFFF")
 	
 	if (platform.system() == "Darwin"):
-	    self.btnRecpSelect = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnRecpSelect.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 120), size=(155, 25))
+	    self.btnRecpSelect = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/surfaces/btnRecpSelect.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 120), size=(155, 25))
 	else:
 	    self.btnRecpSelect = wx.Button(self, id=-1, label="Set Selection", pos=(0, 120), size=(155, 25))
 	    self.btnRecpSelect.SetForegroundColour("#000000")
@@ -80,7 +80,7 @@ class SurfacesPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnRecpSelect.Bind(wx.EVT_BUTTON, self.recpSetSelection)
 	self.btnRecpSelect.SetToolTipString("Set the current selection as the receptor.  Use only the receptor if you simply want a surface and not an interface.")
 	if (platform.system() == "Darwin"):
-	    self.btnLigSelect = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLigSelect.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(160, 120), size=(155, 25))
+	    self.btnLigSelect = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/surfaces/btnRecpSelect.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(160, 120), size=(155, 25))
 	else:
 	    self.btnLigSelect = wx.Button(self, id=-1, label="Set Selection", pos=(160, 120), size=(155, 25))
 	    self.btnLigSelect.SetForegroundColour("#000000")
@@ -89,7 +89,7 @@ class SurfacesPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnLigSelect.SetToolTipString("Set the current selection as the ligand.  If you have ligand and receptor specified on the same model, then the interface between the receptor and ligand will be drawn.")
 	
 	if (platform.system() == "Darwin"):
-	    self.btnRecpHighlight = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnRecpSelect.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 150), size=(155, 25))
+	    self.btnRecpHighlight = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/surfaces/btnRecpHighlight.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 150), size=(155, 25))
 	else:
 	    self.btnRecpHighlight = wx.Button(self, id=-1, label="Highlight", pos=(0, 150), size=(155, 25))
 	    self.btnRecpHighlight.SetForegroundColour("#000000")
@@ -97,7 +97,7 @@ class SurfacesPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnRecpHighlight.Bind(wx.EVT_BUTTON, self.recpHighlight)
 	self.btnRecpHighlight.SetToolTipString("Show the residues currently selected for the receptor.")
 	if (platform.system() == "Darwin"):
-	    self.btnLigHighlight = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLigSelect.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(160, 150), size=(155, 25))
+	    self.btnLigHighlight = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/surfaces/btnRecpHighlight.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(160, 150), size=(155, 25))
 	else:
 	    self.btnLigHighlight = wx.Button(self, id=-1, label="Highlight", pos=(160, 150), size=(155, 25))
 	    self.btnLigHighlight.SetForegroundColour("#000000")
@@ -109,14 +109,14 @@ class SurfacesPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblColoring = wx.StaticText(self, -1, "Coloring:", (0, 190), (80, 20), wx.ALIGN_CENTRE)
 	    self.lblColoring.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblColoring = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblColoring.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 183), size=(80, 20))
+	    self.lblColoring = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/surfaces/lblColoring.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 183), size=(80, 20))
 	else:
 	    self.lblColoring = wx.StaticText(self, -1, "Coloring:", (0, 190), style=wx.ALIGN_CENTRE)
 	    self.lblColoring.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	    resizeTextControlForUNIX(self.lblColoring, 0, 80)
 	self.lblColoring.SetForegroundColour("#FFFFFF")
 	if (platform.system() == "Darwin"):
-	    self.btnCPKColor = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnCPKColor.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(80, 180), size=(80, 35))
+	    self.btnCPKColor = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/surfaces/btnCPKColor.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(80, 180), size=(80, 35))
 	else:
 	    self.btnCPKColor = wx.Button(self, id=-1, label="CPK", pos=(80, 180), size=(80, 35))
 	    self.btnCPKColor.SetForegroundColour("#000000")
@@ -124,7 +124,7 @@ class SurfacesPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnCPKColor.Bind(wx.EVT_BUTTON, self.CPKColor)
 	self.btnCPKColor.SetToolTipString("Color the surface according to CPK coloring")
 	if (platform.system() == "Darwin"):
-	    self.btnElecColor = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnElecColor.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(160, 180), size=(80, 35))
+	    self.btnElecColor = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/surfaces/btnElecColor.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(160, 180), size=(80, 35))
 	else:
 	    self.btnElecColor = wx.Button(self, id=-1, label="Elec", pos=(160, 180), size=(80, 35))
 	    self.btnElecColor.SetForegroundColour("#000000")
@@ -139,7 +139,7 @@ class SurfacesPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblTransparency = wx.StaticText(self, -1, "Transparency:", (0, 223), (100, 20), wx.ALIGN_CENTRE)
 	    self.lblTransparency.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblTransparency = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblTransparency.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 223), size=(100, 20))
+	    self.lblTransparency = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/surfaces/lblTransparency.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 223), size=(100, 20))
 	else:
 	    self.lblTransparency = wx.StaticText(self, -1, "Transparency:", (0, 223), style=wx.ALIGN_CENTRE)
 	    self.lblTransparency.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -153,7 +153,7 @@ class SurfacesPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblSurfaceName = wx.StaticText(self, -1, "Surface Name:", (0, 253), (140, 20), wx.ALIGN_CENTRE)
 	    self.lblSurfaceName.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblSurfaceName = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblSurfaceName.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 253), size=(140, 20))
+	    self.lblSurfaceName = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/surfaces/lblSurfaceName.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 253), size=(140, 20))
 	else:
 	    self.lblSurfaceName = wx.StaticText(self, -1, "Surface Name:", (0, 253), style=wx.ALIGN_CENTRE)
 	    self.lblSurfaceName.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -163,11 +163,14 @@ class SurfacesPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.txtSurfaceName.SetValue("")
 	self.txtSurfaceName.SetToolTipString("Give the surface a name")
 	
-	self.menuSurfaces = wx.ComboBox(self, pos=(0, 280), size=(220, 25), choices=[], style=wx.CB_READONLY | wx.CB_SORT)
+	if (platform.system() == "Darwin"):
+	    self.menuSurfaces = wx.ComboBox(self, pos=(0, 280), size=(220, 25), choices=[], style=wx.CB_READONLY)
+	else:
+	    self.menuSurfaces = wx.ComboBox(self, pos=(0, 280), size=(220, 25), choices=[], style=wx.CB_READONLY | wx.CB_SORT)
 	self.menuSurfaces.Bind(wx.EVT_COMBOBOX, self.surfaceSelect)
 	self.menuSurfaces.SetToolTipString("List of currently active surfaces")
 	if (platform.system() == "Darwin"):
-	    self.btnDelete = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnDelete.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(220, 280), size=(100, 25))
+	    self.btnDelete = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/surfaces/btnDelete.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(220, 280), size=(100, 25))
 	else:
 	    self.btnDelete = wx.Button(self, id=-1, label="Delete", pos=(220, 280), size=(100, 25))
 	    self.btnDelete.SetForegroundColour("#000000")
@@ -176,7 +179,7 @@ class SurfacesPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnDelete.SetToolTipString("Delete the selected surface")
 	
 	if (platform.system() == "Darwin"):
-	    self.btnDraw = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnDraw.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(110, 310), size=(100, 25))
+	    self.btnDraw = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/surfaces/btnDraw.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(110, 310), size=(100, 25))
 	else:
 	    self.btnDraw = wx.Button(self, id=-1, label="Draw!", pos=(110, 310), size=(100, 25))
 	    self.btnDraw.SetForegroundColour("#000000")

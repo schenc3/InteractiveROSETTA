@@ -7,7 +7,7 @@ import time
 import platform
 import multiprocessing
 import datetime
-import requests
+#import requests
 import webbrowser
 from threading import Thread
 from tools import *
@@ -28,7 +28,7 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblProt = wx.StaticText(self, -1, "Comparative Modeling", (25, 15), (270, 25), wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblCompModel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
+	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/compmodel/lblCompModel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
 	else:
 	    self.lblProt = wx.StaticText(self, -1, "Comparative Modeling", (70, 15), style=wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -48,7 +48,7 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblInst = wx.StaticText(self, -1, "Model a structure ab initio using an existing\nstructure as a template.", (0, 45), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstCompModel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 80))
+	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/compmodel/lblInstCompModel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 80))
 	else:
 	    self.lblInst = wx.StaticText(self, -1, "Model a structure ab initio using an existing\nstructure as a template.", (5, 45), style=wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -59,7 +59,7 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblFASTA = wx.StaticText(self, -1, "FASTA Sequence:", (10, 90), (320, 20), wx.ALIGN_LEFT)
 	    self.lblFASTA.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblFASTA = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblFASTA.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 90), size=(320, 20))
+	    self.lblFASTA = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/compmodel/lblFASTA.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 90), size=(320, 20))
 	else:
 	    self.lblFASTA = wx.StaticText(self, -1, "FASTA Sequence:", (10, 90), style=wx.ALIGN_LEFT)
 	    self.lblFASTA.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -74,7 +74,7 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblProt2 = wx.StaticText(self, -1, "Homologous Templates", (0, 190), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblProt2.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblProt2 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblHomologyTemplates.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 190), size=(270, 25))
+	    self.lblProt2 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/compmodel/lblHomologyTemplates.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 190), size=(270, 25))
 	else:
 	    self.lblProt2 = wx.StaticText(self, -1, "Homologous Templates", (70, 190), style=wx.ALIGN_CENTRE)
 	    self.lblProt2.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -85,7 +85,7 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblInst2 = wx.StaticText(self, -1, "Provide scaffolds that the above sequence will\nbe threaded onto.  Templates higher in the grid\nare given more priority.  Click on templates in\nthe grid to edit their alignments.", (0, 220), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblInst2.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblInst2 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstHomologyTemplates.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 220), size=(320, 95))
+	    self.lblInst2 = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/compmodel/lblInstHomologyTemplates.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 220), size=(320, 75))
 	else:
 	    self.lblInst2 = wx.StaticText(self, -1, "Provide scaffolds that the above sequence will\nbe threaded onto.  Templates higher in the grid\nare given more priority.  Click on templates in\nthe grid to edit their alignments.", (5, 220), style=wx.ALIGN_CENTRE)
 	    self.lblInst2.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -96,7 +96,7 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblModel = wx.StaticText(self, -1, "Templates", (0, 290), (155, 20), wx.ALIGN_CENTRE)
 	    self.lblModel.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblModel = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblModelCompModel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 290), size=(155, 20))
+	    self.lblModel = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/compmodel/lblModelCompModel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 290), size=(155, 20))
 	else:
 	    self.lblModel = wx.StaticText(self, -1, "Templates", (0, 290), style=wx.ALIGN_CENTRE)
 	    self.lblModel.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -108,7 +108,7 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.alignments = []
 	
 	if (platform.system() == "Darwin"):
-	    self.btnAddTemplate = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAddFragments.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(165, 310), size=(77, 25))
+	    self.btnAddTemplate = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/compmodel/btnAddTemplate.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(165, 310), size=(77, 25))
 	else:
 	    self.btnAddTemplate = wx.Button(self, id=-1, label="Add", pos=(165, 310), size=(77, 25))
 	    self.btnAddTemplate.SetForegroundColour("#000000")
@@ -116,7 +116,7 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnAddTemplate.Bind(wx.EVT_BUTTON, self.addModel)
 	self.btnAddTemplate.SetToolTipString("Add model to the list of templates")
 	if (platform.system() == "Darwin"):
-	    self.btnRemoveTemplate = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnRemoveFragments.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(242, 310), size=(78, 25))
+	    self.btnRemoveTemplate = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/compmodel/btnRemoveTemplate.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(242, 310), size=(78, 25))
 	else:
 	    self.btnRemoveTemplate = wx.Button(self, id=-1, label="Remove", pos=(242, 310), size=(78, 25))
 	    self.btnRemoveTemplate.SetForegroundColour("#000000")
@@ -145,7 +145,7 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnMoveDown.Bind(wx.EVT_BUTTON, self.moveDown)
 	self.btnMoveDown.SetToolTipString("Remove model from the list of templates")
 	if (platform.system() == "Darwin"):
-	    self.btnLoadAlign = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLoadAlign.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(30, ypos), size=(127, 25))
+	    self.btnLoadAlign = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/compmodel/btnLoadAlign.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(30, ypos), size=(127, 25))
 	else:
 	    self.btnLoadAlign = wx.Button(self, id=-1, label="Load Alignment", pos=(30, ypos), size=(127, 25))
 	    self.btnLoadAlign.SetForegroundColour("#000000")
@@ -153,7 +153,7 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnLoadAlign.Bind(wx.EVT_BUTTON, self.loadAlign)
 	self.btnLoadAlign.SetToolTipString("Load a previously-saved alignment for this template-target pair")
 	if (platform.system() == "Darwin"):
-	    self.btnSaveAlign = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnSaveAlign.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(163, ypos), size=(127, 25))
+	    self.btnSaveAlign = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/compmodel/btnSaveAlign.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(163, ypos), size=(127, 25))
 	else:
 	    self.btnSaveAlign = wx.Button(self, id=-1, label="Save Alignment", pos=(163, ypos), size=(127, 25))
 	    self.btnSaveAlign.SetForegroundColour("#000000")
@@ -165,12 +165,12 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblAlignment = wx.StaticText(self, -1, "Alignment:", (10, ypos+30), (320, 20), wx.ALIGN_LEFT)
 	    self.lblAlignment.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblAlignment = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblAlignment.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, ypos+30), size=(320, 20))
+	    self.lblAlignment = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/compmodel/lblAlignment.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, ypos+30), size=(320, 20))
 	else:
 	    self.lblAlignment = wx.StaticText(self, -1, "Alignment:", (10, ypos+30), style=wx.ALIGN_LEFT)
 	    self.lblAlignment.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.lblAlignment.SetForegroundColour("#FFFFFF")
-	self.txtAlignment = wx.TextCtrl(self, -1, pos=(0, ypos+50), size=(320, 125), style=wx.TE_MULTILINE | wx.TE_READONLY)
+	self.txtAlignment = wx.TextCtrl(self, -1, pos=(0, ypos+50), size=(320, 125), style=wx.TE_MULTILINE)
 	self.txtAlignment.SetValue("")
 	self.txtAlignment.SetFont(wx.Font(10, wx.FONTFAMILY_TELETYPE, wx.NORMAL, wx.NORMAL))
 	self.txtAlignment.SetToolTipString("Alignment of the currently selected model")
@@ -181,7 +181,7 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblNumModels = wx.StaticText(self, -1, "Models to Generate:", (0, ypos+193), (260, 20), wx.ALIGN_CENTRE)
 	    self.lblNumModels.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblNumModels = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblNumModels.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+193), size=(260, 20))
+	    self.lblNumModels = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/compmodel/lblNumModels.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+193), size=(260, 20))
 	else:
 	    self.lblNumModels = wx.StaticText(self, -1, "Models to Generate:", (0, ypos+193), style=wx.ALIGN_CENTRE)
 	    self.lblNumModels.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -192,7 +192,7 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.txtNumModels.SetToolTipString("Number of comparative models to generate (1-100)")
 	
 	if (platform.system() == "Darwin"):
-	    self.btnThread = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnThread.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(110, ypos+220), size=(100, 25))
+	    self.btnThread = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/compmodel/btnThread.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(110, ypos+220), size=(100, 25))
 	else:
 	    self.btnThread = wx.Button(self, id=-1, label="Thread!", pos=(110, ypos+220), size=(100, 25))
 	    self.btnThread.SetForegroundColour("#000000")
@@ -350,7 +350,9 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	for i in range(0, len(self.alignments[indx][0]), self.maxsize):
 	    self.alignmentstr += "Targ " + self.alignments[indx][0][i:i+self.maxsize] + "\n"
 	    self.alignmentstr += self.templates[indx][0:4] + " " + self.alignments[indx][1][i:i+self.maxsize] + "\n\n"
-	self.txtAlignment.SetValue(self.alignmentstr)
+	# On OSX, it will take consecutive "-" and combine them into one, which is super annoying
+	# So replace "-" with "~"
+	self.txtAlignment.SetValue(self.alignmentstr.replace("-", "~"))
     
     def alignmentEdit(self, event):
 	(selpos, end) = self.txtAlignment.GetSelection()
@@ -630,6 +632,8 @@ class CompModelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	goToSandbox()
 	if (platform.system() == "Windows"):
 	    muscle = self.parent.parent.scriptdir + "\\bin\\muscle_win.exe"
+	elif (platform.system() == "Darwin"):
+	    muscle = self.parent.parent.scriptdir + "/bin/muscle_darwin"
 	else:
 	    muscle = self.parent.parent.scriptdir + "/bin/muscle_unix"
 	for i in range(indx, l):

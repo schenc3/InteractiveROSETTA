@@ -1201,20 +1201,11 @@ while (True):
 	    except:
 		pass
 	else:
-	    try:
-		# It'll grab any file in the jobfiles directory, so it might throw an error
-		# if a weird file is in there
-		if ("-" in hostname):
-		    inputtype = inputfile.split("-")[len(inputfile.split("-"))-2]
-		    # If the hostname has - in it, it will screw up the splitting later on, so fix it here
-		    os.rename(inputfile, "jobfiles/" + hostname.replace("-", "") + "-" + inputtype + "-" + ID)
-		    inputfile = "jobfiles/" + hostname.replace("-", "") + "-" + inputtype + "-" + ID
-		else:
-		    inputtype = inputfile.split("-")[1]
-	    except:
-		# Delete this file so it doesn't keep crashing every second
-		print "Unable to process file: " + inputfile.strip() + ".  Moving it to the errors folder..."
-		os.rename(inputfile, "errors/" + inputfile[inputfile.rfind("/")+1:])
+	    if ("-" in hostname):
+		inputtype = inputfile.split("-")[len(inputfile.split("-"))-2]
+		# If the hostname has - in it, it will screw up the splitting later on, so fix it here
+		os.rename(inputfile, "jobfiles/" + hostname.replace("-", "") + "-" + inputtype + "-" + ID)
+		inputfile = "jobfiles/" + hostname.replace("-", "") + "-" + inputtype + "-" + ID
 	    print "Daemon starting custom job..."
 	    doCustom(inputfile, inputtype.split("input")[0])
     time.sleep(1)

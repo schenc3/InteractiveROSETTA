@@ -13,8 +13,6 @@ if [ $EUID == 0 ]; then
     exit
 fi
 
-SEARCHDIR="/"
-
 # Figure out what Linux distro we are on, so we know what the package manager is
 if [ -f /etc/debian_version ]; then
     PMGR="sudo apt-get -q -y install "
@@ -32,37 +30,48 @@ fi
 REALOLDDIR="`pwd`"
 SCRIPTDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd "$SCRIPTDIR"
+find ../InteractiveROSETTA -type d -exec chmod 755 {} \;
+find ../InteractiveROSETTA -type f -exec chmod 755 {} \;
 
 # Have the user unpackage PyRosetta before doing anything else
 echo "Searching for PyRosetta installation..."
-read -p "Enter a directory to search (default: "$SEARCHDIR"): " input
-if [ $input ]; then
-    SEARCHDIR=$input
-fi
-NEWROSETTA=`find $SEARCHDIR -name SetPyRosettaEnvironment* 2> /dev/null | head -n 1 | awk -F "/SetPyRosetta" '{print $1}' `
-echo "Looking for PyRosetta in "$NEWROSETTA
-if [ $NEWROSETTA != "" ]; then
-    # This is obnoxious...there is a colon in the Ubuntu PyRosetta directory name
-    # and it messes up : delimited paths, so create an appropriate symlink
-    #if [[ $ROSETTA_VER == "Ubuntu" ]]; then
-	#OLDROSETTA=$NEWROSETTA
-	#NEWROSETTA=`echo $OLDROSETTA | awk -F "/SetPyRosetta" '{print $1}' | awk -F ":" '{print $1}'`
-	#sudo unlink $NEWROSETTA
-	#sudo ln -s $OLDROSETTA $NEWROSETTA
-	# Move the so files to rosetta because it cannot find them in PyRosetta root
-	#sudo mv $NEWROSETTA/*.so* $NEWROSETTA/rosetta
-    #fi
-    echo "" >> ~/.bashrc
-    echo "source $NEWROSETTA/SetPyRosettaEnvironment.sh" >> ~/.bashrc
-    OLDDIR=`pwd`
-    source ~/.bashrc > /dev/null 2> /dev/null
-    cd "$OLDDIR"
-else
-    echo "A PyRosetta installation was not detected."
-    echo "Please download the package and unpack it."
-    echo "The PyRosetta version you need is "$ROSETTA_VER
-    exit
-fi
+while [ 1 ]; do
+    SEARCHDIR="/"
+    read -p "Enter a directory to search (default: "$SEARCHDIR", type \"q\" to quit): " input
+    if [ $input ]; then
+	SEARCHDIR=$input
+    fi
+    if [ $SEARCHDIR == "q" ]; then
+	echo " "
+	echo "Please download the PyRosetta package and unpack it to continue"
+	echo "The PyRosetta version you need is "$ROSETTA_VER
+	exit
+    fi
+    NEWROSETTA=`find $SEARCHDIR -name SetPyRosettaEnvironment* 2> /dev/null | head -n 1 | awk -F "/SetPyRosetta" '{print $1}' `
+    if [ $NEWROSETTA ]; then
+	echo "Looking for PyRosetta in "$NEWROSETTA
+	# This is obnoxious...there is a colon in the Ubuntu PyRosetta directory name
+	# and it messes up : delimited paths, so create an appropriate symlink
+	#if [[ $ROSETTA_VER == "Ubuntu" ]]; then
+	    #OLDROSETTA=$NEWROSETTA
+	    #NEWROSETTA=`echo $OLDROSETTA | awk -F "/SetPyRosetta" '{print $1}' | awk -F ":" '{print $1}'`
+	    #sudo unlink $NEWROSETTA
+	    #sudo ln -s $OLDROSETTA $NEWROSETTA
+	    # Move the so files to rosetta because it cannot find them in PyRosetta root
+	    #sudo mv $NEWROSETTA/*.so* $NEWROSETTA/rosetta
+	#fi
+	echo "" >> ~/.bashrc
+	echo "source $NEWROSETTA/SetPyRosettaEnvironment.sh" >> ~/.bashrc
+	OLDDIR=`pwd`
+	source ~/.bashrc > /dev/null 2> /dev/null
+	cd "$OLDDIR"
+	break
+    else
+	echo "A PyRosetta installation was not detected on that path!"
+	echo "Please try again"
+	echo " "
+    fi
+done
 
 # Is Python installed? (Probably, but maybe not)
 if hash python 2> /dev/null; then
@@ -83,6 +92,7 @@ if [[ $PYTHON_MINOR != 7 ]]; then
     echo "Continuing to install, but be warned that you may encounter some unexpected behavior"
 fi
 
+$PMGR"xterm" > /dev/null 2> /dev/null
 echo "Installing wxPython..."
 if [[ $ROSETTA_VER == "Ubuntu" ]]; then
     $PMGR"python-wxgtk2.8" > /dev/null 2> /dev/null
@@ -93,7 +103,18 @@ echo "Installing setuptools..."
 $PMGR"python-setuptools" > /dev/null 2> /dev/null
 $PMGR"python-dev" > /dev/null 2> /dev/null
 echo "Installing PyMOL..."
+#if [ -f /etc/redhat-release ]; then
+    # Version 1.7.6 has some issues...use 1.7.2 instead
+#    if $PMGR"`yum --showduplicates search pymol | grep pymol-1.7.2 | awk '{print $1}'`" > /dev/null 2> /dev/null; then
+#	echo "PyMOL 1.7.2 installed"
+#    else
+#	$PMGR"pymol" > /dev/null 2> /dev/null
+#	echo "PyMOL version 1.7.2 not found, installing the default instead"
+#	echo "If selections are not being synchronized properly, please install v1.7.2"
+#    fi
+#else
 $PMGR"pymol" > /dev/null 2> /dev/null
+#fi
 echo "Installing BioPython..."
 $PMGR"python-biopython" > /dev/null 2> /dev/null
 if [[ $ROSETTA_VER == "Ubuntu" ]]; then
@@ -143,9 +164,11 @@ echo "Run it by executing: python /usr/local/InteractiveROSETTA/InteractiveROSET
 cd /usr/local/InteractiveROSETTA
 
 # Update the PyMOL splash screen
-SPLASHDIR=`python -c "import pymol; print pymol.__file__[0:pymol.__file__.rfind(\"/\")] + \"/pymol_path/data/pymol\""` > /dev/null 2> /dev/null
-sudo mv $SPLASHDIR/splash.png $SPLASHDIR/original_splash.png
-sudo cp images/pymol_splash.png $SPLASHDIR/splash.png
+SPLASHDIR=`python -c "import pymol; print pymol.__file__[0:pymol.__file__.rfind(\"/\")]"` > /dev/null 2> /dev/null
+sudo mv $SPLASHDIR/pymol_path/data/pymol/splash.png $SPLASHDIR/pymol_path/data/pymol/original_splash.png
+sudo cp images/pymol_splash.png $SPLASHDIR/pymol_path/data/pymol/splash.png
+sudo mv $SPLASHDIR/data/pymol/splash.png $SPLASHDIR/data/pymol/original_splash.png
+sudo cp images/pymol_splash.png $SPLASHDIR/data/pymol/splash.png
 
 cd "$REALOLDDIR"
 

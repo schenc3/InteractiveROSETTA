@@ -406,11 +406,7 @@ def setupKIC():
 	    offset = 0
 	    for AA in sequence.strip():
 		indx = "ACDEFGHIKLMNPQRSTVWY".find(AA) + 1
-		# Now we have to update the chain IDs for this new loop (currently blank)
-		updatedstr = ""
-		for entry in rsd_factory[indx].split("\n"):
-		    updatedstr += entry[0:21] + pdbdata[loopBegin-1][21] + entry[22:] + "\n"
-		pdbdata.insert(loopBegin+offset, updatedstr)
+		pdbdata.insert(loopBegin+offset, rsd_factory[indx])
 		#pose.append_polymer_residue_after_seqpos(Residue(rsd_factory.residue(indx)), loopBegin+offset, True)
 		offset = offset + 1
 	    # Now we have to update the begin and end points of the other loops if necessary
@@ -797,13 +793,6 @@ while (True):
         f.close()
         os.remove(iRosetta_home + "/writing_to_queue")
         break
-    else:
-	# Is the jobfile still there?  If not, get rid of this entry so we can proceed
-	if (len(glob.glob(iRosetta_home + "/jobfiles/*" + data[0].strip() + "*")) == 0):
-	    f = open(iRosetta_home + "/rosetta_queue", "w")
-	    for aline in data[1:]:
-		f.write(aline.strip() + "\n")
-	    f.close()
     os.remove(iRosetta_home + "/writing_to_queue")
     time.sleep(10)
 # Loop for finding free nodes
