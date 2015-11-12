@@ -27,7 +27,7 @@ class ModuleManagerPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblProt = wx.StaticText(self, -1, "Module Manager", (25, 15), (270, 25), style=wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblModule.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
+	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/modulemanager/lblModule.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 15), size=(320, 25))
 	else:
 	    self.lblProt = wx.StaticText(self, -1, "Module Manager", pos=(90, 15), style=wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -47,7 +47,7 @@ class ModuleManagerPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblInst = wx.StaticText(self, -1, "Create module packages for distribution\nand install pre-made packages.\nSee the documentation for how to set up a package.", (0, 45), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstBrowser.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 120))
+	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/modulemanager/lblInstModule.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 60))
 	else:
 	    self.lblInst = wx.StaticText(self, -1, "Create module packages for distribution\nand install pre-made packages.\nSee the documentation for how to set up a package.", (40, 45), (320, 25), style=wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -58,13 +58,13 @@ class ModuleManagerPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblInstall = wx.StaticText(self, -1, "Install Module:", (10, 103), (195, 20), wx.ALIGN_LEFT)
 	    self.lblInstall.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblInstall = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstallModule.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 103), size=(195, 20))
+	    self.lblInstall = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/modulemanager/lblInstallModule.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 103), size=(195, 20))
 	else:
 	    self.lblInstall = wx.StaticText(self, -1, "Install Module:", (10, 103), style=wx.ALIGN_LEFT)
 	    self.lblInstall.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.lblInstall.SetForegroundColour("#FFFFFF")
 	if (platform.system() == "Darwin"):
-	    self.btnInstall = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnInstall.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(210, 100), size=(100, 25))
+	    self.btnInstall = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/modulemanager/btnInstall.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(210, 100), size=(100, 25))
 	else:
 	    self.btnInstall = wx.Button(self, id=-1, label="Install", pos=(210, 100), size=(100, 25))
 	    self.btnInstall.SetForegroundColour("#000000")
@@ -76,13 +76,13 @@ class ModuleManagerPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblUninstall = wx.StaticText(self, -1, "Uninstall Module:", (10, 133), (195, 20), wx.ALIGN_LEFT)
 	    self.lblUninstall.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblUninstall = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblUninstallModule.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 133), size=(195, 20))
+	    self.lblUninstall = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/modulemanager/lblUninstallModule.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 133), size=(195, 20))
 	else:
 	    self.lblUninstall = wx.StaticText(self, -1, "Uninstall Module:", (10, 133), style=wx.ALIGN_LEFT)
 	    self.lblUninstall.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.lblUninstall.SetForegroundColour("#FFFFFF")
 	if (platform.system() == "Darwin"):
-	    self.btnUninstall = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnUninstall.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(210, 130), size=(100, 25))
+	    self.btnUninstall = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/modulemanager/btnUninstall.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(210, 130), size=(100, 25))
 	else:
 	    self.btnUninstall = wx.Button(self, id=-1, label="Uninstall", pos=(210, 130), size=(100, 25))
 	    self.btnUninstall.SetForegroundColour("#000000")
@@ -94,13 +94,13 @@ class ModuleManagerPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblCreate = wx.StaticText(self, -1, "Create Module:", (10, 163), (195, 20), wx.ALIGN_LEFT)
 	    self.lblCreate.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblCreate = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblCreateModule.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 163), size=(195, 20))
+	    self.lblCreate = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/modulemanager/lblCreateModule.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 163), size=(195, 20))
 	else:
 	    self.lblCreate = wx.StaticText(self, -1, "Create Module:", (10, 163), style=wx.ALIGN_LEFT)
 	    self.lblCreate.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.lblCreate.SetForegroundColour("#FFFFFF")
 	if (platform.system() == "Darwin"):
-	    self.btnCreate = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnCreateModule.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(210, 160), size=(100, 25))
+	    self.btnCreate = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/modulemanager/btnCreate.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(210, 160), size=(100, 25))
 	else:
 	    self.btnCreate = wx.Button(self, id=-1, label="Create", pos=(210, 160), size=(100, 25))
 	    self.btnCreate.SetForegroundColour("#000000")

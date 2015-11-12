@@ -27,7 +27,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblProt = wx.StaticText(self, -1, "Energy Minimization", (25, 15), (270, 25), wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblMinimization.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
+	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/lblMinimization.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
 	else:
 	    self.lblProt = wx.StaticText(self, -1, "Energy Minimization", (70, 15), style=wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -48,7 +48,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblInst = wx.StaticText(self, -1, "Highlight residues to add/remove to minimization", (0, 45), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstMinimization.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 25))
+	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/lblInstMinimization.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 25))
 	else:
 	    self.lblInst = wx.StaticText(self, -1, "Highlight residues to add/remove to minimization", (5, 45), style=wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -57,7 +57,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.sizer.Add(self.lblInst, (1, 0), span=(1, 5), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
 	
 	if (platform.system() == "Darwin"):
-	    self.btnAddBB = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAddBB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(7, 70), size=(95, 25))
+	    self.btnAddBB = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnAddBB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(7, 70), size=(95, 25))
 	else:
 	    self.btnAddBB = wx.Button(self, id=-1, label="BB", pos=(7, 70), size=(95, 25))
 	    self.btnAddBB.SetForegroundColour("#000000")
@@ -65,7 +65,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnAddBB.Bind(wx.EVT_BUTTON, self.selectBB)
 	self.btnAddBB.SetToolTipString("Residues added will default to minimize the backbone only")
 	if (platform.system() == "Darwin"):
-	    self.btnAddChi = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAddChi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(112, 70), size=(95, 25))
+	    self.btnAddChi = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnAddChi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(112, 70), size=(95, 25))
 	else:
 	    self.btnAddChi = wx.Button(self, id=-1, label="Chi", pos=(112, 70), size=(95, 25))
 	    self.btnAddChi.SetForegroundColour("#000000")
@@ -73,7 +73,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnAddChi.Bind(wx.EVT_BUTTON, self.selectChi)
 	self.btnAddChi.SetToolTipString("Residues added will default to minimize the sidechains only")
 	if (platform.system() == "Darwin"):
-	    self.btnAddBoth = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAddBoth_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(217, 70), size=(95, 25))
+	    self.btnAddBoth = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnAddBoth_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(217, 70), size=(95, 25))
 	else:
 	    self.btnAddBoth = wx.Button(self, id=-1, label="Both", pos=(217, 70), size=(95, 25))
 	    self.btnAddBoth.SetForegroundColour("#FF0000")
@@ -86,7 +86,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.addType = "BB+Chi"
 	
 	if (platform.system() == "Darwin"):
-	    self.btnAdd = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAdd.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(7, 100), size=(57, 25))
+	    self.btnAdd = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnAdd.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(7, 100), size=(57, 25))
 	else:
 	    self.btnAdd = wx.Button(self, id=-1, label="Add", pos=(7, 100), size=(57, 25))
 	    self.btnAdd.SetForegroundColour("#000000")
@@ -94,7 +94,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnAdd.Bind(wx.EVT_BUTTON, self.add)
 	self.btnAdd.SetToolTipString("Add selected residues to the minimize map")
 	if (platform.system() == "Darwin"):
-	    self.btnRemove = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnRemove.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(69, 100), size=(57, 25))
+	    self.btnRemove = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnRemove.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(69, 100), size=(57, 25))
 	else:
 	    self.btnRemove = wx.Button(self, id=-1, label="Remove", pos=(69, 100), size=(57, 25))
 	    self.btnRemove.SetForegroundColour("#000000")
@@ -102,7 +102,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnRemove.Bind(wx.EVT_BUTTON, self.remove)
 	self.btnRemove.SetToolTipString("Remove selected residues from the minimize map")
 	if (platform.system() == "Darwin"):
-	    self.btnRestrict = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnRestrict.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(131, 100), size=(57, 25))
+	    self.btnRestrict = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnRestrict.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(131, 100), size=(57, 25))
 	else:
 	    self.btnRestrict = wx.Button(self, id=-1, label="Restrict", pos=(131, 100), size=(57, 25))
 	    self.btnRestrict.SetForegroundColour("#000000")
@@ -110,7 +110,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnRestrict.Bind(wx.EVT_BUTTON, self.restrict)
 	self.btnRestrict.SetToolTipString("Set the minimize map to exclusively contain only the selected residues")
 	if (platform.system() == "Darwin"):
-	    self.btnAll = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAll.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(193, 100), size=(57, 25))
+	    self.btnAll = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnAll.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(193, 100), size=(57, 25))
 	else:
 	    self.btnAll = wx.Button(self, id=-1, label="All", pos=(193, 100), size=(57, 25))
 	    self.btnAll.SetForegroundColour("#000000")
@@ -118,7 +118,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnAll.Bind(wx.EVT_BUTTON, self.addAll)
 	self.btnAll.SetToolTipString("Add all residues to the minimize map")
 	if (platform.system() == "Darwin"):
-	    self.btnClear = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnClear.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(255, 100), size=(57, 25))
+	    self.btnClear = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnClear.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(255, 100), size=(57, 25))
 	else:
 	    self.btnClear = wx.Button(self, id=-1, label="Clear", pos=(255, 100), size=(57, 25))
 	    self.btnClear.SetForegroundColour("#000000")
@@ -137,7 +137,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.minMenu.SetToolTipString("Select minimize map entries to edit")
 	self.selectedModel = ""
 	if (platform.system() == "Darwin"):
-	    self.btnBB = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnBB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(131, 130), size=(57, 25))
+	    self.btnBB = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnBB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(131, 130), size=(57, 25))
 	else:
 	    self.btnBB = wx.Button(self, id=-1, label="BB", pos=(131, 130), size=(57, 25))
 	    self.btnBB.SetForegroundColour("#000000")
@@ -145,7 +145,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnBB.Bind(wx.EVT_BUTTON, self.changeBB)
 	self.btnBB.SetToolTipString("Set current minimize map selection to minimize the backbone only")
 	if (platform.system() == "Darwin"):
-	    self.btnChi = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnChi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(193, 130), size=(57, 25))
+	    self.btnChi = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnChi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(193, 130), size=(57, 25))
 	else:
 	    self.btnChi = wx.Button(self, id=-1, label="Chi", pos=(193, 130), size=(57, 25))
 	    self.btnChi.SetForegroundColour("#000000")
@@ -153,7 +153,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnChi.Bind(wx.EVT_BUTTON, self.changeChi)
 	self.btnChi.SetToolTipString("Set current minimize map selection to minimize the sidechain only")
 	if (platform.system() == "Darwin"):
-	    self.btnBoth = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnBoth.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(255, 130), size=(57, 25))
+	    self.btnBoth = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnBoth.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(255, 130), size=(57, 25))
 	else:
 	    self.btnBoth = wx.Button(self, id=-1, label="Both", pos=(255, 130), size=(57, 25))
 	    self.btnBoth.SetForegroundColour("#000000")
@@ -196,7 +196,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	
 	ypos = self.grdMinMap.GetPosition()[1] + self.grdMinMap.GetSize()[1] + 10
 	if (platform.system() == "Darwin"):
-	    self.btnMinType = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnMinType_Torsion.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, ypos), size=(120, 25))
+	    self.btnMinType = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnMinType_Torsion.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, ypos), size=(120, 25))
 	else:
 	    self.btnMinType = wx.Button(self, id=-1, label="Torsion", pos=(20, ypos), size=(120, 25))
 	    self.btnMinType.SetForegroundColour("#000000")
@@ -204,7 +204,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnMinType.Bind(wx.EVT_BUTTON, self.changeMinType)	
 	self.btnMinType.SetToolTipString("Minimize the models in torsion space (faster)")
 	if (platform.system() == "Darwin"):
-	    self.btnMinimize = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnMinimize.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(175, ypos), size=(120, 25))
+	    self.btnMinimize = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnMinimize.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(175, ypos), size=(120, 25))
 	else:
 	    self.btnMinimize = wx.Button(self, id=-1, label="Minimize!", pos=(175, ypos), size=(120, 25))
 	    self.btnMinimize.SetForegroundColour("#000000")
@@ -354,9 +354,9 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def selectBB(self, event):
 	self.addType = "BB"
 	if (platform.system() == "Darwin"):
-	    self.btnAddBB.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAddBB_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-	    self.btnAddChi.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAddChi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-	    self.btnAddBoth.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAddBoth.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnAddBB.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnAddBB_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnAddChi.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnAddChi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnAddBoth.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnAddBoth.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	else:
 	    self.btnAddBB.SetForegroundColour("#FF0000")
 	    self.btnAddChi.SetForegroundColour("#000000")
@@ -366,9 +366,9 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def selectChi(self, event):
 	self.addType = "Chi"
 	if (platform.system() == "Darwin"):
-	    self.btnAddBB.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAddBB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-	    self.btnAddChi.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAddChi_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-	    self.btnAddBoth.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAddBoth.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnAddBB.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnAddBB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnAddChi.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnAddChi_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnAddBoth.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnAddBoth.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	else:
 	    self.btnAddBB.SetForegroundColour("#000000")
 	    self.btnAddChi.SetForegroundColour("#FF0000")
@@ -378,9 +378,9 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def selectBoth(self, event):
 	self.addType = "BB+Chi"
 	if (platform.system() == "Darwin"):
-	    self.btnAddBB.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAddBB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-	    self.btnAddChi.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAddChi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-	    self.btnAddBoth.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnAddBoth_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnAddBB.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnAddBB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnAddChi.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnAddChi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnAddBoth.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnAddBoth_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	else:
 	    self.btnAddBB.SetForegroundColour("#000000")
 	    self.btnAddChi.SetForegroundColour("#000000")
@@ -509,17 +509,17 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	r = row
 	if (platform.system() == "Darwin"):
 	    if (self.minmap[r][5] == "BB"):
-		self.btnBB.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnBB_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnChi.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnChi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnBoth.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnBoth.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnBB.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnBB_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnChi.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnChi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnBoth.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnBoth.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    elif (self.minmap[r][5] == "Chi"):
-		self.btnBB.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnBB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnChi.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnChi_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnBoth.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnBoth.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnBB.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnBB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnChi.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnChi_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnBoth.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnBoth.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
-		self.btnBB.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnBB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnChi.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnChi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnBoth.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnBoth_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnBB.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnBB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnChi.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnChi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnBoth.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnBoth_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	else:
 	    if (self.minmap[r][5] == "BB"):
 		self.btnBB.SetForegroundColour("#FF0000")
@@ -626,9 +626,9 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    # Change the selected position to this minimization type
 	    logInfo("The selected position was changed to BB")
 	    if (platform.system() == "Darwin"):
-		self.btnBB.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnBB_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnChi.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnChi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnBoth.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnBoth.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnBB.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnBB_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnChi.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnChi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnBoth.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnBoth.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnBB.SetForegroundColour("#FF0000")
 		self.btnChi.SetForegroundColour("#000000")
@@ -641,9 +641,9 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    # Change the selected position to this minimization type
 	    logInfo("The selected position was changed to Chi")
 	    if (platform.system() == "Darwin"):
-		self.btnBB.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnBB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnChi.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnChi_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnBoth.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnBoth.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnBB.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnBB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnChi.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnChi_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnBoth.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnBoth.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnBB.SetForegroundColour("#000000")
 		self.btnChi.SetForegroundColour("#FF0000")
@@ -656,9 +656,9 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    # Change the selected position to this minimization type
 	    logInfo("The selected position was changed to Both")
 	    if (platform.system() == "Darwin"):
-		self.btnBB.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnBB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnChi.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnChi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-		self.btnBoth.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnBoth_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnBB.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnBB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnChi.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnChi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnBoth.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnBoth_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnBB.SetForegroundColour("#000000")
 		self.btnChi.SetForegroundColour("#000000")
@@ -724,14 +724,14 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	if (self.minType == "Torsion"):
 	    self.minType = "Cartesian"
 	    if (platform.system() == "Darwin"):
-		self.btnMinType.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnMinType_Cartesian.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnMinType.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnMinType_Cartesian.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnMinType.SetLabel(self.minType)
 	    self.btnMinType.SetToolTipString("Minimize the models in Cartesian space (slower)")
 	else:
 	    self.minType = "Torsion"
 	    if (platform.system() == "Darwin"):
-		self.btnMinType.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnMinType_Torsion.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnMinType.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnMinType_Torsion.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnMinType.SetLabel(self.minType)
 	    self.btnMinType.SetToolTipString("Minimize the models in torsion space (faster)")
@@ -762,7 +762,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnBoth.Enable()
 	self.btnMinType.Enable()
 	if (platform.system() == "Darwin"):
-	    self.btnMinimize.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnMinimize.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnMinimize.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnMinimize.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	else:
 	    self.btnMinimize.SetLabel("Minimize!")
 	self.buttonState = "Minimize!"
@@ -809,7 +809,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		#thrMinimize.start()
 		self.stage = 1
 		if (platform.system() == "Darwin"):
-		    self.btnMinimize.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnMinimize_Cancel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		    self.btnMinimize.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnMinimize_Cancel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		else:
 		    self.btnMinimize.SetLabel("Cancel!")
 		self.buttonState = "Cancel!"
@@ -846,7 +846,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    self.grdMinMap.SetCellTextColour(r, c, "black")
 	    self.scoretypeMenu.Disable()
 	    if (platform.system() == "Darwin"):
-		self.btnMinimize.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnMinimize.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.btnMinimize.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnMinimize.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.btnMinimize.SetLabel("Minimize!")
 	    self.buttonState = "Minimize!"
@@ -925,7 +925,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnBoth.Enable()
 	self.btnMinType.Enable()
 	if (platform.system() == "Darwin"):
-	    self.btnMinimize.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnMinimize.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+	    self.btnMinimize.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnMinimize.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	else:
 	    self.btnMinimize.SetLabel("Minimize!")
 	self.buttonState = "Minimize!"
@@ -1093,7 +1093,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		self.btnMinType.Enable()
 		self.selectedModel = ""
 		if (platform.system() == "Darwin"):
-		    self.btnMinimize.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnMinimize_Finalize.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		    self.btnMinimize.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnMinimize_Finalize.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		else:
 		    self.btnMinimize.SetLabel("Finalize!")
 		self.buttonState = "Finalize!"

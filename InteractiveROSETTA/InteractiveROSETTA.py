@@ -252,7 +252,7 @@ def importModules(wxpython=False):
 	    import numpy
 	    import pymol
 	    import psutil
-	    import requests
+	    #import requests
 	    import poster
 	    import Bio
 	    import openbabel
@@ -266,7 +266,7 @@ def importModules(wxpython=False):
 	if (wxpython):
 	    modules = ["wx"]
 	else:
-	    modules = ["numpy", "pymol", "psutil", "requests", "poster", "Bio", "openbabel"]
+	    modules = ["numpy", "pymol", "psutil", "poster", "Bio", "openbabel"]
 	notfound = []
 	# Try to import each of the modules and keep track of which ones throw an error
 	for module in modules:
@@ -352,7 +352,7 @@ def importModules(wxpython=False):
 	    import numpy
 	    import pymol
 	    import psutil
-	    import requests
+	    #import requests
 	    import poster
 	    import Bio
 	    import openbabel
@@ -614,7 +614,7 @@ if (__name__ == "__main__"):
 
     # This line starts PyMOL
     # It would be nice if I could disable right-clicking in the PyMOL window to prevent unexpected behavior
-    __main__.pymol_argv = ["pymol", "-qxhi", "-W", pymolw, "-H", pymolh, "-X", pymolx, "-Y", pymoly]
+    __main__.pymol_argv = ["pymol", "-qhxi", "-W", pymolw, "-H", pymolh, "-X", pymolx, "-Y", pymoly]
     # Import the rest of our modules
     importModules()
     from scripts.sequence import SequenceWin
@@ -741,6 +741,7 @@ if (__name__ == "__main__"):
     ProtocolsFrame = ProtocolsWin(screenW, screenH, scriptdir)
     pymol.finish_launching()
     pymol.cmd.set("label_size", 28)
+    pymol.cmd.set("label_position", (0, 0, 5))
     # Start the PyMOL PyRosetta server
     if (os.path.isfile(os.environ["PYROSETTA_DATABASE"] + "/../PyMOLPyRosettaServer2.py")):
 	pymol.cmd.do("run " + os.environ["PYROSETTA_DATABASE"] + "/../PyMOLPyRosettaServer2.py")
@@ -764,4 +765,4 @@ if (__name__ == "__main__"):
 	    SequenceFrame.PyMOLPDBLoad(1, pdb, "Show")
 	except:
 	    pass
-    app.MainLoop()### LICENSE ACCEPTED ###
+    app.MainLoop()

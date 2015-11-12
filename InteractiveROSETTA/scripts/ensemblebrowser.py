@@ -23,7 +23,7 @@ class EnsembleBrowserPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblProt = wx.StaticText(self, -1, "Ensemble Browser", (25, 15), (270, 25), style=wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblBrowser.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
+	    self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblebrowser/lblBrowser.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
 	else:
 	    self.lblProt = wx.StaticText(self, -1, "Ensemble Browser", pos=(90, 15), style=wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -43,7 +43,7 @@ class EnsembleBrowserPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblInst = wx.StaticText(self, -1, "1. Load the desired structures into the\nSequence Window.\n\n2. Superimpose structures if necessary\n\n3. Select regions of the ensembles that\nwill be viewed.", (0, 45), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	elif (platform.system() == "Darwin"):
-	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblInstBrowser.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 120))
+	    self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblebrowser/lblInstBrowser.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 120))
 	else:
 	    self.lblInst = wx.StaticText(self, -1, "1. Load the desired structures into the\nSequence Window.\n\n2. Superimpose structures if necessary\n\n3. Select regions of the ensembles that\nwill be viewed.", (40, 45), (320, 25), style=wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -54,7 +54,7 @@ class EnsembleBrowserPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblAlways = wx.StaticText(self, -1, "Always Show:", (5, 175), (150, 30), wx.ALIGN_CENTRE)
 	    self.lblAlways.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	elif (platform.system() == "Darwin"):
-	    self.lblAlways = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/lblAlways.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 175), size=(150, 30))
+	    self.lblAlways = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblebrowser/lblAlways.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 175), size=(150, 30))
 	else:
 	    self.lblAlways = wx.StaticText(self, -1, "Always Show:", (25, 175), (150, 30), wx.ALIGN_CENTRE)
 	    self.lblAlways.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -68,7 +68,7 @@ class EnsembleBrowserPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.selectedModels = []
 	
 	if (platform.system() == "Darwin"):
-	    self.btnLeft = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnLeft.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 220), size=(25, 25))
+	    self.btnLeft = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblebrowser/btnLeft.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 220), size=(25, 25))
 	else:
 	    self.btnLeft = wx.Button(self, id=-1, label="<", pos=(5, 220), size=(25, 25))
 	    self.btnLeft.SetForegroundColour("#000000")
@@ -76,7 +76,7 @@ class EnsembleBrowserPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnLeft.Bind(wx.EVT_BUTTON, self.leftClick)
 	self.btnLeft.SetToolTipString("Cycle to previous model")
 	if (platform.system() == "Darwin"):
-	    self.btnRight = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/btnRight.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(290, 220), size=(25, 25))
+	    self.btnRight = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/ensemblebrowser/btnRight.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(290, 220), size=(25, 25))
 	else:
 	    self.btnRight = wx.Button(self, id=-1, label=">", pos=(290, 220), size=(25, 25))
 	    self.btnRight.SetForegroundColour("#000000")
