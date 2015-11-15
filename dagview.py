@@ -81,12 +81,58 @@ class GFIntermediate:
     
 class GFTransition:
     """Class defining the transition states in a GeoFold DAG"""
-    def __init__(self):
+    def __init__(self,number = 0, coords = ((0,0),(0,0),(0,0),(0,0)), dagfile = ''):
         #info from imgmap
-        self.number = 0
-        self.coords = ((0,0),(0,0),(0,0),(0,0))
-        self.dagfile = ""
+        self.number = number
+        self.coords = coords
+        self.dagfile = dagfile
         #info from dag
+        if dagfile != '':
+            success = self.read_dagfile(dagfile)
+            assert success == True, 'Could not read dagfile: %s'%(dagfile)            
+        else:
+            self.f = 0
+            self.u1 = 0
+            self.u2 = 0
+            self.entropy = 0.
+            self.cuttype = ''
+            self.iseam = 0
+            self.traffic = 0.
+            
+    def read_dagfile(self,dagfile):
+        try:
+            readDAG = open(dagfile,'r')
+        except IOError:
+            sys.stderr.write('\n\nGFTransition::Error: Could not open file: %s\n'%(dagfile))
+            sys.stderr.flush()
+            return False
+        while 1:
+            line = readDAG.readline()
+            if line == '':
+                sys.stderr.write("\n\nError: End of file reached\n")
+                sys.stderr.flush()
+                return False
+            #Find TSTATE line
+            if line[0:6] == 'TSTATE':
+                line = line.split()
+                if int(line[1]) == self.number:
+                    try:
+                        self.f = int(line[2])
+                        self.u1 = int(line[3])
+                        self.u2 = int(line[4])
+                        self.entropy = float(line[5])
+                        self.cuttype = line[6]
+                        self.iseam = int(line[7])
+                        self.traffic = float(line[8])
+                    except Exception as e:
+                        sys.stderr.write("\n\nError: %s\n"%(e.message))
+                        sys.stderr.flush()
+                        return False
+                    else:
+                        return True
+            
+        
+            
         
 
     def contains_point(self,(x,y)):

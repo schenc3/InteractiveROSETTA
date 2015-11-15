@@ -83,8 +83,51 @@ class testGFIntermediate(unittest.TestCase):
         assert self.test_intermediate.contains_point((89,8)) == True, 'Should be True'
         assert self.test_intermediate.contains_point((0,0)) == False, 'Should be False'
         
+class testGFTransition(unittest.TestCase):
+    '''Test GFTransition class'''
+    def testBlankInit(self):
+        self.transition = dagview.GFTransition()
+        assert self.transition.number == 0, 'Should be 0'
+        assert self.transition.coords == ((0,0),(0,0),(0,0),(0,0)), 'Should initialize to (0,0),(0,0),(0,0),(0,0)'
+        assert self.transition.dagfile == '', 'Should be empty string'
+        assert self.transition.f == 0, 'Should be 0'
+        assert self.transition.u1 == 0, 'Should be 0'
+        assert self.transition.u2 == 0, 'Should be 0'
+        assert self.transition.entropy == 0., 'Should be 0.'
+        assert self.transition.cuttype == '', 'Should be blank'
+        assert self.transition.iseam == 0, 'Should be 0'
+        assert self.transition.traffic == 0., 'Should be 0.'
+        
+    def testInitNoFile(self):
+        try:
+            self.transition = dagview.GFTransition(3,((1,2),(3,4),(5,6),(7,8)),'dagfile')
+        except AssertionError:
+            pass
+        else:
+            assert True == False, 'Should have AssertionError from inability to read dagfile'
+            
+    def testInitPrefill(self):
+            self.transition = dagview.GFTransition(3,((1,2),(3,4),(5,6),(7,8)),'')
+            assert self.transition.number == 3, 'Should be 3'
+            assert self.transition.coords == ((1,2),(3,4),(5,6),(7,8)), 'Should be ((1,2),(3,4),(5,6),(7,8))'
+            assert self.transition.dagfile == '', 'Should be empty'
+        
+    def testFullInitPass(self):
+            self.transition = dagview.GFTransition(115,((111,29),(106,32),(111,35),(116,32)),'1LMB1_1.dag.out')
+            assert self.transition.number == 115, 'Should be 115'
+            assert self.transition.coords == ((111,29),(106,32),(111,35),(116,32)), 'Should be ((111,29),(106,32),(111,35),(116,32))'
+            assert self.transition.dagfile == '1LMB1_1.dag.out'
+            assert self.transition.f == 1, 'Should be 1'
+            assert self.transition.u1 == 97, 'Should be 97'
+            assert self.transition.u2 == 9, 'Should be 9'
+            assert self.transition.entropy == 0.03, 'Should be 0.03'
+            assert self.transition.cuttype == 'p', 'Should be p'
+            assert self.transition.traffic == 0.25000323, 'Should be 0.25000323'
+            assert self.transition.iseam == 0, 'Should be 0'
+    
 def main():
-    GFintermediateSuite = unittest.makeSuite(testGFIntermediate,'test')
+    GFIntermediateSuite = unittest.makeSuite(testGFIntermediate,'test')
+    GFTransitionSuite = unittest.makeSuite(testGFTransition,'test')
     unittest.main()
     
 if __name__ == "__main__":
