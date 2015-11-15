@@ -36,8 +36,7 @@ class testGFIntermediate(unittest.TestCase):
             assert True == False, 'Expected AssertionError'
             
     def testInitBlankDag(self):
-        self.test_intermediate = dagview.GFIntermediate(31,(8,90),1.,'')
-        
+        self.test_intermediate = dagview.GFIntermediate(31,(8,90),1.,'')        
         assert self.test_intermediate.number == 31, 'Number not initialized'
         assert self.test_intermediate.center == (8,90),'Center not initialized'
         assert self.test_intermediate.radius == 1.,'Radius not initialized'
@@ -51,6 +50,11 @@ class testGFIntermediate(unittest.TestCase):
         assert self.test_intermediate.hbonds == 0,'Hbonds not initialized'
         assert self.test_intermediate.concentration == 0.,'Concentration not initialized'
         assert self.test_intermediate.barrels == [],'Barrels not initialized'
+        
+    def testReadDagfileFail(self):
+        self.test_intermediate = dagview.GFIntermediate()
+        self.success = self.test_intermediate.read_dagfile('')
+        assert self.success == False, 'This should fail'
         
 def main():
     GFintermediateSuite = unittest.makeSuite(testGFIntermediate,'test')
