@@ -19,7 +19,7 @@ class testGFIntermediate(unittest.TestCase):
         assert self.test_intermediate.dagfile == '','dagfile not initialized'
         assert self.test_intermediate.iflag == '','iflag not initialized'
         assert self.test_intermediate.state == 0,'State not initialized'
-        assert self.test_intermediate.sym 0.,'sym not initialized'
+        assert self.test_intermediate.sym == 0.,'sym not initialized'
         assert self.test_intermediate.sas == 0.,'SAS not initialized'
         assert self.test_intermediate.entropy == 0.,'Entropy not initialized'
         assert self.test_intermediate.voids == 0,'Voids not initialized'

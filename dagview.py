@@ -1,35 +1,29 @@
 # -*- coding: utf-8 -*-
-import HTMLparser
 import sys
 import math
 
 class GFIntermediate:
     """Class defining the intermediates in a GeoFold DAG"""
-    def __init__(self):
-        """Empty object initialization"""
-        #info from imgmap
-        self.number = 0
-        self.center = (0,0)
-        self.radius = 0.        
-        self.dagfile = ""   
-        #info from dag
-        self.iflag = ""
-        self.state = 0
-        self.sym = 0
-        self.sas = 0.
-        self.entropy = 0.
-        self.voids = 0
-        self.hbonds = 0
-        self.concentration = 0.        
-        self.barrels = []
         
-    def __init__(self,number, center, radius,dagfile):
+    def __init__(self,number=0, center=(0,0), radius=0.,dagfile=''):
         """Initialize given information from imagemap"""
         self.number = number
         self.radius = radius
         self.center = center
         self.dagfile = dagfile
-        self.read_dagfile(dagfile)
+        if dagfile != '':
+            self.read_dagfile(dagfile)
+        else:
+            self.iflag = ""
+            self.state = 0
+            self.sym = 0
+            self.sas = 0.
+            self.entropy = 0.
+            self.voids = 0
+            self.hbonds = 0
+            self.concentration = 0.        
+            self.barrels = []
+                
     
     def read_dagfile(self,dagfile):
         """Given the GFIntermediate initialized with data from imagemap
