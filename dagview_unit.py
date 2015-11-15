@@ -78,6 +78,10 @@ class testGFIntermediate(unittest.TestCase):
         assert self.test_intermediate.concentration == 0.00000001,'Concentration not initialized'
         assert self.test_intermediate.barrels == [0,0,0,0,0,0,0,0],'Barrels not initialized'
         
+    def testContainsPoint(self):
+        self.test_intermediate = dagview.GFIntermediate(1,(88,9),8.,'1LMB1_1.dag.out')
+        assert self.test_intermediate.contains_point((89,8)) == True, 'Should be True'
+        assert self.test_intermediate.contains_point((0,0)) == False, 'Should be False'
         
 def main():
     GFintermediateSuite = unittest.makeSuite(testGFIntermediate,'test')
