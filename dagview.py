@@ -16,7 +16,7 @@ class GFIntermediate:
             assert success == True, 'Could not read dagfile: %s'%(self.dagfile)
         else:
             self.iflag = ""
-            self.state = 0
+            #self.state = 0
             self.sym = 0
             self.sas = 0.
             self.entropy = 0.
@@ -33,7 +33,7 @@ class GFIntermediate:
         try:
             readDAG = open(dagfile,'r')
         except IOError:
-            sys.stderr.write('Error: DAG file %s could not be opened'%(dagfile))
+            sys.stderr.write('\n\nError: DAG file %s could not be opened\n'%(dagfile))
             sys.stderr.flush()
             return False
         while 1:
@@ -58,11 +58,12 @@ class GFIntermediate:
                         self.voids = int(line[6])
                         self.hbonds = int(line[7])
                         self.concentration = float(line[8])
+                        self.barrels = []
                         for i in range(9,17):
                             self.barrels.append(int(line[i]))
                         return True
                 except Exception as e:
-                    sys.stderr.write("Error: "+e)
+                    sys.stderr.write("Error: "+e.message)
                     sys.stderr.flush()
                     return False
         readDAG.close()
