@@ -27,6 +27,31 @@ class testGFIntermediate(unittest.TestCase):
         assert self.test_intermediate.concentration == 0.,'Concentration not initialized'
         assert self.test_intermediate.barrels == [],'Barrels not initialized'
         
+    def testInit(self):
+        try:
+            self.test_intermediate = dagview.GFIntermediate(31,(8,90),1.,'emptyfile')
+        except AssertionError:            
+            pass
+        else:
+            assert True == False, 'Expected AssertionError'
+            
+    def testInitBlankDag(self):
+        self.test_intermediate = dagview.GFIntermediate(31,(8,90),1.,'')
+        
+        assert self.test_intermediate.number == 31, 'Number not initialized'
+        assert self.test_intermediate.center == (8,90),'Center not initialized'
+        assert self.test_intermediate.radius == 1.,'Radius not initialized'
+        assert self.test_intermediate.dagfile == '','dagfile not initialized'
+        assert self.test_intermediate.iflag == '','iflag not initialized'
+        assert self.test_intermediate.state == 0,'State not initialized'
+        assert self.test_intermediate.sym == 0.,'sym not initialized'
+        assert self.test_intermediate.sas == 0.,'SAS not initialized'
+        assert self.test_intermediate.entropy == 0.,'Entropy not initialized'
+        assert self.test_intermediate.voids == 0,'Voids not initialized'
+        assert self.test_intermediate.hbonds == 0,'Hbonds not initialized'
+        assert self.test_intermediate.concentration == 0.,'Concentration not initialized'
+        assert self.test_intermediate.barrels == [],'Barrels not initialized'
+        
 def main():
     GFintermediateSuite = unittest.makeSuite(testGFIntermediate,'test')
     unittest.main()

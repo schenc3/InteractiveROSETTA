@@ -12,7 +12,8 @@ class GFIntermediate:
         self.center = center
         self.dagfile = dagfile
         if dagfile != '':
-            self.read_dagfile(dagfile)
+            success = self.read_dagfile(dagfile)
+            assert success == True, 'Could not read dagfile: %s'%(self.dagfile)
         else:
             self.iflag = ""
             self.state = 0
