@@ -189,8 +189,21 @@ def initializeRosetta(addOn="", extraMutes=""):
     if (len(faParamsFiles) > 0):
 	faparamsstr = "-extra_res_fa " + faparamsstr.strip()
     paramsstr = faparamsstr
-    init(extra_options=paramsstr + " -mute core.kinematics.AtomTree " + extraMutes + " -ignore_unrecognized_res -ignore_zero_occupancy false " + addOn)
-    os.chdir("..")
+    try:
+	init(extra_options=paramsstr + " -mute core.kinematics.AtomTree " + extraMutes + " -ignore_unrecognized_res -ignore_zero_occupancy false " + addOn)
+	os.chdir("..")
+	cm = ChemicalManager.get_instance()
+	cm.residue_type_set("fa_standard")
+    except:
+	print "Water detected already"
+	# Take water out, PyRosetta found one elsewhere
+	newparamsstr = ""
+	for params in paramsstr.split():
+	    if ("HOH" in params):
+		continue
+	    newparamsstr = newparamsstr + params + " "
+	paramsstr = newparamsstr
+	init(extra_options=paramsstr + " -mute core.kinematics.AtomTree " + extraMutes + " -ignore_unrecognized_res -ignore_zero_occupancy false " + addOn)
 
 # This class is used to grab standard output from pmutscan, which is the only output of that protocol
 class ScanCapturing(list):
