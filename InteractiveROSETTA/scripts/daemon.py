@@ -202,7 +202,7 @@ def initializeRosetta(addOn="", extraMutes=""):
 	    if ("HOH" in params):
 		continue
 	    newparamsstr = newparamsstr + params + " "
-	paramsstr = newparamsstr
+	paramsstr = "-extra_res_fa " + newparamsstr
 	init(extra_options=paramsstr + " -mute core.kinematics.AtomTree " + extraMutes + " -ignore_unrecognized_res -ignore_zero_occupancy false " + addOn)
 
 # This class is used to grab standard output from pmutscan, which is the only output of that protocol
