@@ -25,6 +25,7 @@ class GFIntermediate:
             self.hbonds = 0
             self.concentration = 0.        
             self.barrels = []
+            self.barrelflags = []
                 
     
     def read_dagfile(self,dagfile):
@@ -60,15 +61,66 @@ class GFIntermediate:
                         self.hbonds = int(line[7])
                         self.concentration = float(line[8])
                         self.barrels = []
+                        self.barrelflags = []
                         for i in range(9,17):
                             self.barrels.append(int(line[i]))
+                        for barrel in self.barrels:
+                            if barrel != 0:
+                                self.barrelflags.append(self.setbarrelflags(readDAG,barrel))
+                            if barrel == 0:
+                                self.barrelflags.append(('',''))
                         return True
                 except Exception as e:
                     sys.stderr.write("Error: "+e.message)
                     sys.stderr.flush()
                     return False
         readDAG.close()
-    
+        
+    def setbarrelflags(self,readDAG,barrel):
+        '''Given a non-zero barrel.  return it's u1flags and u2flags for this intermediate'''
+        #initialize flags
+        u1flag = ''
+        u2flag = ''
+        #find the barrel number
+        barrel_num = len(self.barrelflags)+1
+        foundFlags = False
+        while not foundFlags:
+            line = readDAG.readline()
+            if line == '':
+                sys.stderr.write("setbarrelflags::Error: End of file reached")
+                sys.stderr.flush()
+                raise IOError
+            line = line.split()
+            if line[0] == 'BARREL' and int(line[1]) == barrel_num:
+                    #read until we find the right seam
+                    foundSeam = False
+                    while not foundFlags:
+                        line = readDAG.readline()
+                        if line == '':
+                            sys.stderr.write("setbarrelflags::Error: End of file reached")
+                            sys.stderr.flush()
+                            raise IOError
+                        line = line.split()
+                        if line[0] == 'SEAM' and int(line[1]) == barrel:
+                            #read until you find u1flag
+                            while not foundFlags:
+                                line = readDAG.readline()
+                                if line == '':
+                                    sys.stderr.write("setbarrelflags::Error: End of file reached")
+                                    sys.stderr.flush()
+                                    raise IOError
+                                line = line.split()
+                                if line[0] == 'U1FLAG':
+                                    u1flag = line[1]
+                                    #u2flag is on the next line
+                                    u2flag = readDAG.readline().split()[1]
+                                    foundFlags = True
+        for i in range(0,len(self.iflag)):
+            if self.iflag[i] == '.':
+                u1flag = u1flag[:i]+'.'+u1flag[i+1:]
+                u2flag = u2flag[:i]+'.'+u2flag[i+1:]
+        return (u1flag,u2flag)
+                            
     def contains_point(self,(x,y)):
         """Returns True if the given coordinate is within the space on the map
         defined by this intermediate (e.g. (x,y) lies within self.radius of 
@@ -82,21 +134,39 @@ class GFIntermediate:
     def show(self):
         ''' Will display the intermediate in the pymol window'''
         import pymol 
-        residues = self.get_residues()
+        #residues = self.get_residues()
+        residues = get_flag_residues(self.iflag)
+        u1res = []
+        u2res = []
+        for (u1,u2) in self.barrelflags:
+            if u1 != '':
+                u1res.append(get_flag_residues(u1))
+                u2res.append(get_flag_residues(u2))
         intermediate  = ' intermediate_%s'%(str(self.number))
         pymol.cmd.hide()
         pymol.cmd.select(intermediate,residues)
         pymol.cmd.show_as('cartoon',intermediate)
+        pymol.cmd.color('purple',intermediate)
+        if len(u1res)!=0:
+            for i in range(0,len(u1res)):
+                u1label = 'i_%d_barrel_%d_u1'%(self.number,i)
+                u2label = 'i_%d_barrel_%d_u2'%(self.number,i)
+                if u1res[i].split() != ['resi']:
+                    pymol.cmd.select(u1label,u1res[i])
+                    pymol.cmd.color('yellow',u1label)
+                if u2res[i].split() != ['resi']:
+                    pymol.cmd.select(u2label,u2res[i])
+                    pymol.cmd.color('green',u2label)
         pymol.cmd.deselect()
-        
-    def get_residues(self):
-        residues = []        
-        for i in range(0,len(self.iflag)):
-            if self.iflag[i] != '.':
-                residues.append(str(i+1))
-        residues = 'resi %s' %(','.join(residues))
-        return residues
 
+def get_flag_residues(flag):
+    '''gets the residue labeling for given flag (iflag,u1flag,u2flag)'''
+    residues = []        
+    for i in range(0,len(flag)):
+        if flag[i] != '.':
+            residues.append(str(i+1))
+    residues = 'resi %s' %(','.join(residues))
+    return residues
     
 class GFTransition:
     """Class defining the transition states in a GeoFold DAG"""
@@ -149,7 +219,7 @@ class GFTransition:
                         return False
                     else:
                         return True
-            
+        
         
             
         
@@ -192,23 +262,24 @@ class GFTransition:
                 u1 = intermediate
             if intermediate.number == self.u2:
                 u2 = intermediate
-        fres = f.get_residues()
-        u1res = u1.get_residues()
+        u1res = get_flag_residues(u1.iflag)
         if u2 != 0:
-            u2res = u2.get_residues()
-        pymol.cmd.select('f',fres)
+            u2res = get_flag_residues(u2.iflag)
+        #pymol.cmd.select('f',fres)
+        f.show()
         pymol.cmd.select('u1',u1res)
         if u2 != 0:
             pymol.cmd.select('u2',u2res)
-        pymol.cmd.hide()        
-        pymol.cmd.show_as('cartoon','f')
+        #pymol.cmd.hide()        
+        #pymol.cmd.show_as('cartoon','f')
         if u2 != 0:
             pymol.cmd.color('red','u1')
             pymol.cmd.color('blue','u2')
             pymol.cmd.deselect()
         #is seam
         else:
-            pass
+            pymol.cmd.hide()
+            u1.show()
         
 
 def parseImgMap(mapFile,dag=''):
@@ -268,13 +339,16 @@ def startPyMOL(pdb):
     
     
 if __name__ == '__main__':
-    intermediates,transitions = parseImgMap('1LMB1_1.dag.html','1LMB1_1.dag.out')
+    intermediates,transitions = parseImgMap('2b3p_florynewtest.21846_1.dag.html','2b3p_florynewtest.21846_1.dag.out')
     print 'parsed map!'
-    startPyMOL('1LMB1.pdb')
-    '''for intermediate in intermediates:
+    startPyMOL('2b3p_florynewtest.21846.pdb')
+    for intermediate in intermediates:
         intermediate.show()
-        time.sleep(1)'''
+        time.sleep(0.01)
     transitions[0].show(intermediates)
     for transition in transitions:
         transition.show(intermediates)
-        time.sleep(0.1)
+        time.sleep(0.01)
+    for intermediate in intermediates:
+        if intermediate.number == 302:
+            intermediate.show()

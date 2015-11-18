@@ -1,8 +1,0 @@
-<html><body><img src="1LMB1_1.dag.png" border=0 usemap="#dagmap">
-<map name="dagmap">
-<area shape="circle" id="node1" href="../isegment.cgi?iseg=n1&amp;dag=1LMB1_1.dag.out&amp;" title="1" alt="" coords="88,9,8"/>
-<area shape="poly" id="node2" href="../isegment.cgi?iseg=tp113&amp;dag=1LMB1_1.dag.out&amp;" alt="" coords="88,24,80,32,88,40,96,32"/>
-<area shape="poly" id="node159" href="../isegment.cgi?iseg=tp115&amp;dag=1LMB1_1.dag.out&amp;" alt="" coords="111,29,106,32,111,35,116,32"/>
-<area shape="poly" id="node162" href="../isegment.cgi?iseg=tp122&amp;dag=1LMB1_1.dag.out&amp;" alt="" coords="116,119,111,123,116,126,121,123"/>
-<area shape="poly" id="node172" href="../isegment.cgi?iseg=tp127&amp;dag=1LMB1_1.dag.out&amp;" alt="" coords="181,74,176,77,181,80,186,77"/>
-<area shape="circle" id="node3" href="../isegment.cgi?iseg=n2&amp;dag=1LMB1_1.dag.out&amp;" alt="" coords="9,281,9"/>
