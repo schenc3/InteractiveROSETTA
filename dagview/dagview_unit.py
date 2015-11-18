@@ -12,7 +12,21 @@ import os
 
 class testGFIntermediate(unittest.TestCase):
     def setUp(self):
-        self.test_intermediate = dagview.GFIntermediate()        
+        self.test_intermediate = dagview.GFIntermediate() 
+        
+    def testSetBarrelFlags(self):
+        #test-specific set up
+        self.test_intermediate.number =  302
+        self.test_intermediate.iflag = '......AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+        self.test_intermediate.barrels = [9,0,0,0,0,0,0,0]
+        self.test_intermediate.barrelflags = []
+        readDAG = open('2b3p_florynewtest.21846_1.dag.out','r')
+        expected_u1 = '................................................................A..A.A...A.......................................................................................................................AAAAAAAAAAAAAAAA...................'
+        expected_u2 = '.......................................................AA..A..............................................................................A.A......................................................................AAAAAAAAAAAAAAb..'
+        u1flag,u2flag = self.test_intermediate.setbarrelflags(readDAG,9)
+        
+        assert u1flag == expected_u1 , 'Should be %s'%(expected_u1)
+        assert u2flag == expected_u2, 'Should be %s'%(expected_u2)
     
     def testBlankInit(self):
         #print '\ntestBlankInit\n'
