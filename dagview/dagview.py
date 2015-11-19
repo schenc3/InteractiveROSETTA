@@ -294,12 +294,10 @@ def parseImgMap(mapFile,dag=''):
     print("reading mapfile.... %s"%(mapFile))
     for line in readMap:
         if "<area shape" in line:
-            print("shape found!")
             line = line.split('"')            
             querystring = line[5].split('=')
             #intermediate
             if line[1] == 'circle':
-                print 'Found intermediate'
                 number = int(querystring[1].strip('n&amp;dag'))
                 if dag == '':
                     dagfile = querystring[2].strip('&amp;')
@@ -311,7 +309,6 @@ def parseImgMap(mapFile,dag=''):
                         center = (int(coords[0]),int(coords[1]))
                         radius = int(coords[2])
                         intermediates.append(GFIntermediate(number,center,radius,dagfile))
-                        print('Intermediate %d'%(number))
             #Transition
             else:
                 number = int(querystring[1].strip('t&amp;dagbphsm'))
@@ -325,7 +322,6 @@ def parseImgMap(mapFile,dag=''):
                         coord = [int(j) for j in coord]
                         coords = ((coord[0],coord[1]),(coord[2],coord[3]),(coord[4],coord[5]),(coord[6],coord[7]))
                         transitions.append(GFTransition(number,coords,dagfile))
-                        print("Transition %d"%(number))
     return (intermediates,transitions)
 
 def findFiles(folderPath):
@@ -335,42 +331,38 @@ class dagPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def __init__(self,parent, dagImg,dagMap,dagFile):        
         wx.lib.scrolledpanel.ScrolledPanel.__init__(self,parent,-1)
         self.intermediates,self.transitions = parseImgMap(dagMap,dagFile)
-        print len(self.intermediates)
-        print len(self.transitions)
         vbox = wx.BoxSizer(wx.VERTICAL)
         img = wx.StaticBitmap(self, -1, wx.Bitmap(dagImg, wx.BITMAP_TYPE_ANY))
         vbox.Add(img)
         
-        img.Bind(wx.EVT_MOUSE_EVENTS,self.onClick)
+        img.Bind(wx.EVT_LEFT_UP,self.onClick)
+        if sys.platform == 'Darwin':
+            img.Bind(wx.EVT_MOUSE_EVENTS,self.osxClick)
         self.SetSizer(vbox)
         self.SetupScrolling()
 
-    def onClick(self,event):
+    def osxClick(self,event):
         if event.GetClickCount() == 1 and event.ButtonUp():
-            print event.GetPosition()
-            (x,y) = event.GetPosition()
-            x = int(x)
-            y = int(y)
-            print x
-            print y
-            print len(self.intermediates)
-            print len(self.transitions)
-            print self.intermediates[0].center
-            print self.intermediates[0].radius
-            notFound = True
-            for intermediate in self.intermediates:
-                if intermediate.contains_point((x,y)):
-                    print "intermediate %d"%(intermediate.number)
+            self.onClick(event)
+    
+    def onClick(self,event):
+        (x,y) = event.GetPosition()
+        notFound = True
+        for intermediate in self.intermediates:
+            if intermediate.contains_point((x,y)):
+                print "intermediate %d"%(intermediate.number)
+                intermediate.show()
+                notFound = False
+                break
+        if notFound:
+            for transition in self.transitions:
+                if transition.contains_point((x,y)):
+                    print "transition %d"%(transition.number)
+                    transition.show(self.intermediates)
                     notFound = False
                     break
-            if notFound:
-                for transition in self.transitions:
-                    if transition.contains_point((x,y)):
-                        print "transition %d"%(transition.number)
-                        notFound = False
-                        break
-            if notFound:
-                print "notFound"
+        if notFound:
+            print "notFound"
         
 def startPyMOL(pdb):
     '''starts PyMOL for us.  Only for testing.  PyMOL should already be opened
@@ -381,8 +373,7 @@ def startPyMOL(pdb):
     pymol.finish_launching()
     pymol.cmd.load(pdb)
     pymol.cmd.show_as('cartoon')
-    pymol.cmd.hide()
-    pymol.cmd.show_as('cartoon','resi 1,2,3,10,11,12,13,14,15')
+    pymol.cmd.color('purple')
     
     
 if __name__ == '__main__':
@@ -399,6 +390,8 @@ if __name__ == '__main__':
     for intermediate in intermediates:
         if intermediate.number == 302:
             intermediate.show()'''
+    
+    startPyMOL('2b3p_florynewtest.21846.pdb')
     app = wx.App(0)
     frame = wx.Frame(None,-1)
     testPanel = dagPanel(frame,'2b3p_florynewtest.21846_1.dag.png','2b3p_florynewtest.21846_1.dag.html','2b3p_florynewtest.21846_1.dag.out')
