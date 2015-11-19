@@ -291,8 +291,10 @@ def parseImgMap(mapFile,dag=''):
     transitions = []
     intermediates = []
     readMap = open(mapFile,'r')
+    print("reading mapfile.... %s"%(mapFile))
     for line in readMap:
         if "<area shape" in line:
+            print("shape found!")
             line = line.split('"')            
             querystring = line[5].split('=')
             #intermediate
@@ -309,6 +311,7 @@ def parseImgMap(mapFile,dag=''):
                         center = (int(coords[0]),int(coords[1]))
                         radius = int(coords[2])
                         intermediates.append(GFIntermediate(number,center,radius,dagfile))
+                        print('Intermediate %d'%(number))
             #Transition
             else:
                 number = int(querystring[1].strip('t&amp;dagbphsm'))
@@ -322,15 +325,18 @@ def parseImgMap(mapFile,dag=''):
                         coord = [int(j) for j in coord]
                         coords = ((coord[0],coord[1]),(coord[2],coord[3]),(coord[4],coord[5]),(coord[6],coord[7]))
                         transitions.append(GFTransition(number,coords,dagfile))
+                        print("Transition %d"%(number))
     return (intermediates,transitions)
 
 def findFiles(folderPath):
     None    
     
 class dagPanel(wx.lib.scrolledpanel.ScrolledPanel):
-    def __init__(self,parent, dagImg,dagFile,dagMap):        
+    def __init__(self,parent, dagImg,dagMap,dagFile):        
         wx.lib.scrolledpanel.ScrolledPanel.__init__(self,parent,-1)
         self.intermediates,self.transitions = parseImgMap(dagMap,dagFile)
+        print len(self.intermediates)
+        print len(self.transitions)
         vbox = wx.BoxSizer(wx.VERTICAL)
         img = wx.StaticBitmap(self, -1, wx.Bitmap(dagImg, wx.BITMAP_TYPE_ANY))
         vbox.Add(img)
@@ -380,10 +386,10 @@ def startPyMOL(pdb):
     
     
 if __name__ == '__main__':
-    #intermediates,transitions = parseImgMap('2b3p_florynewtest.21846_1.dag.html','2b3p_florynewtest.21846_1.dag.out')
-    #print 'parsed map!'
-    #startPyMOL('2b3p_florynewtest.21846.pdb')
-    '''for intermediate in intermediates:
+    '''intermediates,transitions = parseImgMap('2b3p_florynewtest.21846_1.dag.html','2b3p_florynewtest.21846_1.dag.out')
+    print 'parsed map!'
+    startPyMOL('2b3p_florynewtest.21846.pdb')
+    for intermediate in intermediates:
         intermediate.show()
         time.sleep(0.01)
     transitions[0].show(intermediates)
