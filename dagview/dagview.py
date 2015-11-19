@@ -4,6 +4,8 @@ import math
 import time
 import wx
 import wx.lib.scrolledpanel
+import platform
+from tools import *
 
 class GFIntermediate:
     """Class defining the intermediates in a GeoFold DAG"""
@@ -95,7 +97,6 @@ class GFIntermediate:
             line = line.split()
             if line[0] == 'BARREL' and int(line[1]) == barrel_num:
                     #read until we find the right seam
-                    foundSeam = False
                     while not foundFlags:
                         line = readDAG.readline()
                         if line == '':
@@ -133,9 +134,9 @@ class GFIntermediate:
         else:
             return False
             
-    def show(self):
+    def show(self,pymol):
         ''' Will display the intermediate in the pymol window'''
-        import pymol 
+        #import pymol 
         #residues = self.get_residues()
         residues = get_flag_residues(self.iflag)
         u1res = []
@@ -252,9 +253,9 @@ class GFTransition:
         D = A*x + B*y + C
         return D > 0
         
-    def show(self,intermediates):
+    def show(self,intermediates,pymol):
         '''Displays the transition state on the pymol viewer'''
-        import pymol
+        #import pymol
         if self.u2 == 0:
             u2 = 0
         for intermediate in intermediates:
@@ -268,7 +269,7 @@ class GFTransition:
         if u2 != 0:
             u2res = get_flag_residues(u2.iflag)
         #pymol.cmd.select('f',fres)
-        f.show()
+        f.show(pymol)
         pymol.cmd.select('u1',u1res)
         if u2 != 0:
             pymol.cmd.select('u2',u2res)
@@ -281,7 +282,7 @@ class GFTransition:
         #is seam
         else:
             pymol.cmd.hide()
-            u1.show()
+            u1.show(pymol)
         
 
 def parseImgMap(mapFile,dag=''):
@@ -327,6 +328,7 @@ def parseImgMap(mapFile,dag=''):
 def findFiles(folderPath):
     None    
     
+    
 class dagPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def __init__(self,parent, dagImg,dagMap,dagFile):        
         wx.lib.scrolledpanel.ScrolledPanel.__init__(self,parent,-1)
@@ -341,28 +343,194 @@ class dagPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.SetSizer(vbox)
         self.SetupScrolling()
 
+    def setPyMOL(self,pymol):
+        self.pymol = pymol
+        self.cmd = pymol.cmd
+        self.stored = pymol.stored
+
     def osxClick(self,event):
         if event.GetClickCount() == 1 and event.ButtonUp():
             self.onClick(event)
     
     def onClick(self,event):
         (x,y) = event.GetPosition()
+        if platform.system() != 'Darwin':
+            (x,y) = self.CalcUnscrolledPosition(x,y)
         notFound = True
         for intermediate in self.intermediates:
             if intermediate.contains_point((x,y)):
                 print "intermediate %d"%(intermediate.number)
-                intermediate.show()
+                intermediate.show(self.pymol)
                 notFound = False
                 break
         if notFound:
             for transition in self.transitions:
                 if transition.contains_point((x,y)):
                     print "transition %d"%(transition.number)
-                    transition.show(self.intermediates)
+                    transition.show(self.intermediates,self.pymol)
                     notFound = False
                     break
         if notFound:
             print "notFound"
+
+class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
+    def __init__(self,parent,W,H):
+        
+        #ScrolledPanel initialization
+        winh = H-330
+        wx.lib.scrolledpanel.ScrolledPanel.__init__(self,parent,id=-1,pos=(10,60),size=(340,winh),name="Pathway Visualization")
+        self.SetBackgroundColour("#333333")
+        self.parent = parent
+        
+        #labeling
+        if platform.system() == 'Windows':
+            self.lblDagView = wx.StaticText(self,-1,'Pathway Visualization',(25,15),(270,25),style=wx.AALIGN_CENTRE)
+            self.lblDagView.SetFont(wx.Font(12,wx.DEFAULT,wx.ITALIC,wx.BOLD))
+        elif platform.system() == 'Darwin':
+            self.lblDagView = wx.StaticBitmap(self,-1,wx.Image(self.parent.parentscriptdir+"/images/osx/dagview/lblDagView.png",wx.BITMAP_TYPE_PNG).ConvertToBitmap(),pos=(25,15),size=(270,25))
+        else:
+            self.lblDagView = wx.StaticText(self,-1,'Pathway Visualization',pos=(90,15),style = wx.ALIGN_CENTRE)
+            self.lblDagView.SetFont(wx.Font(12,wx.DEFAULT,wx.ITALIC,wx.BOLD))
+        self.lblDagView.SetForegroundColour("#FFFFFF")
+        
+        #Help Button
+        if platform.system() == 'Darwin':
+            self.HelpBtn = wx.BitmapButton(self,id=-1,bitmap=wx.Image(self.parent.parent.scriptdir+'/images/osx/HelpBtn.png',wx.BITMAP_TYPE_PNG).ConvertToBitmap(),pos=(295,10),size=(25,25))
+        else:
+            self.HelpBtn = wx.Button(self, id=-1,label='?',pos=(295,10),size=(25,25))
+            self.HelpBtn.SetForegroundColour("#0000FF")
+            self.HelpBtn.SetFont(wx.Font(10,wx.DEFAULT,wx.NORMAL,wx.BOLD))
+        self.HelpBtn.Bind(wx.EVT_BUTTON,self.showHelp)
+        self.HelpBtn.SetToolTipString("Display the help file for this window")
+        
+        #Subtile text
+        if platform.system() == 'Windows':
+            self.lblInst = wx.StaticText(self,-1,'View unfolding pathways output by GeoFold',(0,45),(320,25),wx.ALIGN_CENTRE)
+            self.lblInst.SetFont(wx.Font(10,wx.DEFAULT,wx.ITALIC,wx.NORMAL))
+        elif platform.system() == 'Darwin':
+            self.lblInst = wx.StaticBitmap(self,-1,wx.image(self.parent.parent.scriptdir+'/images/osx/dagview/lblInstDagView.png',wx.BITMAP_TYPE_PNG).ConvertToBitmap(),pos=(0,45),size=(320,25))
+        else:
+            self.lblInst = wx.StaticText(self,-1,'View unfolding pathways output by GeoFold',pos=(20,45),style=wx.ALIGN_CENTRE)
+            self.lblInst.SetFont(wx.Font(10,wx.DEFAULT,wx.ITALIC,wx.NORMAL))
+            resizeTextControlForUNIX(self.lblInst,0,self.GetSize()[0])
+        self.lblInst.SetForegroundColour("#FFFFFF")
+        #PDB button
+        self.lblPDB = wx.StaticText(self,-1,"None Uploaded", pos=(10,103),size=(180,25),style=wx.ALIGN_CENTRE)
+        self.lblPDB.SetFont(wx.Font(10,wx.DEFAULT,wx.NORMAL,wx.BOLD))
+        if platform.system() == 'Linux':
+            resizeTextControlForUNIX(self.lblPDB,10,180)
+        self.lblPDB.SetForegroundColour("#FFFFFF")
+        if platform.system() == 'Darwin':
+            self.btnLoad = wx.BitmapButton(self,id=-1,bitmap=wx.Image(self.parent.parent.scriptdir+'/images/osx/dagview/btnLoadPDB.png',wx.BITMAP_TYPE_PNG).ConvertToBitmap(),pos=(200,100),size=(110,25))
+        else:
+            self.btnLoad = wx.Button(self,id=-1,label='Load PDB',pos=(200,100),size=(110,25))
+            self.btnLoad.SetForegroundColour("#000000")
+            self.btnLoad.SetFont(wx.Font(10,wx.DEFAULT,wx.NORMAL,wx.BOLD))
+        self.btnLoad.Bind(wx.EVT_BUTTON,self.loadPDB)
+        self.btnLoad.SetToolTipString('Load the PDB file used for GeoFold job')
+        
+        #Dag.out button
+        self.lblDagOut = wx.StaticText(self,-1,"None Uploaded", pos=(10,138),size=(180,25),style=wx.ALIGN_CENTRE)
+        self.lblDagOut.SetFont(wx.Font(10,wx.DEFAULT,wx.NORMAL,wx.BOLD))
+        if platform.system() == 'Linux':
+            resizeTextControlForUNIX(self.lblDagOut,10,180)
+        self.lblPDB.SetForegroundColour("#FFFFFF")
+        if platform.system() == 'Darwin':
+            self.btnDagOut = wx.BitmapButton(self,id=-1,bitmap=wx.Image(self.parent.parent.scriptdir+'/images/osx/dagview/btnDagOut.png',wx.BITMAP_TYPE_PNG).ConvertToBitmap(),pos=(200,135),size=(110,25))
+        else:
+            self.btnDagOut = wx.Button(self,id=-1,label='Load .dag.out',pos=(200,135),size=(110,25))
+            self.btnDagOut.SetForegroundColour("#000000")
+            self.btnDagOut.SetFont(wx.Font(10,wx.DEFAULT,wx.NORMAL,wx.BOLD))
+        self.btnDagOut.Bind(wx.EVT_BUTTON,self.loadDagOut)
+        self.btnDagOut.SetToolTipString('Load the .dag.out file generated by GeoFold')
+        
+        #Dag.html button
+        self.lblDagHtml = wx.StaticText(self,-1,"None Uploaded", pos=(10,173),size=(180,25),style=wx.ALIGN_CENTRE)
+        self.lblDagHtml.SetFont(wx.Font(10,wx.DEFAULT,wx.NORMAL,wx.BOLD))
+        if platform.system() == 'Linux':
+            resizeTextControlForUNIX(self.lblDagHtml,10,180)
+        self.lblDagHtml.SetForegroundColour("#FFFFFF")
+        if platform.system() == 'Darwin':
+            self.btnDagHtml = wx.BitmapButton(self,id=-1,bitmap=wx.Image(self.parent.parent.scriptdir+'/images/osx/dagview/btnDagHtml.png',wx.BITMAP_TYPE_PNG).ConvertToBitmap(),pos=(200,170),size=(110,25))
+        else:
+            self.btnDagHtml = wx.Button(self,id=-1,label='Load .dag.html',pos=(200,100),size=(110,25))
+            self.btnDagHtml.SetForegroundColour("#000000")
+            self.btnDagHtml.SetFont(wx.Font(10,wx.DEFAULT,wx.NORMAL,wx.BOLD))
+        self.btnDagHtml.Bind(wx.EVT_BUTTON,self.loadDagHtml)
+        self.btnDagHtml.SetToolTipString('Load the .dag.html file generated by GeoFold')
+        
+        #Dag.png button
+        self.lblDagPng = wx.StaticText(self,-1,"None Uploaded", pos=(10,208),size=(180,25),style=wx.ALIGN_CENTRE)
+        self.lblDagPng.SetFont(wx.Font(10,wx.DEFAULT,wx.NORMAL,wx.BOLD))
+        if platform.system() == 'Linux':
+            resizeTextControlForUNIX(self.lblDagPng,10,180)
+        self.lblDagPng.SetForegroundColour("#FFFFFF")
+        if platform.system() == 'Darwin':
+            self.btnDagPng = wx.BitmapButton(self,id=-1,bitmap=wx.Image(self.parent.parent.scriptdir+'/images/osx/dagview/btnDagPng.png',wx.BITMAP_TYPE_PNG).ConvertToBitmap(),pos=(200,205),size=(110,25))
+        else:
+            self.btnDagPng = wx.Button(self,id=-1,label='Load .dag.png',pos=(200,205),size=(110,25))
+            self.btnDagPng.SetForegroundColour("#000000")
+            self.btnDagPng.SetFont(wx.Font(10,wx.DEFAULT,wx.NORMAL,wx.BOLD))
+        self.btnDagPng.Bind(wx.EVT_BUTTON,self.loadPDB)
+        self.btnDagPng.SetToolTipString('Load the .dag.png file generated by GeoFold')
+        
+        #GO! Button ViewDag
+        ypos = self.btnDagPng.GetPosition()[1]+self.btnDagPng.GetSize()[1]+10
+        if platform.system() == 'Darwin':
+            self.btnViewDag = wx.BitmapButton(self,id=-1,bitmap=wx.Image(self.parent.parent.scriptdir+'/images/osx/dagview/btnViewDag.png',wx.BITMAP_TYPE_PNG).ConvertToBitmap(),pos=(80,ypos),size=(150,25))
+        else:
+            self.btnViewDag = wx.Button(self,id=-1,label="View Pathway!",pos=(80,ypos),size=(150,25))
+            self.btnViewDag.SetForegroundColour("#000000")
+            self.btnViewDag.SetFont(wx.Font(10,wx.DEFAULT,wx.ITALIC,wx.BOLD))
+        self.btnViewDag.Bind(wx.EVT_BUTTON,self.ViewDagClick)
+        
+        #Scrolling set up
+        self.scrollh = self.btnViewDag.GetPosition()[1]+self.btnSuperimpose.GetSize()[1] + 5
+        self.SetScrollbars(1,1,320,self.scrollh)
+        self.winscrollpos = 0
+        self.Bind(wx.EVT_SCROLLWIN, self.scrolled)
+        
+    def setSeqWin(self, seqWin):
+        self.seqWin = seqWin
+    
+    def showHelp(self, event):
+        '''Open the help page'''
+        if platform.system() == 'Darwin':
+            try:
+                browser = webbrowser.get('Safari')
+            except:
+                print 'Could not load Safari!  The help files are located at %s/help'%(self.parent.parent.scriptdir)
+                return
+            browser.open(self.parent.parent.scriptdir+'/help/dagview.html')
+        else:
+            webbrowser.open(self.parent.parent.scriptdir+'/help/dagview.html')
+    
+    def scrolled(self,event):
+        self.winscrollpos = self.GetScrollPos(wx.VERTICAL)
+        event.Skip()        
+        
+    def setPyMOL(self,pymol):
+        '''Sets PyMOL to be used for this class'''
+        self.pymol = pymol
+        self.cmd = pymol.cmd
+        self.stored = pymol.stored
+        
+    def LoadPDB(self,event):
+        '''Select PDB file to load'''
+        logInfo("Clicked Load PDB button")
+        self.labelMsg
+    
+    def LoadDagOut(self,event):
+        pass
+    
+    def LoadDagHtml(self,event):
+        pass
+    
+    def LoadDagPng(self,event):
+        pass
+    
+    def ViewDagClick(self,event):
+        pass
         
 def startPyMOL(pdb):
     '''starts PyMOL for us.  Only for testing.  PyMOL should already be opened
@@ -374,26 +542,26 @@ def startPyMOL(pdb):
     pymol.cmd.load(pdb)
     pymol.cmd.show_as('cartoon')
     pymol.cmd.color('purple')
+    return pymol
     
     
 if __name__ == '__main__':
-    '''intermediates,transitions = parseImgMap('2b3p_florynewtest.21846_1.dag.html','2b3p_florynewtest.21846_1.dag.out')
+    intermediates,transitions = parseImgMap('2b3p_florynewtest.21846_1.dag.html','2b3p_florynewtest.21846_1.dag.out')
     print 'parsed map!'
-    startPyMOL('2b3p_florynewtest.21846.pdb')
-    for intermediate in intermediates:
-        intermediate.show()
-        time.sleep(0.01)
+    pymol = startPyMOL('2b3p_florynewtest.21846.pdb')
+    '''for intermediate in intermediates:
+        intermediate.show(pymol)
+        time.sleep(0.1)
     transitions[0].show(intermediates)
     for transition in transitions:
         transition.show(intermediates)
-        time.sleep(0.01)
+        time.sleep(0.1)
     for intermediate in intermediates:
         if intermediate.number == 302:
-            intermediate.show()'''
-    
-    startPyMOL('2b3p_florynewtest.21846.pdb')
+            intermediate.show(pymol)'''
     app = wx.App(0)
     frame = wx.Frame(None,-1)
     testPanel = dagPanel(frame,'2b3p_florynewtest.21846_1.dag.png','2b3p_florynewtest.21846_1.dag.html','2b3p_florynewtest.21846_1.dag.out')
+    testPanel.setPyMOL(pymol)
     frame.Show()
     app.MainLoop()
