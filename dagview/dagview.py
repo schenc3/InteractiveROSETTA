@@ -2,6 +2,8 @@
 import sys
 import math
 import time
+import wx
+import wx.lib.scrolledpanel
 
 class GFIntermediate:
     """Class defining the intermediates in a GeoFold DAG"""
@@ -325,6 +327,45 @@ def parseImgMap(mapFile,dag=''):
 def findFiles(folderPath):
     None    
     
+class dagPanel(wx.lib.scrolledpanel.ScrolledPanel):
+    def __init__(self,parent, dagImg,dagFile,dagMap):        
+        wx.lib.scrolledpanel.ScrolledPanel.__init__(self,parent,-1)
+        self.intermediates,self.transitions = parseImgMap(dagMap,dagFile)
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        img = wx.StaticBitmap(self, -1, wx.Bitmap(dagImg, wx.BITMAP_TYPE_ANY))
+        vbox.Add(img)
+        
+        img.Bind(wx.EVT_MOUSE_EVENTS,self.onClick)
+        self.SetSizer(vbox)
+        self.SetupScrolling()
+
+    def onClick(self,event):
+        if event.GetClickCount() == 1 and event.ButtonUp():
+            print event.GetPosition()
+            (x,y) = event.GetPosition()
+            x = int(x)
+            y = int(y)
+            print x
+            print y
+            print len(self.intermediates)
+            print len(self.transitions)
+            print self.intermediates[0].center
+            print self.intermediates[0].radius
+            notFound = True
+            for intermediate in self.intermediates:
+                if intermediate.contains_point((x,y)):
+                    print "intermediate %d"%(intermediate.number)
+                    notFound = False
+                    break
+            if notFound:
+                for transition in self.transitions:
+                    if transition.contains_point((x,y)):
+                        print "transition %d"%(transition.number)
+                        notFound = False
+                        break
+            if notFound:
+                print "notFound"
+        
 def startPyMOL(pdb):
     '''starts PyMOL for us.  Only for testing.  PyMOL should already be opened
     by InteractiveROSETTA'''
@@ -339,10 +380,10 @@ def startPyMOL(pdb):
     
     
 if __name__ == '__main__':
-    intermediates,transitions = parseImgMap('2b3p_florynewtest.21846_1.dag.html','2b3p_florynewtest.21846_1.dag.out')
-    print 'parsed map!'
-    startPyMOL('2b3p_florynewtest.21846.pdb')
-    for intermediate in intermediates:
+    #intermediates,transitions = parseImgMap('2b3p_florynewtest.21846_1.dag.html','2b3p_florynewtest.21846_1.dag.out')
+    #print 'parsed map!'
+    #startPyMOL('2b3p_florynewtest.21846.pdb')
+    '''for intermediate in intermediates:
         intermediate.show()
         time.sleep(0.01)
     transitions[0].show(intermediates)
@@ -351,4 +392,9 @@ if __name__ == '__main__':
         time.sleep(0.01)
     for intermediate in intermediates:
         if intermediate.number == 302:
-            intermediate.show()
+            intermediate.show()'''
+    app = wx.App(0)
+    frame = wx.Frame(None,-1)
+    testPanel = dagPanel(frame,'2b3p_florynewtest.21846_1.dag.png','2b3p_florynewtest.21846_1.dag.html','2b3p_florynewtest.21846_1.dag.out')
+    frame.Show()
+    app.MainLoop()
