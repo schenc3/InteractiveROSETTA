@@ -349,6 +349,7 @@ class dagPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.stored = pymol.stored
 
     def osxClick(self,event):
+        '''OSX doesn't recognize a click like linux does apparently'''
         if event.GetClickCount() == 1 and event.ButtonUp():
             self.onClick(event)
     
@@ -518,19 +519,129 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def LoadPDB(self,event):
         '''Select PDB file to load'''
         logInfo("Clicked Load PDB button")
-        self.labelMsg
-    
+        dlg = wx.FileDialog(self, message = 'Choose a File',defaultDir=self.seqWin.cwd,defaultFile='',wildcard='PDB Files (*.pdb)|*.pdb',style=wx.OPEN | wx.CHANGE_DIR)
+        if dlg.ShowModal() == wx.ID_OK:
+            paths = dlg.GetPaths()
+            #Change cwd to the last opened file
+            if platform.system()=='Windows':
+                lastDirIndx = paths[len(paths)-1].rfind('\\')
+            else:
+                lastDirIndx = paths[len(paths)-1].rfind('/')
+            self.seqWin.cwd = str(paths[len(paths)-1][0:lastDirIndx])
+            filename = str(paths[0])
+            self.loadedPdb = filename
+            localPdb = filename[LastDirIndx+1:]
+            goToSandbox()
+            try:
+                shutil.copy(filename,'params.pdb')
+            except:
+                pass
+            #Delete a file if we're loading a new one
+            try:
+                self.cmd.remove('params')
+                self.cmd.delete('params')
+            except:
+                pass
+            try:
+                self.cmd.load('params.pdb','params')
+            except:
+                wx.MessageBox('The file %s could not be read!'%(filename),'File cannot be read', wx.OK|wx.ICON_EXCLAMATION)
+                return
+            logInfo('PDB file loaded',filename)
+            self.cmd.select('paramssele','model params')
+            self.cmd.hide('everything','paramssele')
+            self.cmd.delete('paramssele')
+            self.lblPDB.SetLabel(localPdb)
+            self.lblPDB.SetForegroundColour('#FFFFFF')
+            if platform.system() == 'Linux':
+                resizeTextControlForUNIX(self.lblPDB,10,180)
+            
+            
     def LoadDagOut(self,event):
-        pass
+        '''Load .dag.out file'''
+        logInfo("Clicked Load DagOut button")
+        dlg = wx.FileDialog(self, message = 'Choose a File',defaultDir=self.seqWin.cwd,defaultFile='',wildcard='dag.out Files (*.dag.out)|*.dag.out',style=wx.OPEN | wx.CHANGE_DIR)
+        if dlg.ShowModal() == wx.ID_OK:
+            paths = dlg.GetPaths()
+            #Change cwd to the last opened file
+            if platform.system()=='Windows':
+                lastDirIndx = paths[len(paths)-1].rfind('\\')
+            else:
+                lastDirIndx = paths[len(paths)-1].rfind('/')
+            self.seqWin.cwd = str(paths[len(paths)-1][0:lastDirIndx])
+            filename = str(paths[0])
+            self.loadedDagOut = filename
+            localDagOut = filename[LastDirIndx+1:]
+            goToSandbox()
+            try:
+                shutil.copy(filename,'params.dag.out')
+            except:
+                pass
+            logInfo('dag.out file loaded',filename)
+            self.lblDagOut.SetLabel(localDagOut)
+            self.lblDagOut.SetForegroundColour('#FFFFFF')
+            if platform.system() == 'Linux':
+                resizeTextControlForUNIX(self.lblDagOut,10,180)
     
     def LoadDagHtml(self,event):
-        pass
+        '''Load .dag.html file'''
+        logInfo("Clicked Load DagHtml button")
+        dlg = wx.FileDialog(self, message = 'Choose a File',defaultDir=self.seqWin.cwd,defaultFile='',wildcard='dag.html Files (*.dag.html)|*.dag.html',style=wx.OPEN | wx.CHANGE_DIR)
+        if dlg.ShowModal() == wx.ID_OK:
+            paths = dlg.GetPaths()
+            #Change cwd to the last opened file
+            if platform.system()=='Windows':
+                lastDirIndx = paths[len(paths)-1].rfind('\\')
+            else:
+                lastDirIndx = paths[len(paths)-1].rfind('/')
+            self.seqWin.cwd = str(paths[len(paths)-1][0:lastDirIndx])
+            filename = str(paths[0])
+            self.loadedDagHtml = filename
+            localDagHtml = filename[LastDirIndx+1:]
+            goToSandbox()
+            try:
+                shutil.copy(filename,'params.dag.html')
+            except:
+                pass
+            logInfo('dag.html file loaded',filename)
+            self.lblDagHtml.SetLabel(localDagHtml)
+            self.lblDagHtml.SetForegroundColour('#FFFFFF')
+            if platform.system() == 'Linux':
+                resizeTextControlForUNIX(self.lblDagHtml,10,180)
     
     def LoadDagPng(self,event):
-        pass
+        '''Load .dag.png file'''
+        logInfo("Clicked Load DagPng button")
+        dlg = wx.FileDialog(self, message = 'Choose a File',defaultDir=self.seqWin.cwd,defaultFile='',wildcard='dag.png Files (*.dag.png)|*.dag.png',style=wx.OPEN | wx.CHANGE_DIR)
+        if dlg.ShowModal() == wx.ID_OK:
+            paths = dlg.GetPaths()
+            #Change cwd to the last opened file
+            if platform.system()=='Windows':
+                lastDirIndx = paths[len(paths)-1].rfind('\\')
+            else:
+                lastDirIndx = paths[len(paths)-1].rfind('/')
+            self.seqWin.cwd = str(paths[len(paths)-1][0:lastDirIndx])
+            filename = str(paths[0])
+            self.loadedDagPng = filename
+            localDagPng = filename[LastDirIndx+1:]
+            goToSandbox()
+            try:
+                shutil.copy(filename,'params.dag.png')
+            except:
+                pass
+            logInfo('dag.png file loaded',filename)
+            self.lblDagPng.SetLabel(localDagPng)
+            self.lblDagPng.SetForegroundColour('#FFFFFF')
+            if platform.system() == 'Linux':
+                resizeTextControlForUNIX(self.lblDagPng,10,180)
     
     def ViewDagClick(self,event):
-        pass
+        logInfo('View Dag Button Clicked')
+        self.intermediates,self.transitions = parseImgMap(self.loadedDagHtml,self.loadedDagOut)
+        self.frame = wx.Frame(None,-1)
+        self.DagPanel = dagPanel(self.frame,self.loadedDagPng,self.loadedDagHtml,self.loadedDagOut)
+        self.DagPanel.setPyMOL(self.pymol)
+        self.frame.Show()
         
 def startPyMOL(pdb):
     '''starts PyMOL for us.  Only for testing.  PyMOL should already be opened
