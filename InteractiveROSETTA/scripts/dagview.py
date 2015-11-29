@@ -410,12 +410,12 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
         
         #Subtile text
         if platform.system() == 'Windows':
-            self.lblInst = wx.StaticText(self,-1,'View unfolding pathways output by GeoFold',(0,45),(320,25),wx.ALIGN_CENTRE)
+            self.lblInst = wx.StaticText(self,-1,'View GeoFold pathways',(0,45),(320,25),wx.ALIGN_CENTRE)
             self.lblInst.SetFont(wx.Font(10,wx.DEFAULT,wx.ITALIC,wx.NORMAL))
         elif platform.system() == 'Darwin':
             self.lblInst = wx.StaticBitmap(self,-1,wx.image(self.parent.parent.scriptdir+'/images/osx/dagview/lblInstDagView.png',wx.BITMAP_TYPE_PNG).ConvertToBitmap(),pos=(0,45),size=(320,25))
         else:
-            self.lblInst = wx.StaticText(self,-1,'View unfolding pathways output by GeoFold',pos=(20,45),style=wx.ALIGN_CENTRE)
+            self.lblInst = wx.StaticText(self,-1,'View GeoFold pathways',pos=(20,45),style=wx.ALIGN_CENTRE)
             self.lblInst.SetFont(wx.Font(10,wx.DEFAULT,wx.ITALIC,wx.NORMAL))
             resizeTextControlForUNIX(self.lblInst,0,self.GetSize()[0])
         self.lblInst.SetForegroundColour("#FFFFFF")
