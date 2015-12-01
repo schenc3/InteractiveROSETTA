@@ -149,6 +149,8 @@ class GFIntermediate:
                 u2res.append(get_flag_residues(u2))
         intermediate  = ' intermediate_%s'%(str(self.number))
         pymol.cmd.hide()
+        pymol.cmd.show_as('ribbon')
+        pymol.cmd.color('white')
         pymol.cmd.select(intermediate,residues)
         pymol.cmd.show_as('cartoon',intermediate)
         pymol.cmd.color('purple',intermediate)
