@@ -667,11 +667,53 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
     
     def ViewDagClick(self,event):
         logInfo('View Dag Button Clicked')
+        self.cmd.show_as('cartoon')
+        self.cmd.color('purple')
         self.intermediates,self.transitions = parseImgMap(self.loadedDagHtml,self.loadedDagOut)
         self.frame = wx.Frame(None,-1)
         self.DagPanel = dagPanel(self.frame,self.loadedDagPng,self.loadedDagHtml,self.loadedDagOut)
         self.DagPanel.setPyMOL(self.pymol)
         self.frame.Show()
+        
+    def findFiles(self,zipDir):
+        '''Takes a given zip file.  extracts it in the sandbox and picks out all
+        the files able to be viewed.  It outputs a list to be put in a ComboBox
+        to allow the user to select which one to view.  If an error occurs, outputs
+        a negative number used to identify the error and handle it'''
+        import zipfile
+        output = []
+        #Check if selected file is valid
+        if not zipfile.is_zipfile(zipDir):
+            return -1, []
+        #Unzip the file in the sandbox
+        unzipped = zipfile.ZipFile(zipDir)
+        info = unzipped.infolist()
+        goToSandbox()
+        try:
+            unzipped.extractall()
+        except: #failed to unzip
+            return -2, []
+        #use glob to get all dag.out files
+        globDir = '%s/%s*.dag.out'%(os.getcwd(),info[0].filename)
+        dagOuts = glob.glob(globDir)
+        #for each file in dagOuts
+        for dag in dagOuts:
+            #get base filename, looks complicated in case '.dag.out' 
+            #is present elsewhere is file path
+            base = '.dag.out'.join(dag.split('.dag.out')[:len(dag.split('.dag.out'))-1])
+            #is dag.png there?
+            dagPng = len(glob.glob(base+'.dag.png'))==1
+            #is dag.html there?
+            dagHtml = len(glob.glob(base+'.dag.html'))==1
+            #if so, append to output
+            if dagPng and dagHtml:
+                output.append(base)
+        #no valid output
+        if len(output) == 0:
+            return -3, []
+        #everything worked!
+        return 0,output
+        
         
 def startPyMOL(pdb):
     '''starts PyMOL for us.  Only for testing.  PyMOL should already be opened
