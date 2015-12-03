@@ -364,14 +364,14 @@ class ProtocolsPanel(wx.Panel):
 		   "Loop Modeling (KIC)",
 		   "Module Manager",
 		   "Molecular Surfaces", 
+		   "Pathway Visualization (GeoFold)", 
 		   "Point Mutant Scan", 
 		   "Point Mutations", 
 		   "Protein Design (Fixbb)", 
 		   "Protein Design (MSD)", 
 		   "Residue/Ligand Creator", 
 		   "Structure Prediction (Comparative Modeling)", 
-		   "Superimposition", 
-		   "Pathway Visualization (GeoFold)"]
+		   "Superimposition"]
 	self.readModules()
 	self.protMenu.SetSelection(self.protocols.index("Superimposition"))
 	
