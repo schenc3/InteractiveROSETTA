@@ -980,7 +980,7 @@ class SequenceWin(wx.Frame):
 	
     # SeqViewer receives a keyboard press
     def keyPress(self, event):
-	# Delete (not backspace) key pressed, or on Macs you need to do CTRL+DELETE (Mac DELETE == PC BACKSPACE, not PC DELETE)
+	# Delete (not backspace) key pressed, or on Macs you need to do fn+DELETE (Mac DELETE == PC BACKSPACE, not PC DELETE)
 	if (int(event.GetKeyCode()) == wx.WXK_DELETE or (platform.system() == "Darwin" and int(event.GetKeyCode()) == 8)):
 	    if (self.cannotDelete):
 		# Active protocol prohibits this action
