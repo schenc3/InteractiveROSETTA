@@ -745,11 +745,14 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.cmd.show_as('cartoon',self.ID)
         #self.cmd.color('purple',self.ID)
         self.cmd.set("cartoon_color",'purple',self.ID)
+        try:
+            self.frame.Destroy()
+        except:
+            pass
         dagbase = self.dagMenu.GetValue()
         self.loadedDagHtml = '%s%s.dag.html'%(self.cwd,dagbase)
         self.loadedDagOut = '%s%s.dag.out'%(self.cwd,dagbase)
         self.loadedDagPng = '%s%s.dag.png'%(self.cwd,dagbase)
-        
         #self.intermediates,self.transitions = parseImgMap(self.loadedDagHtml,self.loadedDagOut,self.ID)
         self.frame = wx.Frame(None,-1)
         self.DagPanel = dagPanel(self.frame,self.loadedDagPng,self.loadedDagHtml,self.loadedDagOut,self.ID)
