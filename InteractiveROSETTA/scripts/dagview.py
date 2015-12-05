@@ -149,7 +149,8 @@ class GFIntermediate:
                 u1res.append('(%s) and %s'%(get_flag_residues(u1),self.ID))
                 u2res.append('(%s) and %s'%(get_flag_residues(u2),self.ID))
         intermediate  = ' intermediate_%s'%(str(self.number))
-        pymol.cmd.hide()
+        pymol.cmd.hide('ribbon',self.ID)
+        pymol.cmd.hide('cartoon',self.ID)
         pymol.cmd.show_as('ribbon',self.ID)
         #pymol.cmd.color('white',self.ID)
         pymol.cmd.set('ribbon_color','white',self.ID)
@@ -300,7 +301,8 @@ class GFTransition:
             pymol.cmd.deselect()
         #is seam
         else:
-            pymol.cmd.hide(self.ID)
+            pymol.cmd.hide('cartoon',self.ID)
+            pymol.cmd.hide('ribbon',self.ID)
             u1.show(pymol)
         
 
