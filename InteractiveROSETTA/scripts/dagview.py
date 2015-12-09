@@ -141,7 +141,6 @@ class GFIntermediate:
         #import pymol 
         #residues = self.get_residues()
         residues = '(%s) AND %s'%(get_flag_residues(self.iflag),self.ID)
-        print 'residues: %s'%(residues)
         u1res = []
         u2res = []
         for (u1,u2) in self.barrelflags:
@@ -163,12 +162,10 @@ class GFIntermediate:
                 u1label = 'i_%d_barrel_%d_u1'%(self.number,i)
                 u2label = 'i_%d_barrel_%d_u2'%(self.number,i)
                 if u1res[i] != '(resi ) and %s'%(self.ID):
-                    print u1res[i]
                     pymol.cmd.select(u1label,u1res[i])
                     #pymol.cmd.color('yellow',u1label)
                     pymol.cmd.set("cartoon_color",'yellow',u1label)
                 if u2res[i] != '(resi ) and %s'%(self.ID):
-                    print u2res[i]
                     pymol.cmd.select(u2label,u2res[i])
                     #pymol.cmd.color('green',u2label)
                     pymol.cmd.set("cartoon_color", 'green', u2label)
@@ -313,7 +310,6 @@ def parseImgMap(mapFile,dag='',ID=''):
     transitions = []
     intermediates = []
     readMap = open(mapFile,'r')
-    print("reading mapfile.... %s"%(mapFile))
     for line in readMap:
         if "<area shape" in line:
             line = line.split('"')            
@@ -350,8 +346,6 @@ def parseImgMap(mapFile,dag='',ID=''):
                         transitions.append(tmpTransition)
     return (intermediates,transitions)
 
-'''def findFiles(folderPath):
-    None    '''
     
     
 class dagPanel(wx.lib.scrolledpanel.ScrolledPanel):
@@ -380,24 +374,24 @@ class dagPanel(wx.lib.scrolledpanel.ScrolledPanel):
     
     def onClick(self,event):
         (x,y) = event.GetPosition()
-        if platform.system() != 'Darwin':
+        if platform.system() != 'Darwin' and platform.system() != 'Windows':
             (x,y) = self.CalcUnscrolledPosition(x,y)
         notFound = True
         for intermediate in self.intermediates:
             if intermediate.contains_point((x,y)):
-                print "intermediate %d"%(intermediate.number)
+                logInfo("intermediate %d"%(intermediate.number))
                 intermediate.show(self.pymol)
                 notFound = False
                 break
         if notFound:
             for transition in self.transitions:
                 if transition.contains_point((x,y)):
-                    print "transition %d"%(transition.number)
+                    logInfo("transition %d"%(transition.number))
                     transition.show(self.intermediates,self.pymol)
                     notFound = False
                     break
         if notFound:
-            print "notFound"
+            logInfo("notFound")
 
 class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def __init__(self,parent,W,H):
@@ -411,7 +405,7 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
         
         #Title labeling
         if platform.system() == 'Windows':
-            self.lblDagView = wx.StaticText(self,-1,'Pathway Visualization',(25,15),(270,25),style=wx.AALIGN_CENTRE)
+            self.lblDagView = wx.StaticText(self,-1,'Pathway Visualization',(25,15),(270,25),style=wx.ALIGN_CENTRE)
             self.lblDagView.SetFont(wx.Font(12,wx.DEFAULT,wx.ITALIC,wx.BOLD))
         #elif platform.system() == 'Darwin':
          #   self.lblDagView = wx.StaticBitmap(self,-1,wx.Image(self.parent.parent.scriptdir+"/images/osx/dagview/lblDagView.png",wx.BITMAP_TYPE_PNG).ConvertToBitmap(),pos=(25,15),size=(270,25))
@@ -420,7 +414,7 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.lblDagView.SetFont(wx.Font(12,wx.DEFAULT,wx.ITALIC,wx.BOLD))
         self.lblDagView.SetForegroundColour("#FFFFFF")
         logInfo('397: Title label set!')
-        
+		
         #Help Button
         if platform.system() == 'Darwin':
             self.HelpBtn = wx.BitmapButton(self,id=-1,bitmap=wx.Image(self.parent.parent.scriptdir+'/images/osx/HelpBtn.png',wx.BITMAP_TYPE_PNG).ConvertToBitmap(),pos=(295,10),size=(25,25))
@@ -430,7 +424,7 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.HelpBtn.SetFont(wx.Font(10,wx.DEFAULT,wx.NORMAL,wx.BOLD))
         self.HelpBtn.Bind(wx.EVT_BUTTON,self.showHelp)
         self.HelpBtn.SetToolTipString("Display the help file for this window")
-        logInfo('408: Help button set')      
+        logInfo('408: Help button set')
         
         #Subtile text
         if platform.system() == 'Windows':
@@ -443,7 +437,8 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.lblInst.SetFont(wx.Font(10,wx.DEFAULT,wx.ITALIC,wx.NORMAL))
             resizeTextControlForUNIX(self.lblInst,0,self.GetSize()[0])
         self.lblInst.SetForegroundColour("#FFFFFF")
-        logInfo('421: Subtitle set!')        
+        logInfo('421: Subtitle set!')
+		
         
         #PDB button
         self.lblPDB = wx.StaticText(self,-1,"None Uploaded", pos=(10,103),size=(180,25),style=wx.ALIGN_CENTRE)
@@ -461,58 +456,7 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.btnLoad.Bind(wx.EVT_BUTTON,self.loadZip)
         self.btnLoad.SetToolTipString('Load the zip file containing the GeoFold output')
         logInfo('437: Zip button set!')
-        '''
-        #Dag.out button
-        self.lblDagOut = wx.StaticText(self,-1,"None Uploaded", pos=(10,138),size=(180,25),style=wx.ALIGN_CENTRE)
-        self.lblDagOut.SetFont(wx.Font(10,wx.DEFAULT,wx.NORMAL,wx.BOLD))
-        if platform.system() == 'Linux':
-            resizeTextControlForUNIX(self.lblDagOut,10,180)
-        self.lblDagOut.SetForegroundColour("#FFFFFF")
-        #if platform.system() == 'Darwin':
-        #    self.btnDagOut = wx.BitmapButton(self,id=-1,bitmap=wx.Image(self.parent.parent.scriptdir+'/images/osx/dagview/btnDagOut.png',wx.BITMAP_TYPE_PNG).ConvertToBitmap(),pos=(200,135),size=(110,25))
-        #else:
-        self.btnDagOut = wx.Button(self,id=-1,label='Load .dag.out',pos=(200,135),size=(110,25))
-        self.btnDagOut.SetForegroundColour("#000000")
-        self.btnDagOut.SetFont(wx.Font(10,wx.DEFAULT,wx.NORMAL,wx.BOLD))
         
-        self.btnDagOut.Bind(wx.EVT_BUTTON,self.loadDagOut)
-        self.btnDagOut.SetToolTipString('Load the .dag.out file generated by GeoFold')
-        logInfo('453: DagOut Button Set')
-        
-        #Dag.html button
-        self.lblDagHtml = wx.StaticText(self,-1,"None Uploaded", pos=(10,173),size=(180,25),style=wx.ALIGN_CENTRE)
-        self.lblDagHtml.SetFont(wx.Font(10,wx.DEFAULT,wx.NORMAL,wx.BOLD))
-        if platform.system() == 'Linux':
-            resizeTextControlForUNIX(self.lblDagHtml,10,180)
-        self.lblDagHtml.SetForegroundColour("#FFFFFF")
-        #if platform.system() == 'Darwin':
-        #    self.btnDagHtml = wx.BitmapButton(self,id=-1,bitmap=wx.Image(self.parent.parent.scriptdir+'/images/osx/dagview/btnDagHtml.png',wx.BITMAP_TYPE_PNG).ConvertToBitmap(),pos=(200,170),size=(110,25))
-        #else:
-        self.btnDagHtml = wx.Button(self,id=-1,label='Load .dag.html',pos=(200,170),size=(110,25))
-        self.btnDagHtml.SetForegroundColour("#000000")
-        self.btnDagHtml.SetFont(wx.Font(10,wx.DEFAULT,wx.NORMAL,wx.BOLD))
-        
-        self.btnDagHtml.Bind(wx.EVT_BUTTON,self.loadDagHtml)
-        self.btnDagHtml.SetToolTipString('Load the .dag.html file generated by GeoFold')
-        logInfo('469: DagHtml Button set!')
-        
-        #Dag.png button
-        self.lblDagPng = wx.StaticText(self,-1,"None Uploaded", pos=(10,208),size=(180,25),style=wx.ALIGN_CENTRE)
-        self.lblDagPng.SetFont(wx.Font(10,wx.DEFAULT,wx.NORMAL,wx.BOLD))
-        if platform.system() == 'Linux':
-            resizeTextControlForUNIX(self.lblDagPng,10,180)
-        self.lblDagPng.SetForegroundColour("#FFFFFF")
-        #if platform.system() == 'Darwin':
-        #    self.btnDagPng = wx.BitmapButton(self,id=-1,bitmap=wx.Image(self.parent.parent.scriptdir+'/images/osx/dagview/btnDagPng.png',wx.BITMAP_TYPE_PNG).ConvertToBitmap(),pos=(200,205),size=(110,25))
-        #else:
-        self.btnDagPng = wx.Button(self,id=-1,label='Load .dag.png',pos=(200,205),size=(110,25))
-        self.btnDagPng.SetForegroundColour("#000000")
-        self.btnDagPng.SetFont(wx.Font(10,wx.DEFAULT,wx.NORMAL,wx.BOLD))
-        
-        self.btnDagPng.Bind(wx.EVT_BUTTON,self.loadDagPng)
-        self.btnDagPng.SetToolTipString('Load the .dag.png file generated by GeoFold')
-        logInfo('485: DagPng Button Set!')        
-        '''
         #combobox        
         self.dagMenu = wx.ComboBox(self, pos=(10,138), size=(110, 25), choices=[], style=wx.CB_READONLY)
         #GO! Button ViewDag
@@ -530,7 +474,6 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
         
         #Scrolling set up
         logInfo('499: Setting scrolling...')
-        logInfo('500: GetPosition = %d'%(self.btnViewDag.GetPosition()[1]))
         logInfo('501: GetSize = %d'%(self.btnViewDag.GetSize()[1]))
         self.scrollh = self.btnViewDag.GetPosition()[1] + self.btnViewDag.GetSize()[1] + 5
         logInfo('503: scrollh set to %d'%(self.scrollh))
@@ -540,7 +483,7 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.Bind(wx.EVT_SCROLLWIN, self.scrolled)
         logInfo('508: Scrolling set.')
         logInfo('509: Initialization complete!')
-        
+		
     def loadZip(self,event):
         '''opens a file dialog to open the zip file.  Loads the PDB and populates
         the dagMenu'''
@@ -567,7 +510,6 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.lblPDB.SetForegroundColour('#FFFFFF')
             if platform.system() == 'Linux':
                 resizeTextControlForUNIX(self.lblPDB,10,180)
-            print 'filename is %s'%(filename)
             
         #run findFiles on the item
         status,dags = self.findFiles(filename)
@@ -581,13 +523,8 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
         #Process dags to just show the base name
         newdags = []
         for dag in dags:
-            if platform.system == 'Windows':
-                dag = dag.split('\\')
-            else:
-                dag = dag.split('/')
-            dag = dag[len(dag)-1]
+            dag = localFile.split('.zip')[0]+'_'+dag.split('_')[len(dag.split('_'))-1]
             newdags.append(dag)
-        print newdags
         #Populate dagMenu
         self.dagMenu.AppendItems(newdags)
         return 0
@@ -750,9 +687,14 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
         except:
             pass
         dagbase = self.dagMenu.GetValue()
-        self.loadedDagHtml = '%s%s.dag.html'%(self.cwd,dagbase)
-        self.loadedDagOut = '%s%s.dag.out'%(self.cwd,dagbase)
-        self.loadedDagPng = '%s%s.dag.png'%(self.cwd,dagbase)
+        if platform.system() == 'Windows':
+            self.loadedDagHtml = '%s\\%s.dag.html'%(self.cwd,dagbase)
+            self.loadedDagOut = '%s\\%s.dag.out'%(self.cwd,dagbase)
+            self.loadedDagPng = '%s\\%s.dag.png'%(self.cwd,dagbase)
+        else:
+            self.loadedDagHtml = '%s/%s.dag.html'%(self.cwd,dagbase)
+            self.loadedDagOut = '%s/%s.dag.out'%(self.cwd,dagbase)
+            self.loadedDagPng = '%s/%s.dag.png'%(self.cwd,dagbase)
         #self.intermediates,self.transitions = parseImgMap(self.loadedDagHtml,self.loadedDagOut,self.ID)
         self.frame = wx.Frame(None,-1)
         self.DagPanel = dagPanel(self.frame,self.loadedDagPng,self.loadedDagHtml,self.loadedDagOut,self.ID)
@@ -772,17 +714,25 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
         #Unzip the file in the sandbox
         unzipped = zipfile.ZipFile(zipDir)
         info = unzipped.infolist()
+        filename = info[0].filename[:len(info[0].filename)-1]
         goToSandbox()
         try:
             unzipped.extractall()
         except: #failed to unzip
             return -2, []
         #use glob to get all dag.out files
-        globDir = '%s/%s*.dag.out'%(os.getcwd(),info[0].filename)
+        if platform.system() == 'Windows':
+            globDir = '%s\\%s\\*.dag.out'%(os.getcwd(),filename)
+        else:
+            globDir = '%s/%s/*.dag.out'%(os.getcwd(),filename)
         dagOuts = glob.glob(globDir)    
         #find pdb file
-        self.cwd = '%s/%s'%(os.getcwd(),info[0].filename)
-        pdb = glob.glob('%s/%s%s.pdb'%(os.getcwd(),info[0].filename,info[0].filename[:len(info[0].filename)-1]))
+        if platform.system() == 'Windows':
+            self.cwd = '%s\\%s'%(os.getcwd(),filename)
+            pdb = glob.glob('%s\\%s\\%s.pdb'%(os.getcwd(),filename,filename))
+        else:
+            self.cwd = '%s/%s'%(os.getcwd(),info[0].filename)
+            pdb = glob.glob('%s/%s/%s.pdb'%(os.getcwd(),filename,filename))
         if len(pdb) == 0:
             return -4, []
         #for each file in dagOuts
@@ -803,7 +753,6 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
         #everything worked!
         self.seqWin.PyMOLPDBLoad(1, pdb[0], "Show")
         self.ID = 'model '+self.seqWin.IDs[len(self.seqWin.IDs)-1]
-        print self.ID
         self.cmd.set('cartoon_color','purple',self.ID)
         self.cmd.select('Native',self.ID)
         self.cmd.show_as('cartoon','Native')
@@ -826,7 +775,6 @@ def startPyMOL(pdb):
     
 if __name__ == '__main__':
     intermediates,transitions = parseImgMap('2b3p_florynewtest.21846_1.dag.html','2b3p_florynewtest.21846_1.dag.out')
-    print 'parsed map!'
     pymol = startPyMOL('2b3p_florynewtest.21846.pdb')
     '''for intermediate in intermediates:
         intermediate.show(pymol)
