@@ -1737,7 +1737,7 @@ def getRecognizedTypes():
     # Returns a list of 3 letter codes that will be recognized by Rosetta
     recognized = ["ALA", "CYS", "ASP", "GLU", "PHE", "GLY", "HIS", "ILE", "LYS", "LEU", "MET", "ASN", 
 	      "PRO", "GLN", "ARG", "SER", "THR", "VAL", "TRP", "TYR", "HIE", "HID", "ADE", "CYT",
-	      "GUA", "THY", "RAD", "RCY", "RGU", "URA"]
+	      "GUA", "THY", "RAD", "RCY", "RGU", "URA","DA","DT","DC","DG"]
     if (platform.system() == "Windows"):
 	# Windows has all the metal ions by default
 	recognized.extend(["CA", "FE2", "FE", "K", "MG", "MN", "NA", "ZN"])
@@ -1769,7 +1769,9 @@ def cleanPDB(pdbfile, acceptNCAAs=False):
     # residues with blank chainIDs and the same residue positions
     fin = open(pdbfile.strip(), "r")
     data = []
+    logInfo('reading out lines.  tools::cleanPDB::1772')
     for aline in fin:
+	logInfo(aline)
 	if ((aline.startswith("ATOM") or aline.startswith("HETATM")) and not aline[21] in takenIDs):
 	    takenIDs += aline[21]
 	data.append(aline)
@@ -1800,6 +1802,7 @@ def cleanPDB(pdbfile, acceptNCAAs=False):
 		    blankID = char
 		    break
 	if ((aline[0:4] == "ATOM" or aline[0:6] == "HETATM") and not(aline[17:20].strip() in getRecognizedTypes()) and not(acceptNCAAs)):
+	    logInfo('Popping line:\n %s'%(aline))
 	    offset = offset + 1
 	    data.pop(counter)
 	    continue
@@ -1869,15 +1872,19 @@ def cleanPDB(pdbfile, acceptNCAAs=False):
 	#else:
 	# Change nucleic acid strings to what Rosetta expects
 	if (aline[17:20] == " DA"):
+	    logInfo('Adenosine %s'%(aline[6:11]))
 	    data[counter] = aline[0:17] + "ADE" + aline[20:]
 	    #data.append(aline[0:17] + "ADE" + aline[20:])
 	elif (aline[17:20] == " DC"):
+	    logInfo('Cytosine %s'%(aline[6:11]))
 	    data[counter] = aline[0:17] + "CYT" + aline[20:]
 	    #data.append(aline[0:17] + "CYT" + aline[20:])
 	elif (aline[17:20] == " DG"):
+	    logInfo('Guanidine %s'%(aline[6:11]))
 	    data[counter] = aline[0:17] + "GUA" + aline[20:]
 	    #data.append(aline[0:17] + "GUA" + aline[20:])
 	elif (aline[17:20] == " DT"):
+	    logInfo('Thymidine %s'%(aline[6:11]))
 	    data[counter] = aline[0:17] + "THY" + aline[20:]
 	    #data.append(aline[0:17] + "THY" + aline[20:])
 	else:
