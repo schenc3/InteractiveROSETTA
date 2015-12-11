@@ -1311,6 +1311,28 @@ def defaultPyMOLView(cmd, model=None):
 	dsele = "(ss g or ss i) and model " + model
 	cmd.set("ribbon_color", "orange", dsele)
 	cmd.set("cartoon_color", "orange", dsele)
+	#DNA
+	#Adenosine
+	logInfo('tools.py 1316')
+	dsele = '(resn ADE) and model %s'%(model)
+	cmd.set('ribbon_color','green',dsele)
+	cmd.set('cartoon_color','green',dsele)
+ 	cmd.color('green',dsele)
+     #Thymine
+	dsele = '(resn THY) and model %s'%(model)
+	cmd.set('ribbon_color','red',dsele)
+	cmd.set('cartoon_color','red',dsele)
+ 	cmd.color('red',dsele)
+     #Cytosine
+	dsele = '(resn CYT) and model %s'%(model)
+	cmd.set('ribbon_color','blue',dsele)
+	cmd.set('cartoon_color','blue',dsele)
+ 	cmd.color('blue',dsele)
+     #Guanine
+	dsele = '(resn GUA) and model %s'%(model)
+	cmd.set('ribbon_color','gray',dsele)
+	cmd.set('cartoon_color','gray',dsele)
+	cmd.color('gray',dsele)
 	#cmd.delete("dsele")
     else:
 	cmd.select("dsele", "all")
@@ -1325,8 +1347,11 @@ def defaultPyMOLView(cmd, model=None):
 	cmd.select("dsele", "symbol c")
 	dsele = "symbol c"
 	cmd.color("gray", dsele)
-	cmd.select("dsele", "all")
-	dsele = "all"
+	#cmd.select("dsele", "all")
+	#dsele = "all"
+	#Had to change this because using 'all' for some reason doesn't play nice with DNA
+	cmd.select('dsele','!(resn ADE | resn THY | resn CYT | resn GUA)')
+	dsele = '!(resn ADE | resn THY | resn CYT | resn GUA)'
 	cmd.set("ribbon_color", "white", dsele)
 	cmd.set("cartoon_color", "white", dsele)
 	cmd.select("dsele", "ss s")
@@ -1345,6 +1370,29 @@ def defaultPyMOLView(cmd, model=None):
 	dsele = "ss g or ss i"
 	cmd.set("ribbon_color", "orange", dsele)
 	cmd.set("cartoon_color", "orange", dsele)
+	#DNA
+	#Adenosine
+	logInfo('tools.py 1372')
+	cmd.select('dsele','resn ADE')
+	cmd.set('ribbon_color','green','dsele')
+	cmd.set('cartoon_color','green','dsele')
+ 	cmd.color('green','dsele')
+     #Thymine
+	cmd.select('dsele','resn THY')
+	cmd.set('ribbon_color','red','dsele')
+	cmd.set('cartoon_color','red','dsele')
+ 	cmd.color('red','dsele')
+     #Cytosine
+	cmd.select('dsele','resn CYT')
+	cmd.set('ribbon_color','blue','dsele')
+	cmd.set('cartoon_color','blue','dsele')
+ 	cmd.color('blue','dsele')
+     #Guanine
+	cmd.select('dsele','resn GUA')
+	cmd.set('ribbon_color','gray','dsele')
+	cmd.set('cartoon_color','gray','dsele')
+	cmd.color('gray','dsele')
+	cmd.deselect()
 	#cmd.delete("dsele")
 
 def goToSandbox(extra=""):
@@ -1769,9 +1817,7 @@ def cleanPDB(pdbfile, acceptNCAAs=False):
     # residues with blank chainIDs and the same residue positions
     fin = open(pdbfile.strip(), "r")
     data = []
-    logInfo('reading out lines.  tools::cleanPDB::1772')
     for aline in fin:
-	logInfo(aline)
 	if ((aline.startswith("ATOM") or aline.startswith("HETATM")) and not aline[21] in takenIDs):
 	    takenIDs += aline[21]
 	data.append(aline)
@@ -1872,19 +1918,15 @@ def cleanPDB(pdbfile, acceptNCAAs=False):
 	#else:
 	# Change nucleic acid strings to what Rosetta expects
 	if (aline[17:20] == " DA"):
-	    logInfo('Adenosine %s'%(aline[6:11]))
 	    data[counter] = aline[0:17] + "ADE" + aline[20:]
 	    #data.append(aline[0:17] + "ADE" + aline[20:])
 	elif (aline[17:20] == " DC"):
-	    logInfo('Cytosine %s'%(aline[6:11]))
 	    data[counter] = aline[0:17] + "CYT" + aline[20:]
 	    #data.append(aline[0:17] + "CYT" + aline[20:])
 	elif (aline[17:20] == " DG"):
-	    logInfo('Guanidine %s'%(aline[6:11]))
 	    data[counter] = aline[0:17] + "GUA" + aline[20:]
 	    #data.append(aline[0:17] + "GUA" + aline[20:])
 	elif (aline[17:20] == " DT"):
-	    logInfo('Thymidine %s'%(aline[6:11]))
 	    data[counter] = aline[0:17] + "THY" + aline[20:]
 	    #data.append(aline[0:17] + "THY" + aline[20:])
 	else:
