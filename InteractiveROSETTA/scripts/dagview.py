@@ -10,7 +10,7 @@ from tools import *
 
 class GFIntermediate:
     """Class defining the intermediates in a GeoFold DAG"""
-        
+
     def __init__(self,number=0, center=(0,0), radius=0.,dagfile=''):
         """Initialize given information from imagemap"""
         self.number = number
@@ -28,11 +28,11 @@ class GFIntermediate:
             self.entropy = 0.
             self.voids = 0
             self.hbonds = 0
-            self.concentration = 0.        
+            self.concentration = 0.
             self.barrels = []
             self.barrelflags = []
-                
-    
+
+
     def read_dagfile(self,dagfile):
         """Given the GFIntermediate initialized with data from imagemap
         open its parent dagfile and read in remaining information.  Returns
@@ -49,7 +49,7 @@ class GFIntermediate:
                 sys.stderr.write("Error: End of file reached")
                 sys.stderr.flush()
                 return False
-            #find ISEGMT lines            
+            #find ISEGMT lines
             if line[0:6] == 'ISEGMT':
                 #find matching ISEGMT number
                 try:
@@ -80,7 +80,7 @@ class GFIntermediate:
                     sys.stderr.flush()
                     return False
         readDAG.close()
-        
+
     def setbarrelflags(self,readDAG,barrel):
         '''Given a non-zero barrel.  return it's u1flags and u2flags for this intermediate'''
         #initialize flags
@@ -124,21 +124,21 @@ class GFIntermediate:
                 u1flag = u1flag[:i]+'.'+u1flag[i+1:]
                 u2flag = u2flag[:i]+'.'+u2flag[i+1:]
         return (u1flag,u2flag)
-                            
+
     def contains_point(self,(x,y)):
         """Returns True if the given coordinate is within the space on the map
-        defined by this intermediate (e.g. (x,y) lies within self.radius of 
+        defined by this intermediate (e.g. (x,y) lies within self.radius of
         self.center)"""
         center_x, center_y = self.center
         if math.sqrt((center_x-x)**2+(center_y-y)**2) <= self.radius:
             return True
         else:
             return False
-            
-    
+
+
     def show(self,pymol):
         ''' Will display the intermediate in the pymol window'''
-        #import pymol 
+        #import pymol
         #residues = self.get_residues()
         residues = '(%s) AND %s'%(get_flag_residues(self.iflag),self.ID)
         u1res = []
@@ -170,19 +170,19 @@ class GFIntermediate:
                     #pymol.cmd.color('green',u2label)
                     pymol.cmd.set("cartoon_color", 'green', u2label)
         pymol.cmd.deselect()
-        
+
     def setID(self,ID):
         self.ID = ID
 
 def get_flag_residues(flag):
     '''gets the residue labeling for given flag (iflag,u1flag,u2flag)'''
-    residues = []        
+    residues = []
     for i in range(0,len(flag)):
         if flag[i] != '.':
             residues.append(str(i+1))
     residues = 'resi %s' %(','.join(residues))
     return residues
-    
+
 class GFTransition:
     """Class defining the transition states in a GeoFold DAG"""
     def __init__(self,number = 0, coords = ((0,0),(0,0),(0,0),(0,0)), dagfile = ''):
@@ -193,7 +193,7 @@ class GFTransition:
         #info from dag
         if dagfile != '':
             success = self.read_dagfile(dagfile)
-            assert success == True, 'Could not read dagfile: %s'%(dagfile)            
+            assert success == True, 'Could not read dagfile: %s'%(dagfile)
         else:
             self.f = 0
             self.u1 = 0
@@ -202,7 +202,7 @@ class GFTransition:
             self.cuttype = ''
             self.iseam = 0
             self.traffic = 0.
-            
+
     def read_dagfile(self,dagfile):
         try:
             readDAG = open(dagfile,'r')
@@ -234,10 +234,10 @@ class GFTransition:
                         return False
                     else:
                         return True
-        
-        
-            
-        
+
+
+
+
 
     def contains_point(self,(x,y)):
         """Returns True if the given coordinate is within the space on the map
@@ -257,17 +257,17 @@ class GFTransition:
         if self.isLeft((x4,y4),(x1,y1),(x,y)):
             return False
         return True
-        
+
     def isLeft(self,(x1,y1),(x2,y2),(x,y)):
         A = -(y2-y1)
         B = x2-x1
         C = -(A*x1 + B*y1)
         D = A*x + B*y + C
         return D > 0
-        
+
     def setID(self,ID):
         self.ID = ID
-        
+
     def show(self,intermediates,pymol):
         '''Displays the transition state on the pymol viewer'''
         #import pymol
@@ -288,7 +288,7 @@ class GFTransition:
         pymol.cmd.select('u1',u1res)
         if u2 != 0:
             pymol.cmd.select('u2',u2res)
-        #pymol.cmd.hide()        
+        #pymol.cmd.hide()
         #pymol.cmd.show_as('cartoon','f')
         if u2 != 0:
             #pymol.cmd.color('red','u1')
@@ -301,18 +301,18 @@ class GFTransition:
             pymol.cmd.hide('cartoon',self.ID)
             pymol.cmd.hide('ribbon',self.ID)
             u1.show(pymol)
-        
+
 
 def parseImgMap(mapFile,dag='',ID=''):
     """This function takes the html imagemap file generated by GeoFold
     and uses it to create a list of Intermediate and transition states"""
-    
+
     transitions = []
     intermediates = []
     readMap = open(mapFile,'r')
     for line in readMap:
         if "<area shape" in line:
-            line = line.split('"')            
+            line = line.split('"')
             querystring = line[5].split('=')
             #intermediate
             if line[1] == 'circle':
@@ -346,16 +346,16 @@ def parseImgMap(mapFile,dag='',ID=''):
                         transitions.append(tmpTransition)
     return (intermediates,transitions)
 
-    
-    
+
+
 class dagPanel(wx.lib.scrolledpanel.ScrolledPanel):
-    def __init__(self,parent, dagImg,dagMap,dagFile,ID=''):        
+    def __init__(self,parent, dagImg,dagMap,dagFile,ID=''):
         wx.lib.scrolledpanel.ScrolledPanel.__init__(self,parent,-1)
         self.intermediates,self.transitions = parseImgMap(dagMap,dagFile,ID)
         vbox = wx.BoxSizer(wx.VERTICAL)
         img = wx.StaticBitmap(self, -1, wx.Bitmap(dagImg, wx.BITMAP_TYPE_ANY))
         vbox.Add(img)
-        
+
         img.Bind(wx.EVT_LEFT_UP,self.onClick)
         if sys.platform == 'Darwin':
             img.Bind(wx.EVT_MOUSE_EVENTS,self.osxClick)
@@ -371,7 +371,7 @@ class dagPanel(wx.lib.scrolledpanel.ScrolledPanel):
         '''OSX doesn't recognize a click like linux does apparently'''
         if event.GetClickCount() == 1 and event.ButtonUp():
             self.onClick(event)
-    
+
     def onClick(self,event):
         (x,y) = event.GetPosition()
         if platform.system() != 'Darwin' and platform.system() != 'Windows':
@@ -395,14 +395,14 @@ class dagPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
 class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def __init__(self,parent,W,H):
-        
+
         #ScrolledPanel initialization
         winh = H-330
         wx.lib.scrolledpanel.ScrolledPanel.__init__(self,parent,id=-1,pos=(10,60),size=(340,winh),name="Pathway Visualization")
         self.SetBackgroundColour("#333333")
         self.parent = parent
         logInfo('385: ScrolledPanel initialized!')
-        
+
         #Title labeling
         if platform.system() == 'Windows':
             self.lblDagView = wx.StaticText(self,-1,'Pathway Visualization',(25,15),(270,25),style=wx.ALIGN_CENTRE)
@@ -414,7 +414,7 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.lblDagView.SetFont(wx.Font(12,wx.DEFAULT,wx.ITALIC,wx.BOLD))
         self.lblDagView.SetForegroundColour("#FFFFFF")
         logInfo('397: Title label set!')
-		
+
         #Help Button
         if platform.system() == 'Darwin':
             self.HelpBtn = wx.BitmapButton(self,id=-1,bitmap=wx.Image(self.parent.parent.scriptdir+'/images/osx/HelpBtn.png',wx.BITMAP_TYPE_PNG).ConvertToBitmap(),pos=(295,10),size=(25,25))
@@ -425,7 +425,7 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.HelpBtn.Bind(wx.EVT_BUTTON,self.showHelp)
         self.HelpBtn.SetToolTipString("Display the help file for this window")
         logInfo('408: Help button set')
-        
+
         #Subtile text
         if platform.system() == 'Windows':
             self.lblInst = wx.StaticText(self,-1,'View GeoFold pathways',(0,45),(320,25),wx.ALIGN_CENTRE)
@@ -438,8 +438,8 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
             resizeTextControlForUNIX(self.lblInst,0,self.GetSize()[0])
         self.lblInst.SetForegroundColour("#FFFFFF")
         logInfo('421: Subtitle set!')
-		
-        
+
+
         #PDB button
         self.lblPDB = wx.StaticText(self,-1,"None Uploaded", pos=(10,103),size=(180,25),style=wx.ALIGN_CENTRE)
         self.lblPDB.SetFont(wx.Font(10,wx.DEFAULT,wx.NORMAL,wx.BOLD))
@@ -452,12 +452,12 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.btnLoad = wx.Button(self,id=-1,label='Load zip file',pos=(200,100),size=(110,25))
         self.btnLoad.SetForegroundColour("#000000")
         self.btnLoad.SetFont(wx.Font(10,wx.DEFAULT,wx.NORMAL,wx.BOLD))
-            
+
         self.btnLoad.Bind(wx.EVT_BUTTON,self.loadZip)
         self.btnLoad.SetToolTipString('Load the zip file containing the GeoFold output')
         logInfo('437: Zip button set!')
-        
-        #combobox        
+
+        #combobox
         self.dagMenu = wx.ComboBox(self, pos=(10,138), size=(110, 25), choices=[], style=wx.CB_READONLY)
         #GO! Button ViewDag
         #ypos = self.btnDagPng.GetPosition()[1]+self.btnDagPng.GetSize()[1]+10
@@ -471,7 +471,7 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
         self.btnViewDag.Bind(wx.EVT_BUTTON,self.ViewDagClick)
         logInfo('496: View Dag Button set')
-        
+
         #Scrolling set up
         logInfo('499: Setting scrolling...')
         logInfo('501: GetSize = %d'%(self.btnViewDag.GetSize()[1]))
@@ -483,7 +483,7 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.Bind(wx.EVT_SCROLLWIN, self.scrolled)
         logInfo('508: Scrolling set.')
         logInfo('509: Initialization complete!')
-		
+
     def loadZip(self,event):
         '''opens a file dialog to open the zip file.  Loads the PDB and populates
         the dagMenu'''
@@ -498,40 +498,47 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
                 lastDirIndx = paths[len(paths)-1].rfind('\\')
             else:
                 lastDirIndx = paths[len(paths)-1].rfind('/')
-            
+
             self.seqWin.cwd = str(paths[len(paths)-1][0:lastDirIndx])
             filename = str(paths[0])
+            logInfo('filename = %s'%(filename))
             if platform.system() == 'Windows':
                 localFile = filename.split('\\')
             else:
                 localFile = filename.split('/')
             localFile = localFile[len(localFile)-1]
+            logInfo('localFile: %s'%(localFile))
             self.lblPDB.SetLabel(localFile)
             self.lblPDB.SetForegroundColour('#FFFFFF')
             if platform.system() == 'Linux':
                 resizeTextControlForUNIX(self.lblPDB,10,180)
-            
+
         #run findFiles on the item
         status,dags = self.findFiles(filename)
-        
+        logInfo(dags)
+
         #Error handling
+        logInfo(status)
         if status != 0:
             msgs = {-1:'The zip file selected is invalid.\nPlease try again',-2:'There was an error unzipping the file',-3:'No valid output was found in the zip file',-4:'PDB file could not be loaded from zip file'}
+            logInfo(msgs[status])
             wx.MessageBox(msgs[status], "", wx.OK|wx.ICON_EXCLAMATION)
             return -1
-        
+
         #Process dags to just show the base name
         newdags = []
+        logInfo('newdags:')
         for dag in dags:
             dag = localFile.split('.zip')[0]+'_'+dag.split('_')[len(dag.split('_'))-1]
             newdags.append(dag)
+            logInfo(dag)
         #Populate dagMenu
         self.dagMenu.AppendItems(newdags)
         return 0
-        
+
     def setSeqWin(self, seqWin):
         self.seqWin = seqWin
-    
+
     def showHelp(self, event):
         '''Open the help page'''
         if platform.system() == 'Darwin':
@@ -543,21 +550,21 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
             browser.open(self.parent.parent.scriptdir+'/help/dagview.html')
         else:
             webbrowser.open(self.parent.parent.scriptdir+'/help/dagview.html')
-    
+
     def scrolled(self,event):
         self.winscrollpos = self.GetScrollPos(wx.VERTICAL)
-        event.Skip()        
-        
+        event.Skip()
+
     def setPyMOL(self,pymol):
         '''Sets PyMOL to be used for this class'''
         self.pymol = pymol
         self.cmd = pymol.cmd
         self.stored = pymol.stored
-    
-        
+
+
     def activate(self):
         self.Scroll(0, self.winscrollpos)
-        
+
     def loadPDB(self,event):
         '''Select PDB file to load'''
         logInfo("Clicked Load PDB button")
@@ -597,8 +604,8 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.lblPDB.SetForegroundColour('#FFFFFF')
             if platform.system() == 'Linux':
                 resizeTextControlForUNIX(self.lblPDB,10,180)
-            
-            
+
+
     def loadDagOut(self,event):
         '''Load .dag.out file'''
         logInfo("Clicked Load DagOut button")
@@ -624,7 +631,7 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.lblDagOut.SetForegroundColour('#FFFFFF')
             if platform.system() == 'Linux':
                 resizeTextControlForUNIX(self.lblDagOut,10,180)
-    
+
     def loadDagHtml(self,event):
         '''Load .dag.html file'''
         logInfo("Clicked Load DagHtml button")
@@ -650,7 +657,7 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.lblDagHtml.SetForegroundColour('#FFFFFF')
             if platform.system() == 'Linux':
                 resizeTextControlForUNIX(self.lblDagHtml,10,180)
-    
+
     def loadDagPng(self,event):
         '''Load .dag.png file'''
         logInfo("Clicked Load DagPng button")
@@ -676,7 +683,7 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.lblDagPng.SetForegroundColour('#FFFFFF')
             if platform.system() == 'Linux':
                 resizeTextControlForUNIX(self.lblDagPng,10,180)
-    
+
     def ViewDagClick(self,event):
         logInfo('View Dag Button Clicked')
         self.cmd.show_as('cartoon',self.ID)
@@ -700,13 +707,14 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.DagPanel = dagPanel(self.frame,self.loadedDagPng,self.loadedDagHtml,self.loadedDagOut,self.ID)
         self.DagPanel.setPyMOL(self.pymol)
         self.frame.Show()
-        
+
     def findFiles(self,zipDir):
         '''Takes a given zip file.  extracts it in the sandbox and picks out all
         the files able to be viewed.  It outputs a list to be put in a ComboBox
         to allow the user to select which one to view.  If an error occurs, outputs
         a negative number used to identify the error and handle it'''
         import zipfile
+        logInfo('Calling findFiles')
         output = []
         #Check if selected file is valid
         if not zipfile.is_zipfile(zipDir):
@@ -725,7 +733,8 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
             globDir = '%s\\%s\\*.dag.out'%(os.getcwd(),filename)
         else:
             globDir = '%s/%s/*.dag.out'%(os.getcwd(),filename)
-        dagOuts = glob.glob(globDir)    
+            logInfo('globDir: %s'%(globDir))
+        dagOuts = glob.glob(globDir)
         #find pdb file
         if platform.system() == 'Windows':
             self.cwd = '%s\\%s'%(os.getcwd(),filename)
@@ -733,13 +742,15 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
         else:
             self.cwd = '%s/%s'%(os.getcwd(),info[0].filename)
             pdb = glob.glob('%s/%s/%s.pdb'%(os.getcwd(),filename,filename))
+            logInfo('pdb: %s'%(pdb))
         if len(pdb) == 0:
             return -4, []
         #for each file in dagOuts
         for dag in dagOuts:
-            #get base filename, looks complicated in case '.dag.out' 
+            #get base filename, looks complicated in case '.dag.out'
             #is present elsewhere is file path
             base = '.dag.out'.join(dag.split('.dag.out')[:len(dag.split('.dag.out'))-1])
+            logInfo('base: %s'%(base))
             #is dag.png there?
             dagPng = len(glob.glob(base+'.dag.png'))==1
             #is dag.html there?
@@ -748,18 +759,35 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
             if dagPng and dagHtml:
                 output.append(base)
         #no valid output
+        logInfo('len(output): %i'%(len(output)))
+        logInfo(output)
         if len(output) == 0:
             return -3, []
         #everything worked!
+        oldIDind = len(self.seqWin.IDs)
         self.seqWin.PyMOLPDBLoad(1, pdb[0], "Show")
-        self.ID = 'model '+self.seqWin.IDs[len(self.seqWin.IDs)-1]
-        self.cmd.set('cartoon_color','purple',self.ID)
-        self.cmd.select('Native',self.ID)
+        newIDs = self.seqWin.IDs[oldIDind:]
+        self.IDs = [] #tuples of the form (model,chain)
+        for ID in newIDs:
+            logInfo('newID: %s'%(ID))
+            ID = (ID[:len(ID)-2],ID[len(ID)-1])
+            self.IDs.append(ID)
+            logInfo('ID added: (%s,%s)'%ID)
+        logInfo('self.IDs')
+        logInfo(self.IDs)
+        logInfo('end self.IDs')
+        native = ''
+        for ID in self.IDs:
+            native += 'model %s and chain %s+'%ID
+        native = native[:len(native)-1]
+        logInfo('native: %s'%(native))
+        self.cmd.select('Native',native)
         self.cmd.show_as('cartoon','Native')
+        self.cmd.set('cartoon_color','purple','Native')
         self.cmd.deselect()
         return 0,output
-        
-        
+
+
 def startPyMOL(pdb):
     '''starts PyMOL for us.  Only for testing.  PyMOL should already be opened
     by InteractiveROSETTA'''
@@ -771,8 +799,8 @@ def startPyMOL(pdb):
     pymol.cmd.show_as('cartoon')
     pymol.cmd.color('purple')
     return pymol
-    
-    
+
+
 if __name__ == '__main__':
     intermediates,transitions = parseImgMap('2b3p_florynewtest.21846_1.dag.html','2b3p_florynewtest.21846_1.dag.out')
     pymol = startPyMOL('2b3p_florynewtest.21846.pdb')
