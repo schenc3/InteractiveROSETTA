@@ -136,23 +136,27 @@ class GFIntermediate:
             return False
 
 
-    def show(self,pymol):
+    def show(self,pymol,boundaries):
         ''' Will display the intermediate in the pymol window'''
         #import pymol
         #residues = self.get_residues()
-        residues = '(%s) AND %s'%(get_flag_residues(self.iflag),self.ID)
+        #residues = '(%s) AND %s'%(get_flag_residues(self.iflag,boundaries),self.IDs)
+        residues = 'model %s and (%s)'%(self.IDs[0][0],get_flag_residues(self.iflag,boundaries))
+        logInfo('residues: %s'%(residues))
         u1res = []
         u2res = []
         for (u1,u2) in self.barrelflags:
             if u1 != '':
-                u1res.append('(%s) and %s'%(get_flag_residues(u1),self.ID))
-                u2res.append('(%s) and %s'%(get_flag_residues(u2),self.ID))
+                #u1res.append('(%s) and %s'%(get_flag_residues(u1),self.ID))
+                #u2res.append('(%s) and %s'%(get_flag_residues(u2),self.ID))
+                u1res.append('model %s and (%s)'%(self.IDs[0][0],get_flag_residues(u1,boundaries)))
+                u2res.append('model %s and (%s)'%(self.IDs[0][0],get_flag_residues(u2,boundaries)))
         intermediate  = ' intermediate_%s'%(str(self.number))
-        pymol.cmd.hide('ribbon',self.ID)
-        pymol.cmd.hide('cartoon',self.ID)
-        pymol.cmd.show_as('ribbon',self.ID)
+        pymol.cmd.hide('ribbon','Native')
+        pymol.cmd.hide('cartoon','Native')
+        pymol.cmd.show_as('ribbon','Native')
         #pymol.cmd.color('white',self.ID)
-        pymol.cmd.set('ribbon_color','white',self.ID)
+        pymol.cmd.set('ribbon_color','white','Native')
         pymol.cmd.select(intermediate,residues)
         pymol.cmd.show_as('cartoon',intermediate)
         #pymol.cmd.color('purple',intermediate)
@@ -161,27 +165,38 @@ class GFIntermediate:
             for i in range(0,len(u1res)):
                 u1label = 'i_%d_barrel_%d_u1'%(self.number,i)
                 u2label = 'i_%d_barrel_%d_u2'%(self.number,i)
-                if u1res[i] != '(resi ) and %s'%(self.ID):
+                #if u1res[i] != '(resi ) and %s'%(self.ID):
+                if u1res[i] != 'model %s and ()'%(self.IDs[0][0]):
+                    logInfo('u1res[%i]: %s'%(i,u1res[i]))
                     pymol.cmd.select(u1label,u1res[i])
                     #pymol.cmd.color('yellow',u1label)
                     pymol.cmd.set("cartoon_color",'yellow',u1label)
-                if u2res[i] != '(resi ) and %s'%(self.ID):
+                #if u2res[i] != '(resi ) and %s'%(self.ID):
+                if u2res[i] != 'model %s and ()'%(self.IDs[0][0]):
+                    logInfo('u2res[%i]: %s'%(i,u2res[i]))
                     pymol.cmd.select(u2label,u2res[i])
                     #pymol.cmd.color('green',u2label)
                     pymol.cmd.set("cartoon_color", 'green', u2label)
         pymol.cmd.deselect()
 
-    def setID(self,ID):
-        self.ID = ID
+    def setIDs(self,IDs):
+        self.IDs = IDs
 
-def get_flag_residues(flag):
+def get_flag_residues(flag,boundaries):
     '''gets the residue labeling for given flag (iflag,u1flag,u2flag)'''
     residues = []
-    for i in range(0,len(flag)):
-        if flag[i] != '.':
-            residues.append(str(i+1))
-    residues = 'resi %s' %(','.join(residues))
-    return residues
+    for bound in boundaries:
+        tmpres = []
+        start,stop = (int(boundaries[bound][0]),int(boundaries[bound][1]))
+        logInfo('start: %i\nstop: %i'%(start,stop))
+        for i in range(0,len(flag)):
+            if flag[i] != '.' and i in range(start,stop+1):
+                tmpres.append(str(i+1))
+        if tmpres != []:
+            residues.append('chain %s and (resi %s)'%(bound,','.join(tmpres)))
+            logInfo(residues)
+    return ' | '.join(residues)
+    #return residues
 
 class GFTransition:
     """Class defining the transition states in a GeoFold DAG"""
@@ -265,10 +280,10 @@ class GFTransition:
         D = A*x + B*y + C
         return D > 0
 
-    def setID(self,ID):
-        self.ID = ID
+    def setIDs(self,IDs):
+        self.IDs = IDs
 
-    def show(self,intermediates,pymol):
+    def show(self,intermediates,pymol,boundaries):
         '''Displays the transition state on the pymol viewer'''
         #import pymol
         if self.u2 == 0:
@@ -280,11 +295,15 @@ class GFTransition:
                 u1 = intermediate
             if intermediate.number == self.u2:
                 u2 = intermediate
-        u1res = '(%s) and %s'%(get_flag_residues(u1.iflag),self.ID)
+        #u1res = '(%s) and %s'%(get_flag_residues(u1.iflag),self.ID)
+        u1res = 'model %s and (%s)'%(self.IDs[0][0],get_flag_residues(u1.iflag,boundaries))
+        logInfo('u1res: %s'%(u1res))
         if u2 != 0:
-            u2res = '(%s) and %s'%(get_flag_residues(u2.iflag),self.ID)
+            #u2res = '(%s) and %s'%(get_flag_residues(u2.iflag),self.ID)
+            u2res = 'model %s and (%s)'%(self.IDs[0][0],get_flag_residues(u1.iflag,boundaries))
+            logInfo('u2res: %s'%(u2res))
         #pymol.cmd.select('f',fres)
-        f.show(pymol)
+        f.show(pymol,boundaries)
         pymol.cmd.select('u1',u1res)
         if u2 != 0:
             pymol.cmd.select('u2',u2res)
@@ -300,10 +319,10 @@ class GFTransition:
         else:
             pymol.cmd.hide('cartoon',self.ID)
             pymol.cmd.hide('ribbon',self.ID)
-            u1.show(pymol)
+            u1.show(pymol,boundaries)
 
 
-def parseImgMap(mapFile,dag='',ID=''):
+def parseImgMap(mapFile,dag='',IDs=[]):
     """This function takes the html imagemap file generated by GeoFold
     and uses it to create a list of Intermediate and transition states"""
 
@@ -327,7 +346,7 @@ def parseImgMap(mapFile,dag='',ID=''):
                         center = (int(coords[0]),int(coords[1]))
                         radius = int(coords[2])
                         tmpIntermediate = GFIntermediate(number,center,radius,dagfile)
-                        tmpIntermediate.setID(ID)
+                        tmpIntermediate.setIDs(IDs)
                         intermediates.append(tmpIntermediate)
             #Transition
             else:
@@ -342,16 +361,40 @@ def parseImgMap(mapFile,dag='',ID=''):
                         coord = [int(j) for j in coord]
                         coords = ((coord[0],coord[1]),(coord[2],coord[3]),(coord[4],coord[5]),(coord[6],coord[7]))
                         tmpTransition = GFTransition(number,coords,dagfile)
-                        tmpTransition.setID(ID)
+                        tmpTransition.setIDs(IDs)
                         transitions.append(tmpTransition)
     return (intermediates,transitions)
 
+def GetChainBoundaries(intermediates):
+    '''Given a set of IDs find Intermediate 1 and extrapolate the boundaries
+    from it'''
+    boundaries = {}
+    for intermediate in intermediates:
+        if intermediate.number == 1:
+            iflag = intermediate.iflag
+            prev = ''
+            first = 0
+            second = 0
+            for i in range(0,len(iflag)):
+                if iflag[i] != prev:
+                    if prev != '':
+                        second = i-1
+                        boundaries[prev] = (first,second)
+                    prev = iflag[i]
+                    first = i
+                if i == len(iflag)-1:
+                    second = i
+                    boundaries[prev] = (first,second)
+            logInfo(boundaries)
+            return boundaries
 
 
 class dagPanel(wx.lib.scrolledpanel.ScrolledPanel):
-    def __init__(self,parent, dagImg,dagMap,dagFile,ID=''):
+    def __init__(self,parent, dagImg,dagMap,dagFile,IDs=[]):
         wx.lib.scrolledpanel.ScrolledPanel.__init__(self,parent,-1)
-        self.intermediates,self.transitions = parseImgMap(dagMap,dagFile,ID)
+        self.intermediates,self.transitions = parseImgMap(dagMap,dagFile,IDs)
+        self.boundaries = GetChainBoundaries(self.intermediates)
+        print self.boundaries
         vbox = wx.BoxSizer(wx.VERTICAL)
         img = wx.StaticBitmap(self, -1, wx.Bitmap(dagImg, wx.BITMAP_TYPE_ANY))
         vbox.Add(img)
@@ -380,14 +423,14 @@ class dagPanel(wx.lib.scrolledpanel.ScrolledPanel):
         for intermediate in self.intermediates:
             if intermediate.contains_point((x,y)):
                 logInfo("intermediate %d"%(intermediate.number))
-                intermediate.show(self.pymol)
+                intermediate.show(self.pymol,self.boundaries)
                 notFound = False
                 break
         if notFound:
             for transition in self.transitions:
                 if transition.contains_point((x,y)):
                     logInfo("transition %d"%(transition.number))
-                    transition.show(self.intermediates,self.pymol)
+                    transition.show(self.intermediates,self.pymol,self.boundaries)
                     notFound = False
                     break
         if notFound:
@@ -533,6 +576,7 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
             newdags.append(dag)
             logInfo(dag)
         #Populate dagMenu
+        self.dagMenu.Clear()
         self.dagMenu.AppendItems(newdags)
         return 0
 
@@ -686,9 +730,9 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
     def ViewDagClick(self,event):
         logInfo('View Dag Button Clicked')
-        self.cmd.show_as('cartoon',self.ID)
+        self.cmd.show_as('cartoon','Native')
         #self.cmd.color('purple',self.ID)
-        self.cmd.set("cartoon_color",'purple',self.ID)
+        self.cmd.set("cartoon_color",'purple','Native')
         try:
             self.frame.Destroy()
         except:
@@ -704,7 +748,7 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.loadedDagPng = '%s/%s.dag.png'%(self.cwd,dagbase)
         #self.intermediates,self.transitions = parseImgMap(self.loadedDagHtml,self.loadedDagOut,self.ID)
         self.frame = wx.Frame(None,-1)
-        self.DagPanel = dagPanel(self.frame,self.loadedDagPng,self.loadedDagHtml,self.loadedDagOut,self.ID)
+        self.DagPanel = dagPanel(self.frame,self.loadedDagPng,self.loadedDagHtml,self.loadedDagOut,self.IDs)
         self.DagPanel.setPyMOL(self.pymol)
         self.frame.Show()
 
