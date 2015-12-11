@@ -2174,10 +2174,11 @@ class SequenceWin(wx.Frame):
 		taken = False
 		for ID in self.IDs:
 		    fields = ID.split("|")
-		    currID = ""
+		    '''currID = ""
 		    for j in range(0, len(fields)-1):
 			currID = currID + fields[j] + "|"
-		    currID = currID[0:len(currID)-1]
+		    currID = currID[0:len(currID)-1'''
+		    currID = '|'.join(fields[:len(fields)-1])
 		    if (currID == newID + "_" + str(i)):
 			taken = True
 			break
