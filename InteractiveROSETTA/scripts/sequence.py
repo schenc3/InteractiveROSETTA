@@ -1440,14 +1440,14 @@ class SequenceWin(wx.Frame):
 	# If this the first selection, we have to create "sele"
 	if (first):
 	    # We have to select by model, chain, and residue index using a bunch of "and" operators
-	    if ("ABCDEFGHIJKLMNOPQRSTUVWXYZ".find(chain) < 0):
+	    if ("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".find(chain) < 0):
 		self.cmd.select("temp", "model " + str(model) + " and resi " + str(res) + "-" + str(resend))
 	    else:
 		self.cmd.select("temp", "model " + str(model) + " and chain " + str(chain) + " and resi " + str(res) + "-" + str(resend))
 	else:
 	    # To get PyMOL to add to the existing selection "sele", we used the "or" operator to union "sele"
 	    # with the new atoms
-	    if ("ABCDEFGHIJKLMNOPQRSTUVWXYZ".find(chain) < 0):
+	    if ("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".find(chain) < 0):
 		self.cmd.select("temp", "temp or (model " + str(model) + " and resi " + str(res) + "-" + str(resend) + ")")
 	    else:
 		self.cmd.select("temp", "temp or (model " + str(model) + " and chain " + str(chain) + " and resi " + str(res) + "-" + str(resend) + ")")
