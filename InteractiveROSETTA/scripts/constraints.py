@@ -16,9 +16,10 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
     pre-existing module.  Note: Doesn't need to be a ScrolledPanel because its
     parent will be a ScrolledPanel'''
 
-    def __init__(self, parent):
+    def __init__(self, parent,minPanel):
       print 'creating constraint panel'
       wx.lib.scrolledpanel.ScrolledPanel.__init__(self,parent,-1)
+      self.minPanel = minPanel
       print 'Panel initialized'
       #sizer
       vbox = wx.BoxSizer(wx.VERTICAL)
@@ -47,6 +48,10 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.LoadConstraintsBtn.SetToolTipString("Load constraints from a file")
       hbox.Add(self.LoadConstraintsBtn,1)
       print 'load button'
+
+      #Remove Constraint Button
+
+      #Clear Constraints Button
 
       vbox.Add(hbox)
 
