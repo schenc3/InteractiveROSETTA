@@ -413,6 +413,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	logInfo("Add button clicked")
 	for i in range(0, len(self.selectedData)):
 	    [indx, r, seqpos, poseindx, chainoffset] = self.selectedData[i]
+	    print "selectedData:",indx, r, seqpos, poseindx, chainoffset
 	    # Make sure this is a CAA
 	    if (not(self.seqWin.getIsCanonicalAA(r, indx))):
 		continue
