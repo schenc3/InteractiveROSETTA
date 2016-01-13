@@ -55,6 +55,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
       vbox.Add(hbox)
 
+      self.vbox=vbox
       self.SetSizer(vbox)
       self.SetupScrolling()
       print 'scrolling'
@@ -71,6 +72,11 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.selectWin = selectWin
       self.selectWin.setProtPanel(self)
 
+    def getConstrainableRes(self):
+      '''Gets a list of all residues currenty being
+      minimized and able to be restrained'''
+      logInfo('Geting constrainable residues')
+
     #Event Listeners
 
     def loadConstraints(self,event):
@@ -85,6 +91,48 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def addConstraint(self,event):
       '''Adds a new constraint to the set of constraints'''
       logInfo('Add Constraint button clicked!')
+      self.constraintTypeText=wx.StaticText(self,-1,'Constraint Type',(10,25),(100,25))
+      self.constraintTypeText.SetFont(wx.Font(10,wx.DEFAULT,wx.ITALIC,wx.BOLD))
+      self.vbox.Add(self.constraintTypeText)
+      constraintTypes = ['AtomPair','Angle','Dihedral','Coordinate']
+      self.constraintTypeMenu = wx.ComboBox(self,pos=(120,20),size=(125,25),choices=constraintTypes,style=wx.CB_READONLY)
+      self.constraintTypeMenu.Bind(wx.EVT_COMBOBOX,self.setConstraintType)
+      self.vbox.Add(self.constraintTypeMenu)
+
+    def setConstraintType(self,event):
+      logInfo('Constraint type selected!')
+      try:
+        pdbs = []
+        print pdbs
+        for [indx, r, seqpos, poseindx, chainoffset, minType] in self.minPanel.minmap:
+          print "poseindx",poseindx
+          if len(pdbs) == 0:
+            print 'appending',poseindx
+            pdbs.append(poseindx)
+          for i in range(0,len(pdbs)):
+            if poseindx == pdbs[i]:
+              print("%i = %i"%(poseindx,pdbs[i]))
+              break
+            print 'appending',poseindx
+            pdbs.append(poseindx)
+        print pdbs
+        for i in range(0,len(pdbs)):
+          pdbs[i] = self.seqWin.poses[pdbs[i]].get_id()
+          print pdbds[i]
+        print pdbs
+        self.PdbText = wx.StaticText(self,-1,'PDB',(10,60),(50,25))
+        self.PdbText.SetFont(wx.Font(10,wx.DEFAULT,wx.ITALIC,wx.BOLD))
+        self.vbox.Add(self.PdbText)
+        print 'pdbtext'
+        self.PdbMenu = wx.ComboBox(self,-1,(70,55),(125,25),choices=pdbs,style=wx.CB_READONLY)
+        self.PdbMenu.Bind(wx.EVT_COMBOBOX,self.setConstraintPDB)
+        self.vbox.Add(self.PdbMenu)
+        print 'pdbmenu'
+      except Exception as e:
+        print(e.message)
+
+    def setConstraintPDB(self,event):
+      logInfo("constraint PDB set!")
 
     def gridClick(self,event):
       logInfo('Constraints Grid Clicked!')
