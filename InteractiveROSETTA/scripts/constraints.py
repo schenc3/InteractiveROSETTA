@@ -54,6 +54,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       print 'load button'
       self.Cancelables = []
       self.CurrentConstraint = {}
+      self.ConstraintSet = []
 
       #Remove Constraint Button
 
@@ -85,11 +86,6 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.selectWin = selectWin
       self.selectWin.setProtPanel(self)
 
-    def getConstrainableRes(self):
-      '''Gets a list of all residues currenty being
-      minimized and able to be restrained'''
-      logInfo('Geting constrainable residues')
-
     #Event Listeners
 
     def loadConstraints(self,event):
@@ -106,9 +102,50 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       logInfo('Add Constraint button clicked!')
       constraintTypes = ['Constraint Type','AtomPair','Angle','Dihedral','Coordinate']
       self.constraintTypeMenu = wx.ComboBox(self,choices=constraintTypes,style=wx.CB_READONLY)
-      self.constraintTypeMenu.Bind(wx.EVT_COMBOBOX,self.setConstraintType)
+#      self.constraintTypeMenu.Bind(wx.EVT_COMBOBOX,self.setConstraintType)
       self.Sizer.Add(self.constraintTypeMenu,(1,0),(1,1))
       self.Cancelables.append(self.constraintTypeMenu)
+      #PDB MENU
+      pdbs = ['Choose PDB']
+      print pdbs
+      for [indx, r, seqpos, poseindx, chainoffset, minType] in self.minPanel.minmap:
+        print "poseindx",poseindx
+        if len(pdbs) == 0:
+          print 'appending',poseindx
+          pdbs.append(poseindx)
+        isThere = False
+        for i in range(0,len(pdbs)):
+          if poseindx == pdbs[i]:
+            print("%i = %i"%(poseindx,pdbs[i]))
+            isThere = True
+            break
+        if not isThere:
+          print 'appending',poseindx
+          pdbs.append(poseindx)
+      print pdbs
+      for i in range(1,len(pdbs)):
+        pdbs[i] = str(self.seqWin.poses[pdbs[i]].get_id())
+        print pdbs[i]
+      print pdbs
+      self.PdbMenu = wx.ComboBox(self,choices=pdbs,style=wx.CB_READONLY)
+#      self.PdbMenu.Bind(wx.EVT_COMBOBOX,self.setConstraintPDB)
+      self.Cancelables.append(self.PdbMenu)
+      self.Sizer.Add(self.PdbMenu,(1,1),(1,1))
+      self.Layout()
+
+      #Constraint Function
+      self.FuncMenu = wx.ComboBox(self,-1,choices=["Select Constraint Function","Harmonic","Circular Harmonic"],style=wx.CB_READONLY)
+#      self.FuncMenu.Bind(wx.EVT_COMBOBOX,self.setFunction)
+      self.Sizer.Add(self.FuncMenu,(1,2),(1,1))
+      self.Layout()
+      self.Cancelables.append(self.FuncMenu)
+      #Next Button
+      self.NextBtn = wx.Button(self,-1,label='Confirm')
+      self.NextBtn.Bind(wx.EVT_BUTTON,self.Next)
+      self.Sizer.Add(self.NextBtn,(1,3),(1,1))
+      self.Layout()
+      self.Cancelables.append(self.NextBtn)
+      print 'pdbmenu'
       #self.Layout()
       #Cancel Button
       self.CancelBtn = wx.Button(self,-1,label='Cancel')
@@ -116,6 +153,31 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.Sizer.Add(self.CancelBtn,(5,2),(1,1))
       self.Cancelables.append(self.CancelBtn)
       self.Layout()
+
+    def Next(self,event):
+      '''generate remaining menu based on initial choices'''
+      self.CurrentConstraint['PDB'] = self.PdbMenu.GetStringSelection()
+      self.CurrentConstraint['ConstraintType'] = self.constraintTypeMenu.GetStringSelection()
+      self.CurrentConstraint['FuncType'] = self.FuncMenu.GetStringSelection()
+      if self.CurrentConstraint['PDB'] == 'Choose PDB' or self.CurrentConstraint['ConstraintType'] == 'Constraint Type' or self.CurrentConstraint['FuncType']=='Select Constraint Function':
+        self.CurrentConstraint = {}
+        event.skip()
+      else:
+        for item in [self.PdbMenu,self.constraintTypeMenu,self.FuncMenu,self.NextBtn]:
+          item.Show(False)
+          item.Destroy()
+        self.Layout
+        constraintlbl = "Constraint Type: %s"%(self.CurrentConstraint['ConstraintType'])
+        Pdblbl = "PDB: %s"%(self.CurrentConstraint['PDB'])
+        funclbl = "Constraint Function: %s"%(self.CurrentConstraint["FuncType"])
+        self.ConstraintTxt = wx.StaticText(self,-1,label=constraintlbl)
+        self.PdbTxt = wx.StaticText(self,-1,label=Pdblbl)
+        self.FuncTxt = wx.StaticText(self,-1,label=funclbl)
+        self.Sizer.Add(self.ConstraintTxt,(1,0),(1,1))
+        self.Sizer.Add(self.PdbTxt,(1,1),(1,1))
+        self.Sizer.Add(self.FuncTxt,(1,2),(1,1))
+        self.Layout()
+        self.Cancelables = [self.ConstraintTxt,self.PdbTxt,self.FuncTxt]
 
     def cancel(self,event):
       logInfo('Cancel Button Pressed!')
@@ -127,42 +189,6 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.CurrentConstraint = {}
       self.Layout()
 
-
-    def setConstraintType(self,event):
-      logInfo('Constraint type selected!')
-      if self.constraintTypeMenu.GetStringSelection() == 'Choose Type':
-        event.skip()
-      try:
-        self.CurrentConstraint['Constraint Type']=self.constraintTypeMenu.GetStringSelection()
-        pdbs = ['Choose PDB']
-        print pdbs
-        for [indx, r, seqpos, poseindx, chainoffset, minType] in self.minPanel.minmap:
-          print "poseindx",poseindx
-          if len(pdbs) == 0:
-            print 'appending',poseindx
-            pdbs.append(poseindx)
-          isThere = False
-          for i in range(0,len(pdbs)):
-            if poseindx == pdbs[i]:
-              print("%i = %i"%(poseindx,pdbs[i]))
-              isThere = True
-              break
-          if not isThere:
-            print 'appending',poseindx
-            pdbs.append(poseindx)
-        print pdbs
-        for i in range(1,len(pdbs)):
-          pdbs[i] = str(self.seqWin.poses[pdbs[i]].get_id())
-          print pdbs[i]
-        print pdbs
-        self.PdbMenu = wx.ComboBox(self,choices=pdbs,style=wx.CB_READONLY)
-        self.PdbMenu.Bind(wx.EVT_COMBOBOX,self.setConstraintPDB)
-        self.Cancelables.append(self.PdbMenu)
-        self.Sizer.Add(self.PdbMenu,(1,1),(1,1))
-        self.Layout()
-        print 'pdbmenu'
-      except Exception as e:
-        print(e.message)
 
     def getResidues(self):
       minmap = self.minPanel.minmap
