@@ -237,7 +237,11 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	 self.frame.Show()
 	 print 'showing frame'
 	except Exception as e:
-	 print e.message
+	 import traceback
+	 print 'Error importing constraints',e.message
+	 traceback.print_tb(sys.exc_info()[2])
+	 pass
+
 
     def showHelp(self, event):
 	# Open the help page
@@ -285,7 +289,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	if (self.grdMinMap.NumberRows > 0):
 	    self.grdMinMap.DeleteRows(0, self.grdMinMap.NumberRows)
 	row = 0
-	for [indx, r, seqpos, poseindx, chainoffset, mtype] in self.minmap:
+	for [indx, r, seqpos, poseindx, chainoffset, mtype,r_indx] in self.minmap:
 	    self.grdMinMap.AppendRows(1)
 	    ID = self.seqWin.IDs[r]
 	    resn = self.seqWin.SeqViewer.GetCellValue(r, indx)
@@ -333,7 +337,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	# Let's first make sure everything in the minmap still exists
 	redrawNeeded = False
 	for i in range(len(self.minmap)-1, -1, -1):
-	    [indx, r, seqpos, p, offset, mtype] = self.minmap[i]
+	    [indx, r, seqpos, p, offset, mtype,r_indx] = self.minmap[i]
 	    ID = self.grdMinMap.GetCellValue(i, 1)
 	    #ID = ID.split(":")[0].strip()
 	    if (r >= len(self.seqWin.IDs) or ID != self.seqWin.IDs[r]):
@@ -405,6 +409,20 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.btnAddBoth.SetForegroundColour("#FF0000")
 	logInfo("The add type was changed to Both")
 
+    def getR_indx(self,selectedData):
+      [indx,r,seqpos,poseindx,co] = selectedData
+      model = self.seqWin.poses[poseindx][0]
+      offset = 0
+      print self.seqWin.IDs
+      for i in range(0,r):
+        chain = self.seqWin.IDs[i][len(self.seqWin.IDs[i])-1]
+        if chain =='_':
+          chain = ' '
+        print chain,len(model[chain])
+        offset += len(model[chain])
+      r_indx = indx + 1 + offset
+      return r_indx
+
     def add(self, event, updateSelection=True):
 	if (updateSelection):
 	    self.activate()
@@ -414,12 +432,13 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	for i in range(0, len(self.selectedData)):
 	    [indx, r, seqpos, poseindx, chainoffset] = self.selectedData[i]
 	    print "selectedData:",indx, r, seqpos, poseindx, chainoffset
+	    r_indx = self.getR_indx(self.selectedData[i])
 	    # Make sure this is a CAA
 	    if (not(self.seqWin.getIsCanonicalAA(r, indx))):
 		continue
 	    alreadyIn = False
 	    for j in range(0, len(self.minmap)):
-		[mindx, mr, mseqpos, mposeindx, mchainoffset, mtype] = self.minmap[j]
+		[mindx, mr, mseqpos, mposeindx, mchainoffset, mtype, mr_indx] = self.minmap[j]
 		if (r == mr and indx == mindx):
 		    # Just switch the BB/Chi/Both flag in case it is different in this selection
 		    self.minmap[j][5] = self.addType
@@ -429,25 +448,25 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		# Now figure out where this belongs so the list stays sorted
 		if (len(self.minmap) == 0):
 		    # List empty, add new element
-		    self.minmap.append([indx, r, seqpos, poseindx, chainoffset, self.addType])
+		    self.minmap.append([indx, r, seqpos, poseindx, chainoffset, self.addType,r_indx])
 		elif (r < self.minmap[0][1] or (r == self.minmap[0][1] and indx < self.minmap[0][0])):
 		    # Belongs first
-		    self.minmap.insert(0, [indx, r, seqpos, poseindx, chainoffset, self.addType])
+		    self.minmap.insert(0, [indx, r, seqpos, poseindx, chainoffset, self.addType,r_indx])
 		else:
 		    notInYet = True
 		    # Maybe it belongs somewhere in the middle?
 		    for i in range(0, len(self.minmap)-1):
-			[indx1, r1, seqpos1, poseindx1, chainoffset1, type1] = self.minmap[i]
-			[indx2, r2, seqpos2, poseindx2, chainoffset2, type2] = self.minmap[i+1]
+			[indx1, r1, seqpos1, poseindx1, chainoffset1, type1,r_indx1] = self.minmap[i]
+			[indx2, r2, seqpos2, poseindx2, chainoffset2, type2,r_indx2] = self.minmap[i+1]
 			if (r == r1 and r == r2 and indx > indx1 and indx < indx2):
 			    notInYet = False
-			    self.minmap.insert(i+1, [indx, r, seqpos, poseindx, chainoffset, self.addType])
+			    self.minmap.insert(i+1, [indx, r, seqpos, poseindx, chainoffset, self.addType,r_indx])
 			elif (r == r1 and r < r2 and indx > indx1):
 			    notInYet = False
-			    self.minmap.insert(i+1, [indx, r, seqpos, poseindx, chainoffset, self.addType])
+			    self.minmap.insert(i+1, [indx, r, seqpos, poseindx, chainoffset, self.addType,r_indx])
 		    if (notInYet):
 			# Belongs at the end
-			self.minmap.append([indx, r, seqpos, poseindx, chainoffset, self.addType])
+			self.minmap.append([indx, r, seqpos, poseindx, chainoffset, self.addType,r_indx])
 	self.updateMinMap()
 
     def remove(self, event):
@@ -711,18 +730,36 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    chain = " "
 		if (thismodel != model):
 		    continue
+		print grid.GetRowLabelValue(row).split()
 		seqpos = grid.GetRowLabelValue(row).split()[1]
 		seqpos = int(seqpos[1:len(seqpos)])
 		# Find the rosetta index
 		ires = 0
-		for ch in poses[indx][0]:
-		    for residue in ch:
-			if (ch.id == chain and residue.id[1] == seqpos):
-			    break
-			ires = ires + 1
-		r = residue_E[ires]
-		b = 255 - r
-		g = 0
+		found = False
+		while not found:
+		    for ch in poses[indx][0]:
+		      if found:
+		        break
+		      for residue in ch:
+		        if found:
+		          break
+		        print chain,seqpos,"=",ch.id,residue.id[1],"?"
+#		        ires = ires + 1
+		        if (ch.id == chain and residue.id[1] == seqpos):
+		          print 'Found!'
+		          found = True
+		        else:
+		          ires += 1
+#      			    break
+		    break
+		try:
+		  r = residue_E[ires]
+		  g = 0
+		  b = 255 -r
+		except:
+		  r = 0
+		  b = 0
+		  g = 0
 		for c in range(0, grid.NumberCols):
 		    grid.SetCellTextColour(row, c, (r, g, b))
 	grid.Refresh()
@@ -994,8 +1031,8 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    f.write(aline.strip() + "\n")
 		f.write("END PDB DATA\n")
 		f2.close()
-	    for [indx, r, seqpos, p, co, mtype] in self.minmap:
-		f.write("MINMAP\t" + str(indx) + "\t" + str(r) + "\t" + str(seqpos) + "\t" + str(p) + "\t" + str(co) + "\t" + str(mtype) + "\n")
+	    for [indx, r, seqpos, p, co, mtype,r_indx] in self.minmap:
+		f.write("MINMAP\t" + str(indx) + "\t" + str(r) + "\t" + str(seqpos) + "\t" + str(p) + "\t" + str(co) + "\t" + str(mtype) + "\t"+str(r_indx)+"\n")
 	    f.write("MINTYPE\t" + self.minType + "\n")
 	    f.write("SCOREFXN\t" + self.selectWin.weightsfile + "\n")
 	    f.close()
