@@ -18,7 +18,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
     def __init__(self, parent,minPanel):
       print 'creating constraint panel'
-      wx.lib.scrolledpanel.ScrolledPanel.__init__(self,parent,-1,size=(1000,500))
+      wx.lib.scrolledpanel.ScrolledPanel.__init__(self,parent,-1)
       self.minPanel = minPanel
       print 'Panel initialized'
       #sizer
@@ -153,6 +153,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.Sizer.Add(self.CancelBtn,(5,2),(1,1))
       self.Cancelables.append(self.CancelBtn)
       self.Layout()
+      self.SetupScrolling()
 
     def Next(self,event):
       '''generate remaining menu based on initial choices'''
@@ -177,9 +178,116 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.Sizer.Add(self.PdbTxt,(1,1),(1,1))
         self.Sizer.Add(self.FuncTxt,(1,2),(1,1))
         self.Layout()
-        self.Cancelables = [self.ConstraintTxt,self.PdbTxt,self.FuncTxt]
+        self.Cancelables = [self.ConstraintTxt,self.PdbTxt,self.FuncTxt,self.CancelBtn]
 
-    def cancel(self,event):
+        #set poseindx
+        for [indx, r, seqpos, poseindx, chainoffset, minType] in self.minPanel.minmap:
+          if str(self.seqWin.poses[poseindx].get_id())==self.CurrentConstraint['PDB']:
+            self.CurrentConstraint['poseindx']=poseindx
+            break
+
+        #check which constraint method was selected and behave accordingly
+        method = self.CurrentConstraint['ConstraintType']
+        #AtomPair
+        if method not in ['AtomPair','Angle','Dihedral','CoordinateConstraint']:
+          self.cancel()
+        else:
+          #Residue 1
+          res1items = ['Select Residue 1']+self.getResidues()
+          self.Residue1Menu = wx.ComboBox(self,-1,choices=res1items,style=wx.CB_READONLY)
+          self.Residue1Menu.Bind(wx.EVT_COMBOBOX,self.setAtom1Items)
+          self.Sizer.Add(self.Residue1Menu,(2,0),(1,1))
+          self.Layout()
+          self.Cancelables.append(self.Residue1Menu)
+          #Atom 1
+          self.Atom1Menu = wx.ComboBox(self,-1,choices=['Select Atom 1'],style=wx.CB_READONLY)
+          self.Sizer.Add(self.Atom1Menu,(2,1),(1,1))
+          self.Layout()
+          self.Cancelables.append(self.Atom1Menu)
+          #Residue 2
+          res2items = ['Select Residue 2']+self.getResidues()
+          self.Residue2Menu = wx.ComboBox(self,-1,choices=res2items,style=wx.CB_READONLY)
+          self.Residue2Menu.Bind(wx.EVT_COMBOBOX,self.setAtom2Items)
+          self.Sizer.Add(self.Residue2Menu,(2,2),(1,1))
+          self.Layout()
+          self.Cancelables.append(self.Residue2Menu)
+          #Atom 2
+          self.Atom2Menu = wx.ComboBox(self,-1,choices=['Select Atom 2'],style=wx.CB_READONLY)
+          self.Sizer.Add(self.Atom2Menu,(2,3),(1,1))
+          self.Layout()
+          self.Cancelables.append(self.Atom2Menu)
+
+          #Angle or Dihdedral
+          if method in ['Angle','Dihedral']:
+            self.Residue3Menu = wx.ComboBox(self,-1,choices=['Select Residue 3']+self.getResidues(),style=wx.CB_READONLY)
+            self.Sizer.Add(self.Residue3Menu,(3,0),(1,1))
+            self.Layout()
+            self.Cancelables.append(self.Residue3Menu)
+            self.Residue3Menu.Bind(wx.EVT_COMBOBOX,self.setAtom3Items)
+            #Atom 3
+            self.Atom3Menu = wx.ComboBox(self,-1,choices=['Select Atom 3'],style=wx.CB_READONLY)
+            self.Sizer.Add(self.Atom3Menu,(3,1),(1,1))
+            self.Layout()
+            self.Cancelables.append(self.Atom3Menu)
+
+          #Dihedral only
+          if method == 'Dihedral':
+            #Residue 4
+            self.Residue4Menu = wx.ComboBox(self,-1,choices=['Select Residue 4']+self.getResidues(),style=wx.CB_READONLY)
+            self.Sizer.Add(self.Residue4Menu,(3,2),(1,1))
+            self.Layout()
+            self.Cancelables.append(self.Residue4Menu)
+            self.Residue4Menu.Bind(wx.EVT_COMBOBOX,self.setAtom4Items)
+            #Atom 4
+            self.Atom4Menu = wx.ComboBox(self,-1,choices=['Select Atom 4'],style=wx.CB_READONLY)
+            self.Sizer.Add(self.Atom4Menu,(3,3),(1,1))
+            self.Layout()
+            self.Cancelables.append(self.Atom4Menu)
+
+          #Coordinate only
+          #Use wx.StaticText labels and wx.TextCtrl for entering text
+          if method == 'CoordinateConstraint':
+            pass
+            #X
+            self.xText = wx.StaticText(self,-1,'X Coordinate')
+            self.xEntry = wx.TextCtrl(self,-1,"ex. 8.34")
+            #Y
+            self.yText = wx.StaticText(self,-1,'Y Coordinate')
+            self.yEntry = wx.TextCtrl(self,-1,"ex. 13.24")
+            #Z
+            self.zText = wx.StaticText(self,-1,'Z Coordinate')
+            self.zEntry = wx.TextCtrl(self,-1,"ex. 3.14")
+            #Add entries to sizer
+            self.Sizer.Add(self.xText,(3,0),(1,1))
+            self.Sizer.Add(self.xEntry,(3,1),(1,1))
+            self.Sizer.Add(self.yText,(3,2),(1,1))
+            self.Sizer.Add(self.yEntry,(3,3),(1,1))
+            self.Sizer.Add(self.zText,(3,4),(1,1))
+            self.Sizer.Add(self.zEntry,(3,5),(1,1))
+            self.Layout()
+            self.Cancelables+=[self.xText,self.xEntry,self.yText,self.yEntry,self.zText,self.zEntry]
+        #Function type stuff
+        if self.CurrentConstraint['FuncType'] in ['Harmonic','Circular Harmonic']:
+          self.x0Text = wx.StaticText(self,-1,"Cut-off Distance")
+          self.x0Entry = wx.TextCtrl(self,-1,"")
+          self.sdText = wx.StaticText(self,-1,"Standard Deviation")
+          self.sdEntry = wx.TextCtrl(self,-1,"")
+          self.Cancelables += [self.x0Text,self.x0Entry,self.sdText,self.sdEntry]
+        self.FinalizeBtn = wx.Button(self,-1,label="Finalize!")
+        self.FinalizeBtn.SetForegroundColour("#000000")
+        self.FinalizeBtn.SetFont(wx.Font(10,wx.DEFAULT,wx.ITALIC,wx.BOLD))
+        self.FinalizeBtn.Bind(wx.EVT_BUTTON,self.FinalizeConstraint)
+        self.Sizer.Add(self.x0Text,(4,1),(1,1))
+        self.Sizer.Add(self.x0Entry,(4,2),(1,1))
+        self.Sizer.Add(self.sdText,(4,3),(1,1))
+        self.Sizer.Add(self.sdEntry,(4,4),(1,1))
+        self.Sizer.Add(self.FinalizeBtn,(5,0),(1,1))
+        self.Layout()
+        self.Cancelables.append(self.FinalizeBtn)
+        self.SetupScrolling()
+
+
+    def cancel(self,event=None):
       logInfo('Cancel Button Pressed!')
       print('Cancel Button Pressed!')
       for item in self.Cancelables:
@@ -188,15 +296,16 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.Cancelables = []
       self.CurrentConstraint = {}
       self.Layout()
+      self.SetupScrolling()
 
 
     def getResidues(self):
       minmap = self.minPanel.minmap
       residues = []
       poseindx = self.CurrentConstraint['poseindx']
-      for [indx, r, seqpos, p, chainoffset, minType] in minmap:
+      for [indx, r, seqpos, p, chainoffset, minType,r_indx] in minmap:
         if p == poseindx:
-          print indx, r, seqpos, p, chainoffset
+          print indx, r, seqpos, p, chainoffset, r_indx
           chain = self.seqWin.IDs[r][len(self.seqWin.IDs[r])-1]
           if chain == '_':
             chain = ' '
@@ -280,106 +389,36 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.Atom4Menu.AppendItems(atoms)
       self.Atom4Menu.SetSelection(0)
 
-    def ConstraintSpecifics(self,event):
-      logInfo('Constraint Specifics!')
-      print 'Constraint Specifics'
-      #check which constraint method was selected and behave accordingly
-      method = self.CurrentConstraint['Constraint Type']
-      #AtomPair
-      if method not in ['AtomPair','Angle','Dihedral','Coordinate']:
-        self.cancel(wx.EVENT)
-      else:
-        #Residue 2
-        res2items = ['Select Residue 2']+self.getResidues()
-        self.Residue2Menu = wx.ComboBox(self,-1,choices=res2items,style=wx.CB_READONLY)
-        self.Residue2Menu.Bind(wx.EVT_COMBOBOX,self.setAtom2Items)
-        self.Sizer.Add(self.Residue2Menu,(2,2),(1,1))
-        self.Layout()
-        self.Cancelables.append(self.Residue2Menu)
-        #Atom 2
-        self.Atom2Menu = wx.ComboBox(self,-1,choices=['Select Atom 2'],style=wx.CB_READONLY)
-        self.Sizer.Add(self.Atom2Menu,(2,3),(1,1))
-        self.Layout()
-        self.Cancelables.append(self.Atom2Menu)
 
-        #Angle or Dihdedral
-        if method in ['Angle','Dihedral']:
-          self.Residue3Menu = wx.ComboBox(self,-1,choices=['Select Residue 3']+self.getResidues(),style=wx.CB_READONLY)
-          self.Sizer.Add(self.Residue3Menu,(3,0),(1,1))
-          self.Layout()
-          self.Cancelables.append(self.Residue3Menu)
-          self.Residue3Menu.Bind(wx.EVT_COMBOBOX,self.setAtom3Items)
-          #Atom 3
-          self.Atom3Menu = wx.ComboBox(self,-1,choices=['Select Atom 3'],style=wx.CB_READONLY)
-          self.Sizer.Add(self.Atom3Menu,(3,1),(1,1))
-          self.Layout()
-          self.Cancelables.append(self.Atom3Menu)
-
-        #Dihedral only
-        if method == 'Dihedral':
-          #Residue 4
-          self.Residue4Menu = wx.ComboBox(self,-1,choices=['Select Residue 4']+self.getResidues(),style=wx.CB_READONLY)
-          self.Sizer.Add(self.Residue4Menu,(3,2),(1,1))
-          self.Layout()
-          self.Cancelables.append(self.Residue4Menu)
-          self.Residue4Menu.Bind(wx.EVT_COMBOBOX,self.setAtom4Items)
-          #Atom 4
-          self.Atom4Menu = wx.ComboBox(self,-1,choices=['Select Atom 4'],style=wx.CB_READONLY)
-          self.Sizer.Add(self.Atom4Menu,(3,3),(1,1))
-          self.Layout()
-          self.Cancelables.append(self.Atom4Menu)
-
-        #Coordinate only
-        #Use wx.StaticText labels and wx.TextCtrl for entering text
-        if method == 'Coordinate':
-          pass
-          #X
-          self.xText = wx.StaticText(self,-1,'X Coordinate')
-          self.xEntry = wx.TextCtrl(self,-1,"ex. 8.34")
-          #Y
-          self.yText = wx.StaticText(self,-1,'Y Coordinate')
-          self.yEntry = wx.TextCtrl(self,-1,"ex. 13.24")
-          #Z
-          self.zText = wx.StaticText(self,-1,'Z Coordinate')
-          self.zEntry = wx.TextCtrl(self,-1,"ex. 3.14")
-          #Add entries to sizer
-          self.Sizer.Add(self.xText,(3,0),(1,1))
-          self.Sizer.Add(self.xEntry,(3,1),(1,1))
-          self.Sizer.Add(self.yText,(3,2),(1,1))
-          self.Sizer.Add(self.yEntry,(3,3),(1,1))
-          self.Sizer.Add(self.zText,(3,4),(1,1))
-          self.Sizer.Add(self.zEntry,(3,5),(1,1))
-          self.Layout()
-          self.Cancelables+=[self.xText,self.xEntry,self.yText,self.yEntry,self.zText,self.zEntry]
-
-        #Function type
-        self.FuncMenu = wx.ComboBox(self,-1,choices=["Select Constraint Function","Harmonic","Circular Harmonic"],style=wx.CB_READONLY)
-        self.FuncMenu.Bind(wx.EVT_COMBOBOX,self.setFunction)
-        self.Sizer.Add(self.FuncMenu,(4,0),(1,1))
-        self.Layout()
-        self.Cancelables.append(self.FuncMenu)
-
-
-    def setFunction(self,event):
-      '''After setting constraint function type, creates boxes for entering parameters and finalize button'''
-      self.x0Text = wx.StaticText(self,-1,"Cut-off Distance")
-      self.x0Entry = wx.TextCtrl(self,-1,"")
-      self.sdText = wx.StaticText(self,-1,"Standard Deviation")
-      self.sdEntry = wx.TextCtrl(self,-1,"")
-      self.FinalizeBtn = wx.Button(self,-1,label="Finalize!")
-      self.FinalizeBtn.SetForegroundColour("#000000")
-      self.FinalizeBtn.SetFont(wx.Font(10,wx.DEFAULT,wx.ITALIC,wx.BOLD))
-      self.FinalizeBtn.Bind(wx.EVT_BUTTON,self.FinalizeConstraint)
-      self.Sizer.Add(self.x0Text,(4,1),(1,1))
-      self.Sizer.Add(self.x0Entry,(4,2),(1,1))
-      self.Sizer.Add(self.sdText,(4,3),(1,1))
-      self.Sizer.Add(self.sdEntry,(4,4),(1,1))
-      self.Sizer.Add(self.FinalizeBtn,(5,0),(1,1))
-      self.Layout()
-      self.Cancelables += [self.x0Text,self.x0Entry,self.sdText,self.sdEntry,self.FinalizeBtn]
 
     def FinalizeConstraint(self,event):
-      pass
+      method = self.CurrentConstraint['ConstraintType']
+      constraintString = method+' '
+      #Atom1 and Atom2
+      constraintString += "%s %s %s %s"%(self.Atom1Menu.GetStringSelection(),self.CurrentConstraint['Atom1_ResNum'],self.Atom2Menu.GetStringSelection(),self.CurrentConstraint['Atom2_ResNum'])
+      #Atom3
+      if method in ['Angle','Dihedral']:
+        constraintString += " %s %s"%(self.Atom3Menu.GetStringSelection(),self.CurrentConstraint['Atom3_ResNum'])
+      #Atom4
+      if method == 'Dihedral':
+        constraintString += " %s %s"%(self.Atom4Menu.GetStringSelection(),self.currentConstraint['Atom4_ResNum'])
+      #CoordinateConstraint
+      if method == 'CoordinateConstraint':
+        self.xEntry.SelectAll()
+        self.yEntry.SelectAll()
+        self.zEntry.SelectAll()
+        constraintString += " %s %s %s"%(self.xEntry.GetStringSelection(),self.yEntry.GetStringSelection(),self.zEntry.GetStringSelection())
+
+      #Function Types
+      functions = {'Harmonic':"HARMONIC",'Circular Harmonic':'CIRCULARHARMONIC'}
+      if self.CurrentConstraint['FuncType'] in ['Harmonic','Circular Harmonic']:
+        self.x0Entry.SelectAll()
+        self.sdEntry.SelectAll()
+        constraintString += ' %s %s %s'%(functions[self.CurrentConstraint['FuncType']],self.x0Entry.GetStringSelection(),self.sdEntry.GetStringSelection())
+      print constraintString
+      logInfo(constraintString)
+      self.ConstraintSet.append([self.CurrentConstraint['PDB'],self.CurrentConstraint['poseindx'],constraintString])
+      self.cancel()
 
     def gridClick(self,event):
       logInfo('Constraints Grid Clicked!')
