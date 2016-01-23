@@ -115,6 +115,12 @@ echo "Installing PyMOL..."
 #else
 $PMGR"pymol" > /dev/null 2> /dev/null
 #fi
+echo "Installing matplotlib..."
+if [[ $ROSETTA_VER == "Ubuntu" ]]; then
+$PMGR"python-matplotlib" > /dev/null 2> /dev/null
+else
+$PMGR"python-matplotlib-wx" > /dev/null 2> /dev/null
+fi
 echo "Installing BioPython..."
 $PMGR"python-biopython" > /dev/null 2> /dev/null
 if [[ $ROSETTA_VER == "Ubuntu" ]]; then

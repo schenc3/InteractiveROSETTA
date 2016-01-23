@@ -45,6 +45,13 @@ else:
     except:
 	print "clipboard not installed, sequence copying is disabled"
 	print "You can install it by executing: sudo easy_install clipboard"
+# For the energy profiler
+import matplotlib
+matplotlib.use('WXAgg')
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_wxagg import \
+    FigureCanvasWxAgg as FigCanvas, \
+    NavigationToolbar2WxAgg as NavigationToolbar
 
 # There is apparently a libc bug on UNIX that caches DNS names that urllib2 tries to open
 # If the Internet connection is not valid the first time it tries to establish a connection, it caches this bad
