@@ -555,8 +555,14 @@ class SequenceWin(wx.Frame):
 	    winx = self.stdwinx
 	if (winy > self.screenH - 100):
 	    winy = self.stdwiny
+	# Catch bad cached sizes
+	if (winw < 200):
+	    winw = self.stdwinw
+	if (winh < 200):
+	    winh = self.stdwinh
 
-	wx.Frame.__init__(self, None, -1, "InteractiveROSETTA - Sequence Viewer", size=(winw, winh))
+	wx.Frame.__init__(self, None, 0, "InteractiveROSETTA - Sequence Viewer", size=(winw, winh))
+	print "X"
 	self.frozen = frozen # This is a legacy Boolean for freezing this window
 	self.poses = poses # Contains BioPython structures for loaded PDBs
 	self.sequences = sequences # Contains strings of sequences per chain
@@ -565,7 +571,7 @@ class SequenceWin(wx.Frame):
 	self.SetPosition((winx, winy))
 	self.SetBackgroundColour("#333333")
 	self.SetIcon(icon.GetIcon())
-	
+	print "B"
 	# This window needs a scrollable area in case all the buttons don't fit given the smallest size of
 	# the window for certain screen resolutions, so they spill over into a scrolled region
 	self.scroll = wx.ScrolledWindow(self, -1)
@@ -592,7 +598,7 @@ class SequenceWin(wx.Frame):
 	self.RCSBTxt = wx.TextCtrl(self.scroll, -1, pos=(158, 10), size=(50, 25))
 	self.RCSBTxt.SetValue("")
 	self.RCSBTxt.SetToolTipString("Four letter PDB code to search for in the RCSB database")
-	
+	print "C"
 	# Fetch PDB button to get the structures from RCSB
 	if (platform.system() == "Darwin"):
 	    self.FetchBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/FetchPDBBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(210, 10), size=(100, 25))
@@ -622,7 +628,7 @@ class SequenceWin(wx.Frame):
 	    self.SaveBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.SaveBtn.Bind(wx.EVT_BUTTON, self.saveClick)
 	self.SaveBtn.SetToolTipString("Save selected/all loaded models")
-	
+	print "D"
 	# Save Image button, for taking a picture of the current PyMOL view
 	if (platform.system() == "Darwin"):
 	    self.SaveImageBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/SaveImageBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(510, 10), size=(100, 25))
