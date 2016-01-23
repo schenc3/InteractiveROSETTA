@@ -2642,12 +2642,15 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    if (self.serverOn):
 		try: 
 		    self.ID = sendToServer("coarsedockinput")
-		    dlg = wx.TextEntryDialog(None, "Enter a description for this submission:", "Job Description", "")
-		    if (dlg.ShowModal() == wx.ID_OK):
-			desc = dlg.GetValue()
-			desc = desc.replace("\t", " ").replace("\n", " ").strip()
-		    else:
-			desc = self.ID
+		    while (True):
+			dlg = wx.TextEntryDialog(None, "Enter a description for this submission:", "Job Description", "")
+			if (dlg.ShowModal() == wx.ID_OK):
+			    desc = dlg.GetValue()
+			    desc = desc.replace("\t", " ").replace("\n", " ").strip()
+			else:
+			    desc = ""
+			if (len(desc.strip()) > 0):
+			    break
 		    # First make sure this isn't a duplicate
 		    alreadythere = False
 		    try:
