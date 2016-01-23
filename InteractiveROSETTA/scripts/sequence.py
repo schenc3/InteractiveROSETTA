@@ -3435,23 +3435,30 @@ class SequenceWin(wx.Frame):
 		desc = job.split("\t")[4].strip()
 	    else:
 		desc = ID
+	    # Determine what file we are supposed to be looking for on the server
+	    if (job.startswith("DOCK")):
+		filename = "score"
+	    else:
+		filename = "results"
 	    if (job.startswith("MSD")):
 		packageext = ".msdar"
 	    elif (job.startswith("PMUTSCAN")):
 		packageext = ".scan"
+	    elif (job.startswith("DOCK")):
+		packageext = ".fasc"
 	    else:
 		packageext = ".ensb"
 	    if (jobURL.lower().startswith("localhost")):
 		serverlocation = getServerName()[jobURL.find(":")+1:]
 		if (platform.system() == "Windows"):
 		    resultsdir = serverlocation + "\\results\\" + ID + "\\"
-		    filepath = resultsdir + "results" + packageext
+		    filepath = resultsdir + filename + packageext
 		else:
 		    resultsdir = serverlocation + "/results/" + ID + "/"
-		    filepath = resultsdir + "results" + packageext
+		    filepath = resultsdir + filename + packageext
 	    else:
 		serverlocation = None
-		URL = jobURL + "/results/" + ID + "/results" + packageext
+		URL = jobURL + "/results/" + ID + "/" + filename + packageext
 	    try:
 		if (serverlocation):
 		    if (not(os.path.isfile(filepath)) and not(os.path.isfile(filepath.split(packageext)[0] + ".gz"))):
@@ -3478,10 +3485,10 @@ class SequenceWin(wx.Frame):
 		    dlg.ShowModal()
 		    dlg.Destroy()
 		    try:
-			os.rename(filepath, "results" + packageext)
+			os.rename(filepath, filename + packageext)
 		    except:
 			# Not there, maybe it's a custom .gz file
-			os.rename(filepath.split(packageext)[0] + ".gz", "results.gz")
+			os.rename(filepath.split(packageext)[0] + ".gz", filename + ".gz")
 			filepath = filepath.split(packageext)[0] + ".gz"
 			packageext = ".gz"
 		else:
@@ -3489,6 +3496,7 @@ class SequenceWin(wx.Frame):
 			downloadpage = urllib2.urlopen(URL, timeout=1) # To make sure its there before display the dialog
 			downloadpage.close()
 		    except:
+			# Try a generic gz file
 			downloadpage = urllib2.urlopen(URL.split(packageext)[0] + ".gz", timeout=1) # To make sure its there before display the dialog
 			downloadpage.close()
 			URL = URL.split(packageext)[0] + ".gz"
@@ -3534,7 +3542,7 @@ class SequenceWin(wx.Frame):
 		    else:
 			# CUSTOM MODULE
 			busyDlg = wx.BusyInfo("Downloading " + jobtype + " archive, please wait...")
-		    (oldfilename, info) = urllib.urlretrieve(URL, "results" + packageext)
+		    (oldfilename, info) = urllib.urlretrieve(URL, filename + packageext)
 		    busyDlg.Destroy()
 		    del busyDlg
 		while (True):
@@ -3561,12 +3569,16 @@ class SequenceWin(wx.Frame):
 			    wildcard="Ensemble Archives (*.ensb)|*.ensb",
 			    style=wx.SAVE | wx.CHANGE_DIR)
 		    elif (jobtype == "DOCK"):
-			dlg = wx.FileDialog(
-			    self, message="Save the docking package",
-			    defaultDir=self.cwd,
-			    defaultFile=ID,
-			    wildcard="Ensemble Archives (*.ensb)|*.ensb",
-			    style=wx.SAVE | wx.CHANGE_DIR)
+			dlg = wx.MessageDialog(
+			    self, "An energy profile of your results has been saved.  Please use the fetch option on the sequence window to retrieve the results you want.\n\nYour results will expire in two weeks.", 
+			    "Docking Energy Profile Retrieved", 
+			    wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+			#dlg = wx.FileDialog(
+			#    self, message="Save the docking package",
+			#    defaultDir=self.cwd,
+			#    defaultFile=ID,
+			#    wildcard="Ensemble Archives (*.ensb)|*.ensb",
+			#    style=wx.SAVE | wx.CHANGE_DIR)
 		    elif (jobtype == "PMUTSCAN"):
 			dlg = wx.FileDialog(
 			    self, message="Save the scan file",
@@ -3613,34 +3625,40 @@ class SequenceWin(wx.Frame):
 				wildcard="GZipped Archives (*.gz)|*.gz",
 				style=wx.SAVE | wx.CHANGE_DIR)
 		    if (dlg.ShowModal() == wx.ID_OK):
-			if (platform.system() == "Darwin"):
-			    paths = [dlg.GetPath()]
-			else:
-			    paths = dlg.GetPaths()
-			# Change cwd to the last opened file
-			if (platform.system() == "Windows"):
-			    lastDirIndx = paths[len(paths)-1].rfind("\\")
-			else:
-			    lastDirIndx = paths[len(paths)-1].rfind("/")
-			self.cwd = str(paths[len(paths)-1][0:lastDirIndx])
-			self.saveWindowData(None)
-			filename = str(paths[0]).split(packageext)[0] + packageext
-			# Does it exist already?  If so, ask if the user really wants to overwrite it
-			if (os.path.isfile(filename)):
-			    dlg2 = wx.MessageDialog(self, "The file " + filename + " already exists.  Overwrite it?", "Filename Already Exists", wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
-			    if (dlg2.ShowModal() == wx.ID_NO):
-				dlg2.Destroy()
-				logInfo("Cancelled save operation due to filename already existing")
-				continue
+			if (jobtype == "DOCK"):
+			    if (platform.system() == "Windows"):
+				dest_filename = "profiles\\" + desc + packageext
 			    else:
-				os.remove(str(filename))
-			    dlg2.Destroy() 
+				dest_filename = "profiles/" + desc + packageext
+			else:
+			    if (platform.system() == "Darwin"):
+				paths = [dlg.GetPath()]
+			    else:
+				paths = dlg.GetPaths()
+			    # Change cwd to the last opened file
+			    if (platform.system() == "Windows"):
+				lastDirIndx = paths[len(paths)-1].rfind("\\")
+			    else:
+				lastDirIndx = paths[len(paths)-1].rfind("/")
+			    self.cwd = str(paths[len(paths)-1][0:lastDirIndx])
+			    self.saveWindowData(None)
+			    dest_filename = str(paths[0]).split(packageext)[0] + packageext
+			    # Does it exist already?  If so, ask if the user really wants to overwrite it
+			    if (os.path.isfile(dest_filename)):
+				dlg2 = wx.MessageDialog(self, "The file " + filename + " already exists.  Overwrite it?", "Filename Already Exists", wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
+				if (dlg2.ShowModal() == wx.ID_NO):
+				    dlg2.Destroy()
+				    logInfo("Cancelled save operation due to filename already existing")
+				    continue
+				else:
+				    os.remove(str(dest_filename))
+				dlg2.Destroy() 
 			break
 		goToSandbox()
-		os.rename("results" + packageext, str(filename))
-		if (jobtype != "PMUTSCAN"):
+		os.rename(filename + packageext, str(dest_filename))
+		if (jobtype != "PMUTSCAN" and jobtype != "DOCK"):
 		    # Unpackage the files
-		    gzipfile = gzip.open(str(filename), "rb")
+		    gzipfile = gzip.open(str(dest_filename), "rb")
 		    prefix = filename.split(packageext)[0]
 		    readingData = False
 		    for aline in gzipfile:

@@ -654,6 +654,8 @@ if (__name__ == "__main__"):
     if (platform.system() == "Windows"):
 	if (not(os.path.exists(homedir + "\\InteractiveROSETTA\\params"))):
 	    os.makedirs(homedir + "\\InteractiveROSETTA\\params")
+	if (not(os.path.exists(homedir + "\\InteractiveROSETTA\\profiles"))):
+	    os.makedirs(homedir + "\\InteractiveROSETTA\\profiles")
 	# We only need to do waters on Windows because PyRosetta automatically gets the metals
 	# on Windows
 	water = os.environ["PYROSETTA_DATABASE"] + "\\chemical\\residue_type_sets\\fa_standard\\residue_types\\water\\HOH.params"
@@ -667,6 +669,8 @@ if (__name__ == "__main__"):
     else:
 	if (not(os.path.exists(homedir + "/.InteractiveROSETTA/params"))):
 	    os.makedirs(homedir + "/.InteractiveROSETTA/params")
+	if (not(os.path.exists(homedir + "/.InteractiveROSETTA/profiles"))):
+	    os.makedirs(homedir + "/.InteractiveROSETTA/profiles")
 	# Now let's take the metal ions and waters that Rosetta already provides, just because
 	# these HETATMS are so common
 	water = os.environ["PYROSETTA_DATABASE"] + "/chemical/residue_type_sets/fa_standard/residue_types/water/HOH.params"
