@@ -748,6 +748,11 @@ class ProtocolsWin(wx.Frame):
 	    winx = self.stdwinx
 	if (winy > self.screenH - 100):
 	    winy = self.stdwiny
+	# Catch bad cached sizes
+	if (winw < 200):
+	    winw = self.stdwinw
+	if (winh < 200):
+	    winh = self.stdwinh
 	# Maybe the screen resolution has changed and the saved dimensions put the windows in
 	# weird places, so default them to better positions and the user can change them later
 	#if (winw < 350):
