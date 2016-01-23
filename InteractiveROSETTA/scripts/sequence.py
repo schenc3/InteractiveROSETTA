@@ -3627,9 +3627,17 @@ class SequenceWin(wx.Frame):
 		    if (dlg.ShowModal() == wx.ID_OK):
 			if (jobtype == "DOCK"):
 			    if (platform.system() == "Windows"):
-				dest_filename = "profiles\\" + desc + packageext
+				dest_filename = "profiles\\" + jobtype + " - " + desc + packageext
 			    else:
-				dest_filename = "profiles/" + desc + packageext
+				dest_filename = "profiles/" + jobtype + " - " + desc + packageext
+			    # Handle naming conflicts by appending numbers to the end of the name
+			    indx = 1
+			    while (os.path.isfile(dest_filename)):
+				indx += 1
+				if (platform.system() == "Windows"):
+				    dest_filename = "profiles\\" + jobtype + " - " + desc + "(" + str(indx) + ")" + packageext
+				else:
+				    dest_filename = "profiles/" + jobtype + " - " + desc + "(" + str(indx) + ")" + packageext
 			else:
 			    if (platform.system() == "Darwin"):
 				paths = [dlg.GetPath()]
