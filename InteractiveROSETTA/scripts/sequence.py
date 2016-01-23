@@ -274,8 +274,7 @@ class ModelDialog(wx.Dialog):
 
 # ===========================================================================================================
 # DOWNLOAD MANAGER CLASS
-# This is the dialog that is displayed when a structure is loaded, asking you what chains you want to load
-# and if waters/HETATMs should be loaded
+# This is the dialog that allows the user to set the Rosetta server to alternate URLs and view outstanding submissions
 
 class DownloadManagerDialog(wx.Dialog):
     def __init__(self, parent, serverURL, scriptdir):
@@ -478,6 +477,22 @@ class DownloadManagerDialog(wx.Dialog):
 	self.EndModal(wx.CANCEL)
 
 # ===========================================================================================================
+# ENERGY PROFILE CLASS
+# This is the dialog that displays energy profiles of recent server submissions and allows users to retrieve
+# specific structures from these submissions
+
+class EnergyProfileDialog(wx.Dialog):
+    def __init__(self, parent, scriptdir):
+	# Save the parent, to access the parent's data
+	self.parent = parent
+	self.size = (max(400, int(self.parent.screenW * 0.8)), max(400, int(self.parent.screenH * 0.8)))
+	wx.Dialog.__init__(self, parent, -1, "Energy Profile Analyzer", size=self.size)
+	self.scriptdir = scriptdir
+	
+	# Center this window
+	self.SetPosition(((wx.GetDisplaySize()[0] - self.size[0])/2, (wx.GetDisplaySize()[1] - self.size[1])/2))
+
+# ===========================================================================================================
 # CHAIN COLORING CLASSES
 # These classes are needed to display the colors of the chains in the SequenceViewer
 
@@ -655,18 +670,30 @@ class SequenceWin(wx.Frame):
 	
 	# Server button, for displaying the download manager dialog, above
 	if (platform.system() == "Darwin"):
-	    self.ServerBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/ServerBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(max(810, W-445), 10), size=(25, 25))
+	    self.ServerBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/server.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(max(810, W-470), 10), size=(25, 25))
 	else:
-	    self.ServerBtn = wx.Button(self.scroll, id=-1, label="S", pos=(max(810, W-445), 10), size=(25, 25))
+	    self.ServerBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/server.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(max(810, W-470), 10), size=(25, 25))
+	    #self.ServerBtn = wx.Button(self.scroll, id=-1, label="S", pos=(max(810, W-470), 10), size=(25, 25))
 	    self.ServerBtn.SetForegroundColour("#000000")
 	    self.ServerBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.ServerBtn.Bind(wx.EVT_BUTTON, self.configureServer)
 	self.ServerBtn.SetToolTipString("Connect to a remote server running PyRosetta and Rosetta (this is required for some protocols)")
+	# Server button, for displaying the energy profiles of server results, above
+	if (platform.system() == "Darwin"):
+	    self.EnergyProfileBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/energy_profile.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(self.ServerBtn.GetPosition()[0]+25, 10), size=(25, 25))
+	else:
+	    self.EnergyProfileBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/energy_profile.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(self.ServerBtn.GetPosition()[0]+25, 10), size=(25, 25))
+	    #self.EnergyProfileBtn = wx.Button(self.scroll, id=-1, label="E", pos=(self.ServerBtn.GetPosition()[0]+25, 10), size=(25, 25))
+	    self.EnergyProfileBtn.SetForegroundColour("#000000")
+	    self.EnergyProfileBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	self.EnergyProfileBtn.Bind(wx.EVT_BUTTON, self.retrieveResults)
+	self.EnergyProfileBtn.SetToolTipString("View and analyze energy profiles from recent submissions")
 	# Help button, for opening the Sequence Window's help page
 	if (platform.system() == "Darwin"):
-	    self.HelpBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/HelpBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(self.ServerBtn.GetPosition()[0]+25, 10), size=(25, 25))
+	    self.HelpBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/help.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(self.EnergyProfileBtn.GetPosition()[0]+25, 10), size=(25, 25))
 	else:
-	    self.HelpBtn = wx.Button(self.scroll, id=-1, label="?", pos=(self.ServerBtn.GetPosition()[0]+25, 10), size=(25, 25))
+	    self.HelpBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/help.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(self.EnergyProfileBtn.GetPosition()[0]+25, 10), size=(25, 25))
+	    #self.HelpBtn = wx.Button(self.scroll, id=-1, label="?", pos=(self.EnergyProfileBtn.GetPosition()[0]+25, 10), size=(25, 25))
 	    self.HelpBtn.SetForegroundColour("#0000FF")
 	    self.HelpBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.HelpBtn.Bind(wx.EVT_BUTTON, self.showHelp)
@@ -2874,6 +2901,13 @@ class SequenceWin(wx.Frame):
         if (dlg.ShowModal() == wx.OK):
 	    setServerName(dlg.txtServerName.GetValue().strip())
 	    self.saveWindowData(None)
+        dlg.Destroy()
+        
+    def retrieveResults(self, event):
+	# This button allows the user to analyze the energetic profiles of recent server submissions
+	# It will allow them to interact with the profile and select specific structures which can be retrieved from the server
+	dlg = EnergyProfileDialog(self, self.scriptdir)
+        dlg.ShowModal()
         dlg.Destroy()
     
     def showHelp(self, event):
