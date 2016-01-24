@@ -108,7 +108,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       #PDB MENU
       pdbs = ['Choose PDB']
       print pdbs
-      for [indx, r, seqpos, poseindx, chainoffset, minType] in self.minPanel.minmap:
+      for [indx, r, seqpos, poseindx, chainoffset, minType,r_indx] in self.minPanel.minmap:
         print "poseindx",poseindx
         if len(pdbs) == 0:
           print 'appending',poseindx
@@ -181,7 +181,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.Cancelables = [self.ConstraintTxt,self.PdbTxt,self.FuncTxt,self.CancelBtn]
 
         #set poseindx
-        for [indx, r, seqpos, poseindx, chainoffset, minType] in self.minPanel.minmap:
+        for [indx, r, seqpos, poseindx, chainoffset, minType,r_indx] in self.minPanel.minmap:
           if str(self.seqWin.poses[poseindx].get_id())==self.CurrentConstraint['PDB']:
             self.CurrentConstraint['poseindx']=poseindx
             break
@@ -247,7 +247,6 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
           #Coordinate only
           #Use wx.StaticText labels and wx.TextCtrl for entering text
           if method == 'CoordinateConstraint':
-            pass
             #X
             self.xText = wx.StaticText(self,-1,'X Coordinate')
             self.xEntry = wx.TextCtrl(self,-1,"ex. 8.34")
@@ -313,11 +312,12 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
           print chain
           chain_structure = self.seqWin.poses[poseindx][0][chain]
           print chain_structure.get_id()
-          residue = chain_structure[int(seqpos)].resname
+          residue = str(r_indx)+":"
+          residue += chain_structure[int(seqpos)].resname+":"
           print residue
           #Only considering standard amino acids for the moment
-          if residue in "ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR":
-            residue += str(seqpos)
+          if residue.split(":")[1] in "ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR":
+            residue += str(seqpos)+":"
             residue += chain
             print residue
             residues.append(residue)
@@ -347,7 +347,8 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
     def setAtom1Items(self,event):
       residue = self.Residue1Menu.GetStringSelection()
-      self.CurrentConstraint['Atom1_ResNum']=residue[3:len(residue)]
+      [r_indx,resname,seqpos,chain] = residue.split(":")
+      self.CurrentConstraint['Atom1_ResNum']=r_indx
       atoms = ["Select Atom 1"]+self.getAtoms(residue)
       print atoms
       self.Atom1Menu.Clear()
@@ -357,16 +358,16 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def getAtoms(self,residue):
       results = []
       poseindx = self.CurrentConstraint['poseindx']
-      chain = residue[len(residue)-1]
-      seqpos = int(residue[3:len(residue)-1])
-      for atom in self.seqWin.poses[poseindx][0][chain][seqpos]:
+      [r_indx,resname,seqpos,chain] = residue.split(":")
+      for atom in self.seqWin.poses[poseindx][0][chain][int(seqpos)]:
         print atom
         results.append(atom.get_fullname())
       return results
 
     def setAtom2Items(self,event):
       residue = self.Residue2Menu.GetStringSelection()
-      self.CurrentConstraint['Atom2_ResNum']=residue[3:len(residue)]
+      [r_indx,resname,seqpos,chain] = residue.split(":")
+      self.CurrentConstraint['Atom2_ResNum']=r_indx
       atoms = ["Select Atom 2"]+self.getAtoms(residue)
       print atoms
       self.Atom2Menu.Clear()
@@ -374,7 +375,8 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.Atom2Menu.SetSelection(0)
     def setAtom3Items(self,event):
       residue = self.Residue3Menu.GetStringSelection()
-      self.CurrentConstraint['Atom3_ResNum']=residue[3:len(residue)]
+      [r_indx,resname,seqpos,chain] = residue.split(":")
+      self.CurrentConstraint['Atom3_ResNum']=r_indx
       atoms = ["Select Atom 3"]+self.getAtoms(residue)
       print atoms
       self.Atom3Menu.Clear()
@@ -382,7 +384,8 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.Atom3Menu.SetSelection(0)
     def setAtom4Items(self,event):
       residue = self.Residue4Menu.GetStringSelection()
-      self.CurrentConstraint['Atom4_ResNum']=residue[3:len(residue)]
+      [r_indx,resname,seqpos,chain] = residue.split(":")
+      self.CurrentConstraint['Atom4_ResNum']=r_indx
       atoms = ["Select Atom 4"]+self.getAtoms(residue)
       print atoms
       self.Atom4Menu.Clear()
