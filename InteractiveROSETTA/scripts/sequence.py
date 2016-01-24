@@ -498,7 +498,186 @@ class EnergyProfileDialog(wx.Dialog):
 	
 	# Center this window
 	self.SetPosition(((wx.GetDisplaySize()[0] - self.size[0])/2, (wx.GetDisplaySize()[1] - self.size[1])/2))
-
+	self.SetBackgroundColour("#bfbfbf")
+	
+	# Energy graphs
+	fig_w = self.size[0] - 255
+	fig_h = int((self.size[1] - 35.0*3.0)/2.0)
+	self.dpi = 300
+	self.figSystem = Figure((fig_w/float(self.dpi), fig_h/float(self.dpi)), dpi=self.dpi)
+	self.canSystem = FigCanvas(self, -1, self.figSystem)
+	self.canSystem.SetPosition((5, 35))
+	self.canSystem.SetFont(wx.Font(8, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	self.axesSystem = self.figSystem.add_subplot(111, axisbg="black")
+	self.axesSystem.set_yticklabels([0, 1, 2], size=4) # These are the actual labels
+	self.axesSystem.set_yticks([0, 0.5, 1]) # These should be fractional, specifying where on the axis the numbers end up
+	self.axesSystem.set_position([0.03, 0.03, 0.97, 0.91]) # This is [x, y, w, h] where they are fractions of the total size of the figure
+	
+	self.canSystem.draw()
+	self.figSystem.axes[0].get_xaxis().set_ticks([])
+	self.figIndividual = Figure((fig_w/float(self.dpi), fig_h/float(self.dpi)), dpi=self.dpi)
+	self.canIndividual = FigCanvas(self, -1, self.figIndividual)
+	self.canIndividual.SetPosition((5, 35+fig_h+35))
+	self.axesIndividual = self.figIndividual.add_subplot(111, axisbg="black")
+	self.axesIndividual.set_yticklabels([0, 1, 2], size=4)
+	self.axesIndividual.set_yticks([0, 1, 2])
+	self.axesIndividual.set_position([0.03, 0.03, 0.97, 0.91])
+	
+	# Labels
+	xpos = 5; ypos = 8
+	if (platform.system() == "Darwin"):
+	    self.lblProfileEnergy = wx.StaticBitmap(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/lblServerName.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(xpos, ypos), size=(fig_w, 23))
+	else:
+	    self.lblProfileEnergy = wx.StaticText(self, -1, "Energy Profile", (xpos, ypos), (395, 25))
+	    self.lblProfileEnergy.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	xpos = 5; ypos = 35+fig_h+5
+	if (platform.system() == "Darwin"):
+	    self.lblIndividualEnergy = wx.StaticBitmap(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/lblServerName.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(xpos, ypos), size=(fig_w, 23))
+	else:
+	    self.lblIndividualEnergy = wx.StaticText(self, -1, "Individual Structure", (xpos, ypos), (395, 25))
+	    self.lblIndividualEnergy.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	xpos = 5; ypos = 35+fig_h+35+fig_h+5
+	if (platform.system() == "Darwin"):
+	    self.lblTotalEnergy = wx.StaticBitmap(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/lblServerName.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(xpos, ypos), size=(int(fig_w / 4)-5, 23))
+	else:
+	    self.lblTotalEnergy = wx.StaticText(self, -1, "Total Energy: ", (xpos, ypos), (int(fig_w / 4), 25))
+	    self.lblTotalEnergy.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	xpos = fig_w/4+5; ypos = 35+fig_h+35+fig_h+5
+	if (platform.system() == "Darwin"):
+	    self.lblTotalE = wx.StaticBitmap(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/lblServerName.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(xpos, ypos), size=(int(fig_w / 4)-5, 23))
+	else:
+	    self.lblTotalE = wx.StaticText(self, -1, "", (xpos, ypos), (int(fig_w / 4)-5, 25))
+	    self.lblTotalE.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	xpos = fig_w/2+5; ypos = 35+fig_h+35+fig_h+5
+	if (platform.system() == "Darwin"):
+	    self.lblSelectedTerm = wx.StaticBitmap(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/lblServerName.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(xpos, ypos), size=(int(fig_w / 4)-5, 23))
+	else:
+	    self.lblSelectedTerm = wx.StaticText(self, -1, "", (xpos, ypos), (int(fig_w / 4)-5, 25))
+	    self.lblSelectedTerm.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	xpos = 3*fig_w/4+5; ypos = 35+fig_h+35+fig_h+5
+	if (platform.system() == "Darwin"):
+	    self.lblTermEnergy = wx.StaticBitmap(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/lblServerName.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(xpos, ypos), size=(int(fig_w / 4)-5, 23))
+	else:
+	    self.lblTermEnergy = wx.StaticText(self, -1, "", (xpos, ypos), (int(fig_w / 4)-5, 25))
+	    self.lblTermEnergy.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	    
+	xpos = 5+fig_w-240
+	# Combo box for the selected report
+	if (platform.system() == "Darwin"):
+	    self.cmbProfiles = wx.ComboBox(self, pos=(xpos, 8), size=(240, 25), choices=[], style=wx.CB_READONLY)
+	else:
+	    self.cmbProfiles = wx.ComboBox(self, pos=(xpos, 8), size=(240, 25), choices=[], style=wx.CB_READONLY | wx.CB_SORT)
+	self.lProfiles = ["None"]
+	goToSandbox("profiles")
+	# Get the list of profiles
+	for filename in glob.glob("*"):
+	    self.lProfiles.append(filename)
+	self.cmbProfiles.AppendItems(self.lProfiles)
+	self.cmbProfiles.SetSelection(self.lProfiles.index("None"))
+	
+	# Slider for setting an energy cutoff
+	xpos=5+fig_w+5; ypos=5
+	if (platform.system() == "Windows"):
+	    self.lblEnergyCutoff = wx.StaticText(self, -1, "Select Within Cutoff", (xpos, ypos), (240, 25), wx.ALIGN_CENTRE)
+	    self.lblEnergyCutoff.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	elif (platform.system() == "Darwin"):
+	    self.lblEnergyCutoff = wx.StaticBitmap(self, -1, wx.Image(self.scriptdir + "/images/osx/antibody/lblAntibody.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(xpos, ypos), size=(240, 25))
+	else:
+	    self.lblEnergyCutoff = wx.StaticText(self, -1, "Select Within Cutoff", (xpos, ypos), style=wx.ALIGN_CENTRE)
+	    self.lblEnergyCutoff.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	    resizeTextControlForUNIX(self.lblEnergyCutoff, xpos, 240)
+	self.sldCutoff = wx.Slider(self, -1, pos=(xpos, ypos), size=(240, 80), value=0, minValue=0, maxValue=1, style=wx.SL_LABELS)
+	
+	if (platform.system() == "Darwin"):
+	    self.btnSelectCutoff = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/protocols/GoBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(xpos+60, ypos+75), size=(120, 25))
+	else:
+	    self.btnSelectCutoff = wx.Button(self, id=-1, label="Select", pos=(xpos+60, ypos+75), size=(120, 25))
+	    self.btnSelectCutoff.SetForegroundColour("#000000")
+	    self.btnSelectCutoff.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	#self.btnSelectCutoff.Bind(wx.EVT_BUTTON, self.changeProtocol)
+	self.btnSelectCutoff.SetToolTipString("Select all structures with a better energy than the cutoff")
+	
+	# Slider for grabbing the top X%
+	xpos=5+fig_w+5; ypos=max(ypos+110, int((self.size[1]-5-90 - ypos+100)/2.0)-50)
+	if (platform.system() == "Windows"):
+	    self.lblPercentCutoff = wx.StaticText(self, -1, "Select Top Percentage", (xpos, ypos), (240, 25), wx.ALIGN_CENTRE)
+	    self.lblPercentCutoff.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	elif (platform.system() == "Darwin"):
+	    self.lblPercentCutoff = wx.StaticBitmap(self, -1, wx.Image(self.scriptdir + "/images/osx/antibody/lblAntibody.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(xpos, ypos), size=(240, 25))
+	else:
+	    self.lblPercentCutoff = wx.StaticText(self, -1, "Select Top Percentage", (xpos, ypos), style=wx.ALIGN_CENTRE)
+	    self.lblPercentCutoff.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	    resizeTextControlForUNIX(self.lblPercentCutoff, xpos, 240)
+	self.sldPercent = wx.Slider(self, -1, pos=(xpos, ypos), size=(240, 80), value=0, minValue=0, maxValue=100, style=wx.SL_LABELS)
+	
+	if (platform.system() == "Darwin"):
+	    self.btnSelectPercent = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/protocols/GoBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(xpos, ypos+75), size=(120, 25))
+	else:
+	    self.btnSelectPercent = wx.Button(self, id=-1, label="Select", pos=(xpos+60, ypos+75), size=(120, 25))
+	    self.btnSelectPercent.SetForegroundColour("#000000")
+	    self.btnSelectPercent.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	#self.btnSelectPercent.Bind(wx.EVT_BUTTON, self.changeProtocol)
+	self.btnSelectPercent.SetToolTipString("Select the best percentage structures")
+	
+	xpos = 5+fig_w-240; ypos = 35+fig_h+5
+	# Buttons for the next structure, and for clearing all selected structures
+	self.btnLeftStruct = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/left-arrow.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(xpos, ypos), size=(25, 25))
+	self.btnLeftStruct.SetForegroundColour("#000000")
+	self.btnLeftStruct.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	#self.btnLeftStruct.Bind(wx.EVT_BUTTON, self.changeProtocol)
+	self.btnLeftStruct.SetToolTipString("View the previous structure")
+	
+	self.btnRightStruct = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/right-arrow.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(xpos+25+190, ypos), size=(25, 25))
+	self.btnRightStruct.SetForegroundColour("#000000")
+	self.btnRightStruct.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	#self.btnLeftStruct.Bind(wx.EVT_BUTTON, self.changeProtocol)
+	self.btnRightStruct.SetToolTipString("View the next structure")
+	
+	if (platform.system() == "Darwin"):
+	    self.btnFetch = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/protocols/GoBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(xpos+25, ypos), size=(190, 25))
+	else:
+	    self.btnFetch = wx.Button(self, id=-1, label="Fetch", pos=(xpos+25, ypos), size=(190, 25))
+	    self.btnFetch.SetForegroundColour("#000000")
+	    self.btnFetch.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	#self.btnFetch.Bind(wx.EVT_BUTTON, self.changeProtocol)
+	self.btnFetch.SetToolTipString("Fetch the current structure")
+	
+	xpos = 5+fig_w+5; ypos = self.size[1]-5-90
+	if (platform.system() == "Windows"):
+	    self.lblStructuresSelected = wx.StaticText(self, -1, "0 Selections", (xpos, ypos), (240, 25), wx.ALIGN_CENTRE)
+	    self.lblStructuresSelected.SetFont(wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	elif (platform.system() == "Darwin"):
+	    self.lblStructuresSelected = wx.StaticBitmap(self, -1, wx.Image(self.scriptdir + "/images/osx/antibody/lblAntibody.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(xpos, ypos), size=(240, 25))
+	else:
+	    self.lblStructuresSelected = wx.StaticText(self, -1, "0 Selections", (xpos, ypos), style=wx.ALIGN_CENTRE)
+	    self.lblStructuresSelected.SetFont(wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	    resizeTextControlForUNIX(self.lblStructuresSelected, xpos, 240)
+	    
+	# Combo box for selected structures
+	if (platform.system() == "Darwin"):
+	    self.cmbSelected = wx.ComboBox(self, pos=(xpos, ypos+30), size=(240, 25), choices=[], style=wx.CB_READONLY)
+	else:
+	    self.cmbSelected = wx.ComboBox(self, pos=(xpos, ypos+30), size=(240, 25), choices=[], style=wx.CB_READONLY | wx.CB_SORT)
+	
+	# Fetching button
+	if (platform.system() == "Darwin"):
+	    self.btnFetchAll = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/protocols/GoBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(xpos, ypos), size=(120, 25))
+	else:
+	    self.btnFetchAll = wx.Button(self, id=-1, label="Fetch All", pos=(xpos, ypos+60), size=(120, 25))
+	    self.btnFetchAll.SetForegroundColour("#000000")
+	    self.btnFetchAll.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	#self.btnFetchAll.Bind(wx.EVT_BUTTON, self.changeProtocol)
+	self.btnFetchAll.SetToolTipString("Fetch all currently selected structures")
+	
+	if (platform.system() == "Darwin"):
+	    self.btnClearAll = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/protocols/GoBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(xpos+120, ypos+60), size=(120, 25))
+	else:
+	    self.btnClearAll = wx.Button(self, id=-1, label="Clear All", pos=(xpos+120, ypos+60), size=(120, 25))
+	    self.btnClearAll.SetForegroundColour("#000000")
+	    self.btnClearAll.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+	#self.btnClearAll.Bind(wx.EVT_BUTTON, self.changeProtocol)
+	self.btnClearAll.SetToolTipString("Clear all currently selected structures")
+	
 # ===========================================================================================================
 # CHAIN COLORING CLASSES
 # These classes are needed to display the colors of the chains in the SequenceViewer
