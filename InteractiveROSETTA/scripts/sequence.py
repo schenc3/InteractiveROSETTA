@@ -512,8 +512,8 @@ class EnergyProfileDialog(wx.Dialog):
 	self.axesSystem.set_yticklabels([0, 1, 2], size=4) # These are the actual labels
 	self.axesSystem.set_yticks([0, 0.5, 1]) # These should be fractional, specifying where on the axis the numbers end up
 	self.axesSystem.set_position([0.06, 0.03, 0.94, 0.91]) # This is [x, y, w, h] where they are fractions of the total size of the figure
+	self.canSystem.mpl_connect("pick_event", self.systemClick)
 	
-	self.canSystem.draw()
 	self.figSystem.axes[0].get_xaxis().set_ticks([])
 	self.figIndividual = Figure((fig_w/float(self.dpi), fig_h/float(self.dpi)), dpi=self.dpi)
 	self.canIndividual = FigCanvas(self, -1, self.figIndividual)
@@ -522,6 +522,7 @@ class EnergyProfileDialog(wx.Dialog):
 	self.axesIndividual.set_yticklabels([0, 1, 2], size=4)
 	self.axesIndividual.set_yticks([0, 1, 2])
 	self.axesIndividual.set_position([0.06, 0.03, 0.94, 0.91])
+	self.canIndividual.mpl_connect("pick_event", self.individualClick)
 	
 	# Labels
 	xpos = 5; ypos = 8
@@ -623,18 +624,23 @@ class EnergyProfileDialog(wx.Dialog):
 	self.btnSelectPercent.SetToolTipString("Select the best percentage structures")
 	
 	xpos = 5+fig_w-240; ypos = 35+fig_h+5
+	self.cbxSelected = wx.CheckBox(self, -1, "Selected", pos=(xpos-90, ypos), style=wx.ALIGN_LEFT)
+	self.Bind(wx.EVT_CHECKBOX, self.selectStruct, self.cbxSelected)
+        
 	# Buttons for the next structure, and for clearing all selected structures
 	self.btnLeftStruct = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/left-arrow.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(xpos, ypos), size=(25, 25))
 	self.btnLeftStruct.SetForegroundColour("#000000")
 	self.btnLeftStruct.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	#self.btnLeftStruct.Bind(wx.EVT_BUTTON, self.changeProtocol)
 	self.btnLeftStruct.SetToolTipString("View the previous structure")
+	self.Bind(wx.EVT_BUTTON, self.prevStruct, self.btnLeftStruct)
 	
 	self.btnRightStruct = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/right-arrow.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(xpos+25+190, ypos), size=(25, 25))
 	self.btnRightStruct.SetForegroundColour("#000000")
 	self.btnRightStruct.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	#self.btnLeftStruct.Bind(wx.EVT_BUTTON, self.changeProtocol)
 	self.btnRightStruct.SetToolTipString("View the next structure")
+	self.Bind(wx.EVT_BUTTON, self.nextStruct, self.btnRightStruct)
 	
 	if (platform.system() == "Darwin"):
 	    self.btnFetch = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/protocols/GoBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(xpos+25, ypos), size=(190, 25))
@@ -644,6 +650,7 @@ class EnergyProfileDialog(wx.Dialog):
 	    self.btnFetch.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	#self.btnFetch.Bind(wx.EVT_BUTTON, self.changeProtocol)
 	self.btnFetch.SetToolTipString("Fetch the current structure")
+	self.Bind(wx.EVT_CHECKBOX, self.fetchStruct, self.btnFetch)
 	
 	xpos = 5+fig_w+5; ypos = self.size[1]-5-90
 	if (platform.system() == "Windows"):
@@ -686,9 +693,10 @@ class EnergyProfileDialog(wx.Dialog):
 	self.lstSelected = []
 	self.lstTerms = []
 	self.lstStructures = []
+	self.iCurrIndx = -1
 	
     def changeProfile(self, event):
-	if (len(self.lstSelected) > 0):
+	if (sum(self.lstSelected) > 0):
 	    # The user will lose current selections if the profile is changed now
 	    dlg = wx.MessageDialog(self, "If you change profiles your current selections will be lost\n\nContinue?", 
 			    "Selections Will Be Lost", 
@@ -708,6 +716,7 @@ class EnergyProfileDialog(wx.Dialog):
 	self.lstEnergies = []
 	self.lstStructures = []
 	self.lstSelected = []
+	self.iCurrIndx = -1
 	fhScores = open(sFilename, "r")
 	bHeaderSeen = False
 	for aline in fhScores:
@@ -720,6 +729,7 @@ class EnergyProfileDialog(wx.Dialog):
 		else:
 		    self.lstEnergies.append(map(float, data[1:len(data)-1]))
 		    self.lstStructures.append(data[len(data)-1])
+		    self.lstSelected.append(False)
 	fhScores.close()
 	# Represent the total scores of all structures in the "system" graph, using bars to represent energies
 	self.lstTotalE = []
@@ -730,7 +740,9 @@ class EnergyProfileDialog(wx.Dialog):
 				       height=self.lstTotalE,
 				       width=1.0,
 				       color="#5252FF",
-				       edgecolor="#5252FF")
+				       edgecolor="#5252FF",
+				       linewidth=0.0,
+				       picker=5) # Need the picker otherwise the pick_events are not fired
 	maxE = max(self.lstTotalE)
 	minE = min(self.lstTotalE)
 	rangeE = maxE - minE
@@ -769,6 +781,53 @@ class EnergyProfileDialog(wx.Dialog):
 	self.axesSystem.grid(True, axis="y", color="#00FF00", linewidth=0.2, linestyle="solid")
 	self.axesSystem.grid(False, axis="x")
 	self.canSystem.draw()
+	
+    def highlightBar(self):
+	for i in range(0, len(self.systemBars)):
+	    if (i == self.iCurrIndx):
+		self.systemBars[i].set_color("#FF5252")
+	    else:
+		if (self.lstSelected[i]):
+		    self.systemBars[i].set_color("#FFFF00")
+		else:
+		    self.systemBars[i].set_color("#5252FF")
+	self.canSystem.draw()
+	# Update the checkbox
+	self.cbxSelected.SetValue(self.lstSelected[self.iCurrIndx])
+	
+    def systemClick(self, event):
+	box_points = event.artist.get_bbox().get_points() # Defines the rectangle clicked
+	indx = int(box_points[0][0])
+	self.iCurrIndx = indx
+	self.highlightBar()
+    
+    def individualClick(self, event):
+	print "2"
+	
+    def selectStruct(self, event):
+	if (self.iCurrIndx >= 0):
+	    self.lstSelected[self.iCurrIndx] = not(self.lstSelected[self.iCurrIndx])
+	    
+    def prevStruct(self, event):
+	if (self.iCurrIndx < 0):
+	    self.iCurrIndx = len(self.lstStructures) - 1
+	elif (self.iCurrIndx == 0):
+	    self.iCurrIndx = len(self.lstStructures) - 1
+	else:
+	    self.iCurrIndx -= 1
+	self.highlightBar()
+    
+    def nextStruct(self, event):
+	if (self.iCurrIndx < 0):
+	    self.iCurrIndx = 0
+	elif (self.iCurrIndx >= len(self.lstStructures) - 1):
+	    self.iCurrIndx = 0
+	else:
+	    self.iCurrIndx += 1
+	self.highlightBar()
+    
+    def fetchStruct(self, event):
+	pass
 	
 # ===========================================================================================================
 # CHAIN COLORING CLASSES
