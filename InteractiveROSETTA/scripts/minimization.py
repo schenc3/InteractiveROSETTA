@@ -413,15 +413,20 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
       [indx,r,seqpos,poseindx,co] = selectedData
       model = self.seqWin.poses[poseindx][0]
       offset = 0
+      chain = self.seqWin.IDs[r][len(self.seqWin.IDs[r])-1]
+      if chain == '_':
+        chain == ' '
       print self.seqWin.IDs
-      for i in range(0,r):
-        chain = self.seqWin.IDs[i][len(self.seqWin.IDs[i])-1]
-        if chain =='_':
-          chain = ' '
-        print chain,len(model[chain])
-        offset += len(model[chain])
-      r_indx = indx + 1 + offset
-      return r_indx
+      for ch in model:
+        chain2 = self.seqWin.IDs[i][len(self.seqWin.IDs[i])-1]
+        if chain2 =='_':
+          chain2 = ' '
+        if chain2 == chain:
+          return offset + indx + 1
+        else:
+          offset += len(model[chain2])
+      #if we got this far, there is an error
+      return None
 
     def add(self, event, updateSelection=True):
 	if (updateSelection):
