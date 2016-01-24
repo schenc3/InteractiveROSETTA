@@ -42,10 +42,10 @@ def getServerName():
 
 def setServerName(name):
     serverName[0] = name
-    
+
 def getPrimaryRender():
     return primaryRender[0]
-    
+
 def setPrimaryRender(renderType):
     if (renderType == "cartoon"):
 	primaryRender[0] = "cartoon"
@@ -1346,7 +1346,7 @@ def defaultPyMOLView(cmd, model=None):
 	cmd.set("ribbon_color", "orange", dsele)
 	cmd.set("cartoon_color", "orange", dsele)
 	#cmd.delete("dsele")
-    
+
 def goToSandbox(extra=""):
     # Easily gets us back to the sandbox location
     homedir = os.path.expanduser("~")
@@ -1358,7 +1358,7 @@ def goToSandbox(extra=""):
 	if (len(extra) > 0):
 	    extra = "/" + extra
 	os.chdir(homedir + "/.InteractiveROSETTA" + extra)
-	
+
 def AA3to1(resn):
     indx3 = "ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR HOH ADE CYT GUA THY RAD RCY RGU URA ".find(resn)
     if (indx3 < 0):
@@ -1381,7 +1381,7 @@ def resizeTextControlForUNIX(widget, leftbound, width):
     if (xpos < leftbound):
 	xpos = leftbound
     widget.SetPosition((int(xpos), widget.GetPosition()[1]))
-    
+
 def startNewLog():
     # This function initializes the logger when InteractiveRosetta is launched and writes some
     # information about the user's system that may be useful
@@ -1402,7 +1402,7 @@ def startNewLog():
 	linuxdistro = linuxdistro + " Release: " + platform.release()
 	f.write(linuxdistro + "\n")
 	processor = platform.processor()
-    elif (operatingsys == "Darwin"): 
+    elif (operatingsys == "Darwin"):
 	processor = platform.processor()
     else: #???
 	processor = platform.processor()
@@ -1415,7 +1415,7 @@ def startNewLog():
     f.close()
     # Go back to where we were
     os.chdir(curpath)
-    
+
 def logInfo(msg, filename=""):
     # This is a useful function that will append messages and optionally the data in uploaded files
     # to a log for easy debugging purposes
@@ -1552,7 +1552,7 @@ def recolorEnergies(pose, allresidue_E, modelname, selectedScoretype, cmd):
 	    g = 0
 	    try:
 		if (modelname == "nomodel"):
-		    # This is to prevent all those "selector-errors" from showing up in the output by attempting to 
+		    # This is to prevent all those "selector-errors" from showing up in the output by attempting to
 		    # select from a non-existent model in PyMOL
 		    raise Exception
 		if (chain != "" and chain != " " and chain != "_"):
@@ -1668,7 +1668,7 @@ def sendToServer(inputfile, remoteServer=None):
 	return myID
     else:
 	raise Exception("ERROR: Failed to upload protocol inputs to the server")
-    
+
 def queryServerForResults(outputfile):
     # This function looks to see if the server uploaded an outputfile
     # If it did, download it and generate the PDB files that the GUI looks for
@@ -1732,10 +1732,10 @@ def queryServerForResults(outputfile):
 	# Not there yet, don't do anything
 	pass
     os.chdir(curdir)
-    
+
 def getRecognizedTypes():
     # Returns a list of 3 letter codes that will be recognized by Rosetta
-    recognized = ["ALA", "CYS", "ASP", "GLU", "PHE", "GLY", "HIS", "ILE", "LYS", "LEU", "MET", "ASN", 
+    recognized = ["ALA", "CYS", "ASP", "GLU", "PHE", "GLY", "HIS", "ILE", "LYS", "LEU", "MET", "ASN",
 	      "PRO", "GLN", "ARG", "SER", "THR", "VAL", "TRP", "TYR", "HIE", "HID", "ADE", "CYT",
 	      "GUA", "THY", "RAD", "RCY", "RGU", "URA"]
     if (platform.system() == "Windows"):
@@ -1751,7 +1751,7 @@ def getRecognizedTypes():
 
 def cleanPDB(pdbfile, acceptNCAAs=False):
     # This function will look for and remove duplicate atoms
-    # It will permanently modify the PDB that the user loaded 
+    # It will permanently modify the PDB that the user loaded
     # This shouldn't cause problems for other programs though
     # I am also going to give blank chain IDs a value because it
     # is causing too much trouble with some of the Rosetta protocols
@@ -1783,6 +1783,7 @@ def cleanPDB(pdbfile, acceptNCAAs=False):
     # BioPython drops these, but it can lead to all kinds of problems later on
     # So I will keep a record of the backbone atoms of the current residue and if we encounter
     # a BB atom with the same residue index, we will assume it's a new residue and renumber the residue
+    # Updated to keep the first such residue and drop all others with the same index
     lastBBatoms = []
     altlocs_taken = ""
     #f = open(pdbfile.strip(), "r")
@@ -1822,14 +1823,17 @@ def cleanPDB(pdbfile, acceptNCAAs=False):
 		lastBBatoms = []
 	    # This is only done if this is a new residue, but not a new residue indx
 	    if (aline[22:27] != curr_res or aline[12:16] in lastBBatoms):
-		curr_res = res
-		atomtypes = []
-		lastBBatoms = []
-		# Assign the altloc to whatever the most recent altloc used was
-		for char in " ABCDEFGHIJKLMNOPQRSTUVWXYZ":
-		    if (not(char in altlocs_taken)):
-			altlocs_taken = char + altlocs_taken
-			break
+		pass
+#==============================================================================
+# 		curr_res = res
+# 		atomtypes = []
+# 		lastBBatoms = []
+# 		# Assign the altloc to whatever the most recent altloc used was
+# 		for char in " ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+# 		    if (not(char in altlocs_taken)):
+# 			altlocs_taken = char + altlocs_taken
+# 			break
+#==============================================================================
 	    res = res[0:4] + altlocs_taken[0]
 	    atomtype = aline[12:16]
 	    if (atomtype in [" C  ", " CA ", " O  ", " N  "]):
@@ -1890,7 +1894,7 @@ def cleanPDB(pdbfile, acceptNCAAs=False):
 	f.write(aline)
     f.close()
     return data
-    
+
 def fixPyMOLSave(pdbfile):
     # Read in the data first
     data = []
@@ -1915,7 +1919,7 @@ def fixPyMOLSave(pdbfile):
     for aline in data:
 	f.write(aline + "\n")
     f.close()
-    
+
 def fitGridColumn(grid, col, minsize):
     # Useful function for taking a grid and resizing the given column to fit overflowing text
     oldwidth = grid.GetColSize(col)
@@ -1933,7 +1937,7 @@ def fitGridColumn(grid, col, minsize):
     if (oldwidth != int(width+10)):
 	grid.SetColSize(col, int(width+10))
 	grid.Refresh()
-	
+
 def deleteInputFiles():
     # Useful function for deleting all input/temporary/output files from InteractiveROSETTA HOME
     # This is useful if a protocol is canceled because if these files are not removed then the daemon
@@ -2001,7 +2005,7 @@ def deleteInputFiles():
     tempfiles = glob.glob("*.pdb")
     for tempfile in tempfiles:
 	os.remove(tempfile)
-	
+
 def isAA(resn):
     if (len(resn) == 3 and resn in "ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR "):
 	return True
