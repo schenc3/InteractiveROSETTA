@@ -418,7 +418,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
         chain == ' '
       print self.seqWin.IDs
       for ch in model:
-        chain2 = self.seqWin.IDs[i][len(self.seqWin.IDs[i])-1]
+        chain2 = ch.get_id()
         if chain2 =='_':
           chain2 = ' '
         if chain2 == chain:
