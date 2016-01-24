@@ -511,7 +511,7 @@ class EnergyProfileDialog(wx.Dialog):
 	self.axesSystem = self.figSystem.add_subplot(111, axisbg="black")
 	self.axesSystem.set_yticklabels([0, 1, 2], size=4) # These are the actual labels
 	self.axesSystem.set_yticks([0, 0.5, 1]) # These should be fractional, specifying where on the axis the numbers end up
-	self.axesSystem.set_position([0.03, 0.03, 0.97, 0.91]) # This is [x, y, w, h] where they are fractions of the total size of the figure
+	self.axesSystem.set_position([0.06, 0.03, 0.94, 0.91]) # This is [x, y, w, h] where they are fractions of the total size of the figure
 	
 	self.canSystem.draw()
 	self.figSystem.axes[0].get_xaxis().set_ticks([])
@@ -521,7 +521,7 @@ class EnergyProfileDialog(wx.Dialog):
 	self.axesIndividual = self.figIndividual.add_subplot(111, axisbg="black")
 	self.axesIndividual.set_yticklabels([0, 1, 2], size=4)
 	self.axesIndividual.set_yticks([0, 1, 2])
-	self.axesIndividual.set_position([0.03, 0.03, 0.97, 0.91])
+	self.axesIndividual.set_position([0.06, 0.03, 0.94, 0.91])
 	
 	# Labels
 	xpos = 5; ypos = 8
@@ -567,13 +567,16 @@ class EnergyProfileDialog(wx.Dialog):
 	    self.cmbProfiles = wx.ComboBox(self, pos=(xpos, 8), size=(240, 25), choices=[], style=wx.CB_READONLY)
 	else:
 	    self.cmbProfiles = wx.ComboBox(self, pos=(xpos, 8), size=(240, 25), choices=[], style=wx.CB_READONLY | wx.CB_SORT)
-	self.lProfiles = ["None"]
+	self.lstProfiles = ["None"]
+	self.sCurrProfile = "None"
 	goToSandbox("profiles")
 	# Get the list of profiles
 	for filename in glob.glob("*"):
-	    self.lProfiles.append(filename)
-	self.cmbProfiles.AppendItems(self.lProfiles)
-	self.cmbProfiles.SetSelection(self.lProfiles.index("None"))
+	    self.lstProfiles.append(filename)
+	self.cmbProfiles.AppendItems(self.lstProfiles)
+	self.cmbProfiles.SetSelection(self.lstProfiles.index("None"))
+	self.cmbProfiles.Bind(wx.EVT_COMBOBOX, self.changeProfile)
+	goToSandbox()
 	
 	# Slider for setting an energy cutoff
 	xpos=5+fig_w+5; ypos=5
@@ -677,6 +680,95 @@ class EnergyProfileDialog(wx.Dialog):
 	    self.btnClearAll.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	#self.btnClearAll.Bind(wx.EVT_BUTTON, self.changeProtocol)
 	self.btnClearAll.SetToolTipString("Clear all currently selected structures")
+	
+	# Data structures for saving which structures are selected
+	self.lstEnergies = []
+	self.lstSelected = []
+	self.lstTerms = []
+	self.lstStructures = []
+	
+    def changeProfile(self, event):
+	if (len(self.lstSelected) > 0):
+	    # The user will lose current selections if the profile is changed now
+	    dlg = wx.MessageDialog(self, "If you change profiles your current selections will be lost\n\nContinue?", 
+			    "Selections Will Be Lost", 
+			    wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
+	    if (dlg.ShowModal() == wx.ID_NO):
+		# Set it back to what it was
+		self.cmbProfiles.SetSelection(self.lstProfiles.index(self.sCurrProfile))
+		return
+	self.sCurrProfile = self.cmbProfiles.GetValue()
+	
+	if (platform.system() == "Windows"):
+	    sFilename = "profiles\\" + self.sCurrProfile
+	else:
+	    sFilename = "profiles/" + self.sCurrProfile
+	# Read the data
+	self.lstTerms = []
+	self.lstEnergies = []
+	self.lstStructures = []
+	self.lstSelected = []
+	fhScores = open(sFilename, "r")
+	bHeaderSeen = False
+	for aline in fhScores:
+	    if (aline.startswith("SCORE:")):
+		# The first SCORE field contains the names of the energy terms
+		data = aline.split()
+		if (not(bHeaderSeen)):
+		    bHeaderSeen = True
+		    self.lstTerms = data[1:len(data)-1]
+		else:
+		    self.lstEnergies.append(map(float, data[1:len(data)-1]))
+		    self.lstStructures.append(data[len(data)-1])
+	fhScores.close()
+	# Represent the total scores of all structures in the "system" graph, using bars to represent energies
+	self.lstTotalE = []
+	for lstE in self.lstEnergies:
+	    self.lstTotalE.append(lstE[0])
+	self.axesSystem.clear()
+	self.systemBars = self.axesSystem.bar(left=range(0, len(self.lstEnergies)),
+				       height=self.lstTotalE,
+				       width=1.0,
+				       color="#5252FF",
+				       edgecolor="#5252FF")
+	maxE = max(self.lstTotalE)
+	minE = min(self.lstTotalE)
+	rangeE = maxE - minE
+	precision = round(math.log(rangeE)) - 1
+	if (maxE > 0 and minE < 0):
+	    if (precision >= 0):
+		lstYTicks = [int(round(minE))]
+	    else:
+		lstYTicks = [minE]
+	    for i in range(1, 10):
+		if (precision >= 0):
+		    lstYTicks.append(int(round(minE + float(i)/9.0*rangeE)))
+		else:
+		    lstYTicks.append("%." + str(-1*precision) + "f" % (minE + float(i)/9.0*rangeE))
+	elif (maxE > 0 and minE > 0):
+	    for i in range(1, 11):
+		if (precision >= 0):
+		    lstYTicks.append(int(round(float(i)/10.0*maxE)))
+		else:
+		    lstYTicks.append("%." + str(-1*precision) + "f" % (float(i)/10.0*maxE))
+	else:
+	    if (precision >= 0):
+		lstYTicks = [int(round(minE))]
+	    else:
+		lstYTicks = [minE]
+	    for i in range(1, 10):
+		if (precision >= 0):
+		    lstYTicks.append(int(round(minE-float(i)/9.0*minE)))
+		else:
+		    lstYTicks.append("%." + str(-1*precision) + "f" % (minE-float(i)/9.0*minE))
+	self.axesSystem.set_yticklabels(lstYTicks, size=3) # These are the actual labels
+	self.axesSystem.set_yticks(lstYTicks) # These should be fractional, specifying where on the axis the numbers end up
+	self.axesSystem.set_xticklabels([], size=3) # These are the actual labels
+	self.axesSystem.set_xticks(range(0, len(self.lstTotalE)+1))
+	self.axesSystem.tick_params(axis="both", length=0, width=0)
+	self.axesSystem.grid(True, axis="y", color="#00FF00", linewidth=0.2, linestyle="solid")
+	self.axesSystem.grid(False, axis="x")
+	self.canSystem.draw()
 	
 # ===========================================================================================================
 # CHAIN COLORING CLASSES
