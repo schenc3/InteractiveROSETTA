@@ -422,6 +422,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
         if chain2 =='_':
           chain2 = ' '
         if chain2 == chain:
+          print offset+indx+1,'R_indx'
           return offset + indx + 1
         else:
           offset += len(model[chain2])
@@ -869,6 +870,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		#thrMinimize = Thread(target=self.threadMinimization, args=())
 		#thrMinimize.start()
 		self.stage = 1
+		self.save_constraints()
 		if (platform.system() == "Darwin"):
 		    self.btnMinimize.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnMinimize_Cancel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		else:
@@ -1020,6 +1022,12 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    jobs.append([currpose, laststart, len(self.minmap)])
 	    f = open("minimizeinputtemp", "w")
 	    for [currpose, start, end] in jobs:
+		constraintFile = ''
+		constraints = self.ConstraintPanel.ConstraintSet
+		for [pdb,pose,constraint] in constraints:
+		  if str(pose) == str(currpose):
+		    constraintFile = str(pose)+".cst"
+		    break
 		fields = self.seqWin.IDs[currpose].split("|")
 		pdbfile = ""
 		for field in fields[0:len(fields)-1]:
@@ -1029,7 +1037,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		dumpmodel = pdbfile.split(".pdb")[0]
 		self.cmd.save(pdbfile.strip(), "model " + dumpmodel)
 		fixPyMOLSave(pdbfile.strip())
-		f.write("JOB\t" + pdbfile + "\t" + str(start) + "\t" + str(end) + "\n")
+		f.write("JOB\t" + pdbfile + "\t" + str(start) + "\t" + str(end) + "\t"+ constraintFile+"\n")
 		f2 = open(pdbfile, "r")
 		f.write("BEGIN PDB DATA\n")
 		for aline in f2:
@@ -1170,3 +1178,14 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    self.cmd.remove("protocol_view")
 		except:
 		    pass
+
+    def save_constraints(self):
+      constraints = self.ConstraintPanel.ConstraintSet
+      goToSandbox()
+      outputs = {}
+      for [pdb,poseindx,constraint] in constraints:
+        if pdb not in outputs:
+          outputs[pdb] = open('%s.cst'%(str(poseindx)),'w+')
+        outputs[pdb].write('%s\n'%(constraint))
+      for pdb in outputs:
+        outputs[pdb].close()
