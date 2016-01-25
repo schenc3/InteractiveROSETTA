@@ -235,6 +235,7 @@ def drain_pipe():
 def doMinimization():
     # Grab the params files in the user's personal directory
     initializeRosetta()
+    import rosetta.protocols.simple_moves
     try:
 	f = open("minimizeinput", "r")
     except:
@@ -249,8 +250,8 @@ def doMinimization():
     #    SCOREFXN: The file containing the score function weights
     for aline in f:
 	if (aline[0:3] == "JOB"):
-	    [pdbfile, strstart, strend] = aline.split("\t")[1:]
-	    jobs.append([pdbfile.strip(), int(strstart), int(strend)])
+	    [pdbfile, strstart, strend,constraintfile] = aline.split("\t")[1:]
+	    jobs.append([pdbfile.strip(), int(strstart), int(strend),constraintfile])
 	elif (aline[0:6] == "MINMAP"):
 	    [strindx, strr, strseqpos, strp, strco, mtype,strr_indx] = aline.split("\t")[1:]
 	    minmap.append([int(strindx), int(strr), int(strseqpos), int(strp), int(strco), mtype.strip(),int(strr_indx.strip())])
@@ -267,12 +268,32 @@ def doMinimization():
 	raise Exception("ERROR: The scoring function weights could not be initialized!")
     f = open("minimizeoutputtemp", "w")
     pyobs = PyMOL_Observer()
-    for [pdbfile, minmapstart, minmapend] in jobs:
+    for [pdbfile, minmapstart, minmapend,constraintFile] in jobs:
 	# Get a Rosetta pose of the file
 	minpose = pose_from_pdb(pdbfile)
 	minpose.pdb_info().name("protocol_view")
 	pyobs.add_observer(minpose)
 	pyobs.pymol.update_energy(True)
+	areCST = False
+	#Configure Constraints
+	if constraintFile.strip() != '':
+	  try:
+    	    areCST = True
+    	    print "THERE ARE CONSTRAINTS"
+    	    goToSandbox()
+    	    cstfile = open(constraintFile.strip(),'r')
+    	    for line in cstfile:
+    	      print line
+    	    cstfile.close()
+    	    cstMover = rosetta.protocols.simple_moves.ConstraintSetMover()
+    	    print "cst file is %s!"%(constraintFile.strip())
+    	    cstMover.constraint_file(constraintFile.strip())
+    	    for cst in [atom_pair_constraint, angle_constraint, dihedral_constraint, coordinate_constraint, constant_constraint]:
+    	      scorefxn.set_weight(cst,1.0)
+	  except:
+	    print 'cst failed.'
+	    areCST = False
+#	  cstMover.apply(minpose)
 	# Create the minmap
 	mm = MoveMap()
 	mm.set_bb(False)
@@ -286,11 +307,20 @@ def doMinimization():
 		mm.set_chi(r_indx,True)
 	# Minimize using dfpmin always
 	minmover = MinMover(mm, scorefxn, "dfpmin", 0.01, True)
+#	if constraintFile.strip() != '':
+#	  minmover.set_cst_file(constraintFile.strip())
 	if (minType == "Cartesian"):
 	    minmover.cartesian(True)
 	    scorefxn.set_weight(cart_bonded, 0.5)
 	    scorefxn.set_weight(pro_close, 0)
 	try:
+	    if areCST:
+	      print 'areCST!'
+	      try:
+	        cstMover.apply(minpose)
+	      except:
+	        print 'pass!'
+	        pass
 	    minmover.apply(minpose)
 	except:
 	    raise Exception("ERROR: The Rosetta minimizer failed!")
@@ -313,7 +343,13 @@ def doMinimization():
 	    f.write("\n")
     f.close()
     # So the main GUI doesn't attempt to read the file before the daemon finishes writing its contents
-    os.rename("minimizeoutputtemp", "minimizeoutput")
+    renamed = False
+    while not renamed:
+      try:
+        os.rename("minimizeoutputtemp", "minimizeoutput")
+        renamed = True
+      except:
+        renamed = False
 
 # Fixed backbone design protocol
 def doFixbb():

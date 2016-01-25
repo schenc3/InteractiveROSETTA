@@ -57,22 +57,48 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.ConstraintSet = []
 
       #Remove Constraint Button
-
+      self.DelBtn = wx.Button(self,-1,label="Delete Constraint")
+      self.DelBtn.SetForegroundColour("#000000")
+      self.DelBtn.SetFont(wx.Font(10,wx.DEFAULT,wx.ITALIC,wx.BOLD))
+      self.DelBtn.Bind(wx.EVT_BUTTON,self.DelConstraint)
+      self.Sizer.Add(self.DelBtn,(0,3),(1,1))
       #Clear Constraints Button
-
+      self.ClearBtn = wx.Button(self,-1,label="Clear Constraints")
+      self.ClearBtn.SetForegroundColour("#000000")
+      self.ClearBtn.SetFont(wx.Font(10,wx.DEFAULT,wx.ITALIC,wx.BOLD))
+      self.ClearBtn.Bind(wx.EVT_BUTTON,self.ClearConstraints)
+      self.Sizer.Add(self.ClearBtn,(0,4),(1,1))
 
       #Constraints Grid
       print 'starting constraints grid'
       self.constraintsGrid = wx.grid.Grid(self)
       self.constraintsGrid.CreateGrid(0,1)
       self.constraintsGrid.SetLabelFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-      self.Sizer.Add(self.constraintsGrid,(6,0),(10,6))
+      self.constraintsGrid.SetColLabelValue(0,"Constraint String")
+      self.constraintsGrid.SetRowLabelSize(80)
+      self.constraintsGrid.SetColSize(0,400)
+      self.constraintsGrid.Bind(wx.grid.EVT_GRID_CELL_LEFT_CLICK,self.gridClick)
+      self.selectdr = -1
+      self.Sizer.Add(self.constraintsGrid,(6,0),(10,6),wx.EXPAND)
       self.Layout()
       print 'grid created'
 
       #Scrolling
       self.SetupScrolling()
       print 'scrolling'
+
+    def DelConstraint(self,event):
+      logInfo("Delete Constraint button pushed!")
+      row = self.selectdr
+      print row
+      self.ConstraintSet.pop(row)
+      self.constraintsGrid.DeleteRows(row,1)
+      print self.ConstraintSet
+
+    def ClearConstraints(self,event):
+      logInfo("Clear Constraints button pushed!")
+      self.ConstraintSet = []
+      self.constraintsGrid.DeleteRows(0,self.constraintsGrid.NumberRows)
 
     def setSeqWin(self,seqWin):
       self.seqWin = seqWin
@@ -139,6 +165,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.Sizer.Add(self.FuncMenu,(1,2),(1,1))
       self.Layout()
       self.Cancelables.append(self.FuncMenu)
+
       #Next Button
       self.NextBtn = wx.Button(self,-1,label='Confirm')
       self.NextBtn.Bind(wx.EVT_BUTTON,self.Next)
@@ -147,6 +174,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.Cancelables.append(self.NextBtn)
       print 'pdbmenu'
       #self.Layout()
+
       #Cancel Button
       self.CancelBtn = wx.Button(self,-1,label='Cancel')
       self.CancelBtn.Bind(wx.EVT_BUTTON,self.cancel)
@@ -267,7 +295,10 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.Cancelables+=[self.xText,self.xEntry,self.yText,self.yEntry,self.zText,self.zEntry]
         #Function type stuff
         if self.CurrentConstraint['FuncType'] in ['Harmonic','Circular Harmonic']:
-          self.x0Text = wx.StaticText(self,-1,"Cut-off Distance")
+          if method in ['AtomPair','CoordinateConstraint']:
+            self.x0Text = wx.StaticText(self,-1,"Cut-off Distance")
+          else:
+            self.x0Text = wx.StaticText(self,-1,"Cut-off Angle")
           self.x0Entry = wx.TextCtrl(self,-1,"")
           self.sdText = wx.StaticText(self,-1,"Standard Deviation")
           self.sdEntry = wx.TextCtrl(self,-1,"")
@@ -395,33 +426,44 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
 
     def FinalizeConstraint(self,event):
+      pdb = self.CurrentConstraint["PDB"]
       method = self.CurrentConstraint['ConstraintType']
       constraintString = method+' '
       #Atom1 and Atom2
-      constraintString += "%s %s %s %s"%(self.Atom1Menu.GetStringSelection(),self.CurrentConstraint['Atom1_ResNum'],self.Atom2Menu.GetStringSelection(),self.CurrentConstraint['Atom2_ResNum'])
+      constraintString += "%s %s %s %s"%(self.Atom1Menu.GetStringSelection().strip(),self.CurrentConstraint['Atom1_ResNum'].strip(),self.Atom2Menu.GetStringSelection().strip(),self.CurrentConstraint['Atom2_ResNum'].strip())
       #Atom3
       if method in ['Angle','Dihedral']:
-        constraintString += " %s %s"%(self.Atom3Menu.GetStringSelection(),self.CurrentConstraint['Atom3_ResNum'])
+        constraintString += " %s %s"%(self.Atom3Menu.GetStringSelection().strip(),self.CurrentConstraint['Atom3_ResNum'].strip())
       #Atom4
       if method == 'Dihedral':
-        constraintString += " %s %s"%(self.Atom4Menu.GetStringSelection(),self.currentConstraint['Atom4_ResNum'])
+        constraintString += " %s %s"%(self.Atom4Menu.GetStringSelection().strip(),self.CurrentConstraint['Atom4_ResNum'].strip())
       #CoordinateConstraint
       if method == 'CoordinateConstraint':
         self.xEntry.SelectAll()
         self.yEntry.SelectAll()
         self.zEntry.SelectAll()
-        constraintString += " %s %s %s"%(self.xEntry.GetStringSelection(),self.yEntry.GetStringSelection(),self.zEntry.GetStringSelection())
+        constraintString += " %s %s %s"%(self.xEntry.GetStringSelection().strip(),self.yEntry.GetStringSelection().strip(),self.zEntry.GetStringSelection().strip())
 
       #Function Types
       functions = {'Harmonic':"HARMONIC",'Circular Harmonic':'CIRCULARHARMONIC'}
       if self.CurrentConstraint['FuncType'] in ['Harmonic','Circular Harmonic']:
         self.x0Entry.SelectAll()
         self.sdEntry.SelectAll()
-        constraintString += ' %s %s %s'%(functions[self.CurrentConstraint['FuncType']],self.x0Entry.GetStringSelection(),self.sdEntry.GetStringSelection())
+        constraintString += ' %s %s %s'%(functions[self.CurrentConstraint['FuncType']].strip(),self.x0Entry.GetStringSelection().strip(),self.sdEntry.GetStringSelection().strip())
       print constraintString
       logInfo(constraintString)
       self.ConstraintSet.append([self.CurrentConstraint['PDB'],self.CurrentConstraint['poseindx'],constraintString])
+      self.addToGrid("%s: %s"%(self.CurrentConstraint['PDB'],constraintString))
       self.cancel()
+
+    def addToGrid(self,constraintString):
+      logInfo("adding string to grid: %s"%(constraintString))
+      row = self.constraintsGrid.NumberRows
+      self.constraintsGrid.AppendRows(1)
+      self.constraintsGrid.SetCellValue(row,0,constraintString)
+
 
     def gridClick(self,event):
       logInfo('Constraints Grid Clicked!')
+      self.selectdr = event.GetRow()
+      print self.selectdr
