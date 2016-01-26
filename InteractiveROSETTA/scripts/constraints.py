@@ -44,13 +44,13 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.DelBtn.SetForegroundColour("#000000")
       self.DelBtn.SetFont(wx.Font(10,wx.DEFAULT,wx.ITALIC,wx.BOLD))
       self.DelBtn.Bind(wx.EVT_BUTTON,self.DelConstraint)
-      self.Sizer.Add(self.DelBtn,(0,3),(1,1))
+      self.Sizer.Add(self.DelBtn,(0,1),(1,1))
       #Clear Constraints Button
       self.ClearBtn = wx.Button(self,-1,label="Clear Constraints")
       self.ClearBtn.SetForegroundColour("#000000")
       self.ClearBtn.SetFont(wx.Font(10,wx.DEFAULT,wx.ITALIC,wx.BOLD))
       self.ClearBtn.Bind(wx.EVT_BUTTON,self.ClearConstraints)
-      self.Sizer.Add(self.ClearBtn,(0,4),(1,1))
+      self.Sizer.Add(self.ClearBtn,(0,2),(1,1))
 
       #Constraints Grid
       print 'starting constraints grid'
@@ -100,7 +100,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def addConstraint(self,event):
       '''Adds a new constraint to the set of constraints'''
       logInfo('Add Constraint button clicked!')
-      constraintTypes = ['Constraint Type','AtomPair','Angle','Dihedral','Coordinate']
+      constraintTypes = ['Constraint Type','AtomPair','Angle','Dihedral','CoordinateConstraint']
       self.constraintTypeMenu = wx.ComboBox(self,choices=constraintTypes,style=wx.CB_READONLY)
 #      self.constraintTypeMenu.Bind(wx.EVT_COMBOBOX,self.setConstraintType)
       self.Sizer.Add(self.constraintTypeMenu,(1,0),(1,1))
@@ -193,6 +193,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
         #AtomPair
         if method not in ['AtomPair','Angle','Dihedral','CoordinateConstraint']:
           self.cancel()
+          return
         else:
           #Residue 1
           res1items = ['Select Residue 1']+self.getResidues()
