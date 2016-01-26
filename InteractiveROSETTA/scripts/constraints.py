@@ -18,7 +18,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
     def __init__(self, parent,minPanel):
       print 'creating constraint panel'
-      wx.lib.scrolledpanel.ScrolledPanel.__init__(self,parent,-1)
+      wx.lib.scrolledpanel.ScrolledPanel.__init__(self,parent,-1,size=(1000,1000))
       self.minPanel = minPanel
       print 'Panel initialized'
       #sizer
@@ -34,23 +34,6 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.Sizer.Add(self.ConstraintBtn,(0,0),(1,1))
       #self.Layout()
       print 'constraint button done'
-      #Save Constraints button
-      self.SaveConstraintsBtn = wx.Button(self,-1,label="Save Constraints")
-      self.SaveConstraintsBtn.SetForegroundColour("#000000")
-      self.SaveConstraintsBtn.SetFont(wx.Font(10,wx.DEFAULT,wx.ITALIC,wx.BOLD))
-      self.SaveConstraintsBtn.Bind(wx.EVT_BUTTON,self.saveConstraints)
-      self.SaveConstraintsBtn.SetToolTipString("Save current constraints to a file for use in later simulations")
-      self.Sizer.Add(self.SaveConstraintsBtn,(0,1),(1,1))
-      #self.Layout()
-      print 'save button'
-      #Load Constraints file button
-      self.LoadConstraintsBtn = wx.Button(self,-1,label="Load Constraints")
-      self.LoadConstraintsBtn.SetForegroundColour("#000000")
-      self.LoadConstraintsBtn.SetFont(wx.Font(10,wx.DEFAULT,wx.ITALIC,wx.BOLD))
-      self.LoadConstraintsBtn.Bind(wx.EVT_BUTTON,self.loadConstraints)
-      self.LoadConstraintsBtn.SetToolTipString("Load constraints from a file")
-      self.Sizer.Add(self.LoadConstraintsBtn,(0,2),(1,1))
-      #self.Layout()
       print 'load button'
       self.Cancelables = []
       self.CurrentConstraint = {}
@@ -113,15 +96,6 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.selectWin.setProtPanel(self)
 
     #Event Listeners
-
-    def loadConstraints(self,event):
-      '''Loads a set of constraints from a file to be used for this simulation'''
-      logInfo('Load Constraints button clicked!')
-
-    def saveConstraints(self,event):
-      '''Saves the current set of constraints to a file that can be used in
-      later simulations'''
-      logInfo('Save Constraints button clicked!')
 
     def addConstraint(self,event):
       '''Adds a new constraint to the set of constraints'''
