@@ -1186,6 +1186,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
       for [pdb,poseindx,constraint] in constraints:
         if pdb not in outputs:
           outputs[pdb] = open('%s.cst'%(str(poseindx)),'w+')
+          outputs[pdb].write('#%s\n'%(pdb))
         outputs[pdb].write('%s\n'%(constraint))
       for pdb in outputs:
         outputs[pdb].close()
