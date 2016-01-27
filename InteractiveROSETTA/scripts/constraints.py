@@ -102,6 +102,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       logInfo('Add Constraint button clicked!')
       constraintTypes = ['Constraint Type','AtomPair','Angle','Dihedral','CoordinateConstraint']
       self.constraintTypeMenu = wx.ComboBox(self,choices=constraintTypes,style=wx.CB_READONLY)
+      self.constraintTypeMenu.SetSelection(0)
 #      self.constraintTypeMenu.Bind(wx.EVT_COMBOBOX,self.setConstraintType)
       self.Sizer.Add(self.constraintTypeMenu,(1,0),(1,1))
       self.Cancelables.append(self.constraintTypeMenu)
@@ -128,6 +129,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
         print pdbs[i]
       print pdbs
       self.PdbMenu = wx.ComboBox(self,choices=pdbs,style=wx.CB_READONLY)
+      self.PdbMenu.SetSelection(0)
 #      self.PdbMenu.Bind(wx.EVT_COMBOBOX,self.setConstraintPDB)
       self.Cancelables.append(self.PdbMenu)
       self.Sizer.Add(self.PdbMenu,(1,1),(1,1))
@@ -135,6 +137,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
       #Constraint Function
       self.FuncMenu = wx.ComboBox(self,-1,choices=["Select Constraint Function","Harmonic","Circular Harmonic"],style=wx.CB_READONLY)
+      self.FuncMenu.SetSelection(0)
 #      self.FuncMenu.Bind(wx.EVT_COMBOBOX,self.setFunction)
       self.Sizer.Add(self.FuncMenu,(1,2),(1,1))
       self.Layout()
@@ -199,11 +202,13 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
           res1items = ['Select Residue 1']+self.getResidues()
           self.Residue1Menu = wx.ComboBox(self,-1,choices=res1items,style=wx.CB_READONLY)
           self.Residue1Menu.Bind(wx.EVT_COMBOBOX,self.setAtom1Items)
+          self.Residue1Menu.SetSelection(0)
           self.Sizer.Add(self.Residue1Menu,(2,0),(1,1))
           self.Layout()
           self.Cancelables.append(self.Residue1Menu)
           #Atom 1
           self.Atom1Menu = wx.ComboBox(self,-1,choices=['Select Atom 1'],style=wx.CB_READONLY)
+          self.Atom1Menu.SetSelection(0)
           self.Sizer.Add(self.Atom1Menu,(2,1),(1,1))
           self.Layout()
           self.Cancelables.append(self.Atom1Menu)
@@ -211,11 +216,13 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
           res2items = ['Select Residue 2']+self.getResidues()
           self.Residue2Menu = wx.ComboBox(self,-1,choices=res2items,style=wx.CB_READONLY)
           self.Residue2Menu.Bind(wx.EVT_COMBOBOX,self.setAtom2Items)
+          self.Residue2Menu.SetSelection(0)
           self.Sizer.Add(self.Residue2Menu,(2,2),(1,1))
           self.Layout()
           self.Cancelables.append(self.Residue2Menu)
           #Atom 2
           self.Atom2Menu = wx.ComboBox(self,-1,choices=['Select Atom 2'],style=wx.CB_READONLY)
+          self.Atom2Menu.SetSelection(0)
           self.Sizer.Add(self.Atom2Menu,(2,3),(1,1))
           self.Layout()
           self.Cancelables.append(self.Atom2Menu)
@@ -223,12 +230,14 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
           #Angle or Dihdedral
           if method in ['Angle','Dihedral']:
             self.Residue3Menu = wx.ComboBox(self,-1,choices=['Select Residue 3']+self.getResidues(),style=wx.CB_READONLY)
+            self.Residue3Menu.SetSelection(0)
             self.Sizer.Add(self.Residue3Menu,(3,0),(1,1))
             self.Layout()
             self.Cancelables.append(self.Residue3Menu)
             self.Residue3Menu.Bind(wx.EVT_COMBOBOX,self.setAtom3Items)
             #Atom 3
             self.Atom3Menu = wx.ComboBox(self,-1,choices=['Select Atom 3'],style=wx.CB_READONLY)
+            self.Atom3Menu.SetSelection(0)
             self.Sizer.Add(self.Atom3Menu,(3,1),(1,1))
             self.Layout()
             self.Cancelables.append(self.Atom3Menu)
@@ -237,12 +246,14 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
           if method == 'Dihedral':
             #Residue 4
             self.Residue4Menu = wx.ComboBox(self,-1,choices=['Select Residue 4']+self.getResidues(),style=wx.CB_READONLY)
+            self.Residue4Menu.SetSelection(0)
             self.Sizer.Add(self.Residue4Menu,(3,2),(1,1))
             self.Layout()
             self.Cancelables.append(self.Residue4Menu)
             self.Residue4Menu.Bind(wx.EVT_COMBOBOX,self.setAtom4Items)
             #Atom 4
             self.Atom4Menu = wx.ComboBox(self,-1,choices=['Select Atom 4'],style=wx.CB_READONLY)
+            self.Atom4Menu.SetSelection(0)
             self.Sizer.Add(self.Atom4Menu,(3,3),(1,1))
             self.Layout()
             self.Cancelables.append(self.Atom4Menu)
@@ -252,13 +263,13 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
           if method == 'CoordinateConstraint':
             #X
             self.xText = wx.StaticText(self,-1,'X Coordinate')
-            self.xEntry = wx.TextCtrl(self,-1,"ex. 8.34")
+            self.xEntry = wx.TextCtrl(self,-1,"")
             #Y
             self.yText = wx.StaticText(self,-1,'Y Coordinate')
-            self.yEntry = wx.TextCtrl(self,-1,"ex. 13.24")
+            self.yEntry = wx.TextCtrl(self,-1,"")
             #Z
             self.zText = wx.StaticText(self,-1,'Z Coordinate')
-            self.zEntry = wx.TextCtrl(self,-1,"ex. 3.14")
+            self.zEntry = wx.TextCtrl(self,-1,"")
             #Add entries to sizer
             self.Sizer.Add(self.xText,(3,0),(1,1))
             self.Sizer.Add(self.xEntry,(3,1),(1,1))
