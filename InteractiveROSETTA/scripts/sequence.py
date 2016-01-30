@@ -535,32 +535,32 @@ class EnergyProfileDialog(wx.Dialog):
 	if (platform.system() == "Darwin"):
 	    self.lblIndividualEnergy = wx.StaticBitmap(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/lblServerName.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(xpos, ypos), size=(fig_w, 23))
 	else:
-	    self.lblIndividualEnergy = wx.StaticText(self, -1, "Individual Structure", (xpos, ypos), (395, 25))
+	    self.lblIndividualEnergy = wx.StaticText(self, -1, "Individual Structure: N/A", (xpos, ypos), (395, 25))
 	    self.lblIndividualEnergy.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	xpos = 5; ypos = 35+fig_h+35+fig_h+5
 	if (platform.system() == "Darwin"):
 	    self.lblTotalEnergy = wx.StaticBitmap(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/lblServerName.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(xpos, ypos), size=(int(fig_w / 4)-5, 23))
 	else:
-	    self.lblTotalEnergy = wx.StaticText(self, -1, "Total Energy: ", (xpos, ypos), (int(fig_w / 4), 25))
+	    self.lblTotalEnergy = wx.StaticText(self, -1, "Total Energy: ", (xpos, ypos), (int(fig_w / 2), 25))
 	    self.lblTotalEnergy.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-	xpos = fig_w/4+5; ypos = 35+fig_h+35+fig_h+5
-	if (platform.system() == "Darwin"):
-	    self.lblTotalE = wx.StaticBitmap(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/lblServerName.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(xpos, ypos), size=(int(fig_w / 4)-5, 23))
-	else:
-	    self.lblTotalE = wx.StaticText(self, -1, "", (xpos, ypos), (int(fig_w / 4)-5, 25))
-	    self.lblTotalE.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	#xpos = fig_w/4+5; ypos = 35+fig_h+35+fig_h+5
+	#if (platform.system() == "Darwin"):
+	#    self.lblTotalE = wx.StaticBitmap(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/lblServerName.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(xpos, ypos), size=(int(fig_w / 4)-5, 23))
+	#else:
+	#    self.lblTotalE = wx.StaticText(self, -1, "", (xpos, ypos), (int(fig_w / 4)-5, 25))
+	#    self.lblTotalE.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	xpos = fig_w/2+5; ypos = 35+fig_h+35+fig_h+5
 	if (platform.system() == "Darwin"):
 	    self.lblSelectedTerm = wx.StaticBitmap(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/lblServerName.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(xpos, ypos), size=(int(fig_w / 4)-5, 23))
 	else:
-	    self.lblSelectedTerm = wx.StaticText(self, -1, "", (xpos, ypos), (int(fig_w / 4)-5, 25))
+	    self.lblSelectedTerm = wx.StaticText(self, -1, "", (xpos, ypos), (int(fig_w / 2)-5, 25))
 	    self.lblSelectedTerm.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-	xpos = 3*fig_w/4+5; ypos = 35+fig_h+35+fig_h+5
-	if (platform.system() == "Darwin"):
-	    self.lblTermEnergy = wx.StaticBitmap(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/lblServerName.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(xpos, ypos), size=(int(fig_w / 4)-5, 23))
-	else:
-	    self.lblTermEnergy = wx.StaticText(self, -1, "", (xpos, ypos), (int(fig_w / 4)-5, 25))
-	    self.lblTermEnergy.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+	#xpos = 3*fig_w/4+5; ypos = 35+fig_h+35+fig_h+5
+	#if (platform.system() == "Darwin"):
+	#    self.lblTermEnergy = wx.StaticBitmap(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/lblServerName.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(xpos, ypos), size=(int(fig_w / 4)-5, 23))
+	#else:
+	#    self.lblTermEnergy = wx.StaticText(self, -1, "", (xpos, ypos), (int(fig_w / 4)-5, 25))
+	#    self.lblTermEnergy.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	    
 	xpos = 5+fig_w-240
 	# Combo box for the selected report
@@ -780,29 +780,117 @@ class EnergyProfileDialog(wx.Dialog):
 	self.axesSystem.tick_params(axis="both", length=0, width=0)
 	self.axesSystem.grid(True, axis="y", color="#00FF00", linewidth=0.2, linestyle="solid")
 	self.axesSystem.grid(False, axis="x")
+	self.axesSystem.axhline(y=0, color="white", linewidth=0.2, linestyle="solid")
 	self.canSystem.draw()
+	
+    def recolorIndividualBars(self):
+	maxE = max(self.lstIE[1])
+	minE = min(self.lstIE[1])
+	rangeE = maxE - minE
+	for i in range(0, len(self.individualBars)):
+	    percentage = (self.lstIE[1][i] - minE) / rangeE
+	    if (percentage <= 0.5):
+		b = 255
+		r = int(255.0 * percentage / 0.5)
+	    else:
+		r = 255
+		b = int((1.0 - percentage) / 0.5 * 255.0)
+	    colorcode = "#%02x00%02x" % (r, b)
+	    self.individualBars[i].set_color(colorcode)
+	
+    def loadIndividualEnergies(self):
+	self.axesIndividual.clear()
+	# Find all energy values for this structure
+	self.lstIE = [[], []]
+	for i in range(2, len(self.lstTerms)):
+	    # Some of these terms are not actually energies, skip them
+	    if (self.lstTerms[i] in ["total_score", "rms", "Fnat", "I_sc", "Irms", "cen_rms", "st_rmsd"]):
+		continue
+	    self.lstIE[0].append(self.lstTerms[i])
+	    self.lstIE[1].append(self.lstEnergies[self.iCurrIndx][i])
+	self.individualBars = self.axesIndividual.bar(left=range(0, len(self.lstIE[1])),
+				       height=self.lstIE[1],
+				       width=1.0,
+				       color="#5252FF",
+				       edgecolor="#5252FF",
+				       linewidth=0.0,
+				       picker=5) # Need the picker otherwise the pick_events are not fired
+	maxE = max(self.lstIE[1])
+	minE = min(self.lstIE[1])
+	rangeE = maxE - minE
+	precision = round(math.log(rangeE)) - 1
+	if (maxE > 0 and minE < 0):
+	    if (precision >= 0):
+		lstYTicks = [int(round(minE))]
+	    else:
+		lstYTicks = [minE]
+	    for i in range(1, 10):
+		if (precision >= 0):
+		    lstYTicks.append(int(round(minE + float(i)/9.0*rangeE)))
+		else:
+		    lstYTicks.append("%." + str(-1*precision) + "f" % (minE + float(i)/9.0*rangeE))
+	elif (maxE > 0 and minE > 0):
+	    for i in range(1, 11):
+		if (precision >= 0):
+		    lstYTicks.append(int(round(float(i)/10.0*maxE)))
+		else:
+		    lstYTicks.append("%." + str(-1*precision) + "f" % (float(i)/10.0*maxE))
+	else:
+	    if (precision >= 0):
+		lstYTicks = [int(round(minE))]
+	    else:
+		lstYTicks = [minE]
+	    for i in range(1, 10):
+		if (precision >= 0):
+		    lstYTicks.append(int(round(minE-float(i)/9.0*minE)))
+		else:
+		    lstYTicks.append("%." + str(-1*precision) + "f" % (minE-float(i)/9.0*minE))
+	self.axesIndividual.set_yticklabels(lstYTicks, size=3) # These are the actual labels
+	self.axesIndividual.set_yticks(lstYTicks) # These should be fractional, specifying where on the axis the numbers end up
+	self.axesIndividual.set_xticklabels([], size=3) # These are the actual labels
+	self.axesIndividual.set_xticks(range(0, len(self.lstIE)+1))
+	self.axesIndividual.tick_params(axis="both", length=0, width=0)
+	self.axesIndividual.grid(True, axis="y", color="#00FF00", linewidth=0.2, linestyle="solid")
+	self.axesIndividual.grid(False, axis="x")
+	self.axesIndividual.axhline(y=0, color="white", linewidth=0.2, linestyle="solid")
+	# Color the bars according to increasing energy as usual
+	self.recolorIndividualBars()
+	self.canIndividual.draw()
+	self.lblIndividualEnergy.SetLabel("Individual Structure: N/A")
 	
     def highlightBar(self):
 	for i in range(0, len(self.systemBars)):
 	    if (i == self.iCurrIndx):
-		self.systemBars[i].set_color("#FF5252")
+		self.systemBars[i].set_color("#FFFF00")
 	    else:
 		if (self.lstSelected[i]):
-		    self.systemBars[i].set_color("#FFFF00")
+		    self.systemBars[i].set_color("#FF5252")
 		else:
 		    self.systemBars[i].set_color("#5252FF")
 	self.canSystem.draw()
 	# Update the checkbox
 	self.cbxSelected.SetValue(self.lstSelected[self.iCurrIndx])
+	# Load all non-zero individual energies into the lower graph
 	
     def systemClick(self, event):
 	box_points = event.artist.get_bbox().get_points() # Defines the rectangle clicked
 	indx = int(box_points[0][0])
 	self.iCurrIndx = indx
 	self.highlightBar()
+	self.loadIndividualEnergies()
+	# Show the user the total energy of this structure
+	self.lblIndividualEnergy.SetLabel("Individual Structure: " + self.lstStructures[indx])
+	self.lblTotalEnergy.SetLabel("Total Energy: %.2f REU" % self.lstEnergies[indx][0])	
     
     def individualClick(self, event):
-	print "2"
+	box_points = event.artist.get_bbox().get_points() # Defines the rectangle clicked
+	indx = int(box_points[0][0])
+	self.recolorIndividualBars()
+	self.individualBars[indx].set_color("#FFFF00")
+	self.canIndividual.draw()
+	# Show the user the individual energy term
+	self.lblSelectedTerm.SetLabel(self.lstIE[0][indx] + ": %.2f REU" % self.lstIE[1][indx])
+	self.lblSelectedTerm.SetToolTipString(getScoreTermDescription(self.lstIE[0][indx]))
 	
     def selectStruct(self, event):
 	if (self.iCurrIndx >= 0):
@@ -816,6 +904,10 @@ class EnergyProfileDialog(wx.Dialog):
 	else:
 	    self.iCurrIndx -= 1
 	self.highlightBar()
+	self.loadIndividualEnergies()
+	# Show the user the total energy of this structure
+	self.lblIndividualEnergy.SetLabel("Individual Structure: " + self.lstStructures[indx])
+	self.lblTotalEnergy.SetLabel("Total Energy: %.2f REU" % self.lstEnergies[indx][0])
     
     def nextStruct(self, event):
 	if (self.iCurrIndx < 0):
@@ -825,6 +917,10 @@ class EnergyProfileDialog(wx.Dialog):
 	else:
 	    self.iCurrIndx += 1
 	self.highlightBar()
+	self.loadIndividualEnergies()
+	# Show the user the total energy of this structure
+	self.lblIndividualEnergy.SetLabel("Individual Structure: " + self.lstStructures[indx])
+	self.lblTotalEnergy.SetLabel("Total Energy: %.2f REU" % self.lstEnergies[indx][0])
     
     def fetchStruct(self, event):
 	pass

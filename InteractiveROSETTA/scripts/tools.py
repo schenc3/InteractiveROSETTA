@@ -2008,3 +2008,60 @@ def isAA(resn):
     elif (len(resn) == 1 and resn in "ACDEFGHIKLMNPQRSTVWY"):
 	return True
     return False
+
+def getScoreTermDescription(term):
+    # Try to return a meaningful description of a score term
+    term = term.strip()
+    if (term == "angle_constraint"):
+	return "Energetic penalty for unsatisfied bond angle constraints"
+    elif (term == "atom_pair_constraint"):
+	return "Energetic penalty for unsatisfied atom pairwise distance constraints"
+    elif (term == "chainbreak"):
+	return "Energetic penalty for chain breaks"
+    elif (term == "coordinate_constraint"):
+	return "Energetic penalty for unsatisfied absolute atomic coordinates"
+    elif (term == "dslf_fa13"):
+	return "Disulfide bond energy"
+    elif (term == "fa_atr"):
+	return "Van der Waals inter-residue attractive energy"
+    elif (term == "fa_dun"):
+	return "Dunbrack rotamer energy"
+    elif (term == "fa_elec"):
+	return "Electrostatics energy"
+    elif (term == "fa_intra_rep"):
+	return "Van der Waals intra-residue repulsion energy"
+    elif (term == "fa_rep"):
+	return "Wan der Waals inter-residue repulsion energy"
+    elif (term == "fa_sol"):
+	return "Lazaridius-Karplus solvation energy"
+    elif (term == "hbond_bb_sc"):
+	return "Hydrogen bond energy between backbone and sidechain atoms"
+    elif (term == "hbond_lr_bb"):
+	return "Hydrogen bond energy between long-range backbone atoms"
+    elif (term == "hbond_sc"):
+	return "Hydrogen bond energy between sidechain atoms"
+    elif (term == "hbond_sr_bb"):
+	return "Hydrogen bond energy between short-range backbone atoms"
+    elif (term == "interchain_contact"):
+	return "Energy for promotion of good interchain contacts"
+    elif (term == "interchain_env"):
+	return "Energy for promotion of good interchain environments"
+    elif (term == "interchain_pair"):
+	return "Energy for promotion of good interchain pairwise interactions"
+    elif (term == "interchain_vds"):
+	return "Energy for promotion of good interchain van der Waals interactions"
+    elif (term == "omega"):
+	return "Energy for satisfaction of ideal backbone omega values"
+    elif (term == "p_aa_pp"):
+	return "Energy for promotion of good statistical agreement of amino acid selections given phi and psi"
+    elif (term == "pro_close"):
+	return "Proline closure energy"
+    elif (term == "rama"):
+	return "Energy for promotion of good Ramachandran phi-psi selections"
+    elif (term == "ref"):
+	return "Reference energy"
+    elif (term == "res_type_constraint"):
+	return "Energetic penalty for unsatisfied residue type restrictions"
+    else:
+	# Don't know it
+	return term
