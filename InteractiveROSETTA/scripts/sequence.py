@@ -946,13 +946,29 @@ class EnergyProfileDialog(wx.Dialog):
 	for i in range(0, len(self.systemBars)):
 	    if (self.lstEnergies[i][0] <= self.systemCutoff):
 		self.lstSelected[i] = True
-	    else:
-		self.lstSelected[i] = False
 	self.highlightBar()
 	self.canSystem.draw()	    
     
     def selectTopPercentage(self, event):
-	pass
+	# Select the top n% of structures
+	fraction = float(self.sldPercent.GetValue()) / 100.0
+	# Get a sorted list of the total energies
+	lstE = []
+	for i in range(0, len(self.lstEnergies)):
+	    lstE.append([self.lstEnergies[i], i])
+	# Sort it by energy
+	for i in range(0, len(lstE)-1):
+	    best = i
+	    for j in range(i+1, len(lstE)):
+		if (lstE[j][0] < lstE[best][0]):
+		    best = j
+	    temp = lstE[best]
+	    lstE[best] = lstE[i]
+	    lstE[i] = temp
+	# Check them off
+	for i in range(0, int(len(lstE) * fraction)):
+	    self.lstSelected[lstE[i][1]] = True
+	self.highlightBar()
     
     def fetchStruct(self, event):
 	pass
