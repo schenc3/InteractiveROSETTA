@@ -590,7 +590,8 @@ class EnergyProfileDialog(wx.Dialog):
 	    self.lblEnergyCutoff = wx.StaticText(self, -1, "Select Within Cutoff", (xpos, ypos), style=wx.ALIGN_CENTRE)
 	    self.lblEnergyCutoff.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	    resizeTextControlForUNIX(self.lblEnergyCutoff, xpos, 240)
-	self.sldCutoff = wx.Slider(self, -1, pos=(xpos, ypos), size=(240, 80), value=0, minValue=0, maxValue=1, style=wx.SL_LABELS)
+	self.sldCutoff = wx.Slider(self, -1, pos=(xpos, ypos), size=(240, 80), value=0, minValue=0, maxValue=100, style=wx.SL_LABELS)
+	self.sldCutoff.Bind(wx.EVT_SLIDER, self.cutoffSlide)
 	
 	if (platform.system() == "Darwin"):
 	    self.btnSelectCutoff = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/protocols/GoBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(xpos+60, ypos+75), size=(120, 25))
@@ -600,6 +601,7 @@ class EnergyProfileDialog(wx.Dialog):
 	    self.btnSelectCutoff.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	#self.btnSelectCutoff.Bind(wx.EVT_BUTTON, self.changeProtocol)
 	self.btnSelectCutoff.SetToolTipString("Select all structures with a better energy than the cutoff")
+	self.Bind(wx.EVT_BUTTON, self.selectWithinCutoff, self.btnSelectCutoff)
 	
 	# Slider for grabbing the top X%
 	xpos=5+fig_w+5; ypos=max(ypos+110, int((self.size[1]-5-90 - ypos+100)/2.0)-50)
@@ -622,6 +624,7 @@ class EnergyProfileDialog(wx.Dialog):
 	    self.btnSelectPercent.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	#self.btnSelectPercent.Bind(wx.EVT_BUTTON, self.changeProtocol)
 	self.btnSelectPercent.SetToolTipString("Select the best percentage structures")
+	self.Bind(wx.EVT_BUTTON, self.selectTopPercentage, self.btnSelectPercent)
 	
 	xpos = 5+fig_w-240; ypos = 35+fig_h+5
 	self.cbxSelected = wx.CheckBox(self, -1, "Selected", pos=(xpos-90, ypos), style=wx.ALIGN_LEFT)
@@ -678,6 +681,7 @@ class EnergyProfileDialog(wx.Dialog):
 	    self.btnFetchAll.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	#self.btnFetchAll.Bind(wx.EVT_BUTTON, self.changeProtocol)
 	self.btnFetchAll.SetToolTipString("Fetch all currently selected structures")
+	self.Bind(wx.EVT_BUTTON, self.fetchAll, self.btnFetchAll)
 	
 	if (platform.system() == "Darwin"):
 	    self.btnClearAll = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/protocols/GoBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(xpos+120, ypos+60), size=(120, 25))
@@ -687,6 +691,7 @@ class EnergyProfileDialog(wx.Dialog):
 	    self.btnClearAll.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	#self.btnClearAll.Bind(wx.EVT_BUTTON, self.changeProtocol)
 	self.btnClearAll.SetToolTipString("Clear all currently selected structures")
+	self.Bind(wx.EVT_BUTTON, self.clearAll, self.btnClearAll)
 	
 	# Data structures for saving which structures are selected
 	self.lstEnergies = []
@@ -781,6 +786,10 @@ class EnergyProfileDialog(wx.Dialog):
 	self.axesSystem.grid(True, axis="y", color="#00FF00", linewidth=0.2, linestyle="solid")
 	self.axesSystem.grid(False, axis="x")
 	self.axesSystem.axhline(y=0, color="white", linewidth=0.2, linestyle="solid")
+	self.systemCutoffLine = self.axesSystem.axhline(y=minE, color="#FF00FF", linewidth=0.5, linestyle="solid")
+	self.systemCutoff = minE
+	self.sldCutoff.SetValue(0)
+	self.sldPercent.SetValue(0)
 	self.canSystem.draw()
 	
     def recolorIndividualBars(self):
@@ -870,7 +879,6 @@ class EnergyProfileDialog(wx.Dialog):
 	self.canSystem.draw()
 	# Update the checkbox
 	self.cbxSelected.SetValue(self.lstSelected[self.iCurrIndx])
-	# Load all non-zero individual energies into the lower graph
 	
     def systemClick(self, event):
 	box_points = event.artist.get_bbox().get_points() # Defines the rectangle clicked
@@ -922,8 +930,41 @@ class EnergyProfileDialog(wx.Dialog):
 	self.lblIndividualEnergy.SetLabel("Individual Structure: " + self.lstStructures[indx])
 	self.lblTotalEnergy.SetLabel("Total Energy: %.2f REU" % self.lstEnergies[indx][0])
     
+    def cutoffSlide(self, event):
+	maxE = max(self.lstTotalE)
+	minE = min(self.lstTotalE)
+	rangeE = maxE - minE
+	if (self.sldCutoff.GetValue() == 100):
+	    ypos = maxE
+	else:
+	    ypos = minE + (rangeE * float(self.sldCutoff.GetValue()) / 100.0)
+	self.systemCutoffLine.set_ydata(ypos)
+	self.systemCutoff = ypos
+	self.canSystem.draw()
+    
+    def selectWithinCutoff(self, event):
+	for i in range(0, len(self.systemBars)):
+	    if (self.lstEnergies[i][0] <= self.systemCutoff):
+		self.lstSelected[i] = True
+	    else:
+		self.lstSelected[i] = False
+	self.highlightBar()
+	self.canSystem.draw()	    
+    
+    def selectTopPercentage(self, event):
+	pass
+    
     def fetchStruct(self, event):
 	pass
+    
+    def fetchAll(self, event):
+	pass
+    
+    def clearAll(self, event):
+	for i in range(0, len(self.systemBars)):
+	    self.lstSelected[i] = False
+	self.highlightBar()
+	self.canSystem.draw()
 	
 # ===========================================================================================================
 # CHAIN COLORING CLASSES
