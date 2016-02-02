@@ -425,17 +425,19 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
         constraintString += " %s %s"%(self.Atom4Menu.GetStringSelection().strip(),self.CurrentConstraint['Atom4_ResNum'].strip())
       #CoordinateConstraint
       if method == 'CoordinateConstraint':
-        self.xEntry.SelectAll()
-        self.yEntry.SelectAll()
-        self.zEntry.SelectAll()
-        constraintString += " %s %s %s"%(self.xEntry.GetStringSelection().strip(),self.yEntry.GetStringSelection().strip(),self.zEntry.GetStringSelection().strip())
+        #self.xEntry.SelectAll()
+        #self.yEntry.SelectAll()
+        #self.zEntry.SelectAll()
+        constraintString += " %s %s %s"%(self.xEntry.GetValue().strip(),self.yEntry.GetValue().strip(),self.zEntry.GetValue().strip())
 
       #Function Types
       functions = {'Harmonic':"HARMONIC",'Circular Harmonic':'CIRCULARHARMONIC'}
       if self.CurrentConstraint['FuncType'] in ['Harmonic','Circular Harmonic']:
-        self.x0Entry.SelectAll()
-        self.sdEntry.SelectAll()
-        constraintString += ' %s %s %s'%(functions[self.CurrentConstraint['FuncType']].strip(),self.x0Entry.GetStringSelection().strip(),self.sdEntry.GetStringSelection().strip())
+        #self.x0Entry.SelectAll()
+        #self.sdEntry.SelectAll()
+        print 'self.x0Entry: ',self.x0Entry.GetValue().strip()," unstripped: ",self.x0Entry.GetValue()
+        print 'self.sdEntry: ',self.sdEntry.GetValue().strip()
+        constraintString += ' %s %s %s'%(functions[self.CurrentConstraint['FuncType']].strip(),self.x0Entry.GetValue().strip(),self.sdEntry.GetValue().strip())
       print constraintString
       logInfo(constraintString)
       self.ConstraintSet.append([self.CurrentConstraint['PDB'],self.CurrentConstraint['poseindx'],constraintString])
