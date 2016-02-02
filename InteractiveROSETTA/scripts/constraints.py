@@ -17,10 +17,10 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
     parent will be a ScrolledPanel'''
 
     def __init__(self, parent,minPanel):
-      print 'creating constraint panel'
+      # print 'creating constraint panel'
       wx.lib.scrolledpanel.ScrolledPanel.__init__(self,parent,-1,size=(1000,1000))
       self.minPanel = minPanel
-      print 'Panel initialized'
+      # print 'Panel initialized'
       #sizer
       sizer = wx.GridBagSizer(10,10)
       self.SetSizer(sizer)
@@ -33,8 +33,8 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.ConstraintBtn.SetToolTipString("Add a new constraint to the simulation")
       self.Sizer.Add(self.ConstraintBtn,(0,0),(1,1))
       #self.Layout()
-      print 'constraint button done'
-      print 'load button'
+      # print 'constraint button done'
+      # print 'load button'
       self.Cancelables = []
       self.CurrentConstraint = {}
       self.ConstraintSet = []
@@ -53,7 +53,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.Sizer.Add(self.ClearBtn,(0,2),(1,1))
 
       #Constraints Grid
-      print 'starting constraints grid'
+      # print 'starting constraints grid'
       self.constraintsGrid = wx.grid.Grid(self)
       self.constraintsGrid.CreateGrid(0,1)
       self.constraintsGrid.SetLabelFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -64,19 +64,19 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.selectdr = -1
       self.Sizer.Add(self.constraintsGrid,(6,0),(10,6),wx.EXPAND)
       self.Layout()
-      print 'grid created'
+      # print 'grid created'
 
       #Scrolling
       self.SetupScrolling()
-      print 'scrolling'
+      # print 'scrolling'
 
     def DelConstraint(self,event):
       logInfo("Delete Constraint button pushed!")
       row = self.selectdr
-      print row
+      # print row
       self.ConstraintSet.pop(row)
       self.constraintsGrid.DeleteRows(row,1)
-      print self.ConstraintSet
+      # print self.ConstraintSet
 
     def ClearConstraints(self,event):
       logInfo("Clear Constraints button pushed!")
@@ -108,26 +108,26 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.Cancelables.append(self.constraintTypeMenu)
       #PDB MENU
       pdbs = ['Choose PDB']
-      print pdbs
+      # print pdbs
       for [indx, r, seqpos, poseindx, chainoffset, minType,r_indx] in self.minPanel.minmap:
-        print "poseindx",poseindx
+        # print "poseindx",poseindx
         if len(pdbs) == 0:
-          print 'appending',poseindx
+          # print 'appending',poseindx
           pdbs.append(poseindx)
         isThere = False
         for i in range(0,len(pdbs)):
           if poseindx == pdbs[i]:
-            print("%i = %i"%(poseindx,pdbs[i]))
+            # print("%i = %i"%(poseindx,pdbs[i]))
             isThere = True
             break
         if not isThere:
-          print 'appending',poseindx
+          # print 'appending',poseindx
           pdbs.append(poseindx)
-      print pdbs
+      # print pdbs
       for i in range(1,len(pdbs)):
         pdbs[i] = str(self.seqWin.poses[pdbs[i]].get_id())
-        print pdbs[i]
-      print pdbs
+        # print pdbs[i]
+      # print pdbs
       self.PdbMenu = wx.ComboBox(self,choices=pdbs,style=wx.CB_READONLY)
       self.PdbMenu.SetSelection(0)
 #      self.PdbMenu.Bind(wx.EVT_COMBOBOX,self.setConstraintPDB)
@@ -149,7 +149,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.Sizer.Add(self.NextBtn,(1,3),(1,1))
       self.Layout()
       self.Cancelables.append(self.NextBtn)
-      print 'pdbmenu'
+      # print 'pdbmenu'
       #self.Layout()
 
       #Cancel Button
@@ -305,7 +305,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
     def cancel(self,event=None):
       logInfo('Cancel Button Pressed!')
-      print('Cancel Button Pressed!')
+      # print('Cancel Button Pressed!')
       for item in self.Cancelables:
         item.Show(False)
         item.Destroy()
@@ -321,22 +321,22 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       poseindx = self.CurrentConstraint['poseindx']
       for [indx, r, seqpos, p, chainoffset, minType,r_indx] in minmap:
         if p == poseindx:
-          print indx, r, seqpos, p, chainoffset, r_indx
+          # print indx, r, seqpos, p, chainoffset, r_indx
           chain = self.seqWin.IDs[r][len(self.seqWin.IDs[r])-1]
           if chain == '_':
             chain = ' '
-          print self.seqWin.poses[poseindx][0]
-          print chain
+          # print self.seqWin.poses[poseindx][0]
+          # print chain
           chain_structure = self.seqWin.poses[poseindx][0][chain]
-          print chain_structure.get_id()
+          # print chain_structure.get_id()
           residue = str(r_indx)+":"
           residue += chain_structure[int(seqpos)].resname+":"
-          print residue
+          # print residue
           #Only considering standard amino acids for the moment
           if residue.split(":")[1] in "ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR":
             residue += str(seqpos)+":"
             residue += chain
-            print residue
+            # print residue
             residues.append(residue)
       return residues
 
@@ -349,7 +349,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
           break
       items = ['Select residue 1']
       items += self.getResidues()
-      print items
+      # print items
       self.Residue1Menu = wx.ComboBox(self,choices=items,style=wx.CB_READONLY)
       self.Residue1Menu.Bind(wx.EVT_COMBOBOX,self.setAtom1Items)
       self.Cancelables.append(self.Residue1Menu)
@@ -367,7 +367,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       [r_indx,resname,seqpos,chain] = residue.split(":")
       self.CurrentConstraint['Atom1_ResNum']=r_indx
       atoms = ["Select Atom 1"]+self.getAtoms(residue)
-      print atoms
+      # print atoms
       self.Atom1Menu.Clear()
       self.Atom1Menu.AppendItems(atoms)
       self.Atom1Menu.SetSelection(0)
@@ -377,7 +377,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       poseindx = self.CurrentConstraint['poseindx']
       [r_indx,resname,seqpos,chain] = residue.split(":")
       for atom in self.seqWin.poses[poseindx][0][chain][int(seqpos)]:
-        print atom
+        # print atom
         results.append(atom.get_fullname())
       return results
 
@@ -386,7 +386,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       [r_indx,resname,seqpos,chain] = residue.split(":")
       self.CurrentConstraint['Atom2_ResNum']=r_indx
       atoms = ["Select Atom 2"]+self.getAtoms(residue)
-      print atoms
+      # print atoms
       self.Atom2Menu.Clear()
       self.Atom2Menu.AppendItems(atoms)
       self.Atom2Menu.SetSelection(0)
@@ -395,7 +395,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       [r_indx,resname,seqpos,chain] = residue.split(":")
       self.CurrentConstraint['Atom3_ResNum']=r_indx
       atoms = ["Select Atom 3"]+self.getAtoms(residue)
-      print atoms
+      # print atoms
       self.Atom3Menu.Clear()
       self.Atom3Menu.AppendItems(atoms)
       self.Atom3Menu.SetSelection(0)
@@ -404,7 +404,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       [r_indx,resname,seqpos,chain] = residue.split(":")
       self.CurrentConstraint['Atom4_ResNum']=r_indx
       atoms = ["Select Atom 4"]+self.getAtoms(residue)
-      print atoms
+      # print atoms
       self.Atom4Menu.Clear()
       self.Atom4Menu.AppendItems(atoms)
       self.Atom4Menu.SetSelection(0)
@@ -435,10 +435,10 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       if self.CurrentConstraint['FuncType'] in ['Harmonic','Circular Harmonic']:
         #self.x0Entry.SelectAll()
         #self.sdEntry.SelectAll()
-        print 'self.x0Entry: ',self.x0Entry.GetValue().strip()," unstripped: ",self.x0Entry.GetValue()
-        print 'self.sdEntry: ',self.sdEntry.GetValue().strip()
+        # print 'self.x0Entry: ',self.x0Entry.GetValue().strip()," unstripped: ",self.x0Entry.GetValue()
+        # print 'self.sdEntry: ',self.sdEntry.GetValue().strip()
         constraintString += ' %s %s %s'%(functions[self.CurrentConstraint['FuncType']].strip(),self.x0Entry.GetValue().strip(),self.sdEntry.GetValue().strip())
-      print constraintString
+      # print constraintString
       logInfo(constraintString)
       self.ConstraintSet.append([self.CurrentConstraint['PDB'],self.CurrentConstraint['poseindx'],constraintString])
       self.addToGrid("%s: %s"%(self.CurrentConstraint['PDB'],constraintString))
@@ -454,4 +454,4 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def gridClick(self,event):
       logInfo('Constraints Grid Clicked!')
       self.selectdr = event.GetRow()
-      print self.selectdr
+      # print self.selectdr
