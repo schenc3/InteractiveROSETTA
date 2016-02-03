@@ -300,25 +300,20 @@ class GFTransition:
         logInfo('u1res: %s'%(u1res))
         if u2 != 0:
             #u2res = '(%s) and %s'%(get_flag_residues(u2.iflag),self.ID)
-            u2res = 'model %s and (%s)'%(self.IDs[0][0],get_flag_residues(u1.iflag,boundaries))
+            u2res = 'model %s and (%s)'%(self.IDs[0][0],get_flag_residues(u2.iflag,boundaries))
             logInfo('u2res: %s'%(u2res))
         #pymol.cmd.select('f',fres)
         f.show(pymol,boundaries)
         pymol.cmd.select('u1',u1res)
         if u2 != 0:
             pymol.cmd.select('u2',u2res)
-        #pymol.cmd.hide()
-        #pymol.cmd.show_as('cartoon','f')
-        if u2 != 0:
-            #pymol.cmd.color('red','u1')
             pymol.cmd.set("cartoon_color",'red','u1')
-            #pymol.cmd.color('blue','u2')
             pymol.cmd.set("cartoon_color",'blue','u2')
             pymol.cmd.deselect()
         #is seam
         else:
-            pymol.cmd.hide('cartoon',self.ID)
-            pymol.cmd.hide('ribbon',self.ID)
+            pymol.cmd.hide('cartoon',self.IDs[0][0])
+            pymol.cmd.hide('ribbon',self.IDs[0][0])
             u1.show(pymol,boundaries)
 
 
