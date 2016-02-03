@@ -279,19 +279,19 @@ def doMinimization():
 	if constraintFile.strip() != '':
 	  try:
     	    areCST = True
-    	    print "THERE ARE CONSTRAINTS"
+    	    # print "THERE ARE CONSTRAINTS"
     	    goToSandbox()
     	    cstfile = open(constraintFile.strip(),'r')
     	    for line in cstfile:
-    	      print line
+    	      # print line
     	    cstfile.close()
     	    cstMover = rosetta.protocols.simple_moves.ConstraintSetMover()
-    	    print "cst file is %s!"%(constraintFile.strip())
+    	    # print "cst file is %s!"%(constraintFile.strip())
     	    cstMover.constraint_file(constraintFile.strip())
     	    for cst in [atom_pair_constraint, angle_constraint, dihedral_constraint, coordinate_constraint, constant_constraint]:
     	      scorefxn.set_weight(cst,1.0)
 	  except:
-	    print 'cst failed.'
+	    # print 'cst failed.'
 	    areCST = False
 #	  cstMover.apply(minpose)
 	# Create the minmap
@@ -315,11 +315,11 @@ def doMinimization():
 	    scorefxn.set_weight(pro_close, 0)
 	try:
 	    if areCST:
-	      print 'areCST!'
+	      # print 'areCST!'
 	      try:
 	        cstMover.apply(minpose)
 	      except:
-	        print 'pass!'
+	        # print 'pass!'
 	        pass
 	    minmover.apply(minpose)
 	except:

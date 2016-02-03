@@ -229,16 +229,16 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
  #CONSTRAINT TEST
 	try:
 	 import constraints
-	 print 'constraints imported'
+	 # print 'constraints imported'
 	 self.frame = wx.Frame(None,-1,title="Constraints Menu")
-	 print 'frame generated'
+	 # print 'frame generated'
 	 self.ConstraintPanel=constraints.ConstraintPanel(self.frame,self)
-	 print 'constraintpanel created'
+	 # print 'constraintpanel created'
 	 self.frame.Show()
-	 print 'showing frame'
+	 # print 'showing frame'
 	except Exception as e:
 	 import traceback
-	 print 'Error importing constraints',e.message
+	 # print 'Error importing constraints',e.message
 	 traceback.print_tb(sys.exc_info()[2])
 	 pass
 
