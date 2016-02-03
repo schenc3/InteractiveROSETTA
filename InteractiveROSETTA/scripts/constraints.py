@@ -17,10 +17,10 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
     parent will be a ScrolledPanel'''
 
     def __init__(self, parent,minPanel):
-      print 'creating constraint panel'
+      # print 'creating constraint panel'
       wx.lib.scrolledpanel.ScrolledPanel.__init__(self,parent,-1,size=(1000,1000))
       self.minPanel = minPanel
-      print 'Panel initialized'
+      # print 'Panel initialized'
       #sizer
       sizer = wx.GridBagSizer(10,10)
       self.SetSizer(sizer)
@@ -33,8 +33,8 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.ConstraintBtn.SetToolTipString("Add a new constraint to the simulation")
       self.Sizer.Add(self.ConstraintBtn,(0,0),(1,1))
       #self.Layout()
-      print 'constraint button done'
-      print 'load button'
+      # print 'constraint button done'
+      # print 'load button'
       self.Cancelables = []
       self.CurrentConstraint = {}
       self.ConstraintSet = []
@@ -53,7 +53,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.Sizer.Add(self.ClearBtn,(0,2),(1,1))
 
       #Constraints Grid
-      print 'starting constraints grid'
+      # print 'starting constraints grid'
       self.constraintsGrid = wx.grid.Grid(self)
       self.constraintsGrid.CreateGrid(0,1)
       self.constraintsGrid.SetLabelFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -64,19 +64,19 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.selectdr = -1
       self.Sizer.Add(self.constraintsGrid,(6,0),(10,6),wx.EXPAND)
       self.Layout()
-      print 'grid created'
+      # print 'grid created'
 
       #Scrolling
       self.SetupScrolling()
-      print 'scrolling'
+      # print 'scrolling'
 
     def DelConstraint(self,event):
       logInfo("Delete Constraint button pushed!")
       row = self.selectdr
-      print row
+      # print row
       self.ConstraintSet.pop(row)
       self.constraintsGrid.DeleteRows(row,1)
-      print self.ConstraintSet
+      # print self.ConstraintSet
 
     def ClearConstraints(self,event):
       logInfo("Clear Constraints button pushed!")
@@ -102,32 +102,34 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       logInfo('Add Constraint button clicked!')
       constraintTypes = ['Constraint Type','AtomPair','Angle','Dihedral','CoordinateConstraint']
       self.constraintTypeMenu = wx.ComboBox(self,choices=constraintTypes,style=wx.CB_READONLY)
+      self.constraintTypeMenu.SetSelection(0)
 #      self.constraintTypeMenu.Bind(wx.EVT_COMBOBOX,self.setConstraintType)
       self.Sizer.Add(self.constraintTypeMenu,(1,0),(1,1))
       self.Cancelables.append(self.constraintTypeMenu)
       #PDB MENU
       pdbs = ['Choose PDB']
-      print pdbs
+      # print pdbs
       for [indx, r, seqpos, poseindx, chainoffset, minType,r_indx] in self.minPanel.minmap:
-        print "poseindx",poseindx
+        # print "poseindx",poseindx
         if len(pdbs) == 0:
-          print 'appending',poseindx
+          # print 'appending',poseindx
           pdbs.append(poseindx)
         isThere = False
         for i in range(0,len(pdbs)):
           if poseindx == pdbs[i]:
-            print("%i = %i"%(poseindx,pdbs[i]))
+            # print("%i = %i"%(poseindx,pdbs[i]))
             isThere = True
             break
         if not isThere:
-          print 'appending',poseindx
+          # print 'appending',poseindx
           pdbs.append(poseindx)
-      print pdbs
+      # print pdbs
       for i in range(1,len(pdbs)):
         pdbs[i] = str(self.seqWin.poses[pdbs[i]].get_id())
-        print pdbs[i]
-      print pdbs
+        # print pdbs[i]
+      # print pdbs
       self.PdbMenu = wx.ComboBox(self,choices=pdbs,style=wx.CB_READONLY)
+      self.PdbMenu.SetSelection(0)
 #      self.PdbMenu.Bind(wx.EVT_COMBOBOX,self.setConstraintPDB)
       self.Cancelables.append(self.PdbMenu)
       self.Sizer.Add(self.PdbMenu,(1,1),(1,1))
@@ -135,6 +137,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
       #Constraint Function
       self.FuncMenu = wx.ComboBox(self,-1,choices=["Select Constraint Function","Harmonic","Circular Harmonic"],style=wx.CB_READONLY)
+      self.FuncMenu.SetSelection(0)
 #      self.FuncMenu.Bind(wx.EVT_COMBOBOX,self.setFunction)
       self.Sizer.Add(self.FuncMenu,(1,2),(1,1))
       self.Layout()
@@ -146,7 +149,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.Sizer.Add(self.NextBtn,(1,3),(1,1))
       self.Layout()
       self.Cancelables.append(self.NextBtn)
-      print 'pdbmenu'
+      # print 'pdbmenu'
       #self.Layout()
 
       #Cancel Button
@@ -199,11 +202,13 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
           res1items = ['Select Residue 1']+self.getResidues()
           self.Residue1Menu = wx.ComboBox(self,-1,choices=res1items,style=wx.CB_READONLY)
           self.Residue1Menu.Bind(wx.EVT_COMBOBOX,self.setAtom1Items)
+          self.Residue1Menu.SetSelection(0)
           self.Sizer.Add(self.Residue1Menu,(2,0),(1,1))
           self.Layout()
           self.Cancelables.append(self.Residue1Menu)
           #Atom 1
           self.Atom1Menu = wx.ComboBox(self,-1,choices=['Select Atom 1'],style=wx.CB_READONLY)
+          self.Atom1Menu.SetSelection(0)
           self.Sizer.Add(self.Atom1Menu,(2,1),(1,1))
           self.Layout()
           self.Cancelables.append(self.Atom1Menu)
@@ -211,11 +216,13 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
           res2items = ['Select Residue 2']+self.getResidues()
           self.Residue2Menu = wx.ComboBox(self,-1,choices=res2items,style=wx.CB_READONLY)
           self.Residue2Menu.Bind(wx.EVT_COMBOBOX,self.setAtom2Items)
+          self.Residue2Menu.SetSelection(0)
           self.Sizer.Add(self.Residue2Menu,(2,2),(1,1))
           self.Layout()
           self.Cancelables.append(self.Residue2Menu)
           #Atom 2
           self.Atom2Menu = wx.ComboBox(self,-1,choices=['Select Atom 2'],style=wx.CB_READONLY)
+          self.Atom2Menu.SetSelection(0)
           self.Sizer.Add(self.Atom2Menu,(2,3),(1,1))
           self.Layout()
           self.Cancelables.append(self.Atom2Menu)
@@ -223,12 +230,14 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
           #Angle or Dihdedral
           if method in ['Angle','Dihedral']:
             self.Residue3Menu = wx.ComboBox(self,-1,choices=['Select Residue 3']+self.getResidues(),style=wx.CB_READONLY)
+            self.Residue3Menu.SetSelection(0)
             self.Sizer.Add(self.Residue3Menu,(3,0),(1,1))
             self.Layout()
             self.Cancelables.append(self.Residue3Menu)
             self.Residue3Menu.Bind(wx.EVT_COMBOBOX,self.setAtom3Items)
             #Atom 3
             self.Atom3Menu = wx.ComboBox(self,-1,choices=['Select Atom 3'],style=wx.CB_READONLY)
+            self.Atom3Menu.SetSelection(0)
             self.Sizer.Add(self.Atom3Menu,(3,1),(1,1))
             self.Layout()
             self.Cancelables.append(self.Atom3Menu)
@@ -237,12 +246,14 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
           if method == 'Dihedral':
             #Residue 4
             self.Residue4Menu = wx.ComboBox(self,-1,choices=['Select Residue 4']+self.getResidues(),style=wx.CB_READONLY)
+            self.Residue4Menu.SetSelection(0)
             self.Sizer.Add(self.Residue4Menu,(3,2),(1,1))
             self.Layout()
             self.Cancelables.append(self.Residue4Menu)
             self.Residue4Menu.Bind(wx.EVT_COMBOBOX,self.setAtom4Items)
             #Atom 4
             self.Atom4Menu = wx.ComboBox(self,-1,choices=['Select Atom 4'],style=wx.CB_READONLY)
+            self.Atom4Menu.SetSelection(0)
             self.Sizer.Add(self.Atom4Menu,(3,3),(1,1))
             self.Layout()
             self.Cancelables.append(self.Atom4Menu)
@@ -252,13 +263,13 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
           if method == 'CoordinateConstraint':
             #X
             self.xText = wx.StaticText(self,-1,'X Coordinate')
-            self.xEntry = wx.TextCtrl(self,-1,"ex. 8.34")
+            self.xEntry = wx.TextCtrl(self,-1,"")
             #Y
             self.yText = wx.StaticText(self,-1,'Y Coordinate')
-            self.yEntry = wx.TextCtrl(self,-1,"ex. 13.24")
+            self.yEntry = wx.TextCtrl(self,-1,"")
             #Z
             self.zText = wx.StaticText(self,-1,'Z Coordinate')
-            self.zEntry = wx.TextCtrl(self,-1,"ex. 3.14")
+            self.zEntry = wx.TextCtrl(self,-1,"")
             #Add entries to sizer
             self.Sizer.Add(self.xText,(3,0),(1,1))
             self.Sizer.Add(self.xEntry,(3,1),(1,1))
@@ -294,7 +305,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
     def cancel(self,event=None):
       logInfo('Cancel Button Pressed!')
-      print('Cancel Button Pressed!')
+      # print('Cancel Button Pressed!')
       for item in self.Cancelables:
         item.Show(False)
         item.Destroy()
@@ -310,22 +321,22 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       poseindx = self.CurrentConstraint['poseindx']
       for [indx, r, seqpos, p, chainoffset, minType,r_indx] in minmap:
         if p == poseindx:
-          print indx, r, seqpos, p, chainoffset, r_indx
+          # print indx, r, seqpos, p, chainoffset, r_indx
           chain = self.seqWin.IDs[r][len(self.seqWin.IDs[r])-1]
           if chain == '_':
             chain = ' '
-          print self.seqWin.poses[poseindx][0]
-          print chain
+          # print self.seqWin.poses[poseindx][0]
+          # print chain
           chain_structure = self.seqWin.poses[poseindx][0][chain]
-          print chain_structure.get_id()
+          # print chain_structure.get_id()
           residue = str(r_indx)+":"
           residue += chain_structure[int(seqpos)].resname+":"
-          print residue
+          # print residue
           #Only considering standard amino acids for the moment
           if residue.split(":")[1] in "ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR":
             residue += str(seqpos)+":"
             residue += chain
-            print residue
+            # print residue
             residues.append(residue)
       return residues
 
@@ -338,7 +349,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
           break
       items = ['Select residue 1']
       items += self.getResidues()
-      print items
+      # print items
       self.Residue1Menu = wx.ComboBox(self,choices=items,style=wx.CB_READONLY)
       self.Residue1Menu.Bind(wx.EVT_COMBOBOX,self.setAtom1Items)
       self.Cancelables.append(self.Residue1Menu)
@@ -356,7 +367,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       [r_indx,resname,seqpos,chain] = residue.split(":")
       self.CurrentConstraint['Atom1_ResNum']=r_indx
       atoms = ["Select Atom 1"]+self.getAtoms(residue)
-      print atoms
+      # print atoms
       self.Atom1Menu.Clear()
       self.Atom1Menu.AppendItems(atoms)
       self.Atom1Menu.SetSelection(0)
@@ -366,7 +377,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       poseindx = self.CurrentConstraint['poseindx']
       [r_indx,resname,seqpos,chain] = residue.split(":")
       for atom in self.seqWin.poses[poseindx][0][chain][int(seqpos)]:
-        print atom
+        # print atom
         results.append(atom.get_fullname())
       return results
 
@@ -375,7 +386,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       [r_indx,resname,seqpos,chain] = residue.split(":")
       self.CurrentConstraint['Atom2_ResNum']=r_indx
       atoms = ["Select Atom 2"]+self.getAtoms(residue)
-      print atoms
+      # print atoms
       self.Atom2Menu.Clear()
       self.Atom2Menu.AppendItems(atoms)
       self.Atom2Menu.SetSelection(0)
@@ -384,7 +395,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       [r_indx,resname,seqpos,chain] = residue.split(":")
       self.CurrentConstraint['Atom3_ResNum']=r_indx
       atoms = ["Select Atom 3"]+self.getAtoms(residue)
-      print atoms
+      # print atoms
       self.Atom3Menu.Clear()
       self.Atom3Menu.AppendItems(atoms)
       self.Atom3Menu.SetSelection(0)
@@ -393,7 +404,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       [r_indx,resname,seqpos,chain] = residue.split(":")
       self.CurrentConstraint['Atom4_ResNum']=r_indx
       atoms = ["Select Atom 4"]+self.getAtoms(residue)
-      print atoms
+      # print atoms
       self.Atom4Menu.Clear()
       self.Atom4Menu.AppendItems(atoms)
       self.Atom4Menu.SetSelection(0)
@@ -414,18 +425,20 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
         constraintString += " %s %s"%(self.Atom4Menu.GetStringSelection().strip(),self.CurrentConstraint['Atom4_ResNum'].strip())
       #CoordinateConstraint
       if method == 'CoordinateConstraint':
-        self.xEntry.SelectAll()
-        self.yEntry.SelectAll()
-        self.zEntry.SelectAll()
-        constraintString += " %s %s %s"%(self.xEntry.GetStringSelection().strip(),self.yEntry.GetStringSelection().strip(),self.zEntry.GetStringSelection().strip())
+        #self.xEntry.SelectAll()
+        #self.yEntry.SelectAll()
+        #self.zEntry.SelectAll()
+        constraintString += " %s %s %s"%(self.xEntry.GetValue().strip(),self.yEntry.GetValue().strip(),self.zEntry.GetValue().strip())
 
       #Function Types
       functions = {'Harmonic':"HARMONIC",'Circular Harmonic':'CIRCULARHARMONIC'}
       if self.CurrentConstraint['FuncType'] in ['Harmonic','Circular Harmonic']:
-        self.x0Entry.SelectAll()
-        self.sdEntry.SelectAll()
-        constraintString += ' %s %s %s'%(functions[self.CurrentConstraint['FuncType']].strip(),self.x0Entry.GetStringSelection().strip(),self.sdEntry.GetStringSelection().strip())
-      print constraintString
+        #self.x0Entry.SelectAll()
+        #self.sdEntry.SelectAll()
+        # print 'self.x0Entry: ',self.x0Entry.GetValue().strip()," unstripped: ",self.x0Entry.GetValue()
+        # print 'self.sdEntry: ',self.sdEntry.GetValue().strip()
+        constraintString += ' %s %s %s'%(functions[self.CurrentConstraint['FuncType']].strip(),self.x0Entry.GetValue().strip(),self.sdEntry.GetValue().strip())
+      # print constraintString
       logInfo(constraintString)
       self.ConstraintSet.append([self.CurrentConstraint['PDB'],self.CurrentConstraint['poseindx'],constraintString])
       self.addToGrid("%s: %s"%(self.CurrentConstraint['PDB'],constraintString))
@@ -441,4 +454,4 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def gridClick(self,event):
       logInfo('Constraints Grid Clicked!')
       self.selectdr = event.GetRow()
-      print self.selectdr
+      # print self.selectdr
