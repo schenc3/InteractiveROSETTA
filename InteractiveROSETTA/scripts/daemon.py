@@ -282,7 +282,7 @@ def doMinimization():
     	    # print "THERE ARE CONSTRAINTS"
     	    goToSandbox()
     	    cstfile = open(constraintFile.strip(),'r')
-    	    for line in cstfile:
+    	    # for line in cstfile:
     	      # print line
     	    cstfile.close()
     	    cstMover = rosetta.protocols.simple_moves.ConstraintSetMover()
