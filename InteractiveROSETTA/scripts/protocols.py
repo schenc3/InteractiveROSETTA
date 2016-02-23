@@ -300,6 +300,7 @@ from minimization import MinimizationPanel
 from ensemblebrowser import EnsembleBrowserPanel
 from compmodel import CompModelPanel
 from fixbb import FixbbPanel
+from dagview import DagViewPanel
 #try:
     # This uses openbabel to convert PDBs to MOL2 files, which makes it way easier
     # to add new parameters files since we can just read the PDB that the user is trying
@@ -363,6 +364,7 @@ class ProtocolsPanel(wx.Panel):
 		   "Loop Modeling (KIC)",
 		   "Module Manager",
 		   "Molecular Surfaces", 
+		   "Pathway Visualization (GeoFold)", 
 		   "Point Mutant Scan", 
 		   "Point Mutations", 
 		   "Protein Design (Fixbb)", 
@@ -678,6 +680,8 @@ class ProtocolsPanel(wx.Panel):
 		elif (selectedProtocol == "Flexible Peptide Docking"):
 		    self.protPanel = FlexPepDockPanel(self, self.W, self.H)
 		    self.protPanel.setSelectWin(self.selectWin)
+		elif selectedProtocol == "Pathway Visualization (GeoFold)":
+		    self.protPanel = DagViewPanel(self,self.W,self.H)
 		else:
 		    # Custom module
 		    # Custom modules are aware of PyMOL, the Sequence Window, and the SelectionPanel
