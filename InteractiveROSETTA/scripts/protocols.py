@@ -100,6 +100,8 @@ except:
 		    try:
 			olddir = os.getcwd()
 			os.chdir(os.path.expanduser("~"))
+			if platform.system() == 'Darwin':
+				os.chdir('/Applications/InteractiveROSETTA.app')
 			if (platform.system() == "Windows"):
 			    # Simply execute the file
 			    import subprocess
@@ -113,7 +115,7 @@ except:
 			    print "Installing PyRosetta, please wait..."
 			    packagename = filename[filename.rfind("/")+1:].strip()
 			    try:
-				shutil.move(filename, packagename)
+				shutil.copy(filename, packagename) #shutil.move
 			    except:
 				# It's probably already in the home directory
 				pass
@@ -152,6 +154,12 @@ except:
 				print "Setting up PyRosetta import..."
 				# Now let's try to import it, since we know where it is
 				rosettapath = os.path.expanduser("~") + "/" + directory
+				#rename if OS X
+				if platform.system() == 'Darwin':
+					import os; os.remove(packagename)
+					import commands; print commands.getstatusoutput('mv -v /Applications/InteractiveROSETTA.app/%s /Applications/InteractiveROSETTA.app/PyRosetta'%(directory))[1]
+					directory = 'PyRosetta'
+					rosettapath = '/Applications/InteractiveROSETTA.app/%s'%(directory)
 				# Look for the database
 				if (os.path.exists(os.path.join(rosettapath, "database"))):
 				    rosettadb = os.path.join(rosettapath, "database")
@@ -182,10 +190,16 @@ except:
 				break
 			    except:
 				# Failed for some reason, but it did unpack
-				dlg3 = wx.MessageDialog(None, "InteractiveROSETTA could not import PyRosetta, but it was unpacked to " + os.path.expanduser("~") + "/PyRosetta.  Please try starting InteractiveROSETTA again.", "PyRosetta Cannot Be Imported", wx.OK | wx.ICON_ERROR | wx.CENTRE)
-				dlg3.ShowModal()
-				dlg3.Destroy()
-				exit()
+				if platform.system() == 'Darwin':
+					dlg3 = wx.MessageDialog(None, "InteractiveROSETTA unpacked to /Applications/InteractiveROSETTA.app/PyRosetta", "Please restart InteractiveROSETTA", wx.OK | wx.ICON_ERROR | wx.CENTRE)
+					dlg3.ShowModal()
+					dlg3.Destroy()
+					exit()
+				else:
+					dlg3 = wx.MessageDialog(None, "InteractiveROSETTA could not import PyRosetta, but it was unpacked to " + os.path.expanduser("~") + "/%s.  Please try starting InteractiveROSETTA again."%(directory), "PyRosetta Cannot Be Imported", wx.OK | wx.ICON_ERROR | wx.CENTRE)
+					dlg3.ShowModal()
+					dlg3.Destroy()
+					exit()
 		    except:
 			# Failed for some reason
 			dlg3 = wx.MessageDialog(None, "InteractiveROSETTA could not install PyRosetta.  Please install it manually.", "PyRosetta Cannot Be Installed", wx.OK | wx.ICON_ERROR | wx.CENTRE)
