@@ -6,6 +6,7 @@ import wx
 import shutil
 import wx.lib.scrolledpanel
 import platform
+import webbrowser
 from tools import *
 
 class GFIntermediate:
@@ -400,6 +401,7 @@ class dagPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.SetSizer(vbox)
         self.SetupScrolling()
 
+
     def setPyMOL(self,pymol):
         self.pymol = pymol
         self.cmd = pymol.cmd
@@ -583,7 +585,7 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
         if platform.system() == 'Darwin':
             try:
                 browser = webbrowser.get('Safari')
-            except:
+            except Exception as e:
                 print 'Could not load Safari!  The help files are located at %s/help'%(self.parent.parent.scriptdir)
                 return
             browser.open(self.parent.parent.scriptdir+'/help/dagview.html')

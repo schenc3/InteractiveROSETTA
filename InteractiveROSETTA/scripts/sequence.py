@@ -54,7 +54,7 @@ if (platform.system() == "Linux"):
     libc = ctypes.cdll.LoadLibrary("libc.so.6")
     res_init = libc.__res_init
 elif (platform.system() == "Darwin"):
-    libc = ctypes.cdll.LoadLibrary("libc.dylib")
+    libc = ctypes.cdll.LoadLibrary("/usr/lib/libc.dylib")
     res_init = libc.res_init
 
 # ===========================================================================================================
