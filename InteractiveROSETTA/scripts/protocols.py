@@ -100,6 +100,8 @@ except:
 		    try:
 			olddir = os.getcwd()
 			os.chdir(os.path.expanduser("~"))
+			if platform.system() == 'Darwin':
+				os.chdir('/Applications/InteractiveROSETTA.app')
 			if (platform.system() == "Windows"):
 			    # Simply execute the file
 			    import subprocess
@@ -113,7 +115,7 @@ except:
 			    print "Installing PyRosetta, please wait..."
 			    packagename = filename[filename.rfind("/")+1:].strip()
 			    try:
-				shutil.move(filename, packagename)
+				shutil.copy(filename, packagename) #shutil.move
 			    except:
 				# It's probably already in the home directory
 				pass
@@ -152,6 +154,12 @@ except:
 				print "Setting up PyRosetta import..."
 				# Now let's try to import it, since we know where it is
 				rosettapath = os.path.expanduser("~") + "/" + directory
+				#rename if OS X
+				if platform.system() == 'Darwin':
+					import os; os.remove(packagename)
+					import commands; print commands.getstatusoutput('mv -v /Applications/InteractiveROSETTA.app/%s /Applications/InteractiveROSETTA.app/PyRosetta'%(directory))[1]
+					directory = 'PyRosetta'
+					rosettapath = '/Applications/InteractiveROSETTA.app/%s'%(directory)
 				# Look for the database
 				if (os.path.exists(os.path.join(rosettapath, "database"))):
 				    rosettadb = os.path.join(rosettapath, "database")
@@ -182,10 +190,16 @@ except:
 				break
 			    except:
 				# Failed for some reason, but it did unpack
-				dlg3 = wx.MessageDialog(None, "InteractiveROSETTA could not import PyRosetta, but it was unpacked to " + os.path.expanduser("~") + "/PyRosetta.  Please try starting InteractiveROSETTA again.", "PyRosetta Cannot Be Imported", wx.OK | wx.ICON_ERROR | wx.CENTRE)
-				dlg3.ShowModal()
-				dlg3.Destroy()
-				exit()
+				if platform.system() == 'Darwin':
+					dlg3 = wx.MessageDialog(None, "InteractiveROSETTA unpacked to /Applications/InteractiveROSETTA.app/PyRosetta", "Please restart InteractiveROSETTA", wx.OK | wx.ICON_ERROR | wx.CENTRE)
+					dlg3.ShowModal()
+					dlg3.Destroy()
+					exit()
+				else:
+					dlg3 = wx.MessageDialog(None, "InteractiveROSETTA could not import PyRosetta, but it was unpacked to " + os.path.expanduser("~") + "/%s.  Please try starting InteractiveROSETTA again."%(directory), "PyRosetta Cannot Be Imported", wx.OK | wx.ICON_ERROR | wx.CENTRE)
+					dlg3.ShowModal()
+					dlg3.Destroy()
+					exit()
 		    except:
 			# Failed for some reason
 			dlg3 = wx.MessageDialog(None, "InteractiveROSETTA could not install PyRosetta.  Please install it manually.", "PyRosetta Cannot Be Installed", wx.OK | wx.ICON_ERROR | wx.CENTRE)
@@ -300,6 +314,7 @@ from minimization import MinimizationPanel
 from ensemblebrowser import EnsembleBrowserPanel
 from compmodel import CompModelPanel
 from fixbb import FixbbPanel
+from dagview import DagViewPanel
 #try:
     # This uses openbabel to convert PDBs to MOL2 files, which makes it way easier
     # to add new parameters files since we can just read the PDB that the user is trying
@@ -363,6 +378,7 @@ class ProtocolsPanel(wx.Panel):
 		   "Loop Modeling (KIC)",
 		   "Module Manager",
 		   "Molecular Surfaces", 
+		   "Pathway Visualization (GeoFold)", 
 		   "Point Mutant Scan", 
 		   "Point Mutations", 
 		   "Protein Design (Fixbb)", 
@@ -678,6 +694,8 @@ class ProtocolsPanel(wx.Panel):
 		elif (selectedProtocol == "Flexible Peptide Docking"):
 		    self.protPanel = FlexPepDockPanel(self, self.W, self.H)
 		    self.protPanel.setSelectWin(self.selectWin)
+		elif selectedProtocol == "Pathway Visualization (GeoFold)":
+		    self.protPanel = DagViewPanel(self,self.W,self.H)
 		else:
 		    # Custom module
 		    # Custom modules are aware of PyMOL, the Sequence Window, and the SelectionPanel
@@ -748,6 +766,11 @@ class ProtocolsWin(wx.Frame):
 	    winx = self.stdwinx
 	if (winy > self.screenH - 100):
 	    winy = self.stdwiny
+	# Catch bad cached sizes
+	if (winw < 200):
+	    winw = self.stdwinw
+	if (winh < 200):
+	    winh = self.stdwinh
 	# Maybe the screen resolution has changed and the saved dimensions put the windows in
 	# weird places, so default them to better positions and the user can change them later
 	#if (winw < 350):

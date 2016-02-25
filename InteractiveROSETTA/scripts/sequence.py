@@ -54,7 +54,7 @@ if (platform.system() == "Linux"):
     libc = ctypes.cdll.LoadLibrary("libc.so.6")
     res_init = libc.__res_init
 elif (platform.system() == "Darwin"):
-    libc = ctypes.cdll.LoadLibrary("libc.dylib")
+    libc = ctypes.cdll.LoadLibrary("/usr/lib/libc.dylib")
     res_init = libc.res_init
 
 # ===========================================================================================================
@@ -555,8 +555,13 @@ class SequenceWin(wx.Frame):
 	    winx = self.stdwinx
 	if (winy > self.screenH - 100):
 	    winy = self.stdwiny
+	# Catch bad cached sizes
+	if (winw < 200):
+	    winw = self.stdwinw
+	if (winh < 200):
+	    winh = self.stdwinh
 
-	wx.Frame.__init__(self, None, -1, "InteractiveROSETTA - Sequence Viewer", size=(winw, winh))
+	wx.Frame.__init__(self, None, 0, "InteractiveROSETTA - Sequence Viewer", size=(winw, winh))
 	self.frozen = frozen # This is a legacy Boolean for freezing this window
 	self.poses = poses # Contains BioPython structures for loaded PDBs
 	self.sequences = sequences # Contains strings of sequences per chain
@@ -565,7 +570,6 @@ class SequenceWin(wx.Frame):
 	self.SetPosition((winx, winy))
 	self.SetBackgroundColour("#333333")
 	self.SetIcon(icon.GetIcon())
-
 	# This window needs a scrollable area in case all the buttons don't fit given the smallest size of
 	# the window for certain screen resolutions, so they spill over into a scrolled region
 	self.scroll = wx.ScrolledWindow(self, -1)
@@ -980,7 +984,7 @@ class SequenceWin(wx.Frame):
 
     # SeqViewer receives a keyboard press
     def keyPress(self, event):
-	# Delete (not backspace) key pressed, or on Macs you need to do CTRL+DELETE (Mac DELETE == PC BACKSPACE, not PC DELETE)
+	# Delete (not backspace) key pressed, or on Macs you need to do fn+DELETE (Mac DELETE == PC BACKSPACE, not PC DELETE)
 	if (int(event.GetKeyCode()) == wx.WXK_DELETE or (platform.system() == "Darwin" and int(event.GetKeyCode()) == 8)):
 	    if (self.cannotDelete):
 		# Active protocol prohibits this action

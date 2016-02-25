@@ -18,7 +18,7 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	#    winh = H-290
 	self.SetBackgroundColour("#333333")
 	self.parent = parent
-	
+
 	if (platform.system() == "Windows"):
 	    self.lblProt = wx.StaticText(self, -1, "Superimposition", (25, 15), (270, 25), style=wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -29,7 +29,7 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	    resizeTextControlForUNIX(self.lblProt, 0, self.GetSize()[0])
 	self.lblProt.SetForegroundColour("#FFFFFF")
-	
+
 	if (platform.system() == "Darwin"):
 	    self.HelpBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/HelpBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(295, 10), size=(25, 25))
 	else:
@@ -38,7 +38,7 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.HelpBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.HelpBtn.Bind(wx.EVT_BUTTON, self.showHelp)
 	self.HelpBtn.SetToolTipString("Display the help file for this window")
-	
+
 	if (platform.system() == "Windows"):
 	    self.lblInst = wx.StaticText(self, -1, "Pre-select models/residues to superimpose", (0, 45), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -49,7 +49,7 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	    resizeTextControlForUNIX(self.lblInst, 0, self.GetSize()[0])
 	self.lblInst.SetForegroundColour("#FFFFFF")
-	
+
 	if (platform.system() == "Windows"):
 	    self.lblBase = wx.StaticText(self, -1, "Superimposition\nBase Model:", (0, 78), (175, 30), wx.ALIGN_CENTRE)
 	    self.lblBase.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -62,7 +62,7 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.lblBase.SetForegroundColour("#FFFFFF")
 	self.modelMenu = wx.ComboBox(self, pos=(200, 80), size=(110, 25), choices=[], style=wx.CB_READONLY)
 	self.modelMenu.SetToolTipString("Model to be used as the immovable reference structure")
-	
+
 	if (platform.system() == "Darwin"):
 	    self.btnByModel = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/superimposition/btnByModel_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 120), size=(120, 25))
 	else:
@@ -80,7 +80,7 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnByResidues.Bind(wx.EVT_BUTTON, self.residuesClick)
 	self.btnByResidues.SetToolTipString("Superimpose by only the selected residues")
 	self.alignBy = "Model"
-	
+
 	if (platform.system() == "Darwin"):
 	    self.btnCARMSD = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/superimposition/btnCARMSD_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 155), size=(120, 25))
 	else:
@@ -98,7 +98,7 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnBBRMSD.Bind(wx.EVT_BUTTON, self.BBclick)
 	self.btnBBRMSD.SetToolTipString("Superimpose by all backbone atoms")
 	self.RMSDtype = "CA"
-	
+
 	self.grdRMSDResults = wx.grid.Grid(self)
 	self.grdRMSDResults.CreateGrid(0, 1)
 	if (winh-265 > 200):
@@ -112,7 +112,7 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.grdRMSDResults.SetColSize(0, int(self.grdRMSDResults.GetSize()[0] / 2))
 	self.grdRMSDResults.SetRowLabelSize(int(self.grdRMSDResults.GetSize()[0] / 2))
 	self.grdRMSDResults.SetColLabelValue(0, "CA RMSD")
-	
+
 	ypos = self.grdRMSDResults.GetPosition()[1] + self.grdRMSDResults.GetSize()[1] + 10
 	if (platform.system() == "Darwin"):
 	    self.btnSuperimpose = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/superimposition/btnSuperimpose.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(80, ypos), size=(150, 25))
@@ -123,7 +123,7 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.btnSuperimpose.Bind(wx.EVT_BUTTON, self.superimposeClick)
 	self.btnSuperimpose.SetToolTipString("Begin superimposition")
 	self.models = []
-	
+
 	self.scrollh = self.btnSuperimpose.GetPosition()[1] + self.btnSuperimpose.GetSize()[1] + 5
 	self.SetScrollbars(1, 1, 320, self.scrollh)
 	self.winscrollpos = 0
@@ -143,7 +143,7 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
     def setSeqWin(self, seqWin):
 	self.seqWin = seqWin
-	
+
     def setPyMOL(self, pymol):
 	self.pymol = pymol
 	self.cmd = pymol.cmd
@@ -154,7 +154,7 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	event.Skip()
 
     def activate(self):
-	if (self.seqWin):		
+	if (self.seqWin):
 	    # Find out which models are selected and the locations of their poses
 	    selection = self.seqWin.getSelectedResidues()
 	    rowsSelected = []
@@ -209,7 +209,7 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.btnByModel.SetForegroundColour("#000000")
 	    self.btnByResidues.SetForegroundColour("#FF0000")
 	logInfo("Superimposition type set to By Residues")
-	
+
     def CAclick(self, event):
 	self.RMSDtype = "CA"
 	if (platform.system() == "Darwin"):
@@ -245,7 +245,7 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.seqWin.setAlignType("Align")
 	    #self.seqWin.alignType = "Align"
 	    if (platform.system() == "Darwin"):
-		self.seqWin.AlignBtn.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/AlignBtn_Align.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.seqWin.AlignBtn.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/sequence/AlignBtn_Align.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 	    else:
 		self.seqWin.AlignBtn.SetLabel("Align")
 	    self.seqWin.regenerateLookupTable() # To get a MUSCLE alignment in the sequence window
@@ -263,7 +263,7 @@ class SuperimpositionPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    if (dlg.ShowModal() == wx.ID_OK):
 		pass
 	    dlg.Destroy()
-	
+
     def doSuperimposition(self):
 	# GetStringSelection does not appear to work right on Linux, so use GetValue instead
 	self.baseModel = str(self.modelMenu.GetValue())
