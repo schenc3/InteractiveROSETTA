@@ -587,8 +587,6 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
                 browser = webbrowser.get('Safari')
             except Exception as e:
                 print 'Could not load Safari!  The help files are located at %s/help'%(self.parent.parent.scriptdir)
-                print e.message
-                import traceback, sys; traceback.print_tb(sys.exc_info()[2])
                 return
             browser.open(self.parent.parent.scriptdir+'/help/dagview.html')
         else:
