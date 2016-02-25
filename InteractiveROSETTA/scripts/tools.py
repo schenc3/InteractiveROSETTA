@@ -1831,6 +1831,7 @@ def cleanPDB(pdbfile, acceptNCAAs=False):
     # BioPython drops these, but it can lead to all kinds of problems later on
     # So I will keep a record of the backbone atoms of the current residue and if we encounter
     # a BB atom with the same residue index, we will assume it's a new residue and renumber the residue
+    # Updated to keep the first such residue and drop all others with the same index
     lastBBatoms = []
     altlocs_taken = ""
     #f = open(pdbfile.strip(), "r")
@@ -1871,14 +1872,18 @@ def cleanPDB(pdbfile, acceptNCAAs=False):
 		lastBBatoms = []
 	    # This is only done if this is a new residue, but not a new residue indx
 	    if (aline[22:27] != curr_res or aline[12:16] in lastBBatoms):
-		curr_res = res
-		atomtypes = []
-		lastBBatoms = []
-		# Assign the altloc to whatever the most recent altloc used was
-		for char in " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789":
-		    if (not(char in altlocs_taken)):
-			altlocs_taken = char + altlocs_taken
-			break
+		pass
+#==============================================================================
+# 		curr_res = res
+# 		atomtypes = []
+# 		lastBBatoms = []
+# 		# Assign the altloc to whatever the most recent altloc used was
+# 		for char in " ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+# 		    if (not(char in altlocs_taken)):
+# 			altlocs_taken = char + altlocs_taken
+# 			break
+#==============================================================================
+
 	    res = res[0:4] + altlocs_taken[0]
 	    atomtype = aline[12:16]
 	    if (atomtype in [" C  ", " CA ", " O  ", " N  "]):
