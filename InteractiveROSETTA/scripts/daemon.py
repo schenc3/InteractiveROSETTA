@@ -72,7 +72,9 @@ except:
 	    os.chdir(rosettapath)
 	    os.environ["PYROSETTA_DATABASE"] = rosettadb
 	    # Try to import Rosetta
-	    from rosetta import *
+        try:
+	       from rosetta import *
+        except:
 	    # Extra imports for KIC
 	    from rosetta.protocols.loops.loop_mover.perturb import *
 	    from rosetta.protocols.loops.loop_mover.refine import *
@@ -215,13 +217,13 @@ class ScanCapturing(list):
 	self.f = open("scanprogress", "w", 1)
 	sys.stdout = self.f #self._stringio = StringIO()
 	return self
-    
+
     def __exit__(self, *args):
 	self.f.close()
 	sys.stdout = self._stdout
 
 captured_stdout = ""
-stdout_pipe = None    
+stdout_pipe = None
 def drain_pipe():
     global captured_stdout
     while True:
@@ -235,6 +237,7 @@ def drain_pipe():
 def doMinimization():
     # Grab the params files in the user's personal directory
     initializeRosetta()
+    import rosetta.protocols.simple_moves
     try:
 	f = open("minimizeinput", "r")
     except:
@@ -249,11 +252,11 @@ def doMinimization():
     #    SCOREFXN: The file containing the score function weights
     for aline in f:
 	if (aline[0:3] == "JOB"):
-	    [pdbfile, strstart, strend] = aline.split("\t")[1:]
-	    jobs.append([pdbfile.strip(), int(strstart), int(strend)])
+	    [pdbfile, strstart, strend,constraintfile] = aline.split("\t")[1:]
+	    jobs.append([pdbfile.strip(), int(strstart), int(strend),constraintfile])
 	elif (aline[0:6] == "MINMAP"):
-	    [strindx, strr, strseqpos, strp, strco, mtype] = aline.split("\t")[1:]
-	    minmap.append([int(strindx), int(strr), int(strseqpos), int(strp), int(strco), mtype.strip()])
+	    [strindx, strr, strseqpos, strp, strco, mtype,strr_indx] = aline.split("\t")[1:]
+	    minmap.append([int(strindx), int(strr), int(strseqpos), int(strp), int(strco), mtype.strip(),int(strr_indx.strip())])
 	elif (aline[0:7] == "MINTYPE"):
 	    minType = aline.split("\t")[1].strip()
 	elif (aline[0:8] == "SCOREFXN"):
@@ -267,28 +270,59 @@ def doMinimization():
 	raise Exception("ERROR: The scoring function weights could not be initialized!")
     f = open("minimizeoutputtemp", "w")
     pyobs = PyMOL_Observer()
-    for [pdbfile, minmapstart, minmapend] in jobs:
+    for [pdbfile, minmapstart, minmapend,constraintFile] in jobs:
 	# Get a Rosetta pose of the file
 	minpose = pose_from_pdb(pdbfile)
 	minpose.pdb_info().name("protocol_view")
 	pyobs.add_observer(minpose)
 	pyobs.pymol.update_energy(True)
+	areCST = False
+	#Configure Constraints
+	if constraintFile.strip() != '':
+	  try:
+    	    areCST = True
+    	    # print "THERE ARE CONSTRAINTS"
+    	    goToSandbox()
+    	    cstfile = open(constraintFile.strip(),'r')
+    	    # for line in cstfile:
+    	      # print line
+    	    cstfile.close()
+    	    cstMover = rosetta.protocols.simple_moves.ConstraintSetMover()
+    	    # print "cst file is %s!"%(constraintFile.strip())
+    	    cstMover.constraint_file(constraintFile.strip())
+    	    for cst in [atom_pair_constraint, angle_constraint, dihedral_constraint, coordinate_constraint, constant_constraint]:
+    	      scorefxn.set_weight(cst,1.0)
+	  except:
+	    # print 'cst failed.'
+	    areCST = False
+#	  cstMover.apply(minpose)
 	# Create the minmap
 	mm = MoveMap()
 	mm.set_bb(False)
 	mm.set_chi(False)
-	for [indx, r, seqpos, p, co, mtype] in minmap[minmapstart:minmapend]:
+	for [indx, r, seqpos, p, co, mtype,r_indx] in minmap[minmapstart:minmapend]:
 	    if (mtype == "BB" or mtype == "BB+Chi"):
-		mm.set_bb(indx+1, True)
+		#mm.set_bb(indx+1, True)
+		mm.set_bb(r_indx,True)
 	    if (mtype == "Chi" or mtype == "BB+Chi"):
-		mm.set_chi(indx+1, True)
+		#mm.set_chi(indx+1, True)
+		mm.set_chi(r_indx,True)
 	# Minimize using dfpmin always
 	minmover = MinMover(mm, scorefxn, "dfpmin", 0.01, True)
+#	if constraintFile.strip() != '':
+#	  minmover.set_cst_file(constraintFile.strip())
 	if (minType == "Cartesian"):
 	    minmover.cartesian(True)
 	    scorefxn.set_weight(cart_bonded, 0.5)
 	    scorefxn.set_weight(pro_close, 0)
 	try:
+	    if areCST:
+	      # print 'areCST!'
+	      try:
+	        cstMover.apply(minpose)
+	      except:
+	        # print 'pass!'
+	        pass
 	    minmover.apply(minpose)
 	except:
 	    raise Exception("ERROR: The Rosetta minimizer failed!")
@@ -311,7 +345,13 @@ def doMinimization():
 	    f.write("\n")
     f.close()
     # So the main GUI doesn't attempt to read the file before the daemon finishes writing its contents
-    os.rename("minimizeoutputtemp", "minimizeoutput")
+    renamed = False
+    while not renamed:
+      try:
+        os.rename("minimizeoutputtemp", "minimizeoutput")
+        renamed = True
+      except:
+        renamed = False
 
 # Fixed backbone design protocol
 def doFixbb():
@@ -1248,7 +1288,7 @@ def doKIC(stage="Coarse"):
 		pose.dump_pdb(outputdir + "/" + pdbfile.split(".pdb")[0] + ("_KIC_%4.4i.pdb" % (decoy+1)))
 	# So the main GUI doesn't attempt to read the file before the daemon finishes writing its contents
 	os.rename("kicoutputtemp", "kicoutput")
-	
+
 def doRepack(scorefxninput="", pdbfile="repackme.pdb", lastStage=False):
     initializeRosetta()
     try:
@@ -1666,7 +1706,7 @@ def doThread(scriptdir):
     # Initialize scoring function
     initstr = frag_files+frag_sizes+fasta+psipred + "-in:file:template_pdb "
     for template in pdbfiles:
-	initstr = initstr + template + " " 
+	initstr = initstr + template + " "
     initstr = initstr + "-in:file:alignment align.aln -cm:aln_format general -overwrite"
     if (not(os.path.exists("temp"))):
 	os.makedirs("temp")
@@ -1684,7 +1724,7 @@ def doThread(scriptdir):
     JobDistributor.get_instance().go(LRT)
     #os.chdir("..")
     # Get the PDB
-    # If the only PDB file in "temp" is the abinitio structure, then we can use glob to get it without knowing 
+    # If the only PDB file in "temp" is the abinitio structure, then we can use glob to get it without knowing
     # the exact filename
     pdbfiles = glob.glob("temp/*.pdb")
     outputpdb = "thread_T.pdb"
@@ -1951,6 +1991,6 @@ def daemonLoop():
 		pass
 	if (platform.system() != "Windows" and count == 2):
 	    stillrunning = True
-	    
+
 if (__name__ == "__main__"):
     daemonLoop()

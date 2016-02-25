@@ -54,7 +54,7 @@ if (platform.system() == "Linux"):
     libc = ctypes.cdll.LoadLibrary("libc.so.6")
     res_init = libc.__res_init
 elif (platform.system() == "Darwin"):
-    libc = ctypes.cdll.LoadLibrary("libc.dylib")
+    libc = ctypes.cdll.LoadLibrary("/usr/lib/libc.dylib")
     res_init = libc.res_init
 
 # ===========================================================================================================
@@ -984,7 +984,7 @@ class SequenceWin(wx.Frame):
 	
     # SeqViewer receives a keyboard press
     def keyPress(self, event):
-	# Delete (not backspace) key pressed, or on Macs you need to do CTRL+DELETE (Mac DELETE == PC BACKSPACE, not PC DELETE)
+	# Delete (not backspace) key pressed, or on Macs you need to do fn+DELETE (Mac DELETE == PC BACKSPACE, not PC DELETE)
 	if (int(event.GetKeyCode()) == wx.WXK_DELETE or (platform.system() == "Darwin" and int(event.GetKeyCode()) == 8)):
 	    if (self.cannotDelete):
 		# Active protocol prohibits this action
