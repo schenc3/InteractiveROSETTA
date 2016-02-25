@@ -69,13 +69,13 @@ class ProteinDialog(wx.Dialog):
 	else:
 	    wx.Dialog.__init__(self, parent, -1, "Protein Loader", size=(300, 330), style=wx.DEFAULT_DIALOG_STYLE | wx.STAY_ON_TOP)
 	self.scriptdir = scriptdir
-	
+
 	# Structure label
 	self.lblPDB = wx.StaticText(self, -1, PDB, (0, 10), (300, 30))
 	self.lblPDB.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	resizeTextControlForUNIX(self.lblPDB, 0, 300)
 	midpoint = int(math.ceil(len(chains) / 2.0))
-	
+
 	# Display checkboxes for each chain
 	# Space them evenly into two columns
 	ygap = int(160 / midpoint)
@@ -86,7 +86,7 @@ class ProteinDialog(wx.Dialog):
 	    else:
 		self.chkChains.append(wx.CheckBox(self, -1, "Chain " + chains[i], (170, 40+(ygap*(i-midpoint)))))
 	    self.chkChains[i].SetValue(True)
-	
+
 	# Toggle buttons for loading water and HETATMs
 	if (platform.system() == "Darwin"):
 	    self.btnWater = wx.BitmapButton(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/btnWater_Load.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (5, 230), (140, 30))
@@ -104,7 +104,7 @@ class ProteinDialog(wx.Dialog):
 	self.btnHETATM.Bind(wx.EVT_BUTTON, self.HETATMToggle)
 	self.btnHETATM.SetToolTipString("Load the protein with heteroatoms present")
 	self.hetatmState = "Load HETATMs"
-	
+
 	# OK and Cancel buttons
 	if (platform.system() == "Darwin"):
 	    self.btnOK = wx.BitmapButton(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/btnOK_Protein.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (5, 265), (140, 30))
@@ -120,10 +120,10 @@ class ProteinDialog(wx.Dialog):
 	    self.btnCancel.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnCancel.Bind(wx.EVT_BUTTON, self.cancelDialog)
 	self.btnCancel.SetToolTipString("Cancel this load operation")
-	
+
 	# Center the dialog in the middle of the screen
 	self.SetPosition((wx.GetDisplaySize()[0]/2-150, wx.GetDisplaySize()[1]/2-150))
-	
+
     def waterToggle(self, event):
 	# Toggle loading waters on and off
 	if (platform.system() == "Darwin"):
@@ -140,7 +140,7 @@ class ProteinDialog(wx.Dialog):
 	    else:
 		self.btnWater.SetLabel("Load Waters")
 		self.btnWater.SetToolTipString("Load the protein with waters present")
-    
+
     def HETATMToggle(self, event):
 	# Toggle loading HETATMs on and off
 	if (platform.system() == "Darwin"):
@@ -157,12 +157,12 @@ class ProteinDialog(wx.Dialog):
 	    else:
 		self.btnHETATM.SetLabel("Load HETATMs")
 		self.btnHETATM.SetToolTipString("Load the protein with heteroatoms present")
-	    
+
     # Return codes, the main script knows how to interpret these
     def okDialog(self, event):
 	self.SetReturnCode(wx.OK)
 	self.EndModal(wx.OK)
-	
+
     def cancelDialog(self, event):
 	self.SetReturnCode(wx.CANCEL)
 	self.EndModal(wx.CANCEL)
@@ -179,7 +179,7 @@ class ModelDialog(wx.Dialog):
 	else:
 	    wx.Dialog.__init__(self, parent, -1, "Modify Model Data", size=(300, 150))
 	self.scriptdir = scriptdir
-	
+
 	# We need to have a handle on the parent (the SeqViewer) so we can see the parent's data
 	self.parent = parent
 	# We also need to know what the original model name and chain ID are
@@ -189,7 +189,7 @@ class ModelDialog(wx.Dialog):
 	    self.inputID = model + "|_"
 	else:
 	    self.inputID = model + "|" + chain
-	
+
 	# Label and text box for the model name
 	if (platform.system() == "Darwin"):
 	    self.lblModel = wx.StaticBitmap(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/lblModel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 13), size=(60, 30))
@@ -199,7 +199,7 @@ class ModelDialog(wx.Dialog):
 	self.txtModel = wx.TextCtrl(self, -1, pos=(70, 10), size=(225, 25))
 	self.txtModel.SetValue(model)
 	self.txtModel.SetToolTipString("The name of the protein")
-	
+
 	# Label and text box for the chain ID
 	if (platform.system() == "Darwin"):
 	    self.lblChain = wx.StaticBitmap(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/lblChain.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 53), size=(140, 30))
@@ -209,7 +209,7 @@ class ModelDialog(wx.Dialog):
 	self.txtChain = wx.TextCtrl(self, -1, pos=(150, 50), size=(145, 25))
 	self.txtChain.SetValue(chain)
 	self.txtChain.SetToolTipString("The identifier of the chain")
-	
+
 	# OK and Cancel buttons
 	if (platform.system() == "Darwin"):
 	    self.btnOK = wx.BitmapButton(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/btnOK_Protein.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (5, 90), (140, 30))
@@ -225,10 +225,10 @@ class ModelDialog(wx.Dialog):
 	    self.btnCancel.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnCancel.Bind(wx.EVT_BUTTON, self.cancelDialog)
 	self.btnCancel.SetToolTipString("Cancel this operation")
-	
+
 	# Center this dialog
 	self.SetPosition((wx.GetDisplaySize()[0]/2-150, wx.GetDisplaySize()[1]/2-150))
-	    
+
     def okDialog(self, event):
 	# Is the chainID valid?
 	chainID = self.txtChain.GetValue().strip().upper()
@@ -267,7 +267,7 @@ class ModelDialog(wx.Dialog):
 	self.return_model = modelname
 	self.SetReturnCode(wx.OK)
 	self.EndModal(wx.OK)
-	
+
     def cancelDialog(self, event):
 	self.SetReturnCode(wx.CANCEL)
 	self.EndModal(wx.CANCEL)
@@ -284,12 +284,12 @@ class DownloadManagerDialog(wx.Dialog):
 	else:
 	    wx.Dialog.__init__(self, parent, -1, "Download Manager", size=(400, 330))
 	self.scriptdir = scriptdir
-	
+
 	# Save the parent, to access the parent's data
 	self.parent = parent
 	# The parent will let us know what the saved URL was for the default setting
 	self.inURL = serverURL
-	
+
 	# Label, text box, and test button for specifying a remote server URL
 	if (platform.system() == "Darwin"):
 	    self.lblServerName = wx.StaticBitmap(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/lblServerName.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 7), size=(395, 23))
@@ -306,17 +306,17 @@ class DownloadManagerDialog(wx.Dialog):
 	    self.btnTest.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnTest.Bind(wx.EVT_BUTTON, self.testConnection)
 	self.btnTest.SetToolTipString("Test that InteractiveROSETTA can connect to this server")
-	
+
 	# Set up a scrollable area for displaying all of the jobs that have been sent to the server
 	if (platform.system() == "Darwin"):
 	    self.lblActive = wx.StaticBitmap(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/lblActive.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 60), size=(395, 30))
 	else:
 	    self.lblActive = wx.StaticText(self, -1, "Active Submissions:", (5, 60), (395, 30))
 	    self.lblActive.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-	
+
 	self.scroll = wx.ScrolledWindow(self, -1, pos=(0, 80))
 	self.scroll.SetSize((self.GetSize()[0], 180))
-	
+
 	# Read the downloadwatch file to see the active jobs
 	try:
 	    jobs = 0
@@ -404,10 +404,10 @@ class DownloadManagerDialog(wx.Dialog):
 	    self.btnCancel.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.btnCancel.Bind(wx.EVT_BUTTON, self.cancelDialog)
 	self.btnCancel.SetToolTipString("Cancel this operation")
-	
+
 	# Center this window
 	self.SetPosition((wx.GetDisplaySize()[0]/2-150, wx.GetDisplaySize()[1]/2-150))
-    
+
     def cancelJob(self, event):
 	# This function attempts to tell the server to kill this job because the user is no longer interested
 	# The server should receive this request and terminate the job, to free up resources for other jobs
@@ -452,7 +452,7 @@ class DownloadManagerDialog(wx.Dialog):
 	    fout.close()
 	    self.lblDownloads[indx*4+3].SetLabel("Status: REMOVED")
 	dlg.Destroy()
-    
+
     def testConnection(self, event):
 	# Simply send a test request to the server
 	# The server receives it and tells us that it was successful, or we catch an error
@@ -467,12 +467,12 @@ class DownloadManagerDialog(wx.Dialog):
 	    dlg2 = wx.MessageDialog(self, "Server test failed!  Either the server is not set up to run Rosetta, the server is behind a firewall, or you do not have a network connection.", "Server Failed", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
 	    dlg2.ShowModal()
 	    dlg2.Destroy()
-    
+
     def okDialog(self, event):
 	# All OK does over Cancel is save the indicated server name
 	self.SetReturnCode(wx.OK)
 	self.EndModal(wx.OK)
-	
+
     def cancelDialog(self, event):
 	self.SetReturnCode(wx.CANCEL)
 	self.EndModal(wx.CANCEL)
@@ -493,7 +493,7 @@ class ChainColorRenderer(glr.GridLabelRenderer):
     def __init__(self, bgcolor):
 	# BG color is taken from a list of colors for different chain indices
 	self._bgcolor = bgcolor
-	
+
     def Draw(self, grid, dc, rect, row):
 	# This code draws a thin color strip of color _bgcolor in the row labels so the user can see which
 	# colors get assigned to which chains
@@ -520,7 +520,7 @@ class SequenceWin(wx.Frame):
 	self.screenH = H; self.screenW = W
 	winx = self.stdwinx; winy = self.stdwiny
 	winw = self.stdwinw; winh = self.stdwinh
-	
+
 	homedir = os.path.expanduser("~")
 	# The location of InteractiveROSETTA.py and the last directory InteractiveROSETTA was working in
 	self.scriptdir = scriptdir
@@ -575,7 +575,7 @@ class SequenceWin(wx.Frame):
 	self.scroll = wx.ScrolledWindow(self, -1)
 	self.scroll.SetBackgroundColour("#333333")
 	self.scroll.SetSize((winw, winh))
-	
+
 	# Load PDBs button
 	if (platform.system() == "Darwin"):
 	    self.LoadPDBsBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/LoadPDBsBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 10), size=(100, 25))
@@ -585,7 +585,7 @@ class SequenceWin(wx.Frame):
 	    self.LoadPDBsBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.LoadPDBsBtn.Bind(wx.EVT_BUTTON, self.loadPDBsClick)
 	self.LoadPDBsBtn.SetToolTipString("Load new PDBs into PyMOL")
-	
+
 	# Label and text box for searching RCSB for structures
 	if (platform.system() == "Darwin"):
 	    self.labelRCSB = wx.StaticBitmap(self.scroll, -1, wx.Image(self.scriptdir + "/images/osx/sequence/labelRCSB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(115, 13), size=(43, 25))
@@ -606,7 +606,7 @@ class SequenceWin(wx.Frame):
 	    self.FetchBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.FetchBtn.Bind(wx.EVT_BUTTON, self.fetchClick)
 	self.FetchBtn.SetToolTipString("Fetch PDB code from RCSB")
-	
+
 	# Close button to close selected chains, or all chains
 	if (platform.system() == "Darwin"):
 	    self.CloseBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/CloseBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(310, 10), size=(100, 25))
@@ -616,7 +616,7 @@ class SequenceWin(wx.Frame):
 	    self.CloseBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.CloseBtn.Bind(wx.EVT_BUTTON, self.closeClick)
 	self.CloseBtn.SetToolTipString("Close selected/all PDBs")
-	
+
 	# Save button for saving the selected models, or all models
 	if (platform.system() == "Darwin"):
 	    self.SaveBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/SaveBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(410, 10), size=(100, 25))
@@ -626,7 +626,7 @@ class SequenceWin(wx.Frame):
 	    self.SaveBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.SaveBtn.Bind(wx.EVT_BUTTON, self.saveClick)
 	self.SaveBtn.SetToolTipString("Save selected/all loaded models")
-	
+
 	# Save Image button, for taking a picture of the current PyMOL view
 	if (platform.system() == "Darwin"):
 	    self.SaveImageBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/SaveImageBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(510, 10), size=(100, 25))
@@ -636,7 +636,7 @@ class SequenceWin(wx.Frame):
 	    self.SaveImageBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.SaveImageBtn.Bind(wx.EVT_BUTTON, self.saveImage)
 	self.SaveImageBtn.SetToolTipString("Save the current PyMOL view to a PNG image")
-	
+
 	# Join button, for joining two selected chains into one
 	if (platform.system() == "Darwin"):
 	    self.JoinBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/JoinChainsBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(610, 10), size=(100, 25))
@@ -646,7 +646,7 @@ class SequenceWin(wx.Frame):
 	    self.JoinBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.JoinBtn.Bind(wx.EVT_BUTTON, self.joinChains)
 	self.JoinBtn.SetToolTipString("Join the selected chains into a single chain")
-	
+
 	# Renumber button, for renumbering a chain sequence from one starting with the selected residue
 	if (platform.system() == "Darwin"):
 	    self.RenumberBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/RenumberBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(710, 10), size=(100, 25))
@@ -656,7 +656,7 @@ class SequenceWin(wx.Frame):
 	    self.RenumberBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.RenumberBtn.Bind(wx.EVT_BUTTON, self.renumber)
 	self.RenumberBtn.SetToolTipString("Renumber the selected chain from 1, using the selected residue as the new start")
-	
+
 	# Server button, for displaying the download manager dialog, above
 	if (platform.system() == "Darwin"):
 	    self.ServerBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/ServerBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(max(810, W-445), 10), size=(25, 25))
@@ -675,7 +675,7 @@ class SequenceWin(wx.Frame):
 	    self.HelpBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.HelpBtn.Bind(wx.EVT_BUTTON, self.showHelp)
 	self.HelpBtn.SetToolTipString("Display the help file for this window")
-	
+
 	# This is the grid that contains all of the primary sequences
 	# Recall that "SequenceViewer" is a special class that inherits from wx.grid.Grid
 	# This should be read-only
@@ -696,7 +696,7 @@ class SequenceWin(wx.Frame):
 	# This boolean is set to True when a protocol view in PyMOL is active, so the selection
 	# panel knows it should be changing representations on the protocol_view only
 	self.protocol_view_active = False
-	
+
 	# These are the buttons to the right of the SeqViewer
 	xpos = self.SeqViewer.GetPosition()[0] + self.SeqViewer.GetSize()[0] + 5
 	# BGRecolor button, for changing the color of PyMOL's background
@@ -734,7 +734,7 @@ class SequenceWin(wx.Frame):
 	self.viewMode = "Mono"
 	self.colorMode = "No Color"
 	self.alignType = "From 1"
-	
+
 	# Timers are used for some updates
 	# saveTimer is used to periodically save the window dimensions/positions
 	# PyMOLUpdateTimer gets fired when a selection happens so the PyMOL window gets updated
@@ -747,13 +747,13 @@ class SequenceWin(wx.Frame):
 	self.Bind(wx.EVT_TIMER, self.updatePyMOLSelection, self.PyMOLUpdateTimer)
 	self.Bind(wx.EVT_TIMER, self.downloader, self.DownloadTimer)
 	self.DownloadTimer.Start(60000)
-	
+
 	# We need to be aware of when this window gains or loses focus
 	self.Bind(wx.EVT_ACTIVATE, self.focusEvent)
 	# And when it changes size/position
 	self.Bind(wx.EVT_SIZE, self.windowGeometryChange)
 	self.Bind(wx.EVT_MOTION, self.windowGeometryChange)
-	
+
 	# Bind a bunch of key and mouse events to the SeqViewer
 	self.Bind(wx.grid.EVT_GRID_LABEL_LEFT_CLICK, self.labelClick)
 	self.SeqViewer.GetGridWindow().Bind(wx.EVT_LEFT_UP, self.leftRelease)
@@ -765,21 +765,21 @@ class SequenceWin(wx.Frame):
 	self.Bind(wx.EVT_CHAR_HOOK, self.keyPress)
 	#self.SeqViewer.GetGridWindow().Bind(wx.EVT_KEY_DOWN, self.keyPress)
 	self.selectedResidues = []
-	
+
 	# This is the label along the bottom of the window, that displays what Rosetta is currently doing
 	self.labelMsg = wx.StaticText(self.scroll, -1, "", (10, 205), (winw-50, 25))
 	self.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	self.labelMsg.SetForegroundColour("#FFFFFF")
 	# We need a queue in case there are multiple things going on at once
 	self.msgQueue = []
-	
+
 	self.scroll.SetScrollbars(1, 1, max(self.StereoBtn.GetPosition()[0] + self.StereoBtn.GetSize()[0] + 5, self.HelpBtn.GetPosition()[0] + self.HelpBtn.GetSize()[0] + 5), winh-40)
 	self.Show()
-	
+
 	# These handlers are needed for loading and writing BioPython structures
 	self.pdbreader = Bio.PDB.PDBParser()
 	self.pdbwriter = Bio.PDB.PDBIO()
-	
+
 	# This is a dictionary that maps DSSP secondary structure codes to cell bg colors and cell text colors
 	self.sscolormap = {}
 	self.sscolormap["H"] = ("red", "white")
@@ -790,7 +790,7 @@ class SequenceWin(wx.Frame):
 	self.sscolormap["B"] = ("blue", "white")
 	self.sscolormap["G"] = ("orange", "black")
 	self.sscolormap["I"] = ("orange", "black")
-	
+
 	# Try to use DSSP if it is available, to give more accurate secondary structure coloring
 	try:
 	    if (platform.system() == "Windows"):
@@ -806,24 +806,24 @@ class SequenceWin(wx.Frame):
 		print "      Install it to " + self.scriptdir + "\\bin\\dssp_win to make it available."
 	    else:
 		print "      Install it to " + self.scriptdir + "/bin/dssp_unix to make it available."
-	
+
     # ======================================================================================================
     # Functions for setting external handlers
-    
+
     def setProtWin(self, protWin):
 	self.protWin = protWin
-	
+
     def setProtocolPanel(self, protPanel):
 	self.protPanel = protPanel
-	
+
     def setPyMOL(self, pymol):
 	self.pymol = pymol
 	self.cmd = pymol.cmd
 	self.stored = pymol.stored
-	
+
     # ======================================================================================================
     # Functions for window frame events
-	
+
     # Window gains/or loses focus
     def focusEvent(self, event):
 	self.inFocus = event.GetActive()
@@ -854,7 +854,7 @@ class SequenceWin(wx.Frame):
 	    self.selectUpdate(self.inFocus)
 	    self.inFocus = False
 	    #self.selectTimer.Stop()
-	
+
     # Window geometry changes
     def windowGeometryChange(self, event):
 	# This function starts a timer that will write out the size and position of this window to a cfg file
@@ -862,7 +862,7 @@ class SequenceWin(wx.Frame):
 	if (not(self.saveTimer.IsRunning())):
 	    self.saveTimer.Start(5000)
 	event.Skip()
-	
+
     # Helper function for saving the window data
     def saveWindowData(self, event):
 	self.saveTimer.Stop()
@@ -941,16 +941,16 @@ class SequenceWin(wx.Frame):
 		else:
 		    f.write("[RENDER]\t" + getPrimaryRender() + "\n")
 	f.close()
-	
+
     # ======================================================================================================
     # Functions for SeqViewer events
-	
+
     # Mouse moves around in the SeqViewer
     def onMouseOver(self, event):
 	# This function is used to dynamically change what SeqViewer's tooltip is so you can see what
 	# the residue type and PDB number are easily
 	# This was taken from a StackOverflow post
-	
+
         # Use CalcUnscrolledPosition() to get the mouse position
         # within the entire grid including what's offscreen
         x, y = self.SeqViewer.CalcUnscrolledPosition(event.GetX(),event.GetY())
@@ -981,7 +981,7 @@ class SequenceWin(wx.Frame):
 	except:
 	    event.GetEventObject().SetToolTipString("")
 	event.Skip()
-	
+
     # SeqViewer receives a keyboard press
     def keyPress(self, event):
 	# Delete (not backspace) key pressed, or on Macs you need to do fn+DELETE (Mac DELETE == PC BACKSPACE, not PC DELETE)
@@ -1163,11 +1163,11 @@ class SequenceWin(wx.Frame):
 	    except:
 		pass
 	event.Skip()
-	
+
     # Left mouse click on SeqViewer cell
     def leftClick(self, event):
 	# This only is used on Windows
-	# For some reason CTRL selections on Windows highlight the boxes but don't register as selections so 
+	# For some reason CTRL selections on Windows highlight the boxes but don't register as selections so
 	# I have to do a selection from the code
 	# If CTRL is not held down then the event should be skipped so weird behavior doesn't ensue for normal
 	# selections and SHIFT selections
@@ -1200,7 +1200,7 @@ class SequenceWin(wx.Frame):
 	else:
 	    # Default behavior
 	    event.Skip()
-    
+
     # Left mouse release on SeqViewer cell
     def leftRelease(self, event):
 	# User released the mouse on the grid, probably because they were selecting things
@@ -1228,12 +1228,12 @@ class SequenceWin(wx.Frame):
 	self.PyMOLUpdateTimer.Stop()
 	self.PyMOLUpdateTimer.Start(100)
 	event.Skip()
-	
+
     # Single left mouse click on a SeqViewer label
     def labelClick(self, event):
 	# This is a dummy function so single clicks on the labels do nothing because I am not skipping the event
 	pass
-    
+
     # Double left mouse click on a SeqViewer label
     def labelDClick(self, event):
 	# For some odd reason, normal label clicks, although they look like they select the row/column, do not
@@ -1249,7 +1249,7 @@ class SequenceWin(wx.Frame):
 		self.SeqViewer.SelectBlock(r, c, r, c, True)
 	self.selectUpdate(updatePyMOL=True)
 	# Do not skip the event, because I don't want anything strange happening
-	
+
     # Single right mouse click on a SeqViewer label
     def labelRClick(self, event):
 	r = event.GetRow()
@@ -1384,7 +1384,7 @@ class SequenceWin(wx.Frame):
 			self.cmd.remove("model " + model + " and chain " + chain)
 		    # Get the BioPython structure back
 		    self.cmd.save("temp.pdb", "model " + dlg.return_model)
-		    self.poses[r] = self.pdbreader.get_structure(dlg.return_model, "temp.pdb")		    
+		    self.poses[r] = self.pdbreader.get_structure(dlg.return_model, "temp.pdb")
 		model = dlg.return_model
 	    if (chain != dlg.return_chain):
 		# This is easy, just rename the chain in both the ID list and PyMOL
@@ -1404,7 +1404,7 @@ class SequenceWin(wx.Frame):
 	    for k in range(0, len(self.IDs)):
 		self.updateSeqViewer(rowToUpdate=k)
 	    self.regenerateLookupTable()
-	    
+
     # Helper function for selecting the indicated residue
     # Used by the comparative modeler
     def selectNthResidue(self, r, indx, addToSelection=False, updateSelection=True):
@@ -1437,25 +1437,25 @@ class SequenceWin(wx.Frame):
 	    totalscroll = int(scrollpospx - shift*w)
 	    scrollunits = int(totalscroll / scrollunitconv)
 	    self.SeqViewer.Scroll(max(0, scrollunits), 0)
-	    
+
     # Helper function for selecting things in PyMOL using PyMOL's cmd API
     def selectInPyMOL(self, r, c, model, chain, res, resend, first):
 	self.selectedResidues.append([r, c])
 	# If this the first selection, we have to create "sele"
 	if (first):
 	    # We have to select by model, chain, and residue index using a bunch of "and" operators
-	    if ("ABCDEFGHIJKLMNOPQRSTUVWXYZ".find(chain) < 0):
+	    if ("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".find(chain) < 0):
 		self.cmd.select("temp", "model " + str(model) + " and resi " + str(res) + "-" + str(resend))
 	    else:
 		self.cmd.select("temp", "model " + str(model) + " and chain " + str(chain) + " and resi " + str(res) + "-" + str(resend))
 	else:
 	    # To get PyMOL to add to the existing selection "sele", we used the "or" operator to union "sele"
 	    # with the new atoms
-	    if ("ABCDEFGHIJKLMNOPQRSTUVWXYZ".find(chain) < 0):
+	    if ("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".find(chain) < 0):
 		self.cmd.select("temp", "temp or (model " + str(model) + " and resi " + str(res) + "-" + str(resend) + ")")
 	    else:
 		self.cmd.select("temp", "temp or (model " + str(model) + " and chain " + str(chain) + " and resi " + str(res) + "-" + str(resend) + ")")
-    
+
     # Function for updating selections between PyMOL and SeqViewer
     # If updatePyMOL==True, then PyMOL is being updated with SeqViewer information
     # Otherwise, SeqViewer is being updated with PyMOL information
@@ -1478,7 +1478,7 @@ class SequenceWin(wx.Frame):
 	    # If there are issues, try getting rid of the "-i" option in InteractiveROSETTA.py for pymol initialization
 	    # because then that internal side window showing the selections will be visible enabling you to see what
 	    # is happening with the selections more easily
-	    # 
+	    #
 	    # We have to try to get everything into the "seqsele" name, but sometimes if the user clicks on things in PyMOL
 	    # they end up in sele, such that there is sele and seqsele
 	    # If you don't combine the two, then everything in sele ends up getting dropped
@@ -1558,7 +1558,7 @@ class SequenceWin(wx.Frame):
 			for field in fields[0:len(fields)-1]:
 			    model = model + field + "|"
 			model = model[0:len(model)-1] # Trim off the last "|"
-			chain = fields[len(fields)-1]			    
+			chain = fields[len(fields)-1]
 			# Save this as a selected residue
 			amISelected[x][y] = True
 			#self.selectCell(x, y, model, chain, res, first)
@@ -1650,7 +1650,7 @@ class SequenceWin(wx.Frame):
 		    self.SeqViewer.DeselectRow(r)
 	self.logSelection()
 	self.cmd.enable("seqsele")
-	    
+
     # This function redraws SeqViewer to have the current sequences and/or IDs
     # If rowToUpdate is >= 0, then we are only updating that row (otherwise we are adding new rows)
     # If relabel==True, then the column labels need to be updated (probably because we are labeling by
@@ -1757,7 +1757,7 @@ class SequenceWin(wx.Frame):
 	self.SeqViewer.DisableDragColSize()
 	self.SeqViewer.DisableDragRowSize()
 	self.SeqViewer.SetRowLabelSize(maxwidth+10)
-	
+
     def regenerateLookupTable(self):
 	# Whenever residues/chains are deleted, the selectLookup table gets all messed up because the rows and columns
 	# don't refer to the same things anymore, so we have to recalculate it after a deletion
@@ -1771,10 +1771,10 @@ class SequenceWin(wx.Frame):
 		    self.selectLookup[(self.IDs[r], int(self.indxToSeqPos[r][c][1]))] = (r, c)
 	# Recolor the residues
 	self.recolorResidues()
-	    
+
     # ======================================================================================================
     # Functions for button events
-    
+
     def loadPDBsClick(self, event):
 	logInfo("Clicked Load PDB button")
 	self.labelMsg.SetLabel("Loading PDB into Rosetta, please be patient...")
@@ -1920,7 +1920,7 @@ class SequenceWin(wx.Frame):
 	    self.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	    self.labelMsg.SetForegroundColour("#FFFFFF")
 	    logInfo("Cancelled out of Load PDB")
-    
+
     def fetchClick(self, event):
 	# You have to do this on Linux due to the libc bug
 	if (platform.system() != "Windows"):
@@ -2106,7 +2106,7 @@ class SequenceWin(wx.Frame):
 		self.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 		self.labelMsg.SetForegroundColour("#FFFFFF")
 		pass
-    
+
     # Helper function for loading a PDBfile into PyMOL
     # dummy is an unused variable for when this function ran in a thread
     # pdbfile is the filename to load
@@ -2178,10 +2178,11 @@ class SequenceWin(wx.Frame):
 		taken = False
 		for ID in self.IDs:
 		    fields = ID.split("|")
-		    currID = ""
+		    '''currID = ""
 		    for j in range(0, len(fields)-1):
 			currID = currID + fields[j] + "|"
-		    currID = currID[0:len(currID)-1]
+		    currID = currID[0:len(currID)-1'''
+		    currID = '|'.join(fields[:len(fields)-1])
 		    if (currID == newID + "_" + str(i)):
 			taken = True
 			break
@@ -2256,7 +2257,8 @@ class SequenceWin(wx.Frame):
 	    foundHETATMs = False
 	    for ch in biopdb[0]:
 		for residue in ch:
-		    if (not(residue.resname in "ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR ")):
+		    if (not(residue.resname in "ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR ADE THY CYT GUA")):
+			logInfo('residue not found: %s'%(residue.resname))
 			foundHETATMs = True
 			break
 		if (foundHETATMs):
@@ -2301,7 +2303,7 @@ class SequenceWin(wx.Frame):
 		    for residue in ch:
 			if (not(self.keepWaters) and residue.resname == "HOH"):
 			    toRemove.append((ch.id, residue.id))
-			elif (not(self.keepHETATMs) and not(residue.resname in "ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR ")):
+			elif (not(self.keepHETATMs) and not(residue.resname in "ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR ADE THY CYT GUA")):
 			    toRemove.append((ch.id, residue.id))
 		for (ch, res) in toRemove:
 		    biopdb[0][ch].detach_child(res)
@@ -2355,7 +2357,7 @@ class SequenceWin(wx.Frame):
 	    for c in biopdb[0]:
 		if (not(first)):
 		    self.poses.append(None) # Just to keep all the lists the same size
-		    # Use getPoseIndex to find out where the real structure is given a row 
+		    # Use getPoseIndex to find out where the real structure is given a row
 		first = False
 		chain = c.id
 		if (len(chain.strip()) == 0):
@@ -2435,7 +2437,7 @@ class SequenceWin(wx.Frame):
 	    if (self.dsspexe != "N/A"):
 		self.cmd.rebuild()
 	    defaultPyMOLView(self.cmd, newID)
-    
+
     def closeClick(self, event):
 	# Find out which rows have a selection
 	logInfo("Clicked on Close PDB button")
@@ -2482,7 +2484,7 @@ class SequenceWin(wx.Frame):
 	#self.recolorResidues()
 	self.SeqViewer.ClearSelection()
 	self.protPanel.activate()
-	
+
     def deleteChain(self, currRow):
 	if (self.cannotDelete):
 	    wx.MessageBox("You cannot perform deletions while a protocol is active!", "Cannot Delete During Protocol", wx.OK|wx.ICON_EXCLAMATION)
@@ -2554,7 +2556,7 @@ class SequenceWin(wx.Frame):
 	    self.pdbwriter.set_structure(self.poses[poseloc])
 	    self.pdbwriter.save(currID + ".pdb")
 	self.protWin.Selection.recolorSavedChainColors()
-	
+
     def saveClick(self, event):
 	logInfo("Clicked on Save PDB button")
 	models = self.getSelectedModels()
@@ -2643,7 +2645,7 @@ class SequenceWin(wx.Frame):
 		    logInfo("Cancelled out of Save PDB")
 		break
 	    dlg.Destroy()
-	
+
     def saveImage(self, event):
 	logInfo("Clicked on Save Image button")
 	dlg = wx.FileDialog(
@@ -2678,7 +2680,7 @@ class SequenceWin(wx.Frame):
 	    logInfo("Saved an image to " + filename)
 	else:
 	    logInfo("Cancelled out of Save Image")
-    
+
     def joinChains(self, event):
 	# Do we have more than one chain selected, if not, do nothing
 	selectedrows = self.getSelectedChains()
@@ -2780,7 +2782,7 @@ class SequenceWin(wx.Frame):
 	defaultPyMOLView(self.cmd, basemodel)
 	# Clear the selection otherwise deleted rows are still considered selected
 	self.SeqViewer.ClearSelection()
-    
+
     def renumber(self, event):
 	# Get the selected elements and make sure there is only one
 	topLefts = self.SeqViewer.GetSelectionBlockTopLeft()
@@ -2868,7 +2870,7 @@ class SequenceWin(wx.Frame):
 	defaultPyMOLView(self.cmd, model)
 	# Clear the selection otherwise deleted rows are still considered selected
 	self.SeqViewer.ClearSelection()
-    
+
     def configureServer(self, event):
 	# This button allows the user to give a name for the remote server
 	# After submission, a test will be made and the user will be notified if the test was sucessful
@@ -2879,7 +2881,7 @@ class SequenceWin(wx.Frame):
 	    setServerName(dlg.txtServerName.GetValue().strip())
 	    self.saveWindowData(None)
         dlg.Destroy()
-    
+
     def showHelp(self, event):
 	# Open the help page
 	if (platform.system() == "Darwin"):
@@ -2891,7 +2893,7 @@ class SequenceWin(wx.Frame):
 	    browser.open(self.scriptdir + "/help/sequence.html")
 	else:
 	    webbrowser.open(self.scriptdir + "/help/sequence.html")
-	    
+
     def bgRecolor(self, event):
 	logInfo("Clicked on the background color button")
 	dlg = wx.ColourDialog(self)
@@ -2904,7 +2906,7 @@ class SequenceWin(wx.Frame):
 	else:
 	    logInfo("Cancelled out of background color selection")
 	dlg.Destroy()
-	    
+
     def stereoToggle(self, event):
 	if (self.viewMode == "Mono"):
 	    self.viewMode = "Crosseye"
@@ -2938,7 +2940,7 @@ class SequenceWin(wx.Frame):
 		self.StereoBtn.SetLabel(self.viewMode)
 	    self.cmd.stereo("off")
 	    logInfo("Turned stereo off")
-	    
+
     def recolorClick(self, event):
 	if (self.colorMode == "No Color"):
 	    self.colorMode = "SS"
@@ -2978,7 +2980,7 @@ class SequenceWin(wx.Frame):
 		self.ColoringBtn.SetLabel(self.colorMode)
 	    logInfo("Turned residue coloring off")
 	self.recolorResidues()
-	
+
     def recolorResidues(self):
 	# This function will recolor the cells in the SeqViewer to either a default white mode,
 	# a secondary structure coloring, or a B-factor coloring
@@ -3058,14 +3060,14 @@ class SequenceWin(wx.Frame):
 		for c in range(0, self.SeqViewer.NumberCols):
 		    self.SeqViewer.SetCellBackgroundColour(r, c, "white")
 		    self.SeqViewer.SetCellTextColour(r, c, "black")
-    
+
 	    AA_list2 = ['A','C','D','E','F','G','H','I','K','L','M','N','P','Q','R','S','T','V','W','Y']
-    
+
 	    AA_list = ['ALA','CYS','ASP','GLU','PHE','GLY','HIS','ILE','LYS','LEU',
 	'MET','ASN','PRO','GLN','ARG','SER','THR','VAL','TRP','TYR']
-	
+
 	    background = [0.0828,0.0194,0.0586,0.0599,0.0401,0.0809,0.0227,0.0555,0.0596,0.0802,0.0207,0.0473,0.0460,0.0373,0.0464,0.0625,0.0589,0.0687,0.0151,0.0376]
-	    
+
 	    r = 0
 	    while (r < self.SeqViewer.NumberRows):
 		if (self.poses[r]):
@@ -3074,9 +3076,9 @@ class SequenceWin(wx.Frame):
 		    for ch in self.poses[r][0]:
 			seq = []
 			for res in ch:
-			    if (res.resname != 'HOH') and (res.resname in AA_list): 
+			    if (res.resname != 'HOH') and (res.resname in AA_list):
 				seq.append(AA_list.index(res.resname)+1)
-			    elif (res.resname != 'HOH'): 
+			    elif (res.resname != 'HOH'):
 				seq.append(21)
 			nres = len(seq)
 			np.asarray(seq)
@@ -3091,7 +3093,7 @@ class SequenceWin(wx.Frame):
 				backbone[:,(n+2)] = res["C"].get_coord()
 				backbone[:,(n+3)] = res["O"].get_coord()
 				n = n + 4
-			    else: 
+			    else:
 				n = n + 4
 			#Send seq and backbone information to HMMSTR, and return gamma sequence profile
 			if(platform.system() == "Windows"):
@@ -3122,7 +3124,7 @@ class SequenceWin(wx.Frame):
 				except:
 				    c = c + 1
 				    continue
-			
+
 				green = int(128 + (llratio[c] * 42))
 				red = 254 - green
 				color = "#%02x%02x%02x" % (red, green, 0)
@@ -3141,7 +3143,7 @@ class SequenceWin(wx.Frame):
 		    self.SeqViewer.SetCellTextColour(r, c, "black")
 	self.cmd.enable("sele")
 	self.SeqViewer.Refresh() # Needed to repaint otherwise the changes don't occur
-	    
+
     def realignToggle(self, event):
 	if (self.alignType == "From 1"):
 	    self.alignType = "PDB #"
@@ -3160,7 +3162,7 @@ class SequenceWin(wx.Frame):
 	    else:
 		self.AlignBtn.SetLabel(self.alignType)
 	    self.regenerateLookupTable()
-	    
+
     def setAlignType(self, val):
 	self.alignType = val
 
@@ -3364,7 +3366,7 @@ class SequenceWin(wx.Frame):
 		else:
 		    self.updateSeqViewer(r, relabel=True)
 	else:
-	    # Simple, just make everything numbered from one again 
+	    # Simple, just make everything numbered from one again
 	    r = 0
 	    for pose in self.poses:
 		if (pose):
@@ -3385,7 +3387,7 @@ class SequenceWin(wx.Frame):
 		    self.updateSeqViewer(r, relabel=False)
 		else:
 		    self.updateSeqViewer(r, relabel=True)
-	    
+
     # ======================================================================================================
     # Download manager functions
 
@@ -3638,7 +3640,7 @@ class SequenceWin(wx.Frame):
 				continue
 			    else:
 				os.remove(str(filename))
-			    dlg2.Destroy() 
+			    dlg2.Destroy()
 			break
 		goToSandbox()
 		os.rename("results" + packageext, str(filename))
@@ -3717,7 +3719,7 @@ class SequenceWin(wx.Frame):
 	    return self.selectLookup[(model + "|" + chain, int(seqpos))]
 	except:
 	    return False
-	
+
     def doesAtomExist(self, model, chain, seqpos, atomname):
 	# Useful function for determining whether a residue exists on a model
 	# You can easily figure this out by trying to access it in the lookup table
@@ -3740,7 +3742,7 @@ class SequenceWin(wx.Frame):
     def updatePyMOLSelection(self, event):
 	self.PyMOLUpdateTimer.Stop()
 	self.selectUpdate(updatePyMOL=True)
-	
+
     def getSelectedResidues(self):
 	# Useful function for getting selected information
 	# First we have to update the selection in case the user was fiddling in PyMOL and
@@ -3778,10 +3780,10 @@ class SequenceWin(wx.Frame):
 		selection.append([r, poseindx, []])
 	    selection[len(selection)-1][2].append(resi)
 	return selection
-    
+
     def numChains(self):
 	return self.SeqViewer.NumberRows
-    
+
     def getChainPose(self, row):
 	# Gets a pose object for only one chain given either by the row in the sequence window or the ID
 	if (not("int" in str(type(row)))):
@@ -3791,7 +3793,7 @@ class SequenceWin(wx.Frame):
 	if (chain == "_"):
 	    chain = " "
 	return self.poses[poseindx][0][chain]
-    
+
     def getModelForChain(self, r):
 	# Useful function to figure out what the name of the model is from an ID in the SeqViewer
 	ID = self.IDs[r]
@@ -3801,7 +3803,7 @@ class SequenceWin(wx.Frame):
 	    model = model + field + "|"
 	model = model[0:len(model)-1]
 	return model
-    
+
     def getPoseIndex(self, r):
 	# Given a row in the SeqViewer, find out the index of the pose for this sequence
 	poseindx = -1
@@ -3810,7 +3812,7 @@ class SequenceWin(wx.Frame):
 		poseindx = i
 		break
 	return poseindx
-    
+
     def getPoseIndexForModel(self, model):
 	# Given a model, find the poseindx
 	poseindx = -1
@@ -3819,7 +3821,7 @@ class SequenceWin(wx.Frame):
 		poseindx = i
 		break
 	return poseindx
-    
+
     def getRosettaIndex(self, model, chain, seqpos):
 	# Useful function for finding what the Rosetta index of a model/chain/seqpos is
 	poseindx = self.getPoseIndexForModel(model)
@@ -3834,7 +3836,7 @@ class SequenceWin(wx.Frame):
 		    return ires
 		ires = ires + 1
 	return -1
-    
+
     def getResidueInfo(self, model, rosettaindx):
 	# Useful function for getting the chain and seqpos given a model and rosetta index
 	ires = 1
@@ -3845,7 +3847,7 @@ class SequenceWin(wx.Frame):
 		    return (ch.id, residue.id[1])
 		ires = ires + 1
 	return None
-    
+
     def getResidueTypeFromRosettaIndx(self, model, rosettaindx):
 	# Given the absolute Rosetta index of a residue, get its residue type
 	poseindx = self.getPoseIndexForModel(model)
@@ -3854,7 +3856,7 @@ class SequenceWin(wx.Frame):
 	    if (ires - len(self.sequences[r]) <= 0):
 		return self.sequences[r][ires-1]
 	    ires -= len(self.sequences[r])
-    
+
     def getIsCanonicalAA(self, r, c):
 	# Find out if this is a canonical CAA or not
 	poseindx = self.getPoseIndex(r)
@@ -3868,7 +3870,7 @@ class SequenceWin(wx.Frame):
 	if (not(restype in "ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR ")):
 	    return False
 	return True
-    
+
     def getSelectedModels(self):
 	# Gets the names of the models that are currently selected for easy PyMOL access
 	topLefts = self.SeqViewer.GetSelectionBlockTopLeft()
@@ -3885,7 +3887,7 @@ class SequenceWin(wx.Frame):
 	    if (not(newmodel in models)):
 		models.append(newmodel)
 	return models
-    
+
     def getSelectedChains(self):
 	# Gets all the selected chains
 	topLefts = self.SeqViewer.GetSelectionBlockTopLeft()
@@ -3898,12 +3900,12 @@ class SequenceWin(wx.Frame):
 		    rowsSelected.append(r)
 	rowsSelected.sort()
 	return rowsSelected
-    
+
     def areResiduesSelected(self):
 	# Used by the selection panel to see if residues are selected
 	# If not, the button usually defaults to applying the operation to everything
 	return (len(self.SeqViewer.GetSelectionBlockTopLeft()) > 0)
-	
+
     def reloadPose(self, poseindx, model, newpdb):
 	# This function reloads a pose from a protocol and reloads the sequence, which may
 	# have changed
@@ -3929,7 +3931,7 @@ class SequenceWin(wx.Frame):
 	# Rerun DSSP
 	self.rerunDSSPForModel(model, newpdb)
 	self.regenerateLookupTable()
-	
+
     def rerunDSSPForModel(self, model, pdbmodel="None"):
 	try:
 	    if (self.dsspexe == "N/A"):
@@ -3965,7 +3967,7 @@ class SequenceWin(wx.Frame):
 	except:
 	    # In case something goes wrong, just use PyMOL's SS coloring and don't crash
 	    pass
-	
+
     def reloadFromPyMOL(self, poseindx):
 	# This function reloads the BioPython data dumped from PyMOL
 	# You need this for docking in case the user was rotating the binding partners in PyMOL before the
@@ -3974,7 +3976,7 @@ class SequenceWin(wx.Frame):
 	self.cmd.save(model + ".pdb", model)
 	fixPyMOLSave(model + ".pdb")
 	self.poses[poseindx] = self.pdbreader.get_structure(model, model + ".pdb")
-    
+
     def logSelection(self):
 	# Periodically log which residues are selected
 	topLefts = self.SeqViewer.GetSelectionBlockTopLeft()
@@ -3985,4 +3987,4 @@ class SequenceWin(wx.Frame):
 	    topLeftPos = self.IDs[topLefts[i][0]] + " position " + str(topLefts[i][1]+1)
 	    bottomRightPos = self.IDs[bottomRights[i][0]] + " position " + str(bottomRights[i][1]+1)
 	    logInfo("New Selection Entry: ")
-	    logInfo("Selected " + topLeftPos + " to " + bottomRightPos)    
+	    logInfo("Selected " + topLeftPos + " to " + bottomRightPos)
