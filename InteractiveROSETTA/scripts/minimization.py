@@ -22,7 +22,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.SetBackgroundColour("#333333")
 	self.parent = parent
 	self.sizer = wx.GridBagSizer(1, 1)
-	
+
 	if (platform.system() == "Windows"):
 	    self.lblProt = wx.StaticText(self, -1, "Energy Minimization", (25, 15), (270, 25), wx.ALIGN_CENTRE)
 	    self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -34,7 +34,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    resizeTextControlForUNIX(self.lblProt, 0, self.GetSize()[0])
 	self.lblProt.SetForegroundColour("#FFFFFF")
 	self.sizer.Add(self.lblProt, (0, 0), span=(1, 5), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
-	
+
 	if (platform.system() == "Darwin"):
 	    self.HelpBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/HelpBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(295, 10), size=(25, 25))
 	else:
@@ -43,7 +43,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.HelpBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.HelpBtn.Bind(wx.EVT_BUTTON, self.showHelp)
 	self.HelpBtn.SetToolTipString("Display the help file for this window")
-	
+
 	if (platform.system() == "Windows"):
 	    self.lblInst = wx.StaticText(self, -1, "Highlight residues to add/remove to minimization", (0, 45), (320, 25), wx.ALIGN_CENTRE)
 	    self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -55,7 +55,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    resizeTextControlForUNIX(self.lblInst, 0, self.GetSize()[0])
 	self.lblInst.SetForegroundColour("#FFFFFF")
 	self.sizer.Add(self.lblInst, (1, 0), span=(1, 5), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
-	
+
 	if (platform.system() == "Darwin"):
 	    self.btnAddBB = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnAddBB.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(7, 70), size=(95, 25))
 	else:
@@ -84,7 +84,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.sizer.Add(self.btnAddChi, (2, 2), span=wx.DefaultSpan, flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
 	self.sizer.Add(self.btnAddBoth, (2, 3), span=wx.DefaultSpan, flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
 	self.addType = "BB+Chi"
-	
+
 	if (platform.system() == "Darwin"):
 	    self.btnAdd = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnAdd.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(7, 100), size=(57, 25))
 	else:
@@ -131,7 +131,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.sizer.Add(self.btnAll, (3, 3), span=(1, 1), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
 	self.sizer.Add(self.btnClear, (3, 4), span=(1, 1), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
 	self.selectedData = []
-	
+
 	self.minMenu = wx.ComboBox(self, pos=(7, 130), size=(119, 25), choices=[], style=wx.CB_READONLY)
 	self.minMenu.Bind(wx.EVT_COMBOBOX, self.minMenuSelect)
 	self.minMenu.SetToolTipString("Select minimize map entries to edit")
@@ -164,7 +164,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.sizer.Add(self.btnBB, (4, 2), span=(1, 1), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
 	self.sizer.Add(self.btnChi, (4, 3), span=(1, 1), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
 	self.sizer.Add(self.btnBoth, (4, 4), span=(1, 1), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
-	
+
 	if (platform.system() == "Darwin"):
 	    self.scoretypeMenu = wx.ComboBox(self, pos=(7, 160), size=(305, 25), choices=[], style=wx.CB_READONLY)
 	else:
@@ -173,7 +173,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.scoretypeMenu.Disable() # Is only enabled after a minimization and before accepting it
 	self.scoretypeMenu.SetToolTipString("Set the scoretype by which PyMOL residues will be colored")
 	self.sizer.Add(self.scoretypeMenu, (5, 0), span=(1, 5), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
-	
+
 	self.grdMinMap = wx.grid.Grid(self)
 	self.grdMinMap.CreateGrid(0, 2)
 	if (winh-235 > 200):
@@ -193,7 +193,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.selectedr = -1
 	self.sizer.Add(self.grdMinMap, (6, 0), span=(1, 5), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
 	self.minmap = []
-	
+
 	ypos = self.grdMinMap.GetPosition()[1] + self.grdMinMap.GetSize()[1] + 10
 	if (platform.system() == "Darwin"):
 	    self.btnMinType = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnMinType_Torsion.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, ypos), size=(120, 25))
@@ -201,7 +201,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.btnMinType = wx.Button(self, id=-1, label="Torsion", pos=(20, ypos), size=(120, 25))
 	    self.btnMinType.SetForegroundColour("#000000")
 	    self.btnMinType.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-	self.btnMinType.Bind(wx.EVT_BUTTON, self.changeMinType)	
+	self.btnMinType.Bind(wx.EVT_BUTTON, self.changeMinType)
 	self.btnMinType.SetToolTipString("Minimize the models in torsion space (faster)")
 	if (platform.system() == "Darwin"):
 	    self.btnMinimize = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnMinimize.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(175, ypos), size=(120, 25))
@@ -215,15 +215,34 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.sizer.Add(self.btnMinType, (7, 0), span=(1, 2), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
 	self.sizer.Add(self.btnMinimize, (7, 2), span=(1, 3), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
 	self.minType = "Torsion"
-	
+
 	self.sizer.AddGrowableRow(6)
 	#self.SetSizerAndFit(self.sizer)
 	#self.SetupScrolling()
+
+
 	self.scrollh = self.btnMinimize.GetPosition()[1] + self.btnMinimize.GetSize()[1] + 5
 	self.SetScrollbars(1, 1, 320, self.scrollh)
 	self.winscrollpos = 0
 	self.Bind(wx.EVT_SCROLLWIN, self.scrolled)
-    
+
+ #CONSTRAINT TEST
+	try:
+	 import constraints
+	 # print 'constraints imported'
+	 self.frame = wx.Frame(None,-1,title="Constraints Menu")
+	 # print 'frame generated'
+	 self.ConstraintPanel=constraints.ConstraintPanel(self.frame,self)
+	 # print 'constraintpanel created'
+	 self.frame.Show()
+	 # print 'showing frame'
+	except Exception as e:
+	 import traceback
+	 # print 'Error importing constraints',e.message
+	 traceback.print_tb(sys.exc_info()[2])
+	 pass
+
+
     def showHelp(self, event):
 	# Open the help page
 	if (platform.system() == "Darwin"):
@@ -235,20 +254,23 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    browser.open(self.parent.parent.scriptdir + "/help/minimization.html")
 	else:
 	    webbrowser.open(self.parent.parent.scriptdir + "/help/minimization.html")
-    
+
     def setSeqWin(self, seqWin):
 	self.seqWin = seqWin
+	self.ConstraintPanel.setSeqWin(seqWin)
 	# So the sequence window knows about what model "minimized_view" really is
 	self.seqWin.setProtocolPanel(self)
-	
+
     def setPyMOL(self, pymol):
 	self.pymol = pymol
 	self.cmd = pymol.cmd
 	self.stored = pymol.stored
-	
+	self.ConstraintPanel.setPyMOL(pymol)
+
     def setSelectWin(self, selectWin):
 	self.selectWin = selectWin
 	self.selectWin.setProtPanel(self)
+	self.ConstraintPanel.setSelectWin(selectWin)
 
     def gridClick(self, event):
 	self.selectedr = event.GetRow()
@@ -267,7 +289,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	if (self.grdMinMap.NumberRows > 0):
 	    self.grdMinMap.DeleteRows(0, self.grdMinMap.NumberRows)
 	row = 0
-	for [indx, r, seqpos, poseindx, chainoffset, mtype] in self.minmap:
+	for [indx, r, seqpos, poseindx, chainoffset, mtype,r_indx] in self.minmap:
 	    self.grdMinMap.AppendRows(1)
 	    ID = self.seqWin.IDs[r]
 	    resn = self.seqWin.SeqViewer.GetCellValue(r, indx)
@@ -315,7 +337,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	# Let's first make sure everything in the minmap still exists
 	redrawNeeded = False
 	for i in range(len(self.minmap)-1, -1, -1):
-	    [indx, r, seqpos, p, offset, mtype] = self.minmap[i]
+	    [indx, r, seqpos, p, offset, mtype,r_indx] = self.minmap[i]
 	    ID = self.grdMinMap.GetCellValue(i, 1)
 	    #ID = ID.split(":")[0].strip()
 	    if (r >= len(self.seqWin.IDs) or ID != self.seqWin.IDs[r]):
@@ -350,7 +372,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    if ("ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR".find(self.seqWin.poses[poseindx][0][chain][self.seqWin.indxToSeqPos[r][c]].resname) >= 0):
 			self.selectedData.append([indx, r, seqpos, poseindx, chainoffset])
 	self.Scroll(0, self.winscrollpos)
-    
+
     def selectBB(self, event):
 	self.addType = "BB"
 	if (platform.system() == "Darwin"):
@@ -362,7 +384,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.btnAddChi.SetForegroundColour("#000000")
 	    self.btnAddBoth.SetForegroundColour("#000000")
 	logInfo("The add type was changed to BB")
-    
+
     def selectChi(self, event):
 	self.addType = "Chi"
 	if (platform.system() == "Darwin"):
@@ -374,7 +396,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.btnAddChi.SetForegroundColour("#FF0000")
 	    self.btnAddBoth.SetForegroundColour("#000000")
 	logInfo("The add type was changed to Chi")
-    
+
     def selectBoth(self, event):
 	self.addType = "BB+Chi"
 	if (platform.system() == "Darwin"):
@@ -386,7 +408,27 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.btnAddChi.SetForegroundColour("#000000")
 	    self.btnAddBoth.SetForegroundColour("#FF0000")
 	logInfo("The add type was changed to Both")
-    
+
+    def getR_indx(self,selectedData):
+      [indx,r,seqpos,poseindx,co] = selectedData
+      model = self.seqWin.poses[poseindx][0]
+      offset = 0
+      chain = self.seqWin.IDs[r][len(self.seqWin.IDs[r])-1]
+      if chain == '_':
+        chain == ' '
+      print self.seqWin.IDs
+      for ch in model:
+        chain2 = ch.get_id()
+        if chain2 =='_':
+          chain2 = ' '
+        if chain2 == chain:
+          print offset+indx+1,'R_indx'
+          return offset + indx + 1
+        else:
+          offset += len(model[chain2])
+      #if we got this far, there is an error
+      return None
+
     def add(self, event, updateSelection=True):
 	if (updateSelection):
 	    self.activate()
@@ -395,12 +437,14 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	logInfo("Add button clicked")
 	for i in range(0, len(self.selectedData)):
 	    [indx, r, seqpos, poseindx, chainoffset] = self.selectedData[i]
+	    print "selectedData:",indx, r, seqpos, poseindx, chainoffset
+	    r_indx = self.getR_indx(self.selectedData[i])
 	    # Make sure this is a CAA
 	    if (not(self.seqWin.getIsCanonicalAA(r, indx))):
 		continue
 	    alreadyIn = False
 	    for j in range(0, len(self.minmap)):
-		[mindx, mr, mseqpos, mposeindx, mchainoffset, mtype] = self.minmap[j]
+		[mindx, mr, mseqpos, mposeindx, mchainoffset, mtype, mr_indx] = self.minmap[j]
 		if (r == mr and indx == mindx):
 		    # Just switch the BB/Chi/Both flag in case it is different in this selection
 		    self.minmap[j][5] = self.addType
@@ -410,27 +454,27 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		# Now figure out where this belongs so the list stays sorted
 		if (len(self.minmap) == 0):
 		    # List empty, add new element
-		    self.minmap.append([indx, r, seqpos, poseindx, chainoffset, self.addType])
+		    self.minmap.append([indx, r, seqpos, poseindx, chainoffset, self.addType,r_indx])
 		elif (r < self.minmap[0][1] or (r == self.minmap[0][1] and indx < self.minmap[0][0])):
 		    # Belongs first
-		    self.minmap.insert(0, [indx, r, seqpos, poseindx, chainoffset, self.addType])
+		    self.minmap.insert(0, [indx, r, seqpos, poseindx, chainoffset, self.addType,r_indx])
 		else:
 		    notInYet = True
 		    # Maybe it belongs somewhere in the middle?
 		    for i in range(0, len(self.minmap)-1):
-			[indx1, r1, seqpos1, poseindx1, chainoffset1, type1] = self.minmap[i]
-			[indx2, r2, seqpos2, poseindx2, chainoffset2, type2] = self.minmap[i+1]
+			[indx1, r1, seqpos1, poseindx1, chainoffset1, type1,r_indx1] = self.minmap[i]
+			[indx2, r2, seqpos2, poseindx2, chainoffset2, type2,r_indx2] = self.minmap[i+1]
 			if (r == r1 and r == r2 and indx > indx1 and indx < indx2):
 			    notInYet = False
-			    self.minmap.insert(i+1, [indx, r, seqpos, poseindx, chainoffset, self.addType])
+			    self.minmap.insert(i+1, [indx, r, seqpos, poseindx, chainoffset, self.addType,r_indx])
 			elif (r == r1 and r < r2 and indx > indx1):
 			    notInYet = False
-			    self.minmap.insert(i+1, [indx, r, seqpos, poseindx, chainoffset, self.addType])
+			    self.minmap.insert(i+1, [indx, r, seqpos, poseindx, chainoffset, self.addType,r_indx])
 		    if (notInYet):
 			# Belongs at the end
-			self.minmap.append([indx, r, seqpos, poseindx, chainoffset, self.addType])
+			self.minmap.append([indx, r, seqpos, poseindx, chainoffset, self.addType,r_indx])
 	self.updateMinMap()
-    
+
     def remove(self, event):
 	self.activate()
 	# For each of the selected entries, find out if it is in the minmap and remove it if it is
@@ -446,14 +490,14 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	#	    self.minmap.pop(j)
 	#	    break
 	self.updateMinMap()
-    
+
     def restrict(self, event):
 	self.activate()
 	# Remove everything and add only the selected residues
 	logInfo("Restrict button clicked")
 	self.minmap = []
 	self.add(event)
-    
+
     def addAll(self, event):
 	# Add everything that is in the sequence viewer
 	logInfo("All button clicked")
@@ -479,14 +523,14 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.selectedData = allData
 	self.add(event, updateSelection=False)
 	self.selectedData = saveit
-    
+
     def clear(self, event):
 	# Remove everything
 	logInfo("Clear button clicked")
 	self.minmap = []
 	self.updateMinMap()
 	pass
-    
+
     def minMenuSelect(self, event):
 	# Find this item in the minmap and highlight whatever the minimization type is
 	selectedValue = self.minMenu.GetStringSelection()
@@ -533,7 +577,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		self.btnBB.SetForegroundColour("#000000")
 		self.btnChi.SetForegroundColour("#000000")
 		self.btnBoth.SetForegroundColour("#FF0000")
-	# Do a neighborhood view on the selected position 
+	# Do a neighborhood view on the selected position
 	model = ""
 	fields = self.grdMinMap.GetCellValue(r, 1).split("|")
 	for field in fields[0:len(fields)-1]:
@@ -620,7 +664,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.cmd.enable("seqsele")
 	self.cmd.delete("minsele")
 	self.seqWin.selectUpdate(False)
-    
+
     def changeBB(self, event):
 	if (self.minMenu.GetStringSelection() != ""):
 	    # Change the selected position to this minimization type
@@ -635,7 +679,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		self.btnBoth.SetForegroundColour("#000000")
 	    self.minmap[self.currSelection][5] = "BB"
 	    self.grdMinMap.SetCellValue(self.currSelection, 0, self.minmap[self.currSelection][5])
-    
+
     def changeChi(self, event):
 	if (self.minMenu.GetStringSelection() != ""):
 	    # Change the selected position to this minimization type
@@ -650,7 +694,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		self.btnBoth.SetForegroundColour("#000000")
 	    self.minmap[self.currSelection][5] = "Chi"
 	    self.grdMinMap.SetCellValue(self.currSelection, 0, self.minmap[self.currSelection][5])
-    
+
     def changeBoth(self, event):
 	if (self.minMenu.GetStringSelection() != ""):
 	    # Change the selected position to this minimization type
@@ -665,7 +709,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		self.btnBoth.SetForegroundColour("#FF0000")
 	    self.minmap[self.currSelection][5] = "BB+Chi"
 	    self.grdMinMap.SetCellValue(self.currSelection, 0, self.minmap[self.currSelection][5])
-    
+
     def recolorGrid(self, poses, allresidue_E, grid, selectedScoretype):
 	# Useful function for recoloring the text color of a grid by energy so the user can see all the relative
 	# energies just by looking at the colors in the grid
@@ -692,22 +736,40 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    chain = " "
 		if (thismodel != model):
 		    continue
+		print grid.GetRowLabelValue(row).split()
 		seqpos = grid.GetRowLabelValue(row).split()[1]
 		seqpos = int(seqpos[1:len(seqpos)])
 		# Find the rosetta index
 		ires = 0
-		for ch in poses[indx][0]:
-		    for residue in ch:
-			if (ch.id == chain and residue.id[1] == seqpos):
-			    break
-			ires = ires + 1
-		r = residue_E[ires]
-		b = 255 - r
-		g = 0
+		found = False
+		while not found:
+		    for ch in poses[indx][0]:
+		      if found:
+		        break
+		      for residue in ch:
+		        if found:
+		          break
+		        print chain,seqpos,"=",ch.id,residue.id[1],"?"
+#		        ires = ires + 1
+		        if (ch.id == chain and residue.id[1] == seqpos):
+		          print 'Found!'
+		          found = True
+		        else:
+		          ires += 1
+#      			    break
+		    break
+		try:
+		  r = residue_E[ires]
+		  g = 0
+		  b = 255 -r
+		except:
+		  r = 0
+		  b = 0
+		  g = 0
 		for c in range(0, grid.NumberCols):
 		    grid.SetCellTextColour(row, c, (r, g, b))
 	grid.Refresh()
-    
+
     def scoretypeMenuSelect(self, event):
 	# Make sure there is even a PyMOL_Mover pose loaded
 	if (self.selectedModel == ""):
@@ -719,7 +781,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    recolorEnergies(self.minposes[indx], self.residue_E[indx], "minimized_view", self.scoretypeMenu.GetStringSelection(), self.cmd)
 	    self.recolorGrid(self.minposes, self.residue_E, self.grdMinMap, self.scoretypeMenu.GetStringSelection())
 	self.minMenuSelect(event) # To update all the labels
-    
+
     def changeMinType(self, event):
 	if (self.minType == "Torsion"):
 	    self.minType = "Cartesian"
@@ -736,7 +798,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		self.btnMinType.SetLabel(self.minType)
 	    self.btnMinType.SetToolTipString("Minimize the models in torsion space (faster)")
 	logInfo("The minimization type was changed to " + self.minType)
-    
+
     def cancelMinimization(self):
 	logInfo("Canceled minimization operation")
 	try:
@@ -781,7 +843,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.seqWin.labelMsg.SetLabel("")
 	self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
-    
+
     def minimizeClick(self, event):
 	# This is also the "Finalize!" button
 	logInfo("Minimize button clicked")
@@ -808,6 +870,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		#thrMinimize = Thread(target=self.threadMinimization, args=())
 		#thrMinimize.start()
 		self.stage = 1
+		self.save_constraints()
 		if (platform.system() == "Darwin"):
 		    self.btnMinimize.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnMinimize_Cancel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		else:
@@ -888,7 +951,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    print "Bug at accept button click"
 		    pass
 	    self.seqWin.recolorResidues()
-    
+
     def recoverFromError(self):
 	# This function tells the user what the error was and tries to revert the protocol
 	# back to the pre-daemon state so the main GUI can continue to be used
@@ -940,7 +1003,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.seqWin.labelMsg.SetLabel("")
 	self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
-    
+
     def threadMinimization(self, event):
 	# Why am I using a Timer?  See the explanation in kic.py
 	if (self.stage == 1):
@@ -959,6 +1022,12 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    jobs.append([currpose, laststart, len(self.minmap)])
 	    f = open("minimizeinputtemp", "w")
 	    for [currpose, start, end] in jobs:
+		constraintFile = ''
+		constraints = self.ConstraintPanel.ConstraintSet
+		for [pdb,pose,constraint] in constraints:
+		  if str(pose) == str(currpose):
+		    constraintFile = str(pose)+".cst"
+		    break
 		fields = self.seqWin.IDs[currpose].split("|")
 		pdbfile = ""
 		for field in fields[0:len(fields)-1]:
@@ -968,15 +1037,15 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		dumpmodel = pdbfile.split(".pdb")[0]
 		self.cmd.save(pdbfile.strip(), "model " + dumpmodel)
 		fixPyMOLSave(pdbfile.strip())
-		f.write("JOB\t" + pdbfile + "\t" + str(start) + "\t" + str(end) + "\n")
+		f.write("JOB\t" + pdbfile + "\t" + str(start) + "\t" + str(end) + "\t"+ constraintFile+"\n")
 		f2 = open(pdbfile, "r")
 		f.write("BEGIN PDB DATA\n")
 		for aline in f2:
 		    f.write(aline.strip() + "\n")
 		f.write("END PDB DATA\n")
 		f2.close()
-	    for [indx, r, seqpos, p, co, mtype] in self.minmap:
-		f.write("MINMAP\t" + str(indx) + "\t" + str(r) + "\t" + str(seqpos) + "\t" + str(p) + "\t" + str(co) + "\t" + str(mtype) + "\n")
+	    for [indx, r, seqpos, p, co, mtype,r_indx] in self.minmap:
+		f.write("MINMAP\t" + str(indx) + "\t" + str(r) + "\t" + str(seqpos) + "\t" + str(p) + "\t" + str(co) + "\t" + str(mtype) + "\t"+str(r_indx)+"\n")
 	    f.write("MINTYPE\t" + self.minType + "\n")
 	    f.write("SCOREFXN\t" + self.selectWin.weightsfile + "\n")
 	    f.close()
@@ -985,7 +1054,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.cmd.hide("everything", "not protocol_view")
 	    appendScorefxnParamsInfoToFile("minimizeinputtemp", self.selectWin.weightsfile)
 	    if (useServer):
-		try: 
+		try:
 		    self.ID = sendToServer("minimizeinput")
 		    self.usingServer = True
 		    logInfo("Minimization input sent to server daemon with ID " + self.ID)
@@ -1109,3 +1178,15 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    self.cmd.remove("protocol_view")
 		except:
 		    pass
+
+    def save_constraints(self):
+      constraints = self.ConstraintPanel.ConstraintSet
+      goToSandbox()
+      outputs = {}
+      for [pdb,poseindx,constraint] in constraints:
+        if pdb not in outputs:
+          outputs[pdb] = open('%s.cst'%(str(poseindx)),'w+')
+          outputs[pdb].write('#%s\n'%(pdb))
+        outputs[pdb].write('%s\n'%(constraint))
+      for pdb in outputs:
+        outputs[pdb].close()
