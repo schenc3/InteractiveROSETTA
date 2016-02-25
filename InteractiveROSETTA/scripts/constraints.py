@@ -51,6 +51,26 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.ClearBtn.SetFont(wx.Font(10,wx.DEFAULT,wx.ITALIC,wx.BOLD))
       self.ClearBtn.Bind(wx.EVT_BUTTON,self.ClearConstraints)
       self.Sizer.Add(self.ClearBtn,(0,2),(1,1))
+      '''
+      #Help Button
+        if platform.system() == 'Darwin':
+            self.HelpBtn = wx.BitmapButton(self,id=-1,bitmap=wx.Image(self.parent.parent.scriptdir+'/images/osx/HelpBtn.png',wx.BITMAP_TYPE_PNG).ConvertToBitmap(),pos=(295,10),size=(25,25))
+        else:
+            self.HelpBtn = wx.Button(self, id=-1,label='?',pos=(295,10),size=(25,25))
+            self.HelpBtn.SetForegroundColour("#0000FF")
+            self.HelpBtn.SetFont(wx.Font(10,wx.DEFAULT,wx.NORMAL,wx.BOLD))
+        self.HelpBtn.Bind(wx.EVT_BUTTON,self.showHelp)
+        self.HelpBtn.SetToolTipString("Display the help file for this window")
+        logInfo('408: Help button set')
+      '''
+      #Help Button
+      self.HelpBtn = wx.Button(self, id=-1,label='?',size=(25,25))
+      self.HelpBtn.SetForegroundColour("#0000FF")
+      self.HelpBtn.SetFont(wx.Font(10,wx.DEFAULT,wx.NORMAL,wx.BOLD))
+      self.HelpBtn.Bind(wx.EVT_BUTTON,self.showHelp)
+      self.HelpBtn.SetToolTipString("Display the help file for this window")
+      logInfo('408: Help button set')
+      self.Sizer.Add(self.HelpBtn,(0,3),(1,1))
 
       #Constraints Grid
       # print 'starting constraints grid'
@@ -69,6 +89,21 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       #Scrolling
       self.SetupScrolling()
       # print 'scrolling'
+
+
+    def showHelp(self, event):
+        '''Open the help page'''
+        if platform.system() == 'Darwin':
+            try:
+                browser = webbrowser.get('Safari')
+            except Exception as e:
+                print 'Could not load Safari!  The help files are located at %s/help'%(self.parent.parent.scriptdir)
+                print e.message
+                import traceback, sys; traceback.print_tb(sys.exc_info()[2])
+                return
+            browser.open(self.minPanel.parent.parent.scriptdir+'/help/constraints.html')
+        else:
+            webbrowser.open(self.minPanel.parent.parent.scriptdir+'/help/constraints.html')
 
     def DelConstraint(self,event):
       logInfo("Delete Constraint button pushed!")
