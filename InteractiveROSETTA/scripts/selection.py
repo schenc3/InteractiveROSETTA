@@ -22,7 +22,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.SetBackgroundColour("#333333")
 	self.Show()
 	self.parent = parent
-	
+
 	# Find the database location if it is not currently set as an environment variable
 	try:
 	    os.environ["PYROSETTA_DATABASE"]
@@ -38,7 +38,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		    rosettadb = aline.split("\t")[1].strip()
 	    f.close()
 	    os.environ["PYROSETTA_DATABASE"] = rosettadb
-	    
+
 	if (platform.system() == "Windows"):
 	    self.weightsfile = os.getenv("PYROSETTA_DATABASE") + "\\scoring\\weights\\talaris2013.wts"
 	    self.labelAtoms = wx.StaticText(self, -1, "Atoms", (5, 5), (70, 20), wx.ALIGN_CENTRE)
@@ -52,7 +52,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.labelAtoms.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	    resizeTextControlForUNIX(self.labelAtoms, 5, 70)
 	self.labelAtoms.SetForegroundColour("#FFFFFF")
-	
+
 	if (platform.system() == "Darwin"):
 	    self.AtomOffBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/selection/AtomOffBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 30), size=(35, 35))
 	else:
@@ -62,37 +62,37 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.AtomOffBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.AtomOffBtn.Bind(wx.EVT_BUTTON, self.atomOff)
 	self.AtomOffBtn.SetToolTipString("Hide selected atoms")
-	
+
 	self.AtomLinesBtn = wx.BitmapButton(self, -1, wx.Image(self.parent.scriptdir + "/images/lines.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(40, 30), size=(35, 35))
 	#self.AtomLinesBtn.SetBackgroundColour("#000000")
 	self.AtomLinesBtn.Bind(wx.EVT_BUTTON, self.atomLines)
 	self.AtomLinesBtn.SetToolTipString("Apply thin bond-line view to selection")
-	
+
 	self.AtomBallsLinesBtn = wx.BitmapButton(self, -1, wx.Image(self.parent.scriptdir + "/images/balls_lines.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 65), size=(35, 35))
 	#self.AtomVDWBtn.SetBackgroundColour("#000000")
 	self.AtomBallsLinesBtn.Bind(wx.EVT_BUTTON, self.atomBallsLines)
 	self.AtomBallsLinesBtn.SetToolTipString("Apply thin bond-line-with-spheres view to selection")
-	
+
 	self.AtomSticksBtn = wx.BitmapButton(self, -1, wx.Image(self.parent.scriptdir + "/images/sticks.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(40, 65), size=(35, 35))
 	#self.AtomSticksBtn.SetBackgroundColour("#000000")
 	self.AtomSticksBtn.Bind(wx.EVT_BUTTON, self.atomSticks)
 	self.AtomSticksBtn.SetToolTipString("Apply thick bond-line view to selection")
-	
+
 	self.AtomBallsSticksBtn = wx.BitmapButton(self, -1, wx.Image(self.parent.scriptdir + "/images/balls_sticks.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 100), size=(35, 35))
 	#self.AtomSticksBtn.SetBackgroundColour("#000000")
 	self.AtomBallsSticksBtn.Bind(wx.EVT_BUTTON, self.atomBallsSticks)
 	self.AtomBallsSticksBtn.SetToolTipString("Apply thick bond-line-with-spheres view to selection")
-	
+
 	self.AtomVDWBtn = wx.BitmapButton(self, -1, wx.Image(self.parent.scriptdir + "/images/VDW.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(40, 100), size=(35, 35))
 	#self.AtomVDWBtn.SetBackgroundColour("#000000")
 	self.AtomVDWBtn.Bind(wx.EVT_BUTTON, self.atomVDW)
 	self.AtomVDWBtn.SetToolTipString("Apply VDW spheres view to selection")
-	
+
 	self.AtomRecolorBtn = wx.BitmapButton(self, -1, wx.Image(self.parent.scriptdir + "/images/colorwheel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (5, 135), (70, 35))
 	#self.AtomWhiteBtn.SetBackgroundColour("#000000")
 	self.AtomRecolorBtn.Bind(wx.EVT_BUTTON, self.atomRecolor)
 	self.AtomRecolorBtn.SetToolTipString("Change the color of the selected atoms")
-	
+
 	if (platform.system() == "Darwin"):
 	    self.AtomStandardBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/selection/AtomStandardBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 169), size=(70, 20))
 	else:
@@ -102,7 +102,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.AtomStandardBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.AtomStandardBtn.Bind(wx.EVT_BUTTON, self.atomStandardColor)
 	self.AtomStandardBtn.SetToolTipString("Change to default colors for selected atoms")
-	
+
 	if (platform.system() == "Darwin"):
 	    self.AtomChainBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/selection/AtomChainBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 189), size=(35, 20))
 	else:
@@ -119,7 +119,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.AtomTermBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.AtomTermBtn.Bind(wx.EVT_BUTTON, self.atomTermini)
 	self.AtomTermBtn.SetToolTipString("Color selected atoms by termini")
-	
+
 	if (platform.system() == "Darwin"):
 	    self.LabelOffBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/selection/LabelOffBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 209), size=(35, 20))
 	else:
@@ -136,7 +136,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.LabelOnBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.LabelOnBtn.Bind(wx.EVT_BUTTON, self.labelResidues)
 	self.LabelOnBtn.SetToolTipString("Label the selected residues")
-	
+
 	if (platform.system() == "Windows"):
 	    self.labelRibbons = wx.StaticText(self, -1, "Ribbons", (85, 5), (70, 20), wx.ALIGN_CENTRE)
 	    self.labelRibbons.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -147,7 +147,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.labelRibbons.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	    resizeTextControlForUNIX(self.labelRibbons, 85, 70)
 	self.labelRibbons.SetForegroundColour("#FFFFFF")
-	
+
 	if (platform.system() == "Darwin"):
 	    self.RibbonOffBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/selection/RibbonOffBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(85, 30), size=(70, 35))
 	else:
@@ -157,22 +157,22 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.RibbonOffBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.RibbonOffBtn.Bind(wx.EVT_BUTTON, self.ribbonsOff)
 	self.RibbonOffBtn.SetToolTipString("Hide ribbon view for selected atoms")
-	
+
 	self.RibbonRibbonBtn = wx.BitmapButton(self, -1, wx.Image(self.parent.scriptdir + "/images/ribbons.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(85, 65), size=(70, 35))
 	#self.RibbonOnBtn.SetBackgroundColour("#000000")
 	self.RibbonRibbonBtn.Bind(wx.EVT_BUTTON, self.ribbonsRibbon)
 	self.RibbonRibbonBtn.SetToolTipString("Apply thin string view to selected ribbon")
-	
+
 	self.RibbonCartoonBtn = wx.BitmapButton(self, -1, wx.Image(self.parent.scriptdir + "/images/cartoons.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(85, 100), size=(70, 35))
 	#self.RibbonOnBtn.SetBackgroundColour("#000000")
 	self.RibbonCartoonBtn.Bind(wx.EVT_BUTTON, self.ribbonsCartoon)
 	self.RibbonCartoonBtn.SetToolTipString("Apply cartoon view to selected ribbon")
-	
+
 	self.RibbonRecolorBtn = wx.BitmapButton(self, -1, wx.Image(self.parent.scriptdir + "/images/colorwheel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (85, 135), (70, 35))
 	#self.RibbonWhiteBtn.SetBackgroundColour("#000000")
 	self.RibbonRecolorBtn.Bind(wx.EVT_BUTTON, self.ribbonRecolor)
 	self.RibbonRecolorBtn.SetToolTipString("Change the color of the selected ribbons")
-	
+
 	if (platform.system() == "Darwin"):
 	    self.RibbonStandardBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/selection/AtomStandardBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(85, 169), size=(70, 20))
 	else:
@@ -182,7 +182,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.RibbonStandardBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.RibbonStandardBtn.Bind(wx.EVT_BUTTON, self.ribbonStandardColor)
 	self.RibbonStandardBtn.SetToolTipString("Color selected ribbons by standard secondary structure coloring")
-	
+
 	if (platform.system() == "Darwin"):
 	    self.RibbonChainBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/selection/AtomChainBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(85, 189), size=(35, 20))
 	else:
@@ -201,7 +201,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.RibbonTermBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.RibbonTermBtn.Bind(wx.EVT_BUTTON, self.ribbonTermini)
 	self.RibbonTermBtn.SetToolTipString("Color selected ribbons by termini")
-	
+
 	if (platform.system() == "Darwin"):
 	    self.ToggleSurfBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/selection/ToggleSurfBtn_Off.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(85, 209), size=(70, 20))
 	else:
@@ -211,7 +211,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.ToggleSurfBtn.Bind(wx.EVT_BUTTON, self.toggleSurf)
 	self.ToggleSurfBtn.SetToolTipString("Display configured surfaces")
 	self.showSurf = False
-	
+
 	if (platform.system() == "Windows"):
 	    self.labelSelection = wx.StaticText(self, -1, "Selection", (175, 5), (140, 20), wx.ALIGN_CENTRE)
 	    self.labelSelection.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -222,7 +222,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.labelSelection.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	    resizeTextControlForUNIX(self.labelSelection, 165, 160)
 	self.labelSelection.SetForegroundColour("#FFFFFF")
-	
+
 	if (platform.system() == "Darwin"):
 	    self.HelpBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/HelpBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(315, 0), size=(25, 25))
 	else:
@@ -231,8 +231,8 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.HelpBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.HelpBtn.Bind(wx.EVT_BUTTON, self.showHelp)
 	self.HelpBtn.SetToolTipString("Display the help file for this window")
-	
-	self.SelectPanel = wx.Panel(self, id=-1, pos=(160, 25), size=(170, 185)) 
+
+	self.SelectPanel = wx.Panel(self, id=-1, pos=(160, 25), size=(170, 185))
 	self.SelectPanel.SetBackgroundColour("#333333")
 	if (platform.system() == "Darwin"):
 	    self.SelectAllBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/selection/SelectAllBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 5), size=(32, 30))
@@ -274,7 +274,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.SelectSidechainsBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.SelectSidechainsBtn.Bind(wx.EVT_BUTTON, self.selectSC)
 	self.SelectSidechainsBtn.SetToolTipString("Select all sidechain atoms")
-	
+
 	if (platform.system() == "Darwin"):
 	    self.SelectHBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/selection/SelectHBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 35), size=(32, 30))
 	else:
@@ -315,7 +315,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.SelectSolventBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.SelectSolventBtn.Bind(wx.EVT_BUTTON, self.selectSolvent)
 	self.SelectSolventBtn.SetToolTipString("Select all solvent atoms")
-	
+
 	if (platform.system() == "Darwin"):
 	    self.SelectExtendBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/selection/SelectExtendBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 65), size=(110, 30))
 	else:
@@ -325,18 +325,18 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.SelectExtendBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.SelectExtendBtn.Bind(wx.EVT_BUTTON, self.selectExtend)
 	self.SelectExtendBtn.SetToolTipString("Extend the current selection by a given Angstrom radius")
-	
+
 	self.ExtendValueTxt = wx.TextCtrl(self.SelectPanel, -1, pos=(115, 67), size=(25, 25))
 	self.ExtendValueTxt.SetValue("8")
 	self.ExtendValueTxt.SetToolTipString("Radius in Angstroms of selection expansion")
-	
+
 	if (platform.system() == "Darwin"):
 	    self.labelExtendA = wx.StaticBitmap(self.SelectPanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/selection/labelAngstrom.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(142, 70), size=(25, 25))
 	else:
 	    self.labelExtendA = wx.StaticText(self.SelectPanel, -1, "A", (140, 68), (25, 25))
 	    self.labelExtendA.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	    self.labelExtendA.SetForegroundColour("#FFFFFF")
-	
+
 	if (platform.system() == "Darwin"):
 	    self.SelectZoomBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/selection/SelectZoomBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 95), size=(80, 30))
 	else:
@@ -353,7 +353,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.CenterBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.CenterBtn.Bind(wx.EVT_BUTTON, self.centerSelection)
 	self.CenterBtn.SetToolTipString("Center the origin of rotation in current selection")
-	
+
 	if (platform.system() == "Darwin"):
 	    self.SelectNeighborhoodBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/selection/SelectNeighborhoodBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 125), size=(110, 30))
 	else:
@@ -363,25 +363,25 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.SelectNeighborhoodBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
 	self.SelectNeighborhoodBtn.Bind(wx.EVT_BUTTON, self.neighborhoodView)
 	self.SelectNeighborhoodBtn.SetToolTipString("View structure within a given radius in Angstroms of the current selection")
-	
+
 	self.NeighborhoodValueTxt = wx.TextCtrl(self.SelectPanel, -1, pos=(115, 127), size=(25, 25))
 	self.NeighborhoodValueTxt.SetValue("8")
 	self.NeighborhoodValueTxt.SetToolTipString("Radius of neighborhood view")
-	
+
 	if (platform.system() == "Darwin"):
 	    self.labelNeighborhoodA = wx.StaticBitmap(self.SelectPanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/selection/labelAngstrom.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(142, 130), size=(25, 25))
 	else:
 	    self.labelNeighborhoodA = wx.StaticText(self.SelectPanel, -1, "A", (140, 128), (25, 25))
 	    self.labelNeighborhoodA.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 	    self.labelNeighborhoodA.SetForegroundColour("#FFFFFF")
-	
+
 	if (platform.system() == "Darwin"):
 	    self.labelSF = wx.StaticBitmap(self.SelectPanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/selection/labelSF.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(5, 155), size=(50, 25))
 	else:
 	    self.labelSF = wx.StaticText(self.SelectPanel, -1, "SFXN:", (5, 159), (50, 25))
 	    self.labelSF.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	    self.labelSF.SetForegroundColour("#FFFFFF")
-	
+
 	if (platform.system() == "Darwin"):
 	    self.SelectScorefxnBtn = wx.Button(self.SelectPanel, id=-1, label="talaris2013", pos=(55, 155), size=(80, 25))
 	else:
@@ -390,7 +390,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.SelectScorefxnBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
 	self.SelectScorefxnBtn.Bind(wx.EVT_BUTTON, self.changeSF)
 	self.SelectScorefxnBtn.SetToolTipString("Select the Rosetta scoring function")
-	
+
 	if (platform.system() == "Darwin"):
 	    self.SelectPanelToggleBtn = wx.BitmapButton(self.SelectPanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/selection/SelectPanelFlipBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(140, 155), size=(25, 25))
 	else:
@@ -400,7 +400,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.SelectPanelToggleBtn.SetToolTipString("Switch to manipulation mode")
 	self.SelectPanelToggleBtn.Bind(wx.EVT_LEFT_DOWN, self.panelToggle)
 	self.panelMode = "Selection"
-	
+
 	self.ManipulatePanel = wx.Panel(self, id=-1, pos=(160, 25), size=(180, 205))
 	self.XYPlane = wx.StaticBitmap(self.ManipulatePanel, -1, wx.Image(self.parent.scriptdir + "/images/plane.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(15, 15), size=(150, 150))
 	self.XYPlane.Bind(wx.EVT_MOTION, self.xyMotion)
@@ -410,7 +410,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.XYPlane.Bind(wx.EVT_LEFT_DOWN, self.xyDown)
 	self.XYPlane.Bind(wx.EVT_ACTIVATE, self.xyFocus)
 	self.leftDown = False
-	
+
 	if (platform.system() == "Darwin"):
 	    self.UpBtn = wx.BitmapButton(self.ManipulatePanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/selection/UpBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(60, 0), size=(60, 15))
 	else:
@@ -475,7 +475,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.RightDownBtn.SetForegroundColour("#000000")
 	self.RightDownBtn.Bind(wx.EVT_BUTTON, self.nudgeRightDown)
 	self.RightDownBtn.SetToolTipString("Nudge right down")
-	
+
 	if (platform.system() == "Darwin"):
 	    self.RotateBtn = wx.BitmapButton(self.ManipulatePanel, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/selection/RotateBtn_Hi.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 180), size=(70, 25))
 	else:
@@ -504,13 +504,13 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.cen_x = 75
 	self.cen_y = 75
 	self.rotval = 5.0
-	
+
 	self.ManipulatePanel.SetBackgroundColour("#333333")
 	self.ManipulatePanel.Hide()
-	
+
 	self.Bind(wx.EVT_ACTIVATE, self.focusEvent)
 	self.SetupScrolling()
-    
+
     def showHelp(self, event):
 	# Open the help page
 	if (platform.system() == "Darwin"):
@@ -522,16 +522,16 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    browser.open(self.parent.scriptdir + "/help/selection.html")
 	else:
 	    webbrowser.open(self.parent.scriptdir + "/help/selection.html")
-    
+
     def focusEvent(self, event):
 	self.inFocus = event.GetActive()
 	if (self.inFocus):
 	    self.cmd.enable("sele")
-    
+
     def setPyMOL(self, pymol):
 	self.pymol = pymol
 	self.cmd = pymol.cmd
-    
+
     def toggleRotate(self, event):
 	self.manipType = "Rotate"
 	if (platform.system() == "Darwin"):
@@ -540,7 +540,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	else:
 	    self.RotateBtn.SetForegroundColour("#FF0000")
 	    self.TranslateBtn.SetForegroundColour("#000000")
-    
+
     def toggleTranslate(self, event):
 	self.manipType = "Translate"
 	if (platform.system() == "Darwin"):
@@ -549,12 +549,12 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	else:
 	    self.RotateBtn.SetForegroundColour("#000000")
 	    self.TranslateBtn.SetForegroundColour("#FF0000")
-    
+
     def xyFocus(self, event):
 	if (not(event.GetActive())):
 	    self.leftDown = False
 	event.Skip()
-    
+
     def xyDown(self, event):
 	self.manip_x = event.GetX()
 	self.manip_y = event.GetY()
@@ -586,11 +586,11 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		self.cmd.select("sele", "all")
 		self.cmd.disable("sele")
 	event.Skip()
-	
+
     def xyUp(self, event):
 	self.leftDown = False
 	event.Skip()
-    
+
     def selectForNudge(self):
 	if (self.manipType == "Rotate"):
 	    try:
@@ -607,7 +607,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    except:
 		self.cmd.select("sele", "all")
 		self.cmd.disable("sele")
-    
+
     def nudgeUp(self, event):
 	self.selectForNudge()
 	if (self.manipType == "Rotate"):
@@ -656,7 +656,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.cmd.rotate([1, 1, 0], 5.0, "sele")
 	else:
 	    self.cmd.translate([1, -1, 0], "sele")
-    
+
     def xyMotion(self, event):
 	x = event.GetX()
 	y = event.GetY()
@@ -709,7 +709,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.manip_x = x
 	    self.manip_y = y
 	event.Skip()
-    
+
     def panelToggle(self, event):
 	if (self.panelMode == "Selection"):
 	    if (platform.system() == "Darwin"):
@@ -729,7 +729,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.ManipulatePanel.Hide()
 	if (platform.system() == "Linux"):
 	    resizeTextControlForUNIX(self.labelSelection, 165, 160)
-    
+
     def atomOff(self, event):
 	try:
 	    self.cmd.hide("sticks", "seqsele")
@@ -740,7 +740,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.cmd.hide("spheres", "all")
 	    self.cmd.hide("lines", "all")
 	logInfo("Turned atom display off")
-    
+
     def atomLines(self, event):
 	if (self.seqWin.protocol_view_active):
 	    bonus = " and protocol_view"
@@ -757,7 +757,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.cmd.set_bond("stick_radius", 0.1, "all" + bonus)
 	    self.cmd.set_bond("stick_transparency", 0, "all" + bonus)
 	logInfo("Turned atom line display on")
-    
+
     def atomSticks(self, event):
 	if (self.seqWin.protocol_view_active):
 	    bonus = " and protocol_view"
@@ -775,7 +775,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.cmd.hide("spheres", "all" + bonus)
 	logInfo("Turned atom stick display on")
 	#self.cmd.hide("lines", "sele")
-	
+
     def atomBallsLines(self, event):
 	if (self.seqWin.protocol_view_active):
 	    bonus = " and protocol_view"
@@ -796,7 +796,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.cmd.set("sphere_scale", 0.15, "all" + bonus)
 	    self.cmd.set("sphere_transparency", 0, "all" + bonus)
 	logInfo("Turned atom balls and lines display on")
-    
+
     def atomBallsSticks(self, event):
 	if (self.seqWin.protocol_view_active):
 	    bonus = " and protocol_view"
@@ -817,7 +817,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.cmd.set("sphere_scale", 0.3, "all" + bonus)
 	    self.cmd.set("sphere_transparency", 0, "all" + bonus)
 	logInfo("Turned atom balls and sticks display on")
-	
+
     def atomVDW(self, event):
 	if (self.seqWin.protocol_view_active):
 	    bonus = " and protocol_view"
@@ -836,7 +836,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.cmd.set("sphere_transparency", 0, "all" + bonus)
 	    self.cmd.set("sphere_scale", 1, "all" + bonus)
 	logInfo("Turned atom VDW display on")
-	
+
     def atomRecolor(self, event):
 	logInfo("Click on the atom recolor button")
 	if (self.seqWin.protocol_view_active):
@@ -904,7 +904,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.cmd.delete("temp")
 	    self.cmd.delete("atomcolorsele")
 	logInfo("Turned atom coloring to standard")
-	
+
     def atomChainColor(self, event):
 	if (self.seqWin.protocol_view_active):
 	    bonus = " and protocol_view"
@@ -960,7 +960,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	if (selection == "seqsele"):
 	    self.cmd.enable("seqsele")
 	logInfo("Colored atoms by chain")
-	
+
     def atomTermini(self, event):
 	if (self.seqWin.protocol_view_active):
 	    bonus = " and protocol_view"
@@ -1019,14 +1019,14 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 			    green = blue
 			color = "0x%02x%02x%02x" % (red, green, blue)
 			self.cmd.color(color, sel)
-	
+
     def labelsOff(self, event):
 	try:
 	    self.cmd.label("seqsele", "\"\"")
 	except:
 	    self.cmd.label("all", "\"\"")
 	logInfo("Turned atom VDW display on")
-	
+
     def labelResidues(self, event):
 	if (self.seqWin.protocol_view_active):
 	    bonus = " and protocol_view"
@@ -1103,16 +1103,16 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	except:
 	    pass
 	logInfo("Displayed labels on the current selection")
-	
+
     def ribbonsOff(self, event):
 	try:
 	    self.cmd.hide("ribbon", "seqsele")
 	    self.cmd.hide("cartoon", "seqsele")
 	except:
 	    self.cmd.hide("ribbon", "all")
-	    self.cmd.hide("cartoon", "all")	
+	    self.cmd.hide("cartoon", "all")
 	logInfo("Turned ribbon displays off")
-	
+
     def ribbonsCartoon(self, event):
 	if (self.seqWin.protocol_view_active):
 	    bonus = " and protocol_view"
@@ -1125,7 +1125,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.cmd.hide("ribbon", "all" + bonus)
 	    self.cmd.show("cartoon", "all" + bonus)
 	logInfo("Turned cartoon display on")
-	
+
     def ribbonsRibbon(self, event):
 	if (self.seqWin.protocol_view_active):
 	    bonus = " and protocol_view"
@@ -1138,7 +1138,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.cmd.show("ribbon", "all")
 	    self.cmd.hide("cartoon", "all")
 	logInfo("Turned string display on")
-	
+
     def ribbonRecolor(self, event):
 	logInfo("Clicked on the ribbon recoloring button")
 	if (self.seqWin.protocol_view_active):
@@ -1195,6 +1195,32 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    temp = "(ss g or ss i) and seqsele" + bonus
 	    self.cmd.set("ribbon_color", "orange", temp)
 	    self.cmd.set("cartoon_color", "orange", temp)
+         #DNA
+         #Adenosine
+	    logInfo('selection.py 1200')
+	    logInfo('Adenosine coloring')
+	    temp = '(resn ADE) and seqsele'+bonus
+	    self.cmd.set('ribbon_color','green',temp)
+	    self.cmd.set('cartoon_color','green',temp)
+	    self.cmd.color('green',temp)
+         #Thymine
+	    logInfo('Thymine coloring')
+	    temp = '(resn THY) and seqsele'+bonus
+	    self.cmd.set('ribbon_color','red',temp)
+	    self.cmd.set('cartoon_color','red',temp)
+	    self.cmd.color('red',temp)
+         #Cytosine
+	    logInfo('Cytosine coloring')
+	    temp = '(resn CYT) and seqsele'+bonus
+	    self.cmd.set('ribbon_color','blue',temp)
+	    self.cmd.set('cartoon_color','blue',temp)
+	    self.cmd.color('blue',temp)
+         #Guanine
+	    logInfo('Guanine coloring')
+	    temp = '(resn GUA) and seqsele'+bonus
+	    self.cmd.set('ribbon_color','gray',temp)
+	    self.cmd.set('cartoon_color','gray',temp)
+	    self.cmd.color('gray',temp)
 	    try:
 		# Save the fact that these residues are not colored by chain in case the colors get moved around later
 		# (i.e. chains were deleted and other chains were moved up)
@@ -1205,13 +1231,14 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.cmd.select("seqsele", "seqsele")
 	    self.cmd.enable("seqsele")
 	except:
+	    logInfo('defaultPyMOLView')
 	    defaultPyMOLView(self.cmd)
 	    try:
 		self.cmd.delete("colorchainsele")
 	    except:
 		pass
 	logInfo("Reset ribbon coloring to standard")
-	
+
     def recolorSavedChainColors(self):
 	# This function is called whenever a chain is deleted to update chain-colored residues with their new
 	# colors according to the colored strip in the sequence viewer
@@ -1232,7 +1259,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	except:
 	    pass
 	self.cmd.disable("seqsele")
-	
+
     def ribbonChainColor(self, event):
 	if (self.seqWin.protocol_view_active):
 	    bonus = " and protocol_view"
@@ -1294,7 +1321,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	if (selection == "seqsele"):
 	    self.cmd.enable("seqsele")
 	logInfo("Colored ribbons by chain")
-    
+
     def ribbonTermini(self, event):
 	if (self.seqWin.protocol_view_active):
 	    bonus = " and protocol_view"
@@ -1353,7 +1380,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 			    green = blue
 			color = "0x%02x%02x%02x" % (red, green, blue)
 			self.cmd.set("cartoon_color", color, sel)
-    
+
     def displaySurfaces(self):
 	# Use the selection information to display pre-configured surfaces from the molecular surfaces protocol
 	if (self.parent.Protocols.currentProtocol == "Molecular Surfaces"):
@@ -1366,7 +1393,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 		except:
 		    pass
 		self.cmd.show("surface", "surf_recp_" + name[10:])
-    
+
     def toggleSurf(self, event):
 	if (self.showSurf):
 	    self.showSurf = False
@@ -1384,7 +1411,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    else:
 		self.ToggleSurfBtn.SetLabel("Surf On")
 	    self.displaySurfaces()
-    
+
     def selectAll(self, event):
 	try:
 	    self.cmd.delete("sele")
@@ -1393,13 +1420,13 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.cmd.select("seqsele", "all")
 	self.seqWin.selectUpdate(False)
 	logInfo("Selected all atoms")
-	
+
     def selectInvert(self, event):
 	self.cmd.select("seqsele", "not seqsele")
 	self.cmd.enable("seqsele")
 	self.seqWin.selectUpdate(False)
 	logInfo("Inverted current selection")
-	
+
     def selectVisible(self, event):
 	self.cmd.select("seqsele", "rep lines or rep sticks or rep spheres")
 	self.cmd.enable("seqsele")
@@ -1415,7 +1442,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.cmd.select("seqsele", "symbol h")
 	self.seqWin.selectUpdate(False)
 	logInfo("Selected all hydrogen atoms")
-	
+
     def selectC(self, event):
 	try:
 	    self.cmd.select("seqsele", "byres seqsele") # Expand out to the whole residues first
@@ -1425,7 +1452,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.cmd.select("seqsele", "symbol c")
 	self.seqWin.selectUpdate(False)
 	logInfo("Selected all carbon atoms")
-	
+
     def selectN(self, event):
 	try:
 	    self.cmd.select("seqsele", "byres seqsele") # Expand out to the whole residues first
@@ -1435,7 +1462,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.cmd.select("seqsele", "symbol n")
 	self.seqWin.selectUpdate(False)
 	logInfo("Selected all nitrogen atoms")
-	
+
     def selectO(self, event):
 	try:
 	    self.cmd.select("seqsele", "byres seqsele") # Expand out to the whole residues first
@@ -1445,7 +1472,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.cmd.select("seqsele", "symbol o")
 	self.seqWin.selectUpdate(False)
 	logInfo("Selected all oxygen atoms")
-	
+
     def selectSolvent(self, event):
 	try:
 	    self.cmd.select("seqsele", "byres seqsele") # Expand out to the whole residues first
@@ -1455,7 +1482,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.cmd.select("seqsele", "solvent")
 	self.seqWin.selectUpdate(False)
 	logInfo("Selected all solvent atoms")
-	
+
     def selectBB(self, event):
 	try:
 	    self.cmd.select("seqsele", "byres seqsele") # Expand out to the whole residues first
@@ -1465,7 +1492,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.cmd.select("seqsele", "backbone")
 	self.seqWin.selectUpdate(False)
 	logInfo("Selected all BB atoms")
-	
+
     def selectSC(self, event):
 	try:
 	    self.cmd.select("seqsele", "byres seqsele") # Expand out to the whole residues first
@@ -1475,7 +1502,7 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    self.cmd.select("seqsele", "sidechain")
 	self.seqWin.selectUpdate(False)
 	logInfo("Selected all sidechain atoms")
-	
+
     def selectExtend(self, event):
 	try:
 	    radius = float(self.ExtendValueTxt.GetValue())
@@ -1486,21 +1513,21 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.cmd.select("seqsele", "all within " + str(radius) + " of seqsele")
 	self.seqWin.selectUpdate(False)
 	logInfo("Extended current selection by a radius of " + str(radius))
-	
+
     def zoomSelection(self, event):
 	try:
 	    self.cmd.zoom("seqsele", 0, 0, 0, 2)
 	except:
 	    self.cmd.zoom("all", 0, 0, 0, 2)
 	logInfo("Clicked the zoom button")
-	
+
     def centerSelection(self, event):
 	try:
 	    self.cmd.center("seqsele")
 	except:
 	    self.cmd.center("all")
 	logInfo("Clicked the center button")
-	
+
     def neighborhoodView(self, event):
 	try:
 	    radius = float(self.NeighborhoodValueTxt.GetValue())
@@ -1524,13 +1551,13 @@ class SelectPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	self.cmd.zoom("seqsele", 0, 0, 0, 2)
 	self.seqWin.selectUpdate(False)
 	logInfo("Clicked the neighborhood button with a radius of " + str(radius))
-	
+
     def setProtPanel(self, protPanel):
 	self.protPanel = protPanel
-	
+
     def setSeqWin(self, seqWin):
 	self.seqWin = seqWin
-	
+
     def changeSF(self, event):
 	logInfo("Clicked the change scorefxn button")
 	if (platform.system() == "Windows"):
