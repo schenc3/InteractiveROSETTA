@@ -1440,15 +1440,24 @@ class FixbbPanel(wx.lib.scrolledpanel.ScrolledPanel):
 	    wildcard="Resfiles (*.resfile)|*.resfile",
 	    style=wx.SAVE | wx.CHANGE_DIR)
 	if (dlg.ShowModal() == wx.ID_OK):
-	    paths = dlg.GetPaths()
+	    '''paths = dlg.GetPaths(); print 'paths:',paths,dlg.GetFilename(),dlg.GetDirectory()
 	    # Change cwd to the last opened file
 	    if (platform.system() == "Windows"):
 		lastDirIndx = paths[len(paths)-1].rfind("\\")
 	    else:
-		lastDirIndx = paths[len(paths)-1].rfind("/")
+			  try:
+					lastDirIndx = paths[len(paths)-1].rfind("/")
+			  except Exception as e:
+					print e.message,len(paths)
+					import traceback,sys; traceback.print_tb(sys.exc_info()[2])
 	    self.seqWin.cwd = str(paths[len(paths)-1][0:lastDirIndx])
 	    self.seqWin.saveWindowData(None)
-	    filename = str(paths[0]).split(".resfile")[0] + ".resfile"
+	    filename = str(paths[0]).split(".resfile")[0] + ".resfile"'''
+	    if platform.system()=='Windows':
+	    	filename = '\\'.join([dlg.GetDirectory(),dlg.GetFilename()])
+	    else:
+	    	filename = '/'.join([dlg.GetDirectory(),dlg.GetFilename()])
+	    print filename
 	    # Does it exist already?  If so, ask if the user really wants to overwrite it
 	    if (os.path.isfile(filename)):
 		dlg2 = wx.MessageDialog(self, "The file " + filename + " already exists.  Overwrite it?", "Filename Already Exists", wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
