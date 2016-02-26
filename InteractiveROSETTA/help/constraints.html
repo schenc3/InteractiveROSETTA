@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>InteractiveROSETTA - Constraints</title>
+</head>
+
+<body>
+<h2><em>InteractiveROSETTA - Constraints</em></h2>
+<hr />
+<p><strong><em>NOTE: </strong>When using constraints with energy minimization, you must first set up the minimization before adding any constraints!</em></p>
+<p><img src="cst_fig1.png" width="600" height="400" /></p>
+<p><strong>Figure 1: </strong>Constraints menu at start</p>
+<p><strong>A:</strong> <em>Add Constraint</em> - Click this button to add a new constraint to the minimization after minimization has been set up.</p>
+<p><strong>B:</strong> <em>Delete Constraint</em> - Deletes the selected constraint from the minimization</p>
+<p><strong>C:</strong> <em>Clear Constraints</em> - Removes all constraints from the minimizations</p>
+<p><strong>D:</strong> <em>Constraints list</em> - All constraints currently configured for the minimization will be displayed here.  Click on one to select it.</p>
+<p><img src="cst_fig2.png" width="600" height="375" /></p>
+<p><strong>Figure 2:</strong> Constraints menu after clicking <em>Add Constraint</em>.</p>
+<p><strong>A: </strong><em>Constraint Type Menu</em> - Select the desired constraint type from the drop-down menu.  Available constraints are:
+<ul><li><em>AtomPair</em> - Constrain the distance between two atoms</li>
+<li><em>Angle</em> - Constrain the angle between three atoms</li>
+<li><em>Dihedral</em> - Constrain the dihedral angle defined by four atoms</li>
+<li><em>CoordinateConstraint</em> - Constrain an atom to a specific coordinate in space</li>
+</ul></p>
+<p><strong>B:</strong> <em>Choose PDB Menu</em> - Select the PDB file from which this constraint will be taken.</p>
+<p><strong>C:</strong> <em>Select Constraint Function Menu</em> - Select the function with which to define the constraint.  Available functions:
+<ul><li><em>Harmonic</em> x0 = cut-off, sd = standard deviation <br><img src="cst_harmonic.png" /></li>
+<li><em>Circular Harmonic</em> x0 = cut-off, sd = standard deviation <br><img src="cst_circ_harmonic.png" /></li></ul></p>
+<p><strong>D:</strong> <em>Confirm Button</em> - Click here to confirm the constraint type, PDB, and constraint function for the current constraint.</p>
+<p><strong>E:</strong> <em>Cancel Button</em> - Click here to cancel the current constraint at any time</p>
+<p><img src="cst_fig3.png" width="600" height="300" /></p>
+<p><strong>Figure 3:</strong> Constraints menu after confirming initial parameters</p>
+<p><strong>A:</strong> <em>Initial Parameters</em> - Parameters set in previous menu are displayed here.</p>
+<p><strong>B:</strong> <em>First Residue Menu</em> - Select the residue of the first atom in the constraint</p>
+<p><strong>C:</strong> <em>First Residue Atom Menu</em> - Select the atom of the first residue for the constraint</p>
+<p><strong>D:</strong> <em>Second Residue Menu</em> - Select the residue of the second atom in the constraint</p>
+<p><strong>E:</strong> <em>Second Residue Atom Menu</em> - Select the atom of the second residue for the constraint</p>
+<p><strong><em>NOTE: </strong>Depending on the constraint type, there may be more menus displayed</em></p>
+<p><strong>F:</strong> <em>Cut-off Entry</em> - Enter the cut-off (x0) for the constraint</p>
+<p><strong>G:</strong> <em>Standard Deviation Entry</em> - Enter the standard deviation (sd) for the constraint</p>
+<p><strong>H:</strong> <em> Finalize Button</em> - Click here to finalize the current constraint</p>
+<p><strong>I:</strong> <em>Cancel Button</em> - Click here to cancel the current constraint</p>
+<p><img src="cst_fig4.png" width="600" height="300" /></p>
+<p><strong>Figure 4:</strong> Constraints menu after adding a constraint</p>
+<p><strong>A:</strong> <em>New Entry in constraints list</em> - After adding a constraint, it will appear in the list of constraints here</p>
+<p><img src="cst_fig5.png" width="600" height="300" /></p>
+<p><strong>Figure 5:</strong> Example of energy minimization with a constraint</p>
+<p><strong>A:</strong> <em>Protein before minimization</em> - The two atoms in space-fill red and blue have an AtomPair constraint placed on them. </p>
+<p><strong>B:</strong> <em>Protein after minimization</em> - The two atoms have been brought together as a result of the constraint</p>
+</body>
+</html>
