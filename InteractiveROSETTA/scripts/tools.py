@@ -1311,6 +1311,28 @@ def defaultPyMOLView(cmd, model=None):
 	dsele = "(ss g or ss i) and model " + model
 	cmd.set("ribbon_color", "orange", dsele)
 	cmd.set("cartoon_color", "orange", dsele)
+	#DNA
+	#Adenosine
+	logInfo('tools.py 1316')
+	dsele = '(resn ADE) and model %s'%(model)
+	cmd.set('ribbon_color','green',dsele)
+	cmd.set('cartoon_color','green',dsele)
+ 	cmd.color('green',dsele)
+     #Thymine
+	dsele = '(resn THY) and model %s'%(model)
+	cmd.set('ribbon_color','red',dsele)
+	cmd.set('cartoon_color','red',dsele)
+ 	cmd.color('red',dsele)
+     #Cytosine
+	dsele = '(resn CYT) and model %s'%(model)
+	cmd.set('ribbon_color','blue',dsele)
+	cmd.set('cartoon_color','blue',dsele)
+ 	cmd.color('blue',dsele)
+     #Guanine
+	dsele = '(resn GUA) and model %s'%(model)
+	cmd.set('ribbon_color','gray',dsele)
+	cmd.set('cartoon_color','gray',dsele)
+	cmd.color('gray',dsele)
 	#cmd.delete("dsele")
     else:
 	cmd.select("dsele", "all")
@@ -1325,8 +1347,11 @@ def defaultPyMOLView(cmd, model=None):
 	cmd.select("dsele", "symbol c")
 	dsele = "symbol c"
 	cmd.color("gray", dsele)
-	cmd.select("dsele", "all")
-	dsele = "all"
+	#cmd.select("dsele", "all")
+	#dsele = "all"
+	#Had to change this because using 'all' for some reason doesn't play nice with DNA
+	cmd.select('dsele','!(resn ADE | resn THY | resn CYT | resn GUA)')
+	dsele = '!(resn ADE | resn THY | resn CYT | resn GUA)'
 	cmd.set("ribbon_color", "white", dsele)
 	cmd.set("cartoon_color", "white", dsele)
 	cmd.select("dsele", "ss s")
@@ -1345,6 +1370,29 @@ def defaultPyMOLView(cmd, model=None):
 	dsele = "ss g or ss i"
 	cmd.set("ribbon_color", "orange", dsele)
 	cmd.set("cartoon_color", "orange", dsele)
+	#DNA
+	#Adenosine
+	logInfo('tools.py 1372')
+	cmd.select('dsele','resn ADE')
+	cmd.set('ribbon_color','green','dsele')
+	cmd.set('cartoon_color','green','dsele')
+ 	cmd.color('green','dsele')
+     #Thymine
+	cmd.select('dsele','resn THY')
+	cmd.set('ribbon_color','red','dsele')
+	cmd.set('cartoon_color','red','dsele')
+ 	cmd.color('red','dsele')
+     #Cytosine
+	cmd.select('dsele','resn CYT')
+	cmd.set('ribbon_color','blue','dsele')
+	cmd.set('cartoon_color','blue','dsele')
+ 	cmd.color('blue','dsele')
+     #Guanine
+	cmd.select('dsele','resn GUA')
+	cmd.set('ribbon_color','gray','dsele')
+	cmd.set('cartoon_color','gray','dsele')
+	cmd.color('gray','dsele')
+	cmd.deselect()
 	#cmd.delete("dsele")
 
 def goToSandbox(extra=""):
@@ -1737,7 +1785,7 @@ def getRecognizedTypes():
     # Returns a list of 3 letter codes that will be recognized by Rosetta
     recognized = ["ALA", "CYS", "ASP", "GLU", "PHE", "GLY", "HIS", "ILE", "LYS", "LEU", "MET", "ASN",
 	      "PRO", "GLN", "ARG", "SER", "THR", "VAL", "TRP", "TYR", "HIE", "HID", "ADE", "CYT",
-	      "GUA", "THY", "RAD", "RCY", "RGU", "URA"]
+	      "GUA", "THY", "RAD", "RCY", "RGU", "URA","DA","DT","DC","DG"]
     if (platform.system() == "Windows"):
 	# Windows has all the metal ions by default
 	recognized.extend(["CA", "FE2", "FE", "K", "MG", "MN", "NA", "ZN"])
@@ -1775,7 +1823,7 @@ def cleanPDB(pdbfile, acceptNCAAs=False):
 	data.append(aline)
     fin.close()
     blankID = ""
-    for char in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+    for char in "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789":
 	if (char not in takenIDs):
 	    blankID = char
 	    break
@@ -1796,11 +1844,12 @@ def cleanPDB(pdbfile, acceptNCAAs=False):
 	if (aline.startswith("TER")):
 	    takenIDs += blankID
 	    blankID = ""
-	    for char in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+	    for char in "ABCDEFGHIJKLMNOPQRSTUVWXYZ00123456789":
 		if (char not in takenIDs):
 		    blankID = char
 		    break
 	if ((aline[0:4] == "ATOM" or aline[0:6] == "HETATM") and not(aline[17:20].strip() in getRecognizedTypes()) and not(acceptNCAAs)):
+	    logInfo('Popping line:\n %s'%(aline))
 	    offset = offset + 1
 	    data.pop(counter)
 	    continue
@@ -1834,6 +1883,7 @@ def cleanPDB(pdbfile, acceptNCAAs=False):
 # 			altlocs_taken = char + altlocs_taken
 # 			break
 #==============================================================================
+
 	    res = res[0:4] + altlocs_taken[0]
 	    atomtype = aline[12:16]
 	    if (atomtype in [" C  ", " CA ", " O  ", " N  "]):
