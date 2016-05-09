@@ -11,38 +11,38 @@ except:
     # If this already happened once already, then we should have saved the Rosetta path, so let's try to import from there
     print "Rosetta could not be imported.  Attempting to locate the PyRosetta install.  Please be patient..."
     if ("/" in sys.argv[0]):
-	scriptdir = sys.argv[0][0:sys.argv[0].rfind("/")]
+        scriptdir = sys.argv[0][0:sys.argv[0].rfind("/")]
     else:
-	scriptdir = "."
+        scriptdir = "."
     cfgfile = scriptdir + "/rosetta.cfg"
     try:
-	f = open(cfgfile.strip(), "r")
-	rosettadir = "Not Found"
-	rosettadb = "Not Found"
-	for aline in f:
-	    if ("[ROSETTAPATH]" in aline):
-		rosettapath = aline.split("\t")[1].strip()
-	    if ("[ROSETTADB]" in aline):
-		rosettadb = aline.split("\t")[1].strip()
-	f.close()
-	if (rosettapath == "Not Found"):
-	    raise Exception
-	else:
-	    sys.path.append(rosettapath)
-	    olddir = os.getcwd()
-	    os.chdir(rosettapath)
-	    os.environ["PYROSETTA_DATABASE"] = rosettadb
-	    # Try to import Rosetta
-	    from rosetta import *
-	    # Extra imports for KIC
-	    from rosetta.protocols.loops.loop_mover.perturb import *
-	    from rosetta.protocols.loops.loop_mover.refine import *
-	    os.chdir(olddir)
-	    print "Found Rosetta at " + rosettapath.strip() + "!"
-	    print "Rosetta Database: " + rosettadb.strip()
+        f = open(cfgfile.strip(), "r")
+        rosettadir = "Not Found"
+        rosettadb = "Not Found"
+        for aline in f:
+            if ("[ROSETTAPATH]" in aline):
+                rosettapath = aline.split("\t")[1].strip()
+            if ("[ROSETTADB]" in aline):
+                rosettadb = aline.split("\t")[1].strip()
+        f.close()
+        if (rosettapath == "Not Found"):
+            raise Exception
+        else:
+            sys.path.append(rosettapath)
+            olddir = os.getcwd()
+            os.chdir(rosettapath)
+            os.environ["PYROSETTA_DATABASE"] = rosettadb
+            # Try to import Rosetta
+            from rosetta import *
+            # Extra imports for KIC
+            from rosetta.protocols.loops.loop_mover.perturb import *
+            from rosetta.protocols.loops.loop_mover.refine import *
+            os.chdir(olddir)
+            print "Found Rosetta at " + rosettapath.strip() + "!"
+            print "Rosetta Database: " + rosettadb.strip()
     except:
-	print "Where, oh where is PyRosetta?"
-	exit()
+        print "Where, oh where is PyRosetta?"
+        exit()
 
 noderank = MPI.COMM_WORLD.Get_rank()
 nodesize = MPI.COMM_WORLD.Get_size()
@@ -63,7 +63,7 @@ if (len(paramsfiles) == 0):
     paramsstr = ""
 else:
     for filename in paramsfiles:
-	paramsstr += filename + " "
+        paramsstr += filename + " "
 # Load the given PDB file and then use a PyRosetta Backrub mover to generate the template
 MPI.COMM_WORLD.Barrier()
 if (noderank == 0):

@@ -26,10 +26,10 @@ if (platform.system() == "Windows"):
     homedir = os.path.expanduser("~")
     binaries = glob.glob(homedir + "\\AppData\\Local\\Temp\\dun10_binary*")
     for binary in binaries:
-	try:
-	    os.remove(binary)
-	except:
-	    pass
+        try:
+            os.remove(binary)
+        except:
+            pass
 else:
     useServer = False
 
@@ -48,15 +48,15 @@ def getPrimaryRender():
 
 def setPrimaryRender(renderType):
     if (renderType == "cartoon"):
-	primaryRender[0] = "cartoon"
-	primaryRender[1] = "ribbon"
+        primaryRender[0] = "cartoon"
+        primaryRender[1] = "ribbon"
     else:
-	primaryRender[0] = "ribbon"
-	primaryRender[1] = "cartoon"
+        primaryRender[0] = "ribbon"
+        primaryRender[1] = "cartoon"
 
 colors = ["0xFF0000", "0x0000FF", "0x00FF00", "0xFFFF00", "0xFF00FF", "0x00FFFF", "0xFF9900", "0x6666FF",
-	  "0x800000", "0x000099", "0x006600", "0xFF99FF", "0x33CCCC", "0x663300", "0x00CCFF", "0xCCCC00",
-	  "0x99FF33", "0x99CCFF", "0x660066", "0xFF3399"]
+          "0x800000", "0x000099", "0x006600", "0xFF99FF", "0x33CCCC", "0x663300", "0x00CCFF", "0xCCCC00",
+          "0x99FF33", "0x99CCFF", "0x660066", "0xFF3399"]
 def getChainColor(row):
     return colors[row % len(colors)]
 
@@ -1268,9 +1268,9 @@ icon = PyEmbeddedImage(
 #    paramsFiles = glob.glob("*.params")
 #    paramsstr = ""
 #    for params in paramsFiles:
-#	paramsstr = paramsstr + params.strip() + " "
+#        paramsstr = paramsstr + params.strip() + " "
 #    if (len(paramsstr) > 0):
-#	paramsstr = "-extra_res_fa " + paramsstr.strip()
+#        paramsstr = "-extra_res_fa " + paramsstr.strip()
 #    init(extra_options=paramsstr + " -ignore_unrecognized_res -pack_missing_sidechains false")
 #    pose = pose_from_pdb("../data/bigPDB.pdb")
 #    goToSandbox()
@@ -1279,141 +1279,141 @@ icon = PyEmbeddedImage(
 def defaultPyMOLView(cmd, model=None):
     # Useful function for setting the default view of a model in PyMOL
     if (model):
-	#cmd.select("dsele", "model " + model)
-	dsele = "model " + model
-	# Set to a default view
-	cmd.hide("lines", dsele)
-	cmd.show(primaryRender[0], dsele)
-	cmd.hide(primaryRender[1], dsele)
-	#cmd.select("dsele", "metal and model " + model)
-	dsele = "metal and model " + model
-	cmd.show("spheres", dsele)
-	#cmd.select("dsele", "symbol c and model " + model)
-	dsele = "symbol c and model " + model
-	cmd.color("gray", dsele)
-	#cmd.select("dsele", "model " + model)
-	dsele = "model " + model
-	cmd.set("ribbon_color", "white", dsele)
-	cmd.set("cartoon_color", "white", dsele)
-	#cmd.select("dsele", "ss s and model " + model)
-	dsele = "ss s and model " + model
-	cmd.set("ribbon_color", "yellow", dsele)
-	cmd.set("cartoon_color", "yellow", dsele)
-	#cmd.select("dsele", "ss h and model " + model)
-	dsele = "ss h and model " + model
-	cmd.set("ribbon_color", "red", dsele)
-	cmd.set("cartoon_color", "red", dsele)
-	#cmd.select("dsele", "(ss b or ss t) and model " + model)
-	dsele = "(ss b or ss t) and model " + model
-	cmd.set("ribbon_color", "blue", dsele)
-	cmd.set("cartoon_color", "blue", dsele)
-	#cmd.select("dsele", "(ss g or ss i) and model " + model)
-	dsele = "(ss g or ss i) and model " + model
-	cmd.set("ribbon_color", "orange", dsele)
-	cmd.set("cartoon_color", "orange", dsele)
-	#DNA
-	#Adenosine
-	logInfo('tools.py 1316')
-	dsele = '(resn ADE) and model %s'%(model)
-	cmd.set('ribbon_color','green',dsele)
-	cmd.set('cartoon_color','green',dsele)
- 	cmd.color('green',dsele)
+        #cmd.select("dsele", "model " + model)
+        dsele = "model " + model
+        # Set to a default view
+        cmd.hide("lines", dsele)
+        cmd.show(primaryRender[0], dsele)
+        cmd.hide(primaryRender[1], dsele)
+        #cmd.select("dsele", "metal and model " + model)
+        dsele = "metal and model " + model
+        cmd.show("spheres", dsele)
+        #cmd.select("dsele", "symbol c and model " + model)
+        dsele = "symbol c and model " + model
+        cmd.color("gray", dsele)
+        #cmd.select("dsele", "model " + model)
+        dsele = "model " + model
+        cmd.set("ribbon_color", "white", dsele)
+        cmd.set("cartoon_color", "white", dsele)
+        #cmd.select("dsele", "ss s and model " + model)
+        dsele = "ss s and model " + model
+        cmd.set("ribbon_color", "yellow", dsele)
+        cmd.set("cartoon_color", "yellow", dsele)
+        #cmd.select("dsele", "ss h and model " + model)
+        dsele = "ss h and model " + model
+        cmd.set("ribbon_color", "red", dsele)
+        cmd.set("cartoon_color", "red", dsele)
+        #cmd.select("dsele", "(ss b or ss t) and model " + model)
+        dsele = "(ss b or ss t) and model " + model
+        cmd.set("ribbon_color", "blue", dsele)
+        cmd.set("cartoon_color", "blue", dsele)
+        #cmd.select("dsele", "(ss g or ss i) and model " + model)
+        dsele = "(ss g or ss i) and model " + model
+        cmd.set("ribbon_color", "orange", dsele)
+        cmd.set("cartoon_color", "orange", dsele)
+        #DNA
+        #Adenosine
+        logInfo('tools.py 1316')
+        dsele = '(resn ADE) and model %s'%(model)
+        cmd.set('ribbon_color','green',dsele)
+        cmd.set('cartoon_color','green',dsele)
+        cmd.color('green',dsele)
      #Thymine
-	dsele = '(resn THY) and model %s'%(model)
-	cmd.set('ribbon_color','red',dsele)
-	cmd.set('cartoon_color','red',dsele)
- 	cmd.color('red',dsele)
+        dsele = '(resn THY) and model %s'%(model)
+        cmd.set('ribbon_color','red',dsele)
+        cmd.set('cartoon_color','red',dsele)
+        cmd.color('red',dsele)
      #Cytosine
-	dsele = '(resn CYT) and model %s'%(model)
-	cmd.set('ribbon_color','blue',dsele)
-	cmd.set('cartoon_color','blue',dsele)
- 	cmd.color('blue',dsele)
+        dsele = '(resn CYT) and model %s'%(model)
+        cmd.set('ribbon_color','blue',dsele)
+        cmd.set('cartoon_color','blue',dsele)
+        cmd.color('blue',dsele)
      #Guanine
-	dsele = '(resn GUA) and model %s'%(model)
-	cmd.set('ribbon_color','gray',dsele)
-	cmd.set('cartoon_color','gray',dsele)
-	cmd.color('gray',dsele)
-	#cmd.delete("dsele")
+        dsele = '(resn GUA) and model %s'%(model)
+        cmd.set('ribbon_color','gray',dsele)
+        cmd.set('cartoon_color','gray',dsele)
+        cmd.color('gray',dsele)
+        #cmd.delete("dsele")
     else:
-	cmd.select("dsele", "all")
-	dsele = "all"
-	# Set to a default view
-	cmd.hide("lines", "dsele")
-	cmd.show(primaryRender[0], dsele)
-	cmd.hide(primaryRender[1], dsele)
-	cmd.select("dsele", "metal")
-	dsele = "metal"
-	cmd.show("spheres", dsele)
-	cmd.select("dsele", "symbol c")
-	dsele = "symbol c"
-	cmd.color("gray", dsele)
-	#cmd.select("dsele", "all")
-	#dsele = "all"
-	#Had to change this because using 'all' for some reason doesn't play nice with DNA
-	cmd.select('dsele','!(resn ADE | resn THY | resn CYT | resn GUA)')
-	dsele = '!(resn ADE | resn THY | resn CYT | resn GUA)'
-	cmd.set("ribbon_color", "white", dsele)
-	cmd.set("cartoon_color", "white", dsele)
-	cmd.select("dsele", "ss s")
-	dsele = "ss s"
-	cmd.set("ribbon_color", "yellow", dsele)
-	cmd.set("cartoon_color", "yellow", dsele)
-	cmd.select("dsele", "ss h")
-	dsele = "ss h"
-	cmd.set("ribbon_color", "red", dsele)
-	cmd.set("cartoon_color", "red", dsele)
-	cmd.select("dsele", "ss b or ss t")
-	dsele = "ss b or ss t"
-	cmd.set("ribbon_color", "blue", dsele)
-	cmd.set("cartoon_color", "blue", dsele)
-	cmd.select("dsele", "ss g or ss i")
-	dsele = "ss g or ss i"
-	cmd.set("ribbon_color", "orange", dsele)
-	cmd.set("cartoon_color", "orange", dsele)
-	#DNA
-	#Adenosine
-	logInfo('tools.py 1372')
-	cmd.select('dsele','resn ADE')
-	cmd.set('ribbon_color','green','dsele')
-	cmd.set('cartoon_color','green','dsele')
- 	cmd.color('green','dsele')
+        cmd.select("dsele", "all")
+        dsele = "all"
+        # Set to a default view
+        cmd.hide("lines", "dsele")
+        cmd.show(primaryRender[0], dsele)
+        cmd.hide(primaryRender[1], dsele)
+        cmd.select("dsele", "metal")
+        dsele = "metal"
+        cmd.show("spheres", dsele)
+        cmd.select("dsele", "symbol c")
+        dsele = "symbol c"
+        cmd.color("gray", dsele)
+        #cmd.select("dsele", "all")
+        #dsele = "all"
+        #Had to change this because using 'all' for some reason doesn't play nice with DNA
+        cmd.select('dsele','!(resn ADE | resn THY | resn CYT | resn GUA)')
+        dsele = '!(resn ADE | resn THY | resn CYT | resn GUA)'
+        cmd.set("ribbon_color", "white", dsele)
+        cmd.set("cartoon_color", "white", dsele)
+        cmd.select("dsele", "ss s")
+        dsele = "ss s"
+        cmd.set("ribbon_color", "yellow", dsele)
+        cmd.set("cartoon_color", "yellow", dsele)
+        cmd.select("dsele", "ss h")
+        dsele = "ss h"
+        cmd.set("ribbon_color", "red", dsele)
+        cmd.set("cartoon_color", "red", dsele)
+        cmd.select("dsele", "ss b or ss t")
+        dsele = "ss b or ss t"
+        cmd.set("ribbon_color", "blue", dsele)
+        cmd.set("cartoon_color", "blue", dsele)
+        cmd.select("dsele", "ss g or ss i")
+        dsele = "ss g or ss i"
+        cmd.set("ribbon_color", "orange", dsele)
+        cmd.set("cartoon_color", "orange", dsele)
+        #DNA
+        #Adenosine
+        logInfo('tools.py 1372')
+        cmd.select('dsele','resn ADE')
+        cmd.set('ribbon_color','green','dsele')
+        cmd.set('cartoon_color','green','dsele')
+        cmd.color('green','dsele')
      #Thymine
-	cmd.select('dsele','resn THY')
-	cmd.set('ribbon_color','red','dsele')
-	cmd.set('cartoon_color','red','dsele')
- 	cmd.color('red','dsele')
+        cmd.select('dsele','resn THY')
+        cmd.set('ribbon_color','red','dsele')
+        cmd.set('cartoon_color','red','dsele')
+        cmd.color('red','dsele')
      #Cytosine
-	cmd.select('dsele','resn CYT')
-	cmd.set('ribbon_color','blue','dsele')
-	cmd.set('cartoon_color','blue','dsele')
- 	cmd.color('blue','dsele')
+        cmd.select('dsele','resn CYT')
+        cmd.set('ribbon_color','blue','dsele')
+        cmd.set('cartoon_color','blue','dsele')
+        cmd.color('blue','dsele')
      #Guanine
-	cmd.select('dsele','resn GUA')
-	cmd.set('ribbon_color','gray','dsele')
-	cmd.set('cartoon_color','gray','dsele')
-	cmd.color('gray','dsele')
-	cmd.deselect()
-	#cmd.delete("dsele")
+        cmd.select('dsele','resn GUA')
+        cmd.set('ribbon_color','gray','dsele')
+        cmd.set('cartoon_color','gray','dsele')
+        cmd.color('gray','dsele')
+        cmd.deselect()
+        #cmd.delete("dsele")
 
 def goToSandbox(extra=""):
     # Easily gets us back to the sandbox location
     homedir = os.path.expanduser("~")
     if (platform.system() == "Windows"):
-	if (len(extra) > 0):
-	    extra = "\\" + extra
-	os.chdir(homedir + "\\InteractiveROSETTA" + extra)
+        if (len(extra) > 0):
+            extra = "\\" + extra
+        os.chdir(homedir + "\\InteractiveROSETTA" + extra)
     else:
-	if (len(extra) > 0):
-	    extra = "/" + extra
-	os.chdir(homedir + "/.InteractiveROSETTA" + extra)
+        if (len(extra) > 0):
+            extra = "/" + extra
+        os.chdir(homedir + "/.InteractiveROSETTA" + extra)
 
 def AA3to1(resn):
     indx3 = "ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR HOH ADE CYT GUA THY RAD RCY RGU URA ".find(resn)
     if (indx3 < 0):
-	return "Z"
+        return "Z"
     else:
-	indx = indx3 / 4
-	return "ACDEFGHIKLMNPQRSTVWYOacgtacgu"[indx]
+        indx = indx3 / 4
+        return "ACDEFGHIKLMNPQRSTVWYOacgtacgu"[indx]
 
 def resizeTextControlForUNIX(widget, leftbound, width):
     # The centering feature doesn't seem to work on UNIX, so in order to center we have to
@@ -1424,10 +1424,10 @@ def resizeTextControlForUNIX(widget, leftbound, width):
     dc.SetFont(font)
     (w, h) = dc.GetTextExtent(widget.GetLabel())
     if (w > width):
-	w = width
+        w = width
     xpos = int(width / 2) - int(w / 2) + leftbound
     if (xpos < leftbound):
-	xpos = leftbound
+        xpos = leftbound
     widget.SetPosition((int(xpos), widget.GetPosition()[1]))
 
 def startNewLog():
@@ -1440,24 +1440,24 @@ def startNewLog():
     f.write("\n")
     operatingsys = platform.system()
     if (operatingsys == "Windows"):
-	f.write("Operating System: Windows " + platform.win32_ver()[0] + ", Ver: " + platform.win32_ver()[1] + " " + platform.win32_ver()[2] + "\n")
-	processor = platform.uname()[3] + ": " + platform.uname()[4] # Windows has some extra data here
+        f.write("Operating System: Windows " + platform.win32_ver()[0] + ", Ver: " + platform.win32_ver()[1] + " " + platform.win32_ver()[2] + "\n")
+        processor = platform.uname()[3] + ": " + platform.uname()[4] # Windows has some extra data here
     elif (operatingsys == "Linux"):
-	f.write("Operating System: Linux - ")
-	linuxdistro = ""
-	for data in platform.linux_distribution():
-	    linuxdistro = linuxdistro + data + " "
-	linuxdistro = linuxdistro + " Release: " + platform.release()
-	f.write(linuxdistro + "\n")
-	processor = platform.processor()
+        f.write("Operating System: Linux - ")
+        linuxdistro = ""
+        for data in platform.linux_distribution():
+            linuxdistro = linuxdistro + data + " "
+        linuxdistro = linuxdistro + " Release: " + platform.release()
+        f.write(linuxdistro + "\n")
+        processor = platform.processor()
     elif (operatingsys == "Darwin"):
-	processor = platform.processor()
+        processor = platform.processor()
     else: #???
-	processor = platform.processor()
+        processor = platform.processor()
     f.write("Processor: " + processor + "\n")
     f.write("Architecture: ")
     for data in platform.architecture():
-	f.write(data + " ")
+        f.write(data + " ")
     f.write("\n")
     f.write("Python Version: " + platform.python_version() + "\n\n")
     f.close()
@@ -1470,18 +1470,18 @@ def logInfo(msg, filename=""):
     curpath = os.getcwd()
     goToSandbox()
     try:
-	f = open("sessionlog", "a")
-	f.write(msg + "\n")
-	if (len(filename.strip()) > 0):
-	    f.write("BEGIN FILE DATA: " + filename.strip() + " ======================================\n")
-	    f2 = open(filename.strip(), "r")
-	    for aline in f2:
-		f.write(aline)
-	    f2.close()
-	    f.write("END FILE DATA: " + filename.strip() + " ========================================\n")
-	f.close()
+        f = open("sessionlog", "a")
+        f.write(msg + "\n")
+        if (len(filename.strip()) > 0):
+            f.write("BEGIN FILE DATA: " + filename.strip() + " ======================================\n")
+            f2 = open(filename.strip(), "r")
+            for aline in f2:
+                f.write(aline)
+            f2.close()
+            f.write("END FILE DATA: " + filename.strip() + " ========================================\n")
+        f.close()
     except:
-	print "The file " + filename.strip() + " could not be opened by the logger!"
+        print "The file " + filename.strip() + " could not be opened by the logger!"
     # Go back to where we were
     os.chdir(curpath)
 
@@ -1495,7 +1495,7 @@ def scale_list(input_list):
     mi = min(input_list)
     ma = max(input_list)
     if ma - mi < 1e-100:
-	ma += 1e-100
+        ma += 1e-100
 
     r = [int((i - mi) * 255. / (ma - mi)) for i in input_list]
     return r
@@ -1511,24 +1511,24 @@ def get_hex_per_residue_message(pose, per_residue_values, autoscale=True):
 
     # Handy scaling, since we are using hex.
     if autoscale:
-	per_residue_values = scale_list(per_residue_values)
+        per_residue_values = scale_list(per_residue_values)
 
     # Check if the PDBInfo exists.
     if info is not None and info.nres() != 0:
-	# The PDBInfo is defined.
-	for i in xrange(len(per_residue_values)):
-	    chain = info.chain(i + 1)[0]
-	    res = info.number(i + 1)
-	    icode = info.icode(i + 1)
-	    message += '%s%4d%c%02x' % (chain, res, icode,
-					per_residue_values[i])
+        # The PDBInfo is defined.
+        for i in xrange(len(per_residue_values)):
+            chain = info.chain(i + 1)[0]
+            res = info.number(i + 1)
+            icode = info.icode(i + 1)
+            message += '%s%4d%c%02x' % (chain, res, icode,
+                                        per_residue_values[i])
     else:
-	# PDBInfo is undefined.
-	# Rather than seg fault, let's try pose numbering....
-	for i in xrange(len(per_residue_values)):
-	    chain = ' '
-	    res = i + 1
-	    message += '%s%4d %02x' % (chain, res, per_residue_values[i])
+        # PDBInfo is undefined.
+        # Rather than seg fault, let's try pose numbering....
+        for i in xrange(len(per_residue_values)):
+            chain = ' '
+            res = i + 1
+            message += '%s%4d %02x' % (chain, res, per_residue_values[i])
 
     return message
 
@@ -1537,90 +1537,90 @@ def relabelEnergies(pose, allresidue_E, modelname, selectedScoretype, cmd, seqpo
     # First label everything, then hide the labels of everything not in selstring
     found = False
     for (scoretypestr, name) in scoretypes.items():
-	if (name == selectedScoretype):
-	    scoretype = scoretypestr
-	    found = True
-	    break
+        if (name == selectedScoretype):
+            scoretype = scoretypestr
+            found = True
+            break
     if (found):
-	sindx = allresidue_E[0].index(scoretype)
+        sindx = allresidue_E[0].index(scoretype)
     else:
-	sindx = 0 # Default to total_score
+        sindx = 0 # Default to total_score
     residue_E = []
     for i in range(1, len(allresidue_E)):
-	residue_E.append(allresidue_E[i][sindx])
+        residue_E.append(allresidue_E[i][sindx])
     cmd.delete("labelsele")
     i = 0
     for ch in pose[0]:
-	for residue in ch:
-	    chain = ch.id
-	    res = residue.id[1]
-	    if (seqpos != "none" and str(res) != seqpos):
-		i = i + 1
-		continue
-	    Elabel = str(int(residue_E[i] * 100.0) / 100.0)
-	    if (chain != "" and chain != " " and chain != "_"):
-		try:
-		    cmd.select("labelsele", "model " + modelname + " and chain " + str(chain) + " and resi " + str(res) + " and name o")
-		    cmd.label("labelsele", Elabel)
-		except:
-		    # Do nothing on a fail (NCAA that has no CA?)
-		    pass
-	    else:
-		try:
-		    cmd.select("labelsele", "model " + modelname + " and resi " + str(res) + " and name o")
-		    cmd.label("labelsele", Elabel)
-		except:
-		    # Do nothing on a fail (NCAA that has no CA?)
-		    pass
-	    i = i + 1
+        for residue in ch:
+            chain = ch.id
+            res = residue.id[1]
+            if (seqpos != "none" and str(res) != seqpos):
+                i = i + 1
+                continue
+            Elabel = str(int(residue_E[i] * 100.0) / 100.0)
+            if (chain != "" and chain != " " and chain != "_"):
+                try:
+                    cmd.select("labelsele", "model " + modelname + " and chain " + str(chain) + " and resi " + str(res) + " and name o")
+                    cmd.label("labelsele", Elabel)
+                except:
+                    # Do nothing on a fail (NCAA that has no CA?)
+                    pass
+            else:
+                try:
+                    cmd.select("labelsele", "model " + modelname + " and resi " + str(res) + " and name o")
+                    cmd.label("labelsele", Elabel)
+                except:
+                    # Do nothing on a fail (NCAA that has no CA?)
+                    pass
+            i = i + 1
 
 def recolorEnergies(pose, allresidue_E, modelname, selectedScoretype, cmd):
     # Useful function for recoloring all the residues of a pose in PyMOL by energy
     found = False
     for (scoretypestr, name) in scoretypes.items():
-	if (name == selectedScoretype or scoretypestr == selectedScoretype):
-	    scoretype = scoretypestr
-	    found = True
-	    break
+        if (name == selectedScoretype or scoretypestr == selectedScoretype):
+            scoretype = scoretypestr
+            found = True
+            break
     if (found):
-	sindx = allresidue_E[0].index(scoretype)
+        sindx = allresidue_E[0].index(scoretype)
     else:
-	sindx = 0 # Default to total_score
+        sindx = 0 # Default to total_score
     residue_E = []
     for i in range(1, len(allresidue_E)):
-	residue_E.append(allresidue_E[i][sindx])
+        residue_E.append(allresidue_E[i][sindx])
     residue_E = scale_list(residue_E)
     i = 0
     for ch in pose[0]:
-	for residue in ch:
-	    chain = ch.id
-	    res = residue.id[1]
-	    r = residue_E[i]
-	    b = 255 - r
-	    g = 0
-	    try:
-		if (modelname == "nomodel"):
-		    # This is to prevent all those "selector-errors" from showing up in the output by attempting to
-		    # select from a non-existent model in PyMOL
-		    raise Exception
-		if (chain != "" and chain != " " and chain != "_"):
-		    cmd.delete("colorsele")
-		    cmd.select("colorsele", "model " + modelname + " and chain " + chain + " and resi " + str(res) + " and symbol c")
-		    cmd.color("0x%02x%02x%02x" % ((r, g, b)), "colorsele")
-		else:
-		    cmd.delete("colorsele")
-		    cmd.select("colorsele", "model " + modelname + " and resi " + str(res) + " and symbol c")
-		    cmd.color("0x%02x%02x%02x" % ((r, g, b)), "colorsele")
-	    except:
-		# Model not defined yet, but we still want to get the updated b-factors so don't exit
-		pass
-	    i = i + 1
-	    # If total energy, save the color as a b-factor so the sequence window can display this information
-	    # at any time
-	    try:
-		residue["N"].set_bfactor(r / 255.0 * 100.0)
-	    except:
-		pass
+        for residue in ch:
+            chain = ch.id
+            res = residue.id[1]
+            r = residue_E[i]
+            b = 255 - r
+            g = 0
+            try:
+                if (modelname == "nomodel"):
+                    # This is to prevent all those "selector-errors" from showing up in the output by attempting to
+                    # select from a non-existent model in PyMOL
+                    raise Exception
+                if (chain != "" and chain != " " and chain != "_"):
+                    cmd.delete("colorsele")
+                    cmd.select("colorsele", "model " + modelname + " and chain " + chain + " and resi " + str(res) + " and symbol c")
+                    cmd.color("0x%02x%02x%02x" % ((r, g, b)), "colorsele")
+                else:
+                    cmd.delete("colorsele")
+                    cmd.select("colorsele", "model " + modelname + " and resi " + str(res) + " and symbol c")
+                    cmd.color("0x%02x%02x%02x" % ((r, g, b)), "colorsele")
+            except:
+                # Model not defined yet, but we still want to get the updated b-factors so don't exit
+                pass
+            i = i + 1
+            # If total energy, save the color as a b-factor so the sequence window can display this information
+            # at any time
+            try:
+                residue["N"].set_bfactor(r / 255.0 * 100.0)
+            except:
+                pass
     return pose
 
 def appendScorefxnParamsInfoToFile(filename, weightsfile):
@@ -1634,7 +1634,7 @@ def appendScorefxnParamsInfoToFile(filename, weightsfile):
     f2 = open(weightsfile, "r")
     f.write("BEGIN SCOREFXN DATA\n")
     for aline in f2:
-	f.write(aline.strip() + "\n")
+        f.write(aline.strip() + "\n")
     f2.close()
     f.write("END SCOREFXN DATA\n")
     # Now get the params data
@@ -1642,14 +1642,14 @@ def appendScorefxnParamsInfoToFile(filename, weightsfile):
     goToSandbox("params")
     paramsfiles = glob.glob("*.params")
     for paramsfile in paramsfiles:
-	# Do not send over nucleotides, they apparently already get imported by default
-	f.write("PARAMS\t" + paramsfile.strip() + "\n")
-	f.write("BEGIN PARAMS DATA\n")
-	f2 = open(paramsfile.strip(), "r")
-	for aline in f2:
-	    f.write(aline.strip() + "\n")
-	f2.close()
-	f.write("END PARAMS DATA\n")
+        # Do not send over nucleotides, they apparently already get imported by default
+        f.write("PARAMS\t" + paramsfile.strip() + "\n")
+        f.write("BEGIN PARAMS DATA\n")
+        f2 = open(paramsfile.strip(), "r")
+        for aline in f2:
+            f.write(aline.strip() + "\n")
+        f2.close()
+        f.write("END PARAMS DATA\n")
     f.close()
     os.chdir(curdir)
 
@@ -1658,64 +1658,64 @@ def sendToServer(inputfile, remoteServer=None):
     home = os.path.expanduser("~")
     serverpath = ""
     if (platform.system() == "Windows"):
-	fin = open(home + "/InteractiveROSETTA/seqwindow.cfg", "r")
+        fin = open(home + "/InteractiveROSETTA/seqwindow.cfg", "r")
     else:
-	fin = open(home + "/.InteractiveROSETTA/seqwindow.cfg", "r")
+        fin = open(home + "/.InteractiveROSETTA/seqwindow.cfg", "r")
     for aline in fin:
-	if (aline.startswith("[SERVER]")):
-	    serverpath = aline.split("\t")[1].strip()
+        if (aline.startswith("[SERVER]")):
+            serverpath = aline.split("\t")[1].strip()
     fin.close()
     if (inputfile == "testinput"):
-	if (platform.system() == "Windows"):
-	    f = open(home + "\\InteractiveROSETTA\\testinputtemp", "w")
-	else:
-	    f = open(home + "/.InteractiveROSETTA/testinputtemp", "w")
-	f.write("THIS IS A TEST")
-	f.close()
+        if (platform.system() == "Windows"):
+            f = open(home + "\\InteractiveROSETTA\\testinputtemp", "w")
+        else:
+            f = open(home + "/.InteractiveROSETTA/testinputtemp", "w")
+        f.write("THIS IS A TEST")
+        f.close()
     elif (inputfile.startswith("kill")):
-	if (platform.system() == "Windows"):
-	    f = open(home + "\\InteractiveROSETTA\\killinputtemp", "w")
-	else:
-	    f = open(home + "/.InteractiveROSETTA/killinputtemp", "w")
-	f.write(inputfile.split("|")[1])
-	serverpath = inputfile.split("|")[2]
-	inputfile = "killinput"
-	f.close()
+        if (platform.system() == "Windows"):
+            f = open(home + "\\InteractiveROSETTA\\killinputtemp", "w")
+        else:
+            f = open(home + "/.InteractiveROSETTA/killinputtemp", "w")
+        f.write(inputfile.split("|")[1])
+        serverpath = inputfile.split("|")[2]
+        inputfile = "killinput"
+        f.close()
     if (remoteServer is not None):
-	serverpath = remoteServer
+        serverpath = remoteServer
     if (platform.system() == "Windows"):
-	f = open(home + "\\InteractiveROSETTA\\" + inputfile + "temp", "rb")
+        f = open(home + "\\InteractiveROSETTA\\" + inputfile + "temp", "rb")
     else:
-	f = open(home + "/.InteractiveROSETTA/" + inputfile + "temp", "rb")
+        f = open(home + "/.InteractiveROSETTA/" + inputfile + "temp", "rb")
     # Added support for a server running on the client's machine, using the keyword "localhost"
     if (serverpath.lower().strip().startswith("localhost")):
-	serverlocation = serverpath[serverpath.find(":")+1:]
-	myID = "0000000000"
-	try:
-	    if (platform.system() == "Windows"):
-		os.rename(home + "\\InteractiveROSETTA\\" + inputfile + "temp", serverlocation + "\\jobfiles\\" + socket.gethostname() + "-" + inputfile + "-" + myID)
-	    else:
-		os.rename(home + "/.InteractiveROSETTA/" + inputfile + "temp", serverlocation + "/jobfiles/" + socket.gethostname() + "-" + inputfile + "-" + myID)
-	    response = "InteractiveROSETTA Upload Successful"
-	except:
-	    response = "Failed"
+        serverlocation = serverpath[serverpath.find(":")+1:]
+        myID = "0000000000"
+        try:
+            if (platform.system() == "Windows"):
+                os.rename(home + "\\InteractiveROSETTA\\" + inputfile + "temp", serverlocation + "\\jobfiles\\" + socket.gethostname() + "-" + inputfile + "-" + myID)
+            else:
+                os.rename(home + "/.InteractiveROSETTA/" + inputfile + "temp", serverlocation + "/jobfiles/" + socket.gethostname() + "-" + inputfile + "-" + myID)
+            response = "InteractiveROSETTA Upload Successful"
+        except:
+            response = "Failed"
     else:
-	datagen, headers = poster.encode.multipart_encode({inputfile: f})
-	for line in datagen:
-	    if (line[0:2] == "--"):
-		myID = line[2:len(line.strip())-2]
-	try:
-	    request = urllib2.Request(serverpath + "/cgi-bin/jobupload.cgi", datagen, headers)
-	    # Actually do the request, and get the response
-	    response = urllib2.urlopen(request).read().strip()
-	    f.close()
-	except:
-	    f.close()
-	    raise Exception("ERROR: Failed to upload protocol inputs to the server")
+        datagen, headers = poster.encode.multipart_encode({inputfile: f})
+        for line in datagen:
+            if (line[0:2] == "--"):
+                myID = line[2:len(line.strip())-2]
+        try:
+            request = urllib2.Request(serverpath + "/cgi-bin/jobupload.cgi", datagen, headers)
+            # Actually do the request, and get the response
+            response = urllib2.urlopen(request).read().strip()
+            f.close()
+        except:
+            f.close()
+            raise Exception("ERROR: Failed to upload protocol inputs to the server")
     if (response == "InteractiveROSETTA Upload Successful"):
-	return myID
+        return myID
     else:
-	raise Exception("ERROR: Failed to upload protocol inputs to the server")
+        raise Exception("ERROR: Failed to upload protocol inputs to the server")
 
 def queryServerForResults(outputfile):
     # This function looks to see if the server uploaded an outputfile
@@ -1724,76 +1724,76 @@ def queryServerForResults(outputfile):
     goToSandbox()
     localfilename = outputfile.split("-")[0]
     try:
-	if (serverName[0].lower().strip().startswith("localhost")):
-	    serverlocation = serverName[0][serverName[0].find(":")+1:]
-	    if (platform.system() == "Windows"):
-		f = open(serverlocation + "\\results\\" + outputfile)
-	    else:
-		f = open(serverlocation + "/results/" + outputfile)
-	else:
-	    f = urllib2.urlopen(serverName[0] + "/results/" + outputfile)
-	f2 = open(localfilename + "temp", "w")
-	for aline in f:
-	    f2.write(aline.strip() + "\n")
-	f2.close()
-	f.close()
-	# Now generate the PDBs from the data in the file so the GUI doesn't crash when it doesn't see them
-	f = open(localfilename + "temp", "r")
-	readingData = False
-	for aline in f:
-	    if (aline[0:6] == "OUTPUT"):
-		pdbfile = aline.split("\t")[1].strip()
-		pdbfile = pdbfile[pdbfile.find("-")+1:]
-		f2 = open(pdbfile, "w")
-	    elif (aline[0:14] == "BEGIN PDB DATA"):
-		readingData = True
-	    elif (aline[0:12] == "END PDB DATA"):
-		f2.close()
-		readingData = False
-	    elif (readingData):
-		f2.write(aline.strip() + "\n")
-	f.close()
-	# Now make it visible to the main GUI
-	os.rename(localfilename + "temp", localfilename)
+        if (serverName[0].lower().strip().startswith("localhost")):
+            serverlocation = serverName[0][serverName[0].find(":")+1:]
+            if (platform.system() == "Windows"):
+                f = open(serverlocation + "\\results\\" + outputfile)
+            else:
+                f = open(serverlocation + "/results/" + outputfile)
+        else:
+            f = urllib2.urlopen(serverName[0] + "/results/" + outputfile)
+        f2 = open(localfilename + "temp", "w")
+        for aline in f:
+            f2.write(aline.strip() + "\n")
+        f2.close()
+        f.close()
+        # Now generate the PDBs from the data in the file so the GUI doesn't crash when it doesn't see them
+        f = open(localfilename + "temp", "r")
+        readingData = False
+        for aline in f:
+            if (aline[0:6] == "OUTPUT"):
+                pdbfile = aline.split("\t")[1].strip()
+                pdbfile = pdbfile[pdbfile.find("-")+1:]
+                f2 = open(pdbfile, "w")
+            elif (aline[0:14] == "BEGIN PDB DATA"):
+                readingData = True
+            elif (aline[0:12] == "END PDB DATA"):
+                f2.close()
+                readingData = False
+            elif (readingData):
+                f2.write(aline.strip() + "\n")
+        f.close()
+        # Now make it visible to the main GUI
+        os.rename(localfilename + "temp", localfilename)
     except:
-	# Not there yet, don't do anything
-	pass
+        # Not there yet, don't do anything
+        pass
     # Maybe there is an error report, let's look for it
     try:
-	ID = outputfile.split("-")[1]
-	if (serverName[0].lower().strip().startswith("localhost")):
-	    serverlocation = serverName[0][serverName[0].find(":")+1:]
-	    if (platform.system() == "Windows"):
-		f = open(serverlocation + "\\results\\errreport-" + ID)
-	    else:
-		f = open(serverlocation + "/results/errreport" + ID)
-	else:
-	    f = urllib2.urlopen(serverName[0] + "/results/errreport-" + ID)
-	f2 = open("errreporttemp", "w")
-	for aline in f:
-	    f2.write(aline.strip() + "\n")
-	f2.close()
-	f.close()
-	# Now make it visible to the main GUI
-	os.rename("errreporttemp", "errreport")
+        ID = outputfile.split("-")[1]
+        if (serverName[0].lower().strip().startswith("localhost")):
+            serverlocation = serverName[0][serverName[0].find(":")+1:]
+            if (platform.system() == "Windows"):
+                f = open(serverlocation + "\\results\\errreport-" + ID)
+            else:
+                f = open(serverlocation + "/results/errreport" + ID)
+        else:
+            f = urllib2.urlopen(serverName[0] + "/results/errreport-" + ID)
+        f2 = open("errreporttemp", "w")
+        for aline in f:
+            f2.write(aline.strip() + "\n")
+        f2.close()
+        f.close()
+        # Now make it visible to the main GUI
+        os.rename("errreporttemp", "errreport")
     except:
-	# Not there yet, don't do anything
-	pass
+        # Not there yet, don't do anything
+        pass
     os.chdir(curdir)
 
 def getRecognizedTypes():
     # Returns a list of 3 letter codes that will be recognized by Rosetta
     recognized = ["ALA", "CYS", "ASP", "GLU", "PHE", "GLY", "HIS", "ILE", "LYS", "LEU", "MET", "ASN",
-	      "PRO", "GLN", "ARG", "SER", "THR", "VAL", "TRP", "TYR", "HIE", "HID", "ADE", "CYT",
-	      "GUA", "THY", "RAD", "RCY", "RGU", "URA","DA","DT","DC","DG"]
+              "PRO", "GLN", "ARG", "SER", "THR", "VAL", "TRP", "TYR", "HIE", "HID", "ADE", "CYT",
+              "GUA", "THY", "RAD", "RCY", "RGU", "URA","DA","DT","DC","DG"]
     if (platform.system() == "Windows"):
-	# Windows has all the metal ions by default
-	recognized.extend(["CA", "FE2", "FE", "K", "MG", "MN", "NA", "ZN"])
+        # Windows has all the metal ions by default
+        recognized.extend(["CA", "FE2", "FE", "K", "MG", "MN", "NA", "ZN"])
     curdir = os.getcwd()
     goToSandbox("params")
     params = glob.glob("*.fa.params")
     for param in params:
-	recognized.append(param.split(".fa.params")[0])
+        recognized.append(param.split(".fa.params")[0])
     os.chdir(curdir)
     return recognized
 
@@ -1818,15 +1818,15 @@ def cleanPDB(pdbfile, acceptNCAAs=False):
     fin = open(pdbfile.strip(), "r")
     data = []
     for aline in fin:
-	if ((aline.startswith("ATOM") or aline.startswith("HETATM")) and not aline[21] in takenIDs):
-	    takenIDs += aline[21]
-	data.append(aline)
+        if ((aline.startswith("ATOM") or aline.startswith("HETATM")) and not aline[21] in takenIDs):
+            takenIDs += aline[21]
+        data.append(aline)
     fin.close()
     blankID = ""
     for char in "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789":
-	if (char not in takenIDs):
-	    blankID = char
-	    break
+        if (char not in takenIDs):
+            blankID = char
+            break
     # Sometimes there are PDBs that have multiple residues with the same residue index
     # BioPython drops these, but it can lead to all kinds of problems later on
     # So I will keep a record of the backbone atoms of the current residue and if we encounter
@@ -1840,108 +1840,108 @@ def cleanPDB(pdbfile, acceptNCAAs=False):
     counter = 0
     while (counter < len(data)):
     #for counter in range(0, len(data)):
-	aline = data[counter]
-	if (aline.startswith("TER")):
-	    takenIDs += blankID
-	    blankID = ""
-	    for char in "ABCDEFGHIJKLMNOPQRSTUVWXYZ00123456789":
-		if (char not in takenIDs):
-		    blankID = char
-		    break
-	if ((aline[0:4] == "ATOM" or aline[0:6] == "HETATM") and not(aline[17:20].strip() in getRecognizedTypes()) and not(acceptNCAAs)):
-	    logInfo('Popping line:\n %s'%(aline))
-	    offset = offset + 1
-	    data.pop(counter)
-	    continue
-	elif (aline[0:4] == "ATOM" or aline[0:6] == "HETATM" or aline[0:3] == "TER"):
-	    try:
-		atomno = int(aline[7:11])
-		atomno = atomno - offset
-		aline = aline[0:7] + ("%4i" % atomno) + aline[11:]
-	    except:
-		pass
-	if ((aline.startswith("ATOM") or aline.startswith("HETATM")) and aline[21] == " "):
-	    # Rewrite blank chain IDs
-	    aline = aline[0:21] + blankID + aline[22:]
-	if ((aline.startswith("ATOM") or aline.startswith("HETATM")) and isAA(aline[17:20])):
-	    res = aline[22:27] # Includes residue indx + the optional alternate letter
-	    if (res[0:4] != curr_res[0:4]): # New residue indx
-		altlocs_taken = res[4] # Reset the taken altlocs
-		curr_res = res
-		atomtypes = []
-		lastBBatoms = []
-	    # This is only done if this is a new residue, but not a new residue indx
-	    if (aline[22:27] != curr_res or aline[12:16] in lastBBatoms):
-		pass
+        aline = data[counter]
+        if (aline.startswith("TER")):
+            takenIDs += blankID
+            blankID = ""
+            for char in "ABCDEFGHIJKLMNOPQRSTUVWXYZ00123456789":
+                if (char not in takenIDs):
+                    blankID = char
+                    break
+        if ((aline[0:4] == "ATOM" or aline[0:6] == "HETATM") and not(aline[17:20].strip() in getRecognizedTypes()) and not(acceptNCAAs)):
+            logInfo('Popping line:\n %s'%(aline))
+            offset = offset + 1
+            data.pop(counter)
+            continue
+        elif (aline[0:4] == "ATOM" or aline[0:6] == "HETATM" or aline[0:3] == "TER"):
+            try:
+                atomno = int(aline[7:11])
+                atomno = atomno - offset
+                aline = aline[0:7] + ("%4i" % atomno) + aline[11:]
+            except:
+                pass
+        if ((aline.startswith("ATOM") or aline.startswith("HETATM")) and aline[21] == " "):
+            # Rewrite blank chain IDs
+            aline = aline[0:21] + blankID + aline[22:]
+        if ((aline.startswith("ATOM") or aline.startswith("HETATM")) and isAA(aline[17:20])):
+            res = aline[22:27] # Includes residue indx + the optional alternate letter
+            if (res[0:4] != curr_res[0:4]): # New residue indx
+                altlocs_taken = res[4] # Reset the taken altlocs
+                curr_res = res
+                atomtypes = []
+                lastBBatoms = []
+            # This is only done if this is a new residue, but not a new residue indx
+            if (aline[22:27] != curr_res or aline[12:16] in lastBBatoms):
+                pass
 #==============================================================================
-# 		curr_res = res
-# 		atomtypes = []
-# 		lastBBatoms = []
-# 		# Assign the altloc to whatever the most recent altloc used was
-# 		for char in " ABCDEFGHIJKLMNOPQRSTUVWXYZ":
-# 		    if (not(char in altlocs_taken)):
-# 			altlocs_taken = char + altlocs_taken
-# 			break
+#                 curr_res = res
+#                 atomtypes = []
+#                 lastBBatoms = []
+#                 # Assign the altloc to whatever the most recent altloc used was
+#                 for char in " ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+#                     if (not(char in altlocs_taken)):
+#                         altlocs_taken = char + altlocs_taken
+#                         break
 #==============================================================================
 
-	    res = res[0:4] + altlocs_taken[0]
-	    atomtype = aline[12:16]
-	    if (atomtype in [" C  ", " CA ", " O  ", " N  "]):
-		lastBBatoms.append(atomtype)
-	    if (atomtype in atomtypes):
-		# Find a new type for this atom
-		stem = atomtype[0:2]
-		for i in range(1, 100):
-		    if (i < 10):
-			newtype = stem + str(i) + " "
-		    else:
-			newtype = stem + str(i)
-		    if (not(newtype in atomtypes)):
-			atomtypes.append(newtype)
-			break
-		aline = aline[0:12] + newtype + aline[16:]
-	    else:
-		atomtypes.append(atomtype)
-	    # Now check for alternate forms of residues (i.e. 30A, 30B, etc.)
-	    # Rename these so the each have a unique number, the user can delete extras later
-	    chain = aline[21]
-	    if (not(chain in taken_nums.keys())):
-		taken_nums[chain] = []
-	    if (not(res[0:4] in taken_nums[chain])):
-		taken_nums[chain].append(res[0:4])
-		num_mapping[chain+res] = res[0:4]
-	    else:
-		try:
-		    aline = aline[0:22] + num_mapping[chain+res] + " " + aline[27:]
-		except:
-		    # Find a new ID
-		    lastnum = int(taken_nums[chain][len(taken_nums[chain])-1]) + 1
-		    num_mapping[chain+res] = "%4i" % lastnum
-		    taken_nums[chain].append("%4i" % lastnum)
-		    aline = aline[0:22] + num_mapping[chain+res] + " " + aline[27:]
-	    #data.append(aline.strip())
-	#else:
-	# Change nucleic acid strings to what Rosetta expects
-	if (aline[17:20] == " DA"):
-	    data[counter] = aline[0:17] + "ADE" + aline[20:]
-	    #data.append(aline[0:17] + "ADE" + aline[20:])
-	elif (aline[17:20] == " DC"):
-	    data[counter] = aline[0:17] + "CYT" + aline[20:]
-	    #data.append(aline[0:17] + "CYT" + aline[20:])
-	elif (aline[17:20] == " DG"):
-	    data[counter] = aline[0:17] + "GUA" + aline[20:]
-	    #data.append(aline[0:17] + "GUA" + aline[20:])
-	elif (aline[17:20] == " DT"):
-	    data[counter] = aline[0:17] + "THY" + aline[20:]
-	    #data.append(aline[0:17] + "THY" + aline[20:])
-	else:
-	    data[counter] = aline
-	    #data.append(aline)
-	counter += 1
+            res = res[0:4] + altlocs_taken[0]
+            atomtype = aline[12:16]
+            if (atomtype in [" C  ", " CA ", " O  ", " N  "]):
+                lastBBatoms.append(atomtype)
+            if (atomtype in atomtypes):
+                # Find a new type for this atom
+                stem = atomtype[0:2]
+                for i in range(1, 100):
+                    if (i < 10):
+                        newtype = stem + str(i) + " "
+                    else:
+                        newtype = stem + str(i)
+                    if (not(newtype in atomtypes)):
+                        atomtypes.append(newtype)
+                        break
+                aline = aline[0:12] + newtype + aline[16:]
+            else:
+                atomtypes.append(atomtype)
+            # Now check for alternate forms of residues (i.e. 30A, 30B, etc.)
+            # Rename these so the each have a unique number, the user can delete extras later
+            chain = aline[21]
+            if (not(chain in taken_nums.keys())):
+                taken_nums[chain] = []
+            if (not(res[0:4] in taken_nums[chain])):
+                taken_nums[chain].append(res[0:4])
+                num_mapping[chain+res] = res[0:4]
+            else:
+                try:
+                    aline = aline[0:22] + num_mapping[chain+res] + " " + aline[27:]
+                except:
+                    # Find a new ID
+                    lastnum = int(taken_nums[chain][len(taken_nums[chain])-1]) + 1
+                    num_mapping[chain+res] = "%4i" % lastnum
+                    taken_nums[chain].append("%4i" % lastnum)
+                    aline = aline[0:22] + num_mapping[chain+res] + " " + aline[27:]
+            #data.append(aline.strip())
+        #else:
+        # Change nucleic acid strings to what Rosetta expects
+        if (aline[17:20] == " DA"):
+            data[counter] = aline[0:17] + "ADE" + aline[20:]
+            #data.append(aline[0:17] + "ADE" + aline[20:])
+        elif (aline[17:20] == " DC"):
+            data[counter] = aline[0:17] + "CYT" + aline[20:]
+            #data.append(aline[0:17] + "CYT" + aline[20:])
+        elif (aline[17:20] == " DG"):
+            data[counter] = aline[0:17] + "GUA" + aline[20:]
+            #data.append(aline[0:17] + "GUA" + aline[20:])
+        elif (aline[17:20] == " DT"):
+            data[counter] = aline[0:17] + "THY" + aline[20:]
+            #data.append(aline[0:17] + "THY" + aline[20:])
+        else:
+            data[counter] = aline
+            #data.append(aline)
+        counter += 1
     #f.close()
     f = open(pdbfile.strip(), "w")
     for aline in data:
-	f.write(aline)
+        f.write(aline)
     f.close()
     return data
 
@@ -1950,24 +1950,24 @@ def fixPyMOLSave(pdbfile):
     data = []
     f = open(pdbfile, "r")
     for aline in f:
-	data.append(aline.strip())
+        data.append(aline.strip())
     f.close()
     # Now traverse backwards through the data, and drop any TER lines that are in between two atoms on the same chain
     lastchain = "NA"
     terHit = -1
     for i in range(len(data)-1, -1, -1):
-	if ((data[i][0:4] == "ATOM" or data[i][0:6] == "HETATM") and terHit >= 0):
-	    if (lastchain == data[i][21]):
-		data.pop(terHit)
-	    terHit = -1
-	if (data[i][0:4] == "ATOM" or data[i][0:6] == "HETATM"):
-	    lastchain = data[i][21]
-	elif (data[i][0:3] == "TER"):
-	    terHit = i
+        if ((data[i][0:4] == "ATOM" or data[i][0:6] == "HETATM") and terHit >= 0):
+            if (lastchain == data[i][21]):
+                data.pop(terHit)
+            terHit = -1
+        if (data[i][0:4] == "ATOM" or data[i][0:6] == "HETATM"):
+            lastchain = data[i][21]
+        elif (data[i][0:3] == "TER"):
+            terHit = i
     # Write it out
     f = open(pdbfile, "w")
     for aline in data:
-	f.write(aline + "\n")
+        f.write(aline + "\n")
     f.close()
 
 def fitGridColumn(grid, col, minsize):
@@ -1979,14 +1979,14 @@ def fitGridColumn(grid, col, minsize):
     width = minsize - 10
     (w, h) = dc.GetTextExtent(grid.GetColLabelValue(col))
     if (w > width):
-	width = w
+        width = w
     for r in range(0, grid.NumberRows):
-	(w, h) = dc.GetTextExtent(grid.GetCellValue(r, col))
-	if (w > width):
-	    width = w
+        (w, h) = dc.GetTextExtent(grid.GetCellValue(r, col))
+        if (w > width):
+            width = w
     if (oldwidth != int(width+10)):
-	grid.SetColSize(col, int(width+10))
-	grid.Refresh()
+        grid.SetColSize(col, int(width+10))
+        grid.Refresh()
 
 def deleteInputFiles():
     # Useful function for deleting all input/temporary/output files from InteractiveROSETTA HOME
@@ -1994,71 +1994,71 @@ def deleteInputFiles():
     # may see them again and start all over
     goToSandbox()
     if (os.path.isfile("minimizeinput")):
-	os.remove("minimizeinput")
+        os.remove("minimizeinput")
     if (os.path.isfile("minimizeoutput")):
-	os.remove("minimizeoutput")
+        os.remove("minimizeoutput")
     if (os.path.isfile("designinput")):
-	os.remove("designinput")
+        os.remove("designinput")
     if (os.path.isfile("designoutput")):
-	os.remove("designoutput")
+        os.remove("designoutput")
     if (os.path.isfile("scoreinput")):
-	os.remove("scoreinput")
+        os.remove("scoreinput")
     if (os.path.isfile("scoreoutput")):
-	os.remove("scoreoutput")
+        os.remove("scoreoutput")
     if (os.path.isfile("rotamerinput")):
-	os.remove("rotamerinput")
+        os.remove("rotamerinput")
     if (os.path.isfile("rotameroutput")):
-	os.remove("rotameroutput")
+        os.remove("rotameroutput")
     if (os.path.isfile("coarsekicinput")):
-	os.remove("coarsekicinput")
+        os.remove("coarsekicinput")
     if (os.path.isfile("coarsekicoutput")):
-	os.remove("coarsekicoutput")
+        os.remove("coarsekicoutput")
     if (os.path.isfile("kicoutput")):
-	os.remove("kicoutput")
+        os.remove("kicoutput")
     if (os.path.isfile("repackme.pdb")):
-	os.remove("repackme.pdb")
+        os.remove("repackme.pdb")
     if (os.path.isfile("finekicinput")):
-	os.remove("finekicinput")
+        os.remove("finekicinput")
     if (os.path.isfile("errreport")):
-	os.remove("errreport")
+        os.remove("errreport")
     if (os.path.isfile("coarsedockinput")):
-	os.remove("coarsedockinput")
+        os.remove("coarsedockinput")
     if (os.path.isfile("finedockinput")):
-	os.remove("finedockinput")
+        os.remove("finedockinput")
     if (os.path.isfile("dockoutput")):
-	os.remove("dockoutput")
+        os.remove("dockoutput")
     if (os.path.isfile("dock_progress")):
-	os.remove("dock_progress")
+        os.remove("dock_progress")
     if (os.path.isfile("threadinput")):
-	os.remove("threadinput")
+        os.remove("threadinput")
     if (os.path.isfile("threadoutput")):
-	os.remove("threadoutput")
+        os.remove("threadoutput")
     tempfiles = glob.glob("*temp")
     for tempfile in tempfiles:
-	try:
-	    os.remove(tempfile)
-	except:
-	    pass
+        try:
+            os.remove(tempfile)
+        except:
+            pass
     tempfiles = glob.glob("*input")
     for tempfile in tempfiles:
-	try:
-	    os.remove(tempfile)
-	except:
-	    pass
+        try:
+            os.remove(tempfile)
+        except:
+            pass
     tempfiles = glob.glob("*output")
     for tempfile in tempfiles:
-	try:
-	    os.remove(tempfile)
-	except:
-	    pass
+        try:
+            os.remove(tempfile)
+        except:
+            pass
     # Remove the sandbox PDBs
     tempfiles = glob.glob("*.pdb")
     for tempfile in tempfiles:
-	os.remove(tempfile)
+        os.remove(tempfile)
 
 def isAA(resn):
     if (len(resn) == 3 and resn in "ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR "):
-	return True
+        return True
     elif (len(resn) == 1 and resn in "ACDEFGHIKLMNPQRSTVWY"):
-	return True
+        return True
     return False
