@@ -18,12 +18,12 @@ packagecode = sys.argv[1].split(".irm")[0]
 packagecode = packagecode[packagecode.rfind("/")+1:]
 if (os.path.exists(home + "/modules/" + packagecode)):
     while (True):
-	answer = raw_input("This module already is installed.  Overwrite it? (Y/N): ").upper().strip()
-	if (answer in ["Y", "N"]):
-	    break
+        answer = raw_input("This module already is installed.  Overwrite it? (Y/N): ").upper().strip()
+        if (answer in ["Y", "N"]):
+            break
     if (answer == "N"):
-	print "Aborting..."
-	exit()
+        print "Aborting..."
+        exit()
     # Delete it
     shutil.rmtree(home + "/modules/" + packagecode, ignore_errors=True)
 if (not(os.path.exists(home + "/modules"))):
@@ -41,13 +41,13 @@ os.chdir(home + "/modules/" + packagecode)
 files = glob.glob("*")
 for filename in files:
     if (filename.strip() != "server"):
-	try:
-	    os.remove(filename)
-	except:
-	    try:
-		shutil.rmtree(filename, ignore_errors=True)
-	    except:
-		pass
+        try:
+            os.remove(filename)
+        except:
+            try:
+                shutil.rmtree(filename, ignore_errors=True)
+            except:
+                pass
 # Now move everything up out of the server folder
 for filename in glob.glob("server/*"):
     os.rename(filename, filename[filename.rfind("/")+1:])
