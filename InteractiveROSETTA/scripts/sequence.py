@@ -130,9 +130,11 @@ class ProteinDialog(wx.Dialog):
             if (self.waterState == "Load Waters"):
                 self.btnWater.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/btnWater_No.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
                 self.btnWater.SetToolTipString("Load the protein while ignoring waters")
+                self.waterState = "No Waters"
             else:
                 self.btnWater.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/btnWater_Load.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
                 self.btnWater.SetToolTipString("Load the protein with waters present")
+                self.waterState = "Load Waters"
         else:
             if (self.btnWater.GetLabel() == "Load Waters"):
                 self.btnWater.SetLabel("No Waters")
@@ -144,12 +146,14 @@ class ProteinDialog(wx.Dialog):
     def HETATMToggle(self, event):
         # Toggle loading HETATMs on and off
         if (platform.system() == "Darwin"):
-            if (self.hetatmState == "Load Waters"):
+            if (self.hetatmState == "Load HETATMs"):
                 self.btnHETATM.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/btnHETATM_No.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
                 self.btnHETATM.SetToolTipString("Load the protein while ignoring heteroatoms")
+                self.hetatmState = "No HETATMs"
             else:
                 self.btnHETATM.SetBitmapLabel(bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/btnHETATM_Load.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
                 self.btnHETATM.SetToolTipString("Load the protein with heteroatoms present")
+                self.hetatmState = "Load HETATMs"
         else:
             if (self.btnHETATM.GetLabel() == "Load HETATMs"):
                 self.btnHETATM.SetLabel("No HETATMs")
@@ -2284,8 +2288,12 @@ class SequenceWin(wx.Frame):
                 for i in range(0, len(chains)):
                     if (not(dlg.chkChains[i].GetValue())):
                         self.chainsToDelete.append(chains[i])
-                self.keepWaters = dlg.btnWater.GetLabel() == "Load Waters"
-                self.keepHETATMs = dlg.btnHETATM.GetLabel() == "Load HETATMs"
+                if platform.system() == "Darwin":
+                    self.keepWaters = dlg.waterState == "Load Waters"
+                    self.keepHETATMs = dlg.hetatmState == "Load HETATMs"
+                else:
+                    self.keepWaters = dlg.btnWater.GetLabel() == "Load Waters"
+                    self.keepHETATMs = dlg.btnHETATM.GetLabel() == "Load HETATMs"
                 dlg.Destroy()
             if (len(chains) == len(self.chainsToDelete)):
                 # Load nothing
