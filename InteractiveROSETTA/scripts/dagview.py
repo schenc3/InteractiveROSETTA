@@ -530,7 +530,7 @@ class DagViewPanel(wx.lib.scrolledpanel.ScrolledPanel):
         #create file dialog
         logInfo("Clicked Load Zip button")
         dlg = wx.FileDialog(self, message = 'Choose a File',defaultDir=self.seqWin.cwd,defaultFile='',
-	    wildcard="Zip Files (*.zip)|*.zip",style=wx.OPEN | wx.CHANGE_DIR)
+            wildcard="Zip Files (*.zip)|*.zip",style=wx.OPEN | wx.CHANGE_DIR)
         if dlg.ShowModal() == wx.ID_OK:
             paths = dlg.GetPaths()
             #Change cwd to the last opened file

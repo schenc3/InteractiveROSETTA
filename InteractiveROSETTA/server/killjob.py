@@ -13,7 +13,7 @@ res, psoutput = commands.getstatusoutput("ps aux | grep " + sys.argv[1].strip() 
 # Now kill each process with this jobID
 for process in psoutput.split("\n"):
     if (len(process.strip()) == 0):
-	continue
+        continue
     pid = process.split()[1]
     res, output = commands.getstatusoutput("kill -9 " + pid)
 shutil.rmtree(scriptdir + "/results/" + sys.argv[1].strip(), ignore_errors=True)
