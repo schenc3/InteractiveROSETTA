@@ -22,6 +22,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.SetBackgroundColour("#333333")
         self.parent = parent
         self.sizer = wx.GridBagSizer(1, 1)
+        self.SetSizer(self.sizer)
 
         if (platform.system() == "Windows"):
             self.lblProt = wx.StaticText(self, -1, "Energy Minimization", (25, 15), (270, 25), wx.ALIGN_CENTRE)
@@ -80,10 +81,19 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.btnAddBoth.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
         self.btnAddBoth.Bind(wx.EVT_BUTTON, self.selectBoth)
         self.btnAddBoth.SetToolTipString("Residues added will default to minimize both the backbone and sidechains")
-        self.sizer.Add(self.btnAddBB, (2, 1), span=wx.DefaultSpan, flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
-        self.sizer.Add(self.btnAddChi, (2, 2), span=wx.DefaultSpan, flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
-        self.sizer.Add(self.btnAddBoth, (2, 3), span=wx.DefaultSpan, flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
+        self.sizer.Add(self.btnAddBB, (2, 0), span=(1,1), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
+        self.sizer.Add(self.btnAddChi, (2, 1), span=(1,1), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
+        self.sizer.Add(self.btnAddBoth, (2, 2), span=(1,1), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
         self.addType = "BB+Chi"
+
+        #Add constraint menu here????
+        self.btnCst = wx.Button(self,id=-1,label="Constraints")
+        self.btnCst.SetFont(wx.Font(10,wx.DEFAULT,wx.NORMAL,wx.BOLD))
+        self.btnCst.SetForegroundColour("#000000")
+        self.btnCst.Bind(wx.EVT_BUTTON,self.open_csts)
+        self.sizer.Add(self.btnCst,(4,0),(1,1),flag = wx.ALIGN_CENTER | wx.EXPAND,border=5)
+        self.Layout()
+        self.ConstraintSet = []
 
         if (platform.system() == "Darwin"):
             self.btnAdd = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnAdd.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(7, 100), size=(57, 25))
@@ -128,8 +138,8 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.sizer.Add(self.btnAdd, (3, 0), span=(1, 1), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
         self.sizer.Add(self.btnRemove, (3, 1), span=(1, 1), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
         self.sizer.Add(self.btnRestrict, (3, 2), span=(1, 1), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
-        self.sizer.Add(self.btnAll, (3, 3), span=(1, 1), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
-        self.sizer.Add(self.btnClear, (3, 4), span=(1, 1), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
+        self.sizer.Add(self.btnAll, (4, 1), span=(1, 1), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
+        self.sizer.Add(self.btnClear, (4, 2), span=(1, 1), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
         self.selectedData = []
 
         self.minMenu = wx.ComboBox(self, pos=(7, 130), size=(119, 25), choices=[], style=wx.CB_READONLY)
@@ -160,10 +170,12 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.btnBoth.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
         self.btnBoth.Bind(wx.EVT_BUTTON, self.changeBoth)
         self.btnBoth.SetToolTipString("Set current minimize map selection to minimize both the backbone and sidechain")
-        self.sizer.Add(self.minMenu, (4, 0), span=(1, 2), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
-        self.sizer.Add(self.btnBB, (4, 2), span=(1, 1), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
-        self.sizer.Add(self.btnChi, (4, 3), span=(1, 1), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
-        self.sizer.Add(self.btnBoth, (4, 4), span=(1, 1), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
+        self.sizer.Add(self.minMenu, (5, 0), span=(1, 3), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
+        self.sizer.Add(self.btnBB, (6, 0), span=(1, 1), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
+        self.sizer.Add(self.btnChi, (6, 1), span=(1, 1), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
+        self.sizer.Add(self.btnBoth, (6, 2), span=(1, 1), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
+
+
 
         if (platform.system() == "Darwin"):
             self.scoretypeMenu = wx.ComboBox(self, pos=(7, 160), size=(305, 25), choices=[], style=wx.CB_READONLY)
@@ -172,7 +184,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.scoretypeMenu.Bind(wx.EVT_COMBOBOX, self.scoretypeMenuSelect)
         self.scoretypeMenu.Disable() # Is only enabled after a minimization and before accepting it
         self.scoretypeMenu.SetToolTipString("Set the scoretype by which PyMOL residues will be colored")
-        self.sizer.Add(self.scoretypeMenu, (5, 0), span=(1, 5), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
+        self.sizer.Add(self.scoretypeMenu, (7, 0), span=(1, 3), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
 
         self.grdMinMap = wx.grid.Grid(self)
         self.grdMinMap.CreateGrid(0, 2)
@@ -191,7 +203,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.grdMinMap.SetColSize(1, 90)
         self.grdMinMap.Bind(wx.grid.EVT_GRID_CELL_LEFT_CLICK, self.gridClick)
         self.selectedr = -1
-        self.sizer.Add(self.grdMinMap, (6, 0), span=(1, 5), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
+        self.sizer.Add(self.grdMinMap, (8, 0), span=(1, 3), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
         self.minmap = []
 
         ypos = self.grdMinMap.GetPosition()[1] + self.grdMinMap.GetSize()[1] + 10
@@ -212,21 +224,26 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.btnMinimize.Bind(wx.EVT_BUTTON, self.minimizeClick)
         self.btnMinimize.SetToolTipString("Perform energy minimization")
         self.buttonState = "Minimize!"
-        self.sizer.Add(self.btnMinType, (7, 0), span=(1, 2), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
-        self.sizer.Add(self.btnMinimize, (7, 2), span=(1, 3), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
+        self.sizer.Add(self.btnMinType, (9, 0), span=(1, 2), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
+        self.sizer.Add(self.btnMinimize, (9, 2), span=(1, 1), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
         self.minType = "Torsion"
 
-        self.sizer.AddGrowableRow(6)
+        self.sizer.AddGrowableRow(8)
         #self.SetSizerAndFit(self.sizer)
         #self.SetupScrolling()
 
 
         self.scrollh = self.btnMinimize.GetPosition()[1] + self.btnMinimize.GetSize()[1] + 5
-        self.SetScrollbars(1, 1, 320, self.scrollh)
+        # self.SetScrollbars(1, 1, 320, self.scrollh)
         self.winscrollpos = 0
         self.Bind(wx.EVT_SCROLLWIN, self.scrolled)
+        self.SetupScrolling()
+        self.Layout()
 
- #CONSTRAINT TEST
+    def open_csts(self,event):
+        '''Creates the Constraints menu and allows constraints to be added.
+        Each time a constraint is added, it is put in the local constraints set,
+        so constraints are maintained as the menu is destroyed and recreated'''
         try:
          import constraints
          # print 'constraints imported'
@@ -236,12 +253,15 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
          # print 'constraintpanel created'
          self.frame.Show()
          # print 'showing frame'
+
+         self.ConstraintPanel.setSelectWin(self.selectWin)
+         self.ConstraintPanel.setSeqWin(self.seqWin)
+         self.ConstraintPanel.setPyMOL(self.pymol)
         except Exception as e:
          import traceback
          # print 'Error importing constraints',e.message
          traceback.print_tb(sys.exc_info()[2])
          pass
-
 
     def showHelp(self, event):
         # Open the help page
@@ -257,7 +277,6 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
     def setSeqWin(self, seqWin):
         self.seqWin = seqWin
-        self.ConstraintPanel.setSeqWin(seqWin)
         # So the sequence window knows about what model "minimized_view" really is
         self.seqWin.setProtocolPanel(self)
 
@@ -265,12 +284,10 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.pymol = pymol
         self.cmd = pymol.cmd
         self.stored = pymol.stored
-        self.ConstraintPanel.setPyMOL(pymol)
 
     def setSelectWin(self, selectWin):
         self.selectWin = selectWin
         self.selectWin.setProtPanel(self)
-        self.ConstraintPanel.setSelectWin(selectWin)
 
     def gridClick(self, event):
         self.selectedr = event.GetRow()
@@ -416,13 +433,13 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
       chain = self.seqWin.IDs[r][len(self.seqWin.IDs[r])-1]
       if chain == '_':
         chain == ' '
-      print self.seqWin.IDs
+    #   print self.seqWin.IDs
       for ch in model:
         chain2 = ch.get_id()
         if chain2 =='_':
           chain2 = ' '
         if chain2 == chain:
-          print offset+indx+1,'R_indx'
+        #   print offset+indx+1,'R_indx'
           return offset + indx + 1
         else:
           offset += len(model[chain2])
@@ -437,7 +454,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
         logInfo("Add button clicked")
         for i in range(0, len(self.selectedData)):
             [indx, r, seqpos, poseindx, chainoffset] = self.selectedData[i]
-            print "selectedData:",indx, r, seqpos, poseindx, chainoffset
+            # print "selectedData:",indx, r, seqpos, poseindx, chainoffset
             r_indx = self.getR_indx(self.selectedData[i])
             # Make sure this is a CAA
             if (not(self.seqWin.getIsCanonicalAA(r, indx))):
@@ -736,7 +753,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
                     chain = " "
                 if (thismodel != model):
                     continue
-                print grid.GetRowLabelValue(row).split()
+                # print grid.GetRowLabelValue(row).split()
                 seqpos = grid.GetRowLabelValue(row).split()[1]
                 seqpos = int(seqpos[1:len(seqpos)])
                 # Find the rosetta index
@@ -749,10 +766,10 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
                       for residue in ch:
                         if found:
                           break
-                        print chain,seqpos,"=",ch.id,residue.id[1],"?"
+                        # print chain,seqpos,"=",ch.id,residue.id[1],"?"
 #                        ires = ires + 1
                         if (ch.id == chain and residue.id[1] == seqpos):
-                          print 'Found!'
+                        #   print 'Found!'
                           found = True
                         else:
                           ires += 1
@@ -823,6 +840,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.btnChi.Enable()
         self.btnBoth.Enable()
         self.btnMinType.Enable()
+        self.btnCst.Enable()
         if (platform.system() == "Darwin"):
             self.btnMinimize.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnMinimize.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
         else:
@@ -866,6 +884,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
                 self.btnChi.Disable()
                 self.btnBoth.Disable()
                 self.btnMinType.Disable()
+                self.btnCst.Disable()
                 self.seqWin.cannotDelete = True
                 #thrMinimize = Thread(target=self.threadMinimization, args=())
                 #thrMinimize.start()
@@ -1023,7 +1042,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
             f = open("minimizeinputtemp", "w")
             for [currpose, start, end] in jobs:
                 constraintFile = ''
-                constraints = self.ConstraintPanel.ConstraintSet
+                constraints = self.ConstraintSet
                 for [pdb,pose,constraint] in constraints:
                   if str(pose) == str(currpose):
                     constraintFile = str(pose)+".cst"
@@ -1180,7 +1199,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
                     pass
 
     def save_constraints(self):
-      constraints = self.ConstraintPanel.ConstraintSet
+      constraints = self.ConstraintSet
       goToSandbox()
       outputs = {}
       for [pdb,poseindx,constraint] in constraints:
