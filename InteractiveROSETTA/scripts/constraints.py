@@ -37,7 +37,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       # print 'load button'
       self.Cancelables = []
       self.CurrentConstraint = {}
-      self.ConstraintSet = []
+    #   self.ConstraintSet = self.minPanel.ConstraintSet
 
       #Remove Constraint Button
       self.DelBtn = wx.Button(self,-1,label="Delete Constraint")
@@ -86,6 +86,9 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.Layout()
       # print 'grid created'
 
+    #   print self.minPanel.ConstraintSet
+      for [pdb,pindx,cst] in self.minPanel.ConstraintSet:
+           self.addToGrid("%s: %s"%(pdb,cst))
       #Scrolling
       self.SetupScrolling()
       # print 'scrolling'
@@ -109,13 +112,15 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       logInfo("Delete Constraint button pushed!")
       row = self.selectdr
       # print row
-      self.ConstraintSet.pop(row)
+    #   self.ConstraintSet.pop(row)
+      self.minPanel.ConstraintSet.pop(row)
       self.constraintsGrid.DeleteRows(row,1)
       # print self.ConstraintSet
 
     def ClearConstraints(self,event):
       logInfo("Clear Constraints button pushed!")
-      self.ConstraintSet = []
+    #   self.ConstraintSet = []
+      self.minPanel.ConstraintSet = []
       self.constraintsGrid.DeleteRows(0,self.constraintsGrid.NumberRows)
 
     def setSeqWin(self,seqWin):
@@ -475,7 +480,8 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
         constraintString += ' %s %s %s'%(functions[self.CurrentConstraint['FuncType']].strip(),self.x0Entry.GetValue().strip(),self.sdEntry.GetValue().strip())
       # print constraintString
       logInfo(constraintString)
-      self.ConstraintSet.append([self.CurrentConstraint['PDB'],self.CurrentConstraint['poseindx'],constraintString])
+    #   self.ConstraintSet.append([self.CurrentConstraint['PDB'],self.CurrentConstraint['poseindx'],constraintString])
+      self.minPanel.ConstraintSet.append([self.CurrentConstraint['PDB'],self.CurrentConstraint['poseindx'],constraintString])
       self.addToGrid("%s: %s"%(self.CurrentConstraint['PDB'],constraintString))
       self.cancel()
 
