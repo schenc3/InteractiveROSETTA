@@ -406,7 +406,11 @@ def setupKIC():
             offset = 0
             for AA in sequence.strip():
                 indx = "ACDEFGHIKLMNPQRSTVWY".find(AA) + 1
-                pdbdata.insert(loopBegin+offset, rsd_factory[indx])
+                # Now we have to update the chain IDs for this new loop (currently blank)
+                updatedstr = ""
+                for entry in rsd_factory[indx].split("\n"):
+                    updatedstr += entry[0:21] + pdbdata[loopBegin-1][21] + entry[22:] + "\n"
+                pdbdata.insert(loopBegin+offset, updatedstr)
                 #pose.append_polymer_residue_after_seqpos(Residue(rsd_factory.residue(indx)), loopBegin+offset, True)
                 offset = offset + 1
             # Now we have to update the begin and end points of the other loops if necessary
@@ -683,6 +687,180 @@ def doFlexPep():
         outfile = "final_flexpep_%4.4i.pdb" % (i+1)
         os.system("cp " + pdblist[i] + " " + outfile)
 
+def doThread(hostfile):
+    # Unpack the input files
+    fin = open("threadinput", "r")
+    readingData = False
+    templates = []
+    targaligns = []
+    tempaligns = []
+    for aline in fin:
+        if (aline.startswith("FASTA")):
+            FASTAseq = aline.split("\t")[1].strip()
+        elif (aline.startswith("PDBFILE")):
+            pdbfile = aline.split("\t")[1].strip()
+            templates.append(pdbfile)
+            fout = open(pdbfile, "w")
+        elif (aline.startswith("BEGIN PDB DATA")):
+            readingData = True
+        elif (aline.startswith("END PDB DATA")):
+            fout.close()
+            readingData = False
+        elif (aline.startswith("TARGALIGN")):
+            targaligns.append(aline.split("\t")[1].strip())
+        elif (aline.startswith("TEMPALIGN")):
+            tempaligns.append(aline.split("\t")[1].strip())
+        elif (aline.startswith("NMODELS")):
+            nstruct = int(aline.split("\t")[1])
+        elif (readingData):
+            fout.write(aline)
+    fin.close()
+    # Let's get the FASTA file
+    fout = open("target.fasta", "w")
+    fout.write("> Target\n" + FASTAseq.strip() + "\n")
+    fout.close()
+    # First we have to generate fragments for the comparative modeler
+    # Now we have to run PSIBLAST to get a position specific matrix to generate the sequence
+    # profile for fragment selections
+    commandline = "blastpgp -i target.fasta -j 2 -d nr.15 -C checkpoint.pssm"
+    print commandline
+    res, output = commands.getstatusoutput(commandline)
+    if (res):
+        print "ERROR: blastpgp failed!"
+        print output
+    # Now we have to use Rosetta's script to convert the binary checkpoint.pssm to a text
+    # file that can be used for sequence profiles
+    commandline = "perl ../../gen-sequence-profile.pl target.fasta checkpoint.pssm frags.chk"
+    print commandline
+    res, output = commands.getstatusoutput(commandline)
+    if (res):
+        print "ERROR: gen-sequence-profile.pl failed!"
+        print output
+    # Now run psipred to get the secondary structure prediction
+    commandline = "runpsipred_single target.fasta"
+    print commandline
+    res, output = commands.getstatusoutput(commandline)
+    if (res):
+        print "ERROR: PSIPRED failed!"
+        print output
+    # Now generate a simple weighting scheme for fragment selection
+    fout = open("simple.wghts", "w")
+    fout.write("# score name        priority  wght   max_allowed  extras\n")
+    fout.write("SecondarySimilarity 350 1.0 - psipred\n")
+    fout.write("RamaScore 150 2.0 - psipred\n")
+    fout.write("ProfileScoreL1 200 2.0 -\n")
+    fout.write("SequenceIdentity 100 1.0 -") # No newline here otherwise you get a duplicate!!!
+    fout.close()
+    # Setup and run fragment generation
+    fout = open("flags", "w")
+    fout.write("-database " + rosetta_db + "\n")
+    fout.write("-in::file::vall " + fragment_tools + "/vall.apr24.2008.extended.gz\n")
+    fout.write("-in::file::fasta target.fasta\n")
+    fout.write("-in::file::checkpoint frags.chk\n")
+    fout.write("-frags::ss_pred target.ss2 psipred\n")
+    fout.write("-frags::scoring::config simple.wghts\n")
+    fout.write("-frags::bounded_protocol\n")
+    fout.write("-frags::frag_sizes 3 5 9\n")
+    fout.write("-frags::n_candidates 200\n")
+    fout.write("-frags::n_frags 200\n")
+    fout.write("-out::file::frag_prefix frags\n")
+    fout.write("-frags::describe_fragments frags.fsc\n")
+    fout.close()
+    if (separateMPI_master):
+        command = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " " + hostfile + " " + numproc_arg + " 1 " + rosetta_bin + "/fragment_picker.mpi.linuxgccrelease @flags > frag.out) >& frag.err\""
+    else:
+        command = "cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " " + hostfile + " " + numproc_arg + " 1 " + rosetta_bin + "/fragment_picker.mpi.linuxgccrelease @flags > frag.out) >& frag.err"
+    print command
+    p = Popen(args=command, stdout=PIPE, shell=True)
+    (out, err) = p.communicate()
+    # Okay, now we need to set up a multiple sequence alignment for the comparative modeler
+    # The alignments as they are now are correct, but the target sequences may have gaps in
+    # different places so all we have to do is line up all the target sequences and keep the
+    # template sequences aligned to the same residues
+    indx = 0
+    while (True):
+        getout = True
+        for i in range(0, len(targaligns)):
+            if (indx < len(targaligns[i])):
+                getout = False
+                break
+        if (getout):
+            break
+        # Do we have a gap at this index in any of the target alignments?
+        havegap = False
+        for i in range(0, len(targaligns)):
+            if (indx >= len(targaligns[i]) or targaligns[i][indx] == "-"):
+                havegap = True
+        if (havegap):
+            # Yes, we do.  Add one into each target sequence that does not have a gap
+            # and also add a gap to their partner alignments
+            for i in range(0, len(targaligns)):
+                if (indx >= len(targaligns[i])):
+                    targaligns[i] += "-"
+                    tempaligns[i] += "-"
+                elif (targaligns[i][indx] != "-"):
+                    targaligns[i] = targaligns[i][0:indx] + "-" + targaligns[i][indx:]
+                    tempaligns[i] = tempaligns[i][0:indx] + "-" + tempaligns[i][indx:]
+        indx += 1
+    # Write the alignment out as a FASTA file
+    fout = open("comparative.aln", "w")
+    fout.write("> Target\n" + targaligns[0].strip() + "\n\n")
+    for i in range(0, len(tempaligns)):
+        fout.write("> " + templates[i].split(".pdb")[0] + "\n" + tempaligns[i].strip() + "\n\n")
+    fout.close()
+    # Okay, now let's run the setup_RosettaCM.py script to generate some input files for CM
+    commandline = "python " + cm_scripts + "/setup_RosettaCM.py --fasta target.fasta " + \
+        "--alignment comparative.aln --alignment_format fasta --rosetta_bin " + rosetta_bin + " --templates "
+    for pdbfile in templates:
+        commandline += pdbfile.strip() + " "
+    print commandline
+    # For some reason the script below sometimes does not generate the appropriate pdbfiles
+    # Let's help it along now
+    try:
+        os.mkdir("rosetta_cm")
+    except:
+        pass
+    for template in templates:
+        shutil.copy(template, "rosetta_cm/" + template.split(".pdb")[0] + "_201.pdb") # This seems to be what it looks for
+    res, output = commands.getstatusoutput(commandline)
+    if (res):
+        print "ERROR: setup_RosettaCM.py failed!"
+        print output
+    # This generates a folder called "rosetta_cm" that contains most of our input files
+    os.chdir("rosetta_cm")
+    # The flags file does not have the frags files in it, so let's add them
+    fout = open("flags", "a")
+    fout.write("-frag3 ../frags.200.3mers\n")
+    fout.write("-frag5 ../frags.200.5mers\n")
+    fout.write("-frag9 ../frags.200.9mers\n")
+    fout.close()
+    # There's also a score function issue, apparently cart_bonded and pro_close cannot be used
+    # together, so turn off pro_close (https://www.rosettacommons.org/content/multiple-homology-modelling, pose #28)
+    data = []
+    fin = open("stage3_rlx.wts", "r")
+    for aline in fin:
+        if ("pro_close" not in aline):
+            data.append(aline)
+    fin.close()
+    fout = open("stage3_rlx.wts", "w")
+    for aline in data:
+        fout.write(aline)
+    fout.close()
+    # Now we can run rosettaCM
+    if (separateMPI_master):
+        command = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "/rosetta_cm; (" + mpiexec + " " + hostfile_arg + " ../hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/rosetta_scripts.mpi.linuxgccrelease @flags -database " + rosetta_db + " -nstruct " + str(nstruct) + " > cm.out) >& cm.err\""
+    else:
+        command = "cd " + iRosetta_home + "/results/" + jobID.strip() + "/rosetta_cm; (" + mpiexec + " " + hostfile_arg + " ../hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/rosetta_scripts.mpi.linuxgccrelease @flags -database " + rosetta_db + " -nstruct " + str(nstruct) + " > cm.out) >& cm.err"
+    print command
+    p = Popen(args=command, stdout=PIPE, shell=True)
+    (out, err) = p.communicate()
+    # Move the output files back out of this directory
+    expected_outputs = []
+    for i in range(0, nstruct):
+        outputname = "final_cm_%4.4i.pdb" % (i+1)
+        os.rename("S_%4.4i.pdb" % (i+1), "../" + outputname)
+    os.chdir("..")
+
 # This script is used by InteractiveROSETTA to submit uploaded jobs to the C++ Rosetta, and then packages them up into
 # files that the client GUI can access remotely
 # Please note that this script is called by daemon_server.py
@@ -793,6 +971,13 @@ while (True):
         f.close()
         os.remove(iRosetta_home + "/writing_to_queue")
         break
+    else:
+        # Is the jobfile still there?  If not, get rid of this entry so we can proceed
+        if (len(glob.glob(iRosetta_home + "/jobfiles/*" + data[0].strip() + "*")) == 0):
+            f = open(iRosetta_home + "/rosetta_queue", "w")
+            for aline in data[1:]:
+                f.write(aline.strip() + "\n")
+            f.close()
     os.remove(iRosetta_home + "/writing_to_queue")
     time.sleep(10)
 # Loop for finding free nodes
@@ -1171,8 +1356,8 @@ if (runnable):
             command = "cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/mpi_msd.mpi.linuxgccrelease @flags > msd.out) >& msd.err"
     elif (protocol == "flexpep"):
         doFlexPep()
-    #elif (protocol == "thread"):
-        #doThread()
+    elif (protocol == "thread"):
+        doThread("hostfile_" + jobID.strip())
     else:
         try:
             (expected_outputs, packagetype) = modules[protocol].runJob(protocol + "input",
