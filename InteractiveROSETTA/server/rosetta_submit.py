@@ -804,7 +804,7 @@ def doThread(hostfile):
         indx += 1
     # Write the alignment out as a FASTA file
     fout = open("comparative.aln", "w")
-    fout.write("> Target\n" + targaligns[0].strip() + "\n\n")
+    fout.write("> target\n" + targaligns[0].strip() + "\n\n")
     for i in range(0, len(tempaligns)):
         fout.write("> " + templates[i].split(".pdb")[0] + "\n" + tempaligns[i].strip() + "\n\n")
     fout.close()
