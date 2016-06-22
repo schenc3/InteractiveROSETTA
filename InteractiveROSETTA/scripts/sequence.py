@@ -3422,6 +3422,8 @@ class SequenceWin(wx.Frame):
         os.remove("errreport")
 
     def downloader(self, event):
+        logInfo("DownloadTimer finished.  Calling downloader")
+        print("DownloadTimer finished.  Calling downloader")
         self.DownloadTimer.Stop()
         # You have to do this on Linux due to the libc bug
         if (platform.system() == "Linux"):
@@ -3439,6 +3441,7 @@ class SequenceWin(wx.Frame):
             self.activeJobs.append(aline.strip())
             removeJob.append(False)
         f.close()
+        print "activeJobs:",self.activeJobs
         for i in range(0, len(self.activeJobs)):
             job = self.activeJobs[i]
             #elif (job.startswith("MSD") or job.startswith("ANTIBODY") or job.startswith("DOCK") or job.startswith("PMUTSCAN") or job.startswith("BACKRUB") or job.startswith("KIC") or job.startswith("FLEXPEP")):
@@ -3500,9 +3503,11 @@ class SequenceWin(wx.Frame):
                         packageext = ".gz"
                 else:
                     try:
+                        print "attempting to download from url",URL
                         downloadpage = urllib2.urlopen(URL, timeout=1) # To make sure its there before display the dialog
                         downloadpage.close()
                     except:
+                        print "Failed to download from",URL,"Attempting to download from %s.gz"%(URL.split(packageext)[0])
                         downloadpage = urllib2.urlopen(URL.split(packageext)[0] + ".gz", timeout=1) # To make sure its there before display the dialog
                         downloadpage.close()
                         URL = URL.split(packageext)[0] + ".gz"
@@ -3658,6 +3663,7 @@ class SequenceWin(wx.Frame):
                     prefix = filename.split(packageext)[0]
                     readingData = False
                     for aline in gzipfile:
+                        print aline
                         if (aline.startswith("BEGIN PDB")):
                             if (jobtype == "MSD"):
                                 if (platform.system() == "Windows"):
