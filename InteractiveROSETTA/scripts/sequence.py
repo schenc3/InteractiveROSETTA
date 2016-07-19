@@ -661,11 +661,24 @@ class SequenceWin(wx.Frame):
         self.RenumberBtn.Bind(wx.EVT_BUTTON, self.renumber)
         self.RenumberBtn.SetToolTipString("Renumber the selected chain from 1, using the selected residue as the new start")
 
+        # Ramachandran Plot button, for creating and displaying a Ramachandran Plot
+        if (platform.system() == "Darwin"):
+            #self.RenumberBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/RenumberBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(710, 10), size=(100, 25))
+            self.RenumberBtn = wx.Button(self.scroll, id=-1, label="Ramachandran Plot", pos=(810, 10), size=(150, 25))
+            self.RenumberBtn.SetForegroundColour("#000000")
+            self.RenumberBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+        else:
+            self.RenumberBtn = wx.Button(self.scroll, id=-1, label="Ramachandran Plot", pos=(810, 10), size=(150, 25))
+            self.RenumberBtn.SetForegroundColour("#000000")
+            self.RenumberBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+        #self.RenumberBtn.Bind(wx.EVT_BUTTON, self.renumber)
+        self.RenumberBtn.SetToolTipString("Create and display a Ramachandran Plot form the selected .pdb file")
+
         # Server button, for displaying the download manager dialog, above
         if (platform.system() == "Darwin"):
             self.ServerBtn = wx.BitmapButton(self.scroll, id=-1, bitmap=wx.Image(self.scriptdir + "/images/osx/sequence/ServerBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(max(810, W-445), 10), size=(25, 25))
         else:
-            self.ServerBtn = wx.Button(self.scroll, id=-1, label="S", pos=(max(810, W-445), 10), size=(25, 25))
+            self.ServerBtn = wx.Button(self.scroll, id=-1, label="S", pos=(max(860, W-445), 10), size=(25, 25))
             self.ServerBtn.SetForegroundColour("#000000")
             self.ServerBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
         self.ServerBtn.Bind(wx.EVT_BUTTON, self.configureServer)
