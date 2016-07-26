@@ -293,6 +293,8 @@ class DownloadManagerDialog(wx.Dialog):
         self.parent = parent
         # The parent will let us know what the saved URL was for the default setting
         self.inURL = serverURL
+        sizer = wx.GridBagSizer(10,10)
+        self.SetSizer(sizer)
 
         # Label, text box, and test button for specifying a remote server URL
         if (platform.system() == "Darwin"):
@@ -318,8 +320,10 @@ class DownloadManagerDialog(wx.Dialog):
             self.lblActive = wx.StaticText(self, -1, "Active Submissions:", (5, 60), (395, 30))
             self.lblActive.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 
-        self.scroll = wx.ScrolledWindow(self, -1, pos=(0, 80))
+        self.scroll = wx.lib.scrolledpanel.ScrolledPanel(self, -1, pos=(0, 80))
         self.scroll.SetSize((self.GetSize()[0], 180))
+        sizer = wx.GridBagSizer(10,10)
+        self.scroll.SetSizer(sizer)
 
         # Read the downloadwatch file to see the active jobs
         try:
@@ -381,15 +385,23 @@ class DownloadManagerDialog(wx.Dialog):
                 # The name field is important because it contains the index of this specific cancel button
                 # so when one is clicked, we can figure out which one was clicked by looking at the event's name
                 if (platform.system() == "Darwin"):
-                    self.btnRemoveJob.append(wx.BitmapButton(self, -1, wx.Image(self.scriptdir + "/images/osx/sequence/btnRemoveJob.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (355, jobs*100), (25, 25)))
+                    self.btnRemoveJob.append(wx.BitmapButton(self.scroll, -1, wx.Image(self.scriptdir + "/images/osx/sequence/btnRemoveJob.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), (355, jobs*100), (25, 25),name=str(jobs)))
                 else:
                     self.btnRemoveJob.append(wx.Button(self.scroll, id=-1, label="X", pos=(355, jobs*100), size=(25, 25), name=str(jobs)))
                     self.btnRemoveJob[jobs].SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
                 self.btnRemoveJob[jobs].Bind(wx.EVT_BUTTON, self.cancelJob)
                 self.btnRemoveJob[jobs].SetToolTipString("Remove this job from the download manager")
                 jobs += 1
+            for i in range(len(self.lblDownloads)):
+                item = self.lblDownloads[i]
+                self.scroll.Sizer.Add(item,(i,0),(1,5))
+            for i in range(len(self.btnRemoveJob)):
+                item = self.btnRemoveJob[i]
+                self.scroll.Sizer.Add(item,(i*4,5),(1,1))
             fin.close()
-            self.scroll.SetScrollbars(1, 1, self.scroll.GetSize()[0], max(self.scroll.GetSize()[1], self.lblDownloads[len(self.lblDownloads)-1].GetPosition()[1] + 30))
+            self.scroll.Layout()
+            self.scroll.SetupScrolling()
+            #self.scroll.SetScrollbars(1, 1, self.scroll.GetSize()[0], max(self.scroll.GetSize()[1], self.lblDownloads[len(self.lblDownloads)-1].GetPosition()[1] + 30))
         except:
             # The file downloadwatch didn't exist or was corrupt, so we are not aware of any outstanding submissions
             pass
@@ -2883,6 +2895,7 @@ class SequenceWin(wx.Frame):
         # This button allows the user to give a name for the remote server
         # After submission, a test will be made and the user will be notified if the test was sucessful
         dlg = DownloadManagerDialog(self, getServerName(), self.scriptdir)
+
         #dlg = wx.TextEntryDialog(self, "Enter the URL of the remote server:", "Configure Remote Server", "", style=wx.OK | wx.CANCEL)
         #dlg.SetValue(getServerName())
         if (dlg.ShowModal() == wx.OK):
