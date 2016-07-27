@@ -13,7 +13,7 @@
 set HOSTFILE = "hostlist"
 set REMOTE_SERVER = 0 # Set this to zero if the machine executing this script is the server, 1 if this machine will tell another machine to run the server                                                                                                         
 set IROSETTA_HOME = `pwd` # Location of InteractiveROSETTA on this machine                                                        
-set REMOTE_IROSETTA_HOME = "/bach1"`pwd` # This is the location on the remote machine, if you are cross mounting from a main file server this needs to be set properly
+set REMOTE_IROSETTA_HOME = `pwd` # This is the location on the remote machine, if you are cross mounting from a main file server this needs to be set properly
 # ==============================================================================================================
 foreach HOST (`cat $HOSTFILE`)
     if ($REMOTE_SERVER == 0) then

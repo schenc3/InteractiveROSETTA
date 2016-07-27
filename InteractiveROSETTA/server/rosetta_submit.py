@@ -13,7 +13,7 @@ from subprocess import Popen, PIPE, STDOUT
 
 # ====================================================================================================================
 # These are variables that need to be changed to suit your setup
-iRosetta_home = "/home/balto/server"
+iRosetta_home = "/var/www/html/walcob/InteractiveROSETTA/server"
 # This is not the same file as for the Windows backend
 # It is the list of nodes that are MPI-capable for running MPI C++ Rosetta
 # mpi_hostlist is simply the hostlist file used for mpirun
@@ -21,7 +21,7 @@ mpi_hostlist = iRosetta_home + "/hostfile"
 # This value is true if the server running daemon_server.py is not able to submit MPI jobs to a cluster
 # If True, you need to specify the name of the machine that can submit MPI jobs so this script can ssh into it
 separateMPI_master = False
-MPI_master = "bach1"
+MPI_master = "iR-testing"
 this_host = socket.gethostname()
 # MPI-specific commands
 # Change if you are not using mpirun or mpirun does not take these arguments
@@ -74,6 +74,7 @@ def AA3to1(resn):
 
 def doDock(nproc, inputstruct, hostfile, receptorchains, ligandchains, decoys, nfinal, randomize1, randomize2, ensemble1, ensemble2):
     outputdir = "."
+    writeStatus("Running")
     # If either ensemble1 or ensemble2 is present, then we need a file for both ensembles
     # If either is False, then that ensemble needs a file with only the single template from the input
     # structure in it
@@ -227,14 +228,15 @@ def doDock(nproc, inputstruct, hostfile, receptorchains, ligandchains, decoys, n
         fin.close()
         fout.close()
         if (separateMPI_master):
-            commandline = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " -hostfile " + hostfile + " -np " + str(nproc) + " " + rosetta_bin + "/docking_prepack_protocol.mpi.linuxgccrelease @flags_prepack > dock.out) >& dock.err\""
+            commandline = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " -hostfile " + hostfile + " -np " + str(nproc) + " " + rosetta_bin + "/docking_prepack_protocol.mpi.linuxgccrelease @flags_prepack > dock.out) &> dock.err\""
         else:
-            commandline = "cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " -hostfile " + hostfile + " -np " + str(nproc) + " " + rosetta_bin + "/docking_prepack_protocol.mpi.linuxgccrelease @flags_prepack > dock.out) >& dock.err"
+            commandline = "cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " -hostfile " + hostfile + " -np " + str(nproc) + " " + rosetta_bin + "/docking_prepack_protocol.mpi.linuxgccrelease @flags_prepack > dock.out) &> dock.err"
         print commandline
         res, output = commands.getstatusoutput(commandline)
         if (res):
             print "ERROR: The Rosetta MPI prepack docker crashed!"
             print "Output: " + output
+            writeStatus("Failed")
             exit()
         # Now we have to score those .ppk files and update the ensemble lists with the centroid and fa scores
         # Some versions of the prepacker do this automatically, so let's make sure Rosetta did what
@@ -256,17 +258,19 @@ def doDock(nproc, inputstruct, hostfile, receptorchains, ligandchains, decoys, n
             if (res):
                 print "ERROR: The ensemble scorer crashed!"
                 print "Output: " + output
+                writeStatus("Failed")
                 exit()
     # Do docking
     if (separateMPI_master):
-        commandline = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " -hostfile " + hostfile + " -np " + str(nproc) + " " + rosetta_bin + "/docking_protocol.mpi.linuxgccrelease @flags > dock.out) >& dock.err\""
+        commandline = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " -hostfile " + hostfile + " -np " + str(nproc) + " " + rosetta_bin + "/docking_protocol.mpi.linuxgccrelease @flags > dock.out) &> dock.err\""
     else:
-        commandline = "cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " -hostfile " + hostfile + " -np " + str(nproc) + " " + rosetta_bin + "/docking_protocol.mpi.linuxgccrelease @flags > dock.out) >& dock.err"
+        commandline = "cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " -hostfile " + hostfile + " -np " + str(nproc) + " " + rosetta_bin + "/docking_protocol.mpi.linuxgccrelease @flags > dock.out) &> dock.err"
     print commandline
     res, output = commands.getstatusoutput(commandline)
     if (res):
         print "ERROR: The Rosetta MPI docker, round 1, crashed!"
         print "Output: " + output
+        writeStatus("Failed")
         exit()
     # Move the files to the appropriate output folder
     pdbprefix = inputstruct.split(".pdb")[0]
@@ -321,9 +325,11 @@ def doDock(nproc, inputstruct, hostfile, receptorchains, ligandchains, decoys, n
         else:
             os.rename(winner, "final_%4.4i.pdb" % i)
         i += 1
+    writeStatus("Finished")
 
 def setupKIC():
     # Unpack everything we need from that inputfile and generate the flags file for KIC submission
+    writeStatus("Running")
     fin = open("coarsekicinput", "r")
     nstruct = 1
     loopdata = []
@@ -459,8 +465,10 @@ def setupKIC():
     fout.close()
     # Return the output stem so the ensemble packer can find the PDB outputs
     return pdbfile.split(".pdb")[0] + "_"
+    writeStatus("Finished")
 
 def doFlexPep():
+    writeStatus("Running")
     # Generate the input files
     fin = open("flexpepinput", "r")
     readingData = False
@@ -525,6 +533,8 @@ def doFlexPep():
         if (res):
             print "ERROR: blastpgp failed!"
             print output
+            writeStatus("Failed")
+            exit()
         # Now we have to use Rosetta's script to convert the binary checkpoint.pssm to a text
         # file that can be used for sequence profiles
         commandline = "perl ../../gen-sequence-profile.pl peptide.fasta checkpoint.pssm frags.chk"
@@ -533,6 +543,8 @@ def doFlexPep():
         if (res):
             print "ERROR: gen-sequence-profile.pl failed!"
             print output
+            writeStatus("Failed")
+            exit()
         # Now run psipred to get the secondary structure prediction
         commandline = "runpsipred_single peptide.fasta"
         print commandline
@@ -564,11 +576,11 @@ def doFlexPep():
         fout.write("-frags::describe_fragments frags.fsc\n")
         fout.close()
         if (separateMPI_master):
-            command = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " 1 " + rosetta_bin + "/fragment_picker.mpi.linuxgccrelease @flags > frag.out) >& frag.err\""
+            command = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " 1 " + rosetta_bin + "/fragment_picker.mpi.linuxgccrelease @flags > frag.out) &> frag.err\""
         else:
-            command = "cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " 1 " + rosetta_bin + "/fragment_picker.mpi.linuxgccrelease @flags > frag.out) >& frag.err"
+            command = "cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " 1 " + rosetta_bin + "/fragment_picker.mpi.linuxgccrelease @flags > frag.out) &> frag.err"
         print command
-        p = Popen(args=command, stdout=PIPE, shell=True)
+        p = Popen(args=command, stdout=PIPE, stderr=PIPE, shell=True)
         (out, err) = p.communicate()
         # As per the flexpepdock instructions, we have to shift the fragment positions in the
         # frags files by the number of residues in receptor chains
@@ -599,6 +611,8 @@ def doFlexPep():
         if (res):
             print "ERROR: Could not shift the frag files!"
             print output
+            writeStatus("Failed")
+            exit()
     # Now that we have the fragments, we can run flexpepdock
     # Generate the new frags file
     fout = open("flags", "w")
@@ -624,11 +638,11 @@ def doFlexPep():
     fout.close()
     # Run it
     if (separateMPI_master):
-        command = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/FlexPepDocking.mpi.linuxgccrelease @flags > flexpep.out) >& flexpep.err\""
+        command = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/FlexPepDocking.mpi.linuxgccrelease @flags > flexpep.out) &> flexpep.err\""
     else:
-        command = "cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/FlexPepDocking.mpi.linuxgccrelease @flags > flexpep.out) >& flexpep.err"
+        command = "cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/FlexPepDocking.mpi.linuxgccrelease @flags > flexpep.out) &> flexpep.err"
     print command
-    p = Popen(args=command, stdout=PIPE, shell=True)
+    p = Popen(args=command, stdout=PIPE, stderr=PIPE, shell=True)
     (out, err) = p.communicate()
     # Okay, now let's take the top N models as ranked by the constraints score first and
     # reweighted FlexPepDock score second
@@ -686,10 +700,17 @@ def doFlexPep():
     for i in range(0, nreturn):
         outfile = "final_flexpep_%4.4i.pdb" % (i+1)
         os.system("cp " + pdblist[i] + " " + outfile)
+    writeStatus("Finished")
+
+def writeStatus(status):
+    statusOut = open("status",'w+')
+    statusOut.write(status)
+    statusOut.close()
 
 def doThread(hostfile):
     # Unpack the input files
     fin = open("threadinput", "r")
+    writeStatus("Running")
     readingData = False
     templates = []
     targaligns = []
@@ -717,7 +738,7 @@ def doThread(hostfile):
     fin.close()
     # Let's get the FASTA file
     fout = open("target.fasta", "w")
-    fout.write("> Target\n" + FASTAseq.strip() + "\n")
+    fout.write("> target\n" + FASTAseq.strip() + "\n")
     fout.close()
     # First we have to generate fragments for the comparative modeler
     # Now we have to run PSIBLAST to get a position specific matrix to generate the sequence
@@ -728,6 +749,8 @@ def doThread(hostfile):
     if (res):
         print "ERROR: blastpgp failed!"
         print output
+        writeStatus("Failed")
+        exit()
     # Now we have to use Rosetta's script to convert the binary checkpoint.pssm to a text
     # file that can be used for sequence profiles
     commandline = "perl ../../gen-sequence-profile.pl target.fasta checkpoint.pssm frags.chk"
@@ -736,6 +759,8 @@ def doThread(hostfile):
     if (res):
         print "ERROR: gen-sequence-profile.pl failed!"
         print output
+        writeStatus("Failed")
+        exit()
     # Now run psipred to get the secondary structure prediction
     commandline = "runpsipred_single target.fasta"
     print commandline
@@ -743,6 +768,8 @@ def doThread(hostfile):
     if (res):
         print "ERROR: PSIPRED failed!"
         print output
+        writeStatus("Failed")
+        exit()
     # Now generate a simple weighting scheme for fragment selection
     fout = open("simple.wghts", "w")
     fout.write("# score name        priority  wght   max_allowed  extras\n")
@@ -767,16 +794,17 @@ def doThread(hostfile):
     fout.write("-frags::describe_fragments frags.fsc\n")
     fout.close()
     if (separateMPI_master):
-        command = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " " + hostfile + " " + numproc_arg + " 1 " + rosetta_bin + "/fragment_picker.mpi.linuxgccrelease @flags > frag.out) >& frag.err\""
+        command = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " " + hostfile + " " + numproc_arg + " 1 " + rosetta_bin + "/fragment_picker.mpi.linuxgccrelease @flags > frag.out) &> frag.err\""
     else:
-        command = "cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " " + hostfile + " " + numproc_arg + " 1 " + rosetta_bin + "/fragment_picker.mpi.linuxgccrelease @flags > frag.out) >& frag.err"
+        command = "cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " " + hostfile + " " + numproc_arg + " 1 " + rosetta_bin + "/fragment_picker.mpi.linuxgccrelease @flags > frag.out) &> frag.err"
     print command
-    p = Popen(args=command, stdout=PIPE, shell=True)
+    p = Popen(args=command, stdout=PIPE,stderr=PIPE, shell=True)
     (out, err) = p.communicate()
     # Okay, now we need to set up a multiple sequence alignment for the comparative modeler
     # The alignments as they are now are correct, but the target sequences may have gaps in
     # different places so all we have to do is line up all the target sequences and keep the
     # template sequences aligned to the same residues
+
     indx = 0
     while (True):
         getout = True
@@ -824,8 +852,10 @@ def doThread(hostfile):
         shutil.copy(template, "rosetta_cm/" + template.split(".pdb")[0] + "_201.pdb") # This seems to be what it looks for
     res, output = commands.getstatusoutput(commandline)
     if (res):
-        print "ERROR: setup_RosettaCM.py failed!"
+        print "%i ERROR: setup_RosettaCM.py failed!" %(res)
         print output
+        print
+        writeStatus("Failed")
     # This generates a folder called "rosetta_cm" that contains most of our input files
     os.chdir("rosetta_cm")
     # The flags file does not have the frags files in it, so let's add them
@@ -848,18 +878,24 @@ def doThread(hostfile):
     fout.close()
     # Now we can run rosettaCM
     if (separateMPI_master):
-        command = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "/rosetta_cm; (" + mpiexec + " " + hostfile_arg + " ../hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/rosetta_scripts.mpi.linuxgccrelease @flags -database " + rosetta_db + " -nstruct " + str(nstruct) + " > cm.out) >& cm.err\""
+        command = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "/rosetta_cm; (" + mpiexec + " " + hostfile_arg + " ../hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/rosetta_scripts.mpi.linuxgccrelease @flags -database " + rosetta_db + " -nstruct " + str(nstruct) + " > cm.out) &> cm.err\""
     else:
-        command = "cd " + iRosetta_home + "/results/" + jobID.strip() + "/rosetta_cm; (" + mpiexec + " " + hostfile_arg + " ../hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/rosetta_scripts.mpi.linuxgccrelease @flags -database " + rosetta_db + " -nstruct " + str(nstruct) + " > cm.out) >& cm.err"
+        command = "cd " + iRosetta_home + "/results/" + jobID.strip() + "/rosetta_cm; (" + mpiexec + " " + hostfile_arg + " ../hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/rosetta_scripts.mpi.linuxgccrelease @flags -database " + rosetta_db + " -nstruct " + str(nstruct) + " > cm.out) &> cm.err"
     print command
-    p = Popen(args=command, stdout=PIPE, shell=True)
+    p = Popen(args=command, stdout=PIPE,stderr=PIPE, shell=True)
     (out, err) = p.communicate()
+
     # Move the output files back out of this directory
     expected_outputs = []
     for i in range(0, nstruct):
         outputname = "final_cm_%4.4i.pdb" % (i+1)
-        os.rename("S_%4.4i.pdb" % (i+1), "../" + outputname)
+        #os.rename("S_%4.4i.pdb" % (i+1), "../" + outputname)
+        status,output = commands.getstatusoutput("cp -v S_%4.4i.pdb ../%s"%(i+1,outputname))
+        print status
+        print output
     os.chdir("..")
+    print "doThread finished!"
+    writeStatus("Finished")
 
 # This script is used by InteractiveROSETTA to submit uploaded jobs to the C++ Rosetta, and then packages them up into
 # files that the client GUI can access remotely
@@ -1109,18 +1145,18 @@ while (True):
         hostname = host[0]
         slots = host[1]
         if (hostname == this_host):
-            process = Popen(args="uptime", stdout=PIPE, shell=True)
+            process = Popen(args="uptime", stdout=PIPE,stderr = PIPE, shell=True)
         elif (separateMPI_master):
-            process = Popen(args="ssh " + MPI_master + " \'ssh " + hostname + " \"uptime\"\'", stdout=PIPE, shell=True)
+            process = Popen(args="ssh " + MPI_master + " \'ssh " + hostname + " \"uptime\"\'", stdout=PIPE, stderr = PIPE, shell=True)
         else:
-            process = Popen(args="ssh " + hostname + " \"uptime\"", stdout=PIPE, shell=True)
+            process = Popen(args="ssh " + hostname + " \"uptime\"", stdout=PIPE, stderr = PIPE, shell=True)
         uptimeoutput = process.communicate()[0]
         if (hostname == this_host):
-            process = Popen(args="nproc", stdout=PIPE, shell=True)
+            process = Popen(args="nproc", stdout=PIPE, stderr = PIPE, shell=True)
         elif (separateMPI_master):
-            process = Popen(args="ssh " + MPI_master + " \'ssh " + hostname + " \"nproc\"\'", stdout=PIPE, shell=True)
+            process = Popen(args="ssh " + MPI_master + " \'ssh " + hostname + " \"nproc\"\'", stdout=PIPE, stderr = PIPE, shell=True)
         else:
-            process = Popen(args="ssh " + hostname + " \"nproc\"", stdout=PIPE, shell=True)
+            process = Popen(args="ssh " + hostname + " \"nproc\"", stdout=PIPE, stderr = PIPE, shell=True)
         nprocoutput = process.communicate()[0]
         try:
             load_1min = float(uptimeoutput.split()[len(uptimeoutput.split())-3].split(",")[0])
@@ -1183,9 +1219,9 @@ if (runnable):
                 fout.close()
         fin.close()
         if (separateMPI_master):
-            command = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " python ../../antibody_mpi.py MYAB " + str(nmodels) + " light.fasta heavy.fasta " + antibody_home + " " + rosetta_bin + " " + rosetta_db + " > antibody.out) >& antibody.err\""
+            command = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " python ../../antibody_mpi.py MYAB " + str(nmodels) + " light.fasta heavy.fasta " + antibody_home + " " + rosetta_bin + " " + rosetta_db + " > antibody.out) &> antibody.err\""
         else:
-            command = "cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " python ../../antibody_mpi.py MYAB " + str(nmodels) + " light.fasta heavy.fasta " + antibody_home + " " + rosetta_bin + " " + rosetta_db + " > antibody.out) >& antibody.err"
+            command = "cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " python ../../antibody_mpi.py MYAB " + str(nmodels) + " light.fasta heavy.fasta " + antibody_home + " " + rosetta_bin + " " + rosetta_db + " > antibody.out) &> antibody.err"
     elif (protocol == "backrub"):
         # Generate the input PDB file and the weights file
         fin = open("backrubinput", "r")
@@ -1224,9 +1260,9 @@ if (runnable):
                 maxRMSD = float(aline.split("\t")[1].strip())
         fin.close()
         if (separateMPI_master):
-            command = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " python ../../backrub.py " + pdbfile + " " + str(nmodels) + " " + str(maxRMSD) + " > backrub.out) >& backrub.err\""
+            command = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " python ../../backrub.py " + pdbfile + " " + str(nmodels) + " " + str(maxRMSD) + " > backrub.out) &> backrub.err\""
         else:
-            command = "cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " python ../../backrub.py " + pdbfile + " " + str(nmodels) + " " + str(maxRMSD) + " > backrub.out) >& backrub.err"
+            command = "cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " python ../../backrub.py " + pdbfile + " " + str(nmodels) + " " + str(maxRMSD) + " > backrub.out) &> backrub.err"
     elif (protocol == "dock"):
         # Generate the input files
         fin = open("coarsedockinput", "r")
@@ -1340,20 +1376,20 @@ if (runnable):
         fout.write("-mute basic core\n")
         fout.close()
         if (separateMPI_master):
-            command = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/pmut_scan_parallel.mpi.linuxgccrelease @flags > pmut.out) >& pmut.err\""
+            command = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/pmut_scan_parallel.mpi.linuxgccrelease @flags > pmut.out) &> pmut.err\""
         else:
-            command = "cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/pmut_scan_parallel.mpi.linuxgccrelease @flags > pmut.out) >& pmut.err"
+            command = "cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/pmut_scan_parallel.mpi.linuxgccrelease @flags > pmut.out) &> pmut.err"
     elif (protocol == "kic"):
         outputstem = setupKIC()
         if (separateMPI_master):
-            command = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/loopmodel.mpi.linuxgccrelease @flags > kic.out) >& kic.err\""
+            command = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/loopmodel.mpi.linuxgccrelease @flags > kic.out) &> kic.err\""
         else:
-            command = "cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/loopmodel.mpi.linuxgccrelease @flags > kic.out) >& kic.err"
+            command = "cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/loopmodel.mpi.linuxgccrelease @flags > kic.out) &> kic.err"
     elif (protocol == "msd"):
         if (separateMPI_master):
-            command = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/mpi_msd.mpi.linuxgccrelease @flags > msd.out) >& msd.err\""
+            command = "ssh " + MPI_master + " \"cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/mpi_msd.mpi.linuxgccrelease @flags > msd.out) &> msd.err\""
         else:
-            command = "cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/mpi_msd.mpi.linuxgccrelease @flags > msd.out) >& msd.err"
+            command = "cd " + iRosetta_home + "/results/" + jobID.strip() + "; (" + mpiexec + " " + hostfile_arg + " hostfile_" + jobID.strip() + " " + numproc_arg + " " + str(cpus) + " " + rosetta_bin + "/mpi_msd.mpi.linuxgccrelease @flags > msd.out) &> msd.err"
     elif (protocol == "flexpep"):
         doFlexPep()
     elif (protocol == "thread"):
@@ -1382,7 +1418,7 @@ if (runnable):
             exit()
     if (protocol not in ["dock", "flexpep", "thread"] and not(custom_module)):
         print command
-        p = Popen(args=command, stdout=PIPE, shell=True)
+        p = Popen(args=command, stdout=PIPE, stderr = PIPE, shell=True)
         (out, err) = p.communicate()
 # Now package the results up
 if (protocol == "msd"):
@@ -1501,6 +1537,8 @@ elif (protocol == "thread"):
     # Sometimes warnings get outputted to the error file, so we can't know if an error really happening
     # simply by checking to see if dock.err has content in it
     outputfiles = glob.glob("final_cm_????.pdb")
+    print "outputfiles"
+    print outputfiles
     if (len(outputfiles) == 0):
         crashed = True
     if (crashed):
