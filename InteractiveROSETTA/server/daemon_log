@@ -1,0 +1,6 @@
+/bin/sh: 1: Syntax error: Bad fd number
+cd /var/www/html/walcob/InteractiveROSETTA/server/results/d32ba86874f04816ace5179e9d57dde8; (mpirun --mca btl_tcp_if_exclude lo,virbr0 --hostfile hostfile_d32ba86874f04816ace5179e9d57dde8 -np 6 /usr/local/rosetta/main/source/bin/pmut_scan_parallel.mpi.linuxgccrelease @flags > pmut.out) >& pmut.err
+Traceback (most recent call last):
+  File "../../rosetta_submit.py", line 1551, in <module>
+    f = open("pmut.err", "r")
+IOError: [Errno 2] No such file or directory: 'pmut.err'
