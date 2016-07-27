@@ -34,7 +34,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
             resizeTextControlForUNIX(self.lblProt, 0, self.GetSize()[0])
         self.lblProt.SetForegroundColour("#FFFFFF")
-        self.sizer.Add(self.lblProt, (0, 0), span=(1, 5), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
+        self.sizer.Add(self.lblProt, (0, 0), span=(1, 2), flag = wx.ALIGN_CENTER | wx.EXPAND, border=5)
 
         if (platform.system() == "Darwin"):
             self.HelpBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/HelpBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(295, 10), size=(25, 25))
@@ -44,6 +44,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.HelpBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
         self.HelpBtn.Bind(wx.EVT_BUTTON, self.showHelp)
         self.HelpBtn.SetToolTipString("Display the help file for this window")
+        self.sizer.Add(self.HelpBtn,(0,2),(1,1))
 
         if (platform.system() == "Windows"):
             self.lblInst = wx.StaticText(self, -1, "Highlight residues to add/remove to minimization", (0, 45), (320, 25), wx.ALIGN_CENTRE)
@@ -250,6 +251,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
          self.frame = wx.Frame(None,-1,title="Constraints Menu")
          # print 'frame generated'
          self.ConstraintPanel=constraints.ConstraintPanel(self.frame,self)
+         self.frame.Fit()
          # print 'constraintpanel created'
          self.frame.Show()
          # print 'showing frame'
