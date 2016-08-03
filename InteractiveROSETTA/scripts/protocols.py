@@ -21,7 +21,7 @@ except:
             # Ask the user to show us where they installed it
             dlg2 = wx.DirDialog(None, "Please navigate to and enter the PyRosetta folder",
                                 defaultPath=os.path.expanduser("~"),
-                                style=wx.DD_DEFAULT_STYLE 
+                                style=wx.DD_DEFAULT_STYLE
                                 | wx.DD_DIR_MUST_EXIST
                                 | wx.DD_CHANGE_DIR)
             if (dlg2.ShowModal() == wx.ID_OK):
@@ -215,7 +215,7 @@ except:
         if (platform.system() == "Windows"):
             dlg2 = wx.MessageDialog(None, "You need to download the Windows installer and double click on the downloaded exe file to install PyRosetta.\n\nDownload: http://www.pyrosetta.org/dow", "Please Install PyRosetta", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
         elif (platform.system() == "Darwin"):
-            dlg2 = wx.MessageDialog(None, "You need to download the Mac package and untar the package.  To do that, open Terminal.app and execute \"tar xjvf [package]\" where [package] is the name of the downloaded file.\n\nDownload: http://www.pyrosetta.org/dow", "Please Install PyRosetta", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
+            dlg2 = wx.MessageDialog(None, "You need to download the Mac package and do not untar it. \n\nDownload: http://www.pyrosetta.org/dow", "Please Install PyRosetta", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
         else:
             dlg2 = wx.MessageDialog(None, "You need to download the Linux package and untar the package.  To do that, open a terminal and execute \"tar xjvf [package]\" where [package] is the name of the downloaded file.\n\nDownload: http://www.pyrosetta.org/dow", "Please Install PyRosetta", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
         dlg2.ShowModal()
@@ -333,7 +333,7 @@ from pointmutations import PointMutationsPanel
 from kic import KICPanel
 from docking import DockingPanel
 from msd import MSDPanel
-from pmutscan import PointMutantScanPanel 
+from pmutscan import PointMutantScanPanel
 from surfaces import SurfacesPanel
 from antibody import AntibodyPanel
 from ensemblegen import EnsembleGenPanel
@@ -350,7 +350,7 @@ class ProtocolsPanel(wx.Panel):
         self.parent = parent
         self.SetBackgroundColour("#333333")
         self.Show()
-        
+
         if (platform.system() == "Windows"):
             self.label = wx.StaticText(self, -1, "Protocols", (5, 5), (340, 25), wx.ALIGN_CENTRE)
             self.label.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -361,34 +361,34 @@ class ProtocolsPanel(wx.Panel):
             self.label.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
             resizeTextControlForUNIX(self.label, 0, self.GetSize()[0])
         self.label.SetForegroundColour("#FFFFFF")
-        
+
         if (platform.system() == "Darwin"):
             self.protMenu = wx.ComboBox(self, pos=(5, 30), size=(230, 25), choices=[], style=wx.CB_READONLY)
         else:
             self.protMenu = wx.ComboBox(self, pos=(5, 30), size=(230, 25), choices=[], style=wx.CB_READONLY | wx.CB_SORT)
         self.protMenu.SetToolTipString("List of currently available protocols")
-        
-        self.default_protocols = ["Antibody Modeling", 
+
+        self.default_protocols = ["Antibody Modeling",
                    "Biological Tools",
-                   "Docking", 
-                   "Energy Minimization", 
-                   "Ensemble Browser", 
+                   "Docking",
+                   "Energy Minimization",
+                   "Ensemble Browser",
                    "Ensemble Generation",
                    "Flexible Peptide Docking",
                    "Loop Modeling (KIC)",
                    "Module Manager",
-                   "Molecular Surfaces", 
-                   "Pathway Visualization (GeoFold)", 
-                   "Point Mutant Scan", 
-                   "Point Mutations", 
-                   "Protein Design (Fixbb)", 
-                   "Protein Design (MSD)", 
-                   "Residue/Ligand Creator", 
-                   "Structure Prediction (Comparative Modeling)", 
+                   "Molecular Surfaces",
+                   "Pathway Visualization (GeoFold)",
+                   "Point Mutant Scan",
+                   "Point Mutations",
+                   "Protein Design (Fixbb)",
+                   "Protein Design (MSD)",
+                   "Residue/Ligand Creator",
+                   "Structure Prediction (Comparative Modeling)",
                    "Superimposition"]
         self.readModules()
         self.protMenu.SetSelection(self.protocols.index("Superimposition"))
-        
+
         if (platform.system() == "Darwin"):
             self.GoBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.scriptdir + "/images/osx/protocols/GoBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(240, 30), size=(100, 25))
         else:
@@ -398,13 +398,13 @@ class ProtocolsPanel(wx.Panel):
         self.GoBtn.Bind(wx.EVT_BUTTON, self.changeProtocol)
         self.GoBtn.SetToolTipString("Change to the selected protocol")
         self.currentProtocol = "Superimposition"
-        
+
         self.protPanel = SuperimpositionPanel(self, W, H)
-        
+
     def readModules(self):
         self.protocols = self.default_protocols[:]
         # Let's see if there are any custom modules to import
-        # Everything needs to be in a try/except block to prevent corrupted modules from 
+        # Everything needs to be in a try/except block to prevent corrupted modules from
         # crashing the whole program
         # Ignore anything that does not import properly and write a message out to the terminal
         olddir = os.getcwd()
@@ -467,7 +467,7 @@ class ProtocolsPanel(wx.Panel):
         os.chdir(olddir)
         self.protMenu.Clear()
         self.protMenu.AppendItems(self.protocols)
-        
+
     def changeProtocol(self, event):
         logInfo("Go button clicked")
         selectedProtocol = self.protMenu.GetStringSelection()
@@ -709,21 +709,21 @@ class ProtocolsPanel(wx.Panel):
                 self.seqWin.setProtocolPanel(self.protPanel)
             except:
                 self.protPanel = None
-    
+
     def setSeqWin(self, seqWin):
         self.seqWin = seqWin
         self.protPanel.setSeqWin(seqWin)
         self.seqWin.setProtocolPanel(self.protPanel)
-        
+
     def setPyMOL(self, pymol):
         self.pymol = pymol
         self.cmd = pymol.cmd
         self.stored = pymol.stored
         self.protPanel.setPyMOL(pymol)
-        
+
     def setSelectWin(self, selectWin):
         self.selectWin = selectWin
-        
+
     def activate(self):
         self.cmd.enable("seqsele")
         try:
@@ -793,18 +793,18 @@ class ProtocolsWin(wx.Frame):
         self.SetSizeHints(330, 560, 370, H)
         self.SetIcon(icon.GetIcon())
         self.Show()
-        
+
         self.Protocols = ProtocolsPanel(self, winw, winh)
         self.Selection = SelectPanel(self, winw, winh)
         self.Protocols.setSelectWin(self.Selection)
         self.Selection.setProtPanel(self.Protocols)
-        
+
         self.saveTimer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.saveWindowData, self.saveTimer)
         self.Bind(wx.EVT_SIZE, self.windowGeometryChange)
         self.Bind(wx.EVT_MOTION, self.windowGeometryChange)
         self.Bind(wx.EVT_ACTIVATE, self.focusEvent)
-        
+
         # Start the Rosetta daemon that will run in the background looking for job input files generated
         # by the main GUI
         # It could be the case that the user was in the middle of a protocol, then quits suddenly so the
@@ -839,7 +839,7 @@ class ProtocolsWin(wx.Frame):
             #else:
             self.daemon_process = multiprocessing.Process(target=daemonLoop)
             self.daemon_process.start()
-        
+
     def restartDaemon(self):
         # This function kills the current daemon process and starts a new one
         # This function is called whenever the protocol panel changes to a different protocol
@@ -854,7 +854,7 @@ class ProtocolsWin(wx.Frame):
         self.daemon_process = multiprocessing.Process(target=daemonLoop)
         self.daemon_process.start()
         os.chdir(savedir)
-        
+
     def focusEvent(self, event):
         if (event.GetActive()):
             # Protocols read selection information from the sequence window, so update the sequence window
@@ -862,12 +862,12 @@ class ProtocolsWin(wx.Frame):
             self.seqWin.selectUpdate(False) # Update PyMOL changes in sequence
             self.Protocols.activate()
         event.Skip()
-    
+
     def setSeqWin(self, seqWin):
         self.seqWin = seqWin
         self.Protocols.setSeqWin(seqWin)
         self.Selection.setSeqWin(seqWin)
-        
+
     def windowGeometryChange(self, event):
         # This function starts a timer that will write out the size and position of this window to a cfg file
         # so the orientation is saved and can be loaded the next time InteractiveROSETTA is started
@@ -889,7 +889,7 @@ class ProtocolsWin(wx.Frame):
             self.Selection.SetPosition((x, h-270))
             self.Selection.SetSize((w-20, self.Selection.GetSize()[1]))
         event.Skip()
-        
+
     def saveWindowData(self, event):
         homedir = os.path.expanduser("~")
         data = []
