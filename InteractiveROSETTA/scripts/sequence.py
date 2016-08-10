@@ -2,6 +2,17 @@ import wx
 import wx.grid
 # This is needed to draw the chain colors on the grid
 import wx.lib.mixins.gridlabelrenderer as glr
+import matplotlib
+matplotlib.use('WXAgg')
+
+from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
+from matplotlib.figure import Figure
+from matplotlib.widgets import RectangleSelector
+from pylab import *
+from rosetta import *
+from toolbox import pose_from_rcsb
+import sys, time, os
+import pymol
 import os
 import os.path
 import shutil
@@ -170,6 +181,317 @@ class ProteinDialog(wx.Dialog):
     def cancelDialog(self, event):
         self.SetReturnCode(wx.CANCEL)
         self.EndModal(wx.CANCEL)
+
+#============================================================================================================
+#RAMACHANDRAN PLOT CLASSES
+
+class Res():
+    def __init__(self, id, name, phi, psi, omega, pdbID, chainID):
+        self.id = id
+        self.name = name
+        self.phi = phi
+        self.psi = psi
+        self.omega = omega
+        self.pdbID = pdbID
+        self.chainID = chainID
+        selected = False
+
+class RamachandranFrame(wx.Frame):
+    def __init__(self):
+        this_dir = os.path.dirname(__file__)
+        print this_dir
+        gen_filename = os.path.join(this_dir, '..', 'data', 'RamachandranPlot', 'rama500-general.data')
+        gen_file = open(gen_filename, "r")
+        #gen_file = open("rama500-general.data", "r")
+        pro_filename = os.path.join(this_dir, '..', 'data', 'RamachandranPlot', 'rama500-pro.data')
+        pro_file = open(pro_filename, "r")
+        #pro_file = open("rama500-pro.data", "r")
+        prepro_filename = os.path.join(this_dir, '..', 'data', 'RamachandranPlot', 'rama500-general.data')
+        prepro_file = open(prepro_filename, "r")
+        #prepro_file = open("rama500-prepro.data", "r")
+        gly_filename = os.path.join(this_dir, '..', 'data', 'RamachandranPlot', 'rama500-general.data')
+        gly_file = open(gly_filename, "r")
+        #gly_file = open("rama500-gly-sym.data", "r")
+
+        self.x_contour = []
+        self.y_contour = []
+
+        temp = -179
+        while temp <= 179:
+            self.x_contour.append(float(temp))
+            self.y_contour.append(float(temp))
+            temp += 2
+
+        dimension = len(self.x_contour)
+        self.z_gen = np.zeros((dimension, dimension))
+        self.loop_through_file(gen_file, self.z_gen, dimension)
+
+        self.z_pro = np.zeros((dimension, dimension))
+        self.loop_through_file(pro_file, self.z_pro, dimension)
+
+        self.z_prepro = np.zeros((dimension, dimension))
+        self.loop_through_file(prepro_file, self.z_prepro, dimension)
+
+        self.z_gly = np.zeros((dimension, dimension))
+        self.loop_through_file(gly_file, self.z_gly, dimension)
+
+        gen_file.close()
+        pro_file.close()
+        gly_file.close()
+        prepro_file.close()
+
+        wx.Frame.__init__(self, None, wx.NewId(), "Ramachadran Plot")
+        self.sizer = wx.BoxSizer(wx.VERTICAL)
+        self.button_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.figure = Figure(figsize=(10,10))
+        self.figure.set_size_inches( (10, 10) )
+        self.axe = self.figure.add_subplot(111)
+        self.figurecanvas = FigureCanvas(self, -1, self.figure)
+        self.buttonPlotAll = wx.Button(self, wx.NewId(), "General")
+        self.buttonPlotPro = wx.Button(self, wx.NewId(), "Proline")
+        self.buttonPlotPrePro = wx.Button(self, wx.NewId(), "Pre-Proline")
+        self.buttonPlotGly = wx.Button(self, wx.NewId(), "Glycine")
+        self.buttonClearSelection = wx.Button(self, wx.NewId(), "Clear Selection")
+
+        init()
+        pose = pose_from_rcsb("1TDG")
+        pdbInfo = pose.pdb_info()
+        res_list = []
+        #fp = open("psi_phi_out.txt", "w")
+        #fp.truncate()
+
+        for i in range(1, pose.total_residue() + 1):
+            res_list.append(Res(i, pose.residue(i).name(), pose.phi(i), pose.psi(i), pose.omega(i), pdbInfo.number(i), pdbInfo.chain(i)))
+            #temp_print = str(i) + " " + str(pose.residue(i).name()) + " phi =" + str(pose.phi(i)) + " psi =" + str(pose.psi(i)) + " chain ID = " + str(pdbInfo.chain(i)) + " pdb ID = " + str(pdbInfo.number(i)) + "\n"
+            #fp.write(temp_print)
+
+        self.gly_phi_list = []
+        self.gly_psi_list = []
+        self.pro_phi_list = []
+        self.pro_psi_list = []
+        self.prepro_phi_list = []
+        self.prepro_psi_list = []
+        self.gen_phi_list = []
+        self.gen_psi_list = []
+
+        self.gly_list = []
+        self.pro_list = []
+        self.prepro_list = []
+        self.gen_list = []
+
+        for i in range(len(res_list)):
+            print(res_list[i].name)
+            if len(res_list[i].name) == 3 or res_list[i].name[4]!='N' or res_list[i].name[4]!='C':
+                if res_list[i].name == "GLY":
+                    self.gly_phi_list.append(res_list[i].phi)
+                    self.gly_psi_list.append(res_list[i].psi)
+                    self.gly_list.append(res_list[i])
+                elif res_list[i].name == "PRO":
+                    self.pro_phi_list.append(res_list[i].phi)
+                    self.pro_psi_list.append(res_list[i].psi)
+                    self.pro_list.append(res_list[i])
+                    if i-1 >= 0 and (res_list[i-1].name != "GLY" or res_list[i-1].name != "PRO") and (len(res_list[i].name) == 3 or res_list[i-1].name[4]!='N' or res_list[i-1].name[4]!='C'):
+                        self.prepro_phi_list.append(res_list[i-1].phi)
+                        self.prepro_psi_list.append(res_list[i-1].psi)
+                        self.prepro_list.append(res_list[i-1])
+                        self.gen_phi_list.pop()
+                        self.gen_psi_list.pop()
+                        self.gen_list.pop()
+                else:
+                    self.gen_phi_list.append(res_list[i].phi)
+                    self.gen_psi_list.append(res_list[i].psi)
+                    self.gen_list.append(res_list[i])
+
+        pymol.finish_launching()
+        pymol.cmd.load("1TDG.clean.pdb")
+        myspace = {'pymol_res': self.pymol_res}
+        self.pymol_res_list = []
+        #pymol.cmd.iterate('(all)', 'pymol_res(resi, resn, name, chain)', space=myspace)
+
+        self.sizer.Add(self.figurecanvas, proportion=1, border=5, flag=wx.ALL | wx.EXPAND)
+        self.button_sizer.Add(self.buttonPlotAll, proportion=0, border=2, flag=wx.ALL | wx.ALIGN_LEFT)
+        self.button_sizer.Add(self.buttonPlotPro, proportion=0, border=2, flag=wx.ALL | wx.ALIGN_LEFT)
+        self.button_sizer.Add(self.buttonPlotPrePro, proportion=0, border=2, flag=wx.ALL | wx.ALIGN_LEFT)
+        self.button_sizer.Add(self.buttonPlotGly, proportion=0, border=2, flag=wx.ALL | wx.ALIGN_LEFT)
+        self.button_sizer.Add(self.buttonClearSelection, proportion=0, border=2, flag=wx.ALL | wx.ALIGN_RIGHT)
+        self.sizer.Add(self.button_sizer, 0)
+
+        self.SetSizer(self.sizer)
+        self.buttonPlotAll.Bind(wx.EVT_BUTTON, self.on_button_plot_all)
+        self.buttonPlotPro.Bind(wx.EVT_BUTTON, self.on_button_plot_pro)
+        self.buttonPlotPrePro.Bind(wx.EVT_BUTTON, self.on_button_plot_pre_pro)
+        self.buttonPlotGly.Bind(wx.EVT_BUTTON, self.on_button_plot_gly)
+        self.buttonClearSelection.Bind(wx.EVT_BUTTON, self.on_button_clear_selection)
+        self.buttonSelected = "All"
+
+        self.contour_lines = [.01, .1]
+
+        self.gen_sele_x = []
+        self.gen_sele_y = []
+        self.pro_sele_x = []
+        self.pro_sele_y = []
+        self.prepro_sele_x = []
+        self.prepro_sele_y = []
+        self.gly_sele_x = []
+        self.gly_sele_y = []
+
+        self.res_location = ""
+
+        self.draw_plot()
+
+    def loop_through_file(self, pdb_file, z, dimension):
+        i = 0
+        j = 0
+        for line in pdb_file:
+            if line[0] != '#':
+                temp_list = line.split()
+                z[j][i] = float(temp_list[2])
+                j += 1
+                if j == dimension:
+                    i += 1
+                    j = 0
+
+    def draw_plot(self):
+        self.figure.set_canvas(self.figurecanvas)
+        self.axe.clear()
+        self.axe.set_xlabel('Phi(degrees)')
+        self.axe.set_ylabel('Psi(degrees)')
+        self.axe.set_aspect('equal', adjustable='box')
+        self.axe.axis([-180, 180, -180, 180])
+        self.axe.set_xlim(-180, 180)
+        self.axe.set_ylim(-180, 180)
+
+        if self.buttonSelected == "All":
+            self.axe.contour(self.x_contour, self.y_contour, self.z_gen, self.contour_lines)
+
+            self.gen_plot, = self.axe.plot(self.gen_phi_list, self.gen_psi_list, 'o', picker=5, label="General")
+            self.pro_plot, = self.axe.plot(self.pro_phi_list, self.pro_psi_list, 'o', c='pink', marker='^', picker=5, label="Proline")
+            self.prepro_plot, = self.axe.plot(self.prepro_phi_list, self.prepro_psi_list, 'o', c='red', marker='v', picker=5, label="Pre-Proline")
+            self.gly_plot, = self.axe.plot(self.gly_phi_list, self.gly_psi_list, 'o', c='green', marker='s', picker=5, label="Glycine")
+
+            self.axe.plot(self.gen_sele_x, self.gen_sele_y, 'o', markerfacecolor="None", markeredgecolor='red', markersize = 12)
+            self.axe.plot(self.pro_sele_x, self.pro_sele_y, 'o', markerfacecolor="None", markeredgecolor='red', markersize = 12)
+            self.axe.plot(self.prepro_sele_x, self.prepro_sele_y, 'o', markerfacecolor="None", markeredgecolor='red', markersize = 12)
+            self.axe.plot(self.gly_sele_x, self.gly_sele_y, 'o', markerfacecolor="None", markeredgecolor='red', markersize = 12)
+
+        elif self.buttonSelected == "Proline":
+            self.axe.contour(self.x_contour, self.y_contour, self.z_pro, self.contour_lines)
+
+            self.axe.plot(self.pro_phi_list, self.pro_psi_list, 'o', c='pink', marker='^', picker=5)
+            self.axe.plot(self.pro_sele_x, self.pro_sele_y, 'o', markerfacecolor="None", markeredgecolor='red', markersize = 12)
+
+        elif self.buttonSelected == "Pre-Proline":
+            self.axe.contour(self.x_contour, self.y_contour, self.z_prepro, self.contour_lines)
+
+            self.axe.plot(self.prepro_sele_x, self.prepro_sele_y, 'o', markerfacecolor="None", markeredgecolor='red', markersize = 12)
+            self.axe.plot(self.prepro_phi_list, self.prepro_psi_list, 'o', c='red', marker='v', picker=5)
+
+        elif self.buttonSelected == "Glycine":
+            self.axe.contour(self.x_contour, self.y_contour, self.z_gly, self.contour_lines)
+
+            self.axe.plot(self.gly_phi_list, self.gly_psi_list, 'o', c='green', marker='s', picker=5)
+            self.axe.plot(self.gly_sele_x, self.gly_sele_y, 'o', markerfacecolor="None", markeredgecolor='red', markersize = 12)
+
+        self.axe.plot([0,0], [-180,180], 'k', lw=2)
+        self.axe.plot([-180,180], [0,0], 'k', lw=2)
+
+        self.axe.legend(handles=[self.gen_plot, self.pro_plot, self.prepro_plot, self.gly_plot], numpoints=1, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+
+        self.toggle_selector_RS = RectangleSelector(self.axe, self.on_select, drawtype='box')
+        connect('key_press_event', self.toggle_selector)
+        self.figurecanvas.draw()
+
+    def on_button_plot_all(self, evt):
+        self.buttonSelected = "All"
+        self.draw_plot()
+
+    def on_button_plot_pro(self, evt):
+        self.buttonSelected = "Proline"
+        self.draw_plot()
+
+    def on_button_plot_pre_pro(self, evt):
+        self.buttonSelected = "Pre-Proline"
+        self.draw_plot()
+
+    def on_button_plot_gly(self, evt):
+        self.buttonSelected = "Glycine"
+        self.draw_plot()
+
+    def on_button_clear_selection(self, evt):
+        self.gen_sele_x = []
+        self.gen_sele_y = []
+        self.pro_sele_x = []
+        self.pro_sele_y = []
+        self.prepro_sele_x = []
+        self.prepro_sele_y = []
+        self.gly_sele_x = []
+        self.gly_sele_y = []
+        self.res_location = ""
+        self.draw_plot()
+        pymol.cmd.delete("Selection")
+
+    def find_selected(self, phi_list, psi_list, sele_x, sele_y, r_list, x_min, x_max, y_min, y_max):
+        for i in range(len(phi_list)):
+            if phi_list[i] >= x_min and phi_list[i] <= x_max and psi_list[i] >= y_min and psi_list[i] <= y_max:
+                sele_x.append(phi_list[i])
+                sele_y.append(psi_list[i])
+                r_list[i].selected = True
+                self.res_location += " resi " + str(self.gen_list[i].pdbID) + " and chain " + str(self.gen_list[i].chainID)
+
+    def on_select(self, eclick, erelease):
+        #print(' startposition : (%f, %f)' % (eclick.xdata, eclick.ydata))
+        #print(' endposition   : (%f, %f)' % (erelease.xdata, erelease.ydata))
+        #print(' used button   : ', eclick.button)
+
+        x_min = min(eclick.xdata, erelease.xdata)
+        x_max = max(eclick.xdata, erelease.xdata)
+        y_min = min(eclick.ydata, erelease.ydata)
+        y_max = max(eclick.ydata, erelease.ydata)
+
+        if self.buttonSelected == "All":
+            self.find_selected(self.gen_phi_list, self.gen_psi_list, self.gen_sele_x, self.gen_sele_y, self.gen_list, x_min, x_max, y_min, y_max)
+            self.find_selected(self.pro_phi_list, self.pro_psi_list, self.pro_sele_x, self.pro_sele_y, self.pro_list, x_min, x_max, y_min, y_max)
+            self.find_selected(self.prepro_phi_list, self.prepro_psi_list, self.prepro_sele_x, self.prepro_sele_y, self.prepro_list, x_min, x_max, y_min, y_max)
+            self.find_selected(self.gly_phi_list, self.gly_psi_list, self.gly_sele_x, self.gly_sele_y, self.gly_list, x_min, x_max, y_min, y_max)
+
+            self.axe.plot(self.gen_sele_x, self.gen_sele_y, 'o', markerfacecolor="None", markeredgecolor='red', markersize = 12)
+            self.axe.plot(self.pro_sele_x, self.pro_sele_y, 'o', markerfacecolor="None", markeredgecolor='red', markersize = 12)
+            self.axe.plot(self.prepro_sele_x, self.prepro_sele_y, 'o', markerfacecolor="None", markeredgecolor='red', markersize = 12)
+            self.axe.plot(self.gly_sele_x, self.gly_sele_y, 'o', markerfacecolor="None", markeredgecolor='red', markersize = 12)
+
+        elif self.buttonSelected == "Proline":
+            self.find_selected(self.pro_phi_list, self.pro_psi_list, self.pro_sele_x, self.pro_sele_y, self.pro_list, x_min, x_max, y_min, y_max)
+            self.axe.plot(self.pro_sele_x, self.pro_sele_y, 'o', markerfacecolor="None", markeredgecolor='red', markersize = 12)
+
+        elif self.buttonSelected == "Pre-Proline":
+            self.find_selected(self.prepro_phi_list, self.prepro_psi_list, self.prepro_sele_x, self.prepro_sele_y, self.prepro_list, x_min, x_max, y_min, y_max)
+            self.axe.plot(self.prepro_sele_x, self.prepro_sele_y, 'o', markerfacecolor="None", markeredgecolor='red', markersize = 12)
+
+        elif self.buttonSelected == "Glycine":
+            self.find_selected(self.gly_phi_list, self.gly_psi_list, self.gly_sele_x, self.gly_sele_y, self.gly_list, x_min, x_max, y_min, y_max)
+            self.axe.plot(self.gly_sele_x, self.gly_sele_y, 'o', markerfacecolor="None", markeredgecolor='red', markersize = 12)
+
+        pymol.cmd.select("Selection", self.res_location)
+        self.figurecanvas.draw()
+
+    def toggle_selector(self, event):
+        if event.key in ['Q', 'q'] and self.toggle_selector_RS.active:
+            print(' RectangleSelector deactivated.')
+            self.toggle_selector_RS.set_active(False)
+        if event.key in ['A', 'a'] and not self.toggle_selector_RS.active:
+            print(' RectangleSelector activated.')
+            self.toggle_selector_RS.set_active(True)
+
+    def pymol_res(self, resi,resn,name,chain):
+        if name != "HOH":
+            self.pymol_res_list.append(PyMolRes(resi, resn, chain))
+
+class RamaApp(wx.App):
+    def OnInit(self):
+        frame = RamachandranFrame()
+        frame.Show(True)
+        self.SetTopWindow(frame)
+        return True
 
 # ===========================================================================================================
 # MODEL NAME AND CHAIN ID DIALOG CLASS
@@ -671,7 +993,7 @@ class SequenceWin(wx.Frame):
             self.RenumberBtn = wx.Button(self.scroll, id=-1, label="Ramachandran Plot", pos=(810, 10), size=(150, 25))
             self.RenumberBtn.SetForegroundColour("#000000")
             self.RenumberBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-        #self.RenumberBtn.Bind(wx.EVT_BUTTON, self.renumber)
+        self.RenumberBtn.Bind(wx.EVT_BUTTON, self.ramaPlot)
         self.RenumberBtn.SetToolTipString("Create and display a Ramachandran Plot form the selected .pdb file")
 
         # Server button, for displaying the download manager dialog, above
@@ -2891,6 +3213,10 @@ class SequenceWin(wx.Frame):
         defaultPyMOLView(self.cmd, model)
         # Clear the selection otherwise deleted rows are still considered selected
         self.SeqViewer.ClearSelection()
+
+    def ramaPlot(self, event):
+        app = RamaApp(0)
+        app.MainLoop()
 
     def configureServer(self, event):
         # This button allows the user to give a name for the remote server
