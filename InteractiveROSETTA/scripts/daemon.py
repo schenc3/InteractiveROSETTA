@@ -23,6 +23,7 @@ import os.path
 import sys
 import traceback
 import platform
+import subprocess
 import psutil
 import glob
 import gzip
@@ -1289,6 +1290,71 @@ def doKIC(stage="Coarse"):
         # So the main GUI doesn't attempt to read the file before the daemon finishes writing its contents
         os.rename("kicoutputtemp", "kicoutput")
 
+# TODO figure out the funky bug where only one stupid-big loop is returned (play with cpp code)
+#      change exe output to alanines
+#      actually pass length parameters to exe and do somethig with them
+
+def doINDEL():
+    # Parse file, remove input file
+    f = open("INDELinput", "r")
+    for aline in f:
+        if (aline[0:4] == "LOOP"):
+            # [LOOP , N-anchor , C-anchor, minlength , max length]
+            loop_params = aline.split("\t")
+        if (aline[0:7] == "PDBFILE"):
+            pdbfile = aline.split("\t")[1].strip()
+    f.close()
+    try:
+        os.remove("INDELinput")
+    except:
+        pass
+
+    # Query database
+    num_results = 0
+    try:
+        num_results = int( subprocess.check_output(["./iRosetta_Lookup.exe" , pdbfile , "pdblist.dat", "looplist.dat" , "grid.dat" , loop_params[1] , loop_params[2], loop_params[3], loop_params[4]]) )
+    except:
+        raise Exception("ERROR: The database query failed! Check input pdb and try again")
+
+
+
+    # If we got results, try to insert them (just one for now)
+    try:
+        if (num_results > 0):
+            initializeRosetta()
+            import rosetta.protocols.grafting as graft
+            scaffold = pose_from_pdb(pdbfile)
+            scorefxn = create_score_function("talaris2013")
+            mc = MonteCarlo(scaffold,scorefxn, 1.0)
+
+            # Delete region to be remodeled from scaffold
+            start_residue = int(loop_params[1])
+            stop_residue = int(loop_params[2])
+            #graft.delete_region(scaffold, start_residue, stop_residue)
+
+            #Set some parameters
+            graftmover = graft.AnchoredGraftMover(start_residue-1,stop_residue+1)
+            graftmover.set_cycles(500)
+            loop = pose_from_pdb("loopout_1.pdb")
+            graftmover.set_piece(loop, 0, 0)
+            graftmover.apply(scaffold)
+
+            # Don't need to repack, AnchoredGraftMover takes care of it
+
+            scaffold.dump_pdb("INDELoutput")
+    except:
+        raise Exception("ERROR: The Rosetta AnchoredGraftMover failed!")
+
+
+    #Console output
+    print "Tried to find loops for anchor residues N-term:" + loop_params[1] + "\t C-term: " + loop_params[2]
+    print str(num_results) + " loops found."
+
+
+
+
+
+
 def doRepack(scorefxninput="", pdbfile="repackme.pdb", lastStage=False):
     initializeRosetta()
     try:
@@ -1867,6 +1933,15 @@ def daemonLoop():
                 print "The daemon crashed while performing the coarse KIC loop modeling job!"
                 os.remove("coarsekicinput")
                 writeError(e.message)
+        elif (os.path.isfile("INDELinput")):
+            print "Daemon starting INDEL loop modeling job..."
+            doINDEL()
+            try:
+                os.remove("INDELinput")
+            except:
+                pass
+
+
         elif (os.path.isfile("repackme_0.pdb")):
             print "Daemon starting rotamer repacking job..."
             try:
