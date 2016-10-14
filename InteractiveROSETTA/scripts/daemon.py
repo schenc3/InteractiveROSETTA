@@ -1299,7 +1299,7 @@ def doINDEL():
     f = open("INDELinput", "r")
     for aline in f:
         if (aline[0:4] == "LOOP"):
-            # [LOOP , N-anchor , C-anchor, minlength , max length]
+            # [LOOP , N-anchor , C-anchor, min length , max length, min results, max results]
             loop_params = aline.split("\t")
         if (aline[0:7] == "PDBFILE"):
             pdbfile = aline.split("\t")[1].strip()
@@ -1309,41 +1309,89 @@ def doINDEL():
     except:
         pass
 
+
+
     # Query database
     num_results = 0
     try:
-        num_results = int( subprocess.check_output(["./iRosetta_Lookup.exe" , pdbfile , "pdblist.dat", "looplist.dat" , "grid.dat" , loop_params[1] , loop_params[2], loop_params[3], loop_params[4]]) )
+        num_results = int( subprocess.check_output(["./iRosetta_Lookup.exe" , pdbfile , "pdblist.dat", "looplist.dat" , "grid.dat" , loop_params[1] ,
+         loop_params[2], loop_params[3], loop_params[4], loop_params[5], loop_params[6]]) )
     except:
         raise Exception("ERROR: The database query failed! Check input pdb and try again")
 
 
 
     # If we got results, try to insert them (just one for now)
-    try:
-        if (num_results > 0):
+    if (num_results > 0):
+        try:
+            # Get every component of Rosetta started that we can, try to avoid
+            # initializing for every loop we try to insert
+            print "Found " + str(num_results) + " loops \n"         #debugging
+
             initializeRosetta()
             import rosetta.protocols.grafting as graft
-            scaffold = pose_from_pdb(pdbfile)
+            # Set some parameters
+            # Just use default score function for now
             scorefxn = create_score_function("talaris2013")
-            mc = MonteCarlo(scaffold,scorefxn, 1.0)
 
-            # Delete region to be remodeled from scaffold
+            # Figure out where we're grafting
+            #scaffold = pose_from_pdb(pdbfile)
             start_residue = int(loop_params[1])
             stop_residue = int(loop_params[2])
-            #graft.delete_region(scaffold, start_residue, stop_residue)
 
-            #Set some parameters
-            graftmover = graft.AnchoredGraftMover(start_residue-1,stop_residue+1)
-            graftmover.set_cycles(500)
-            loop = pose_from_pdb("loopout_1.pdb")
-            graftmover.set_piece(loop, 0, 0)
-            graftmover.apply(scaffold)
 
+            # the man on the internet said this can improve results
+            #graftmover.set_use_smooth_centroid_settings(True)
+        except:
+            raise Exception("ERROR: Couldn't initialize Rosetta!")
+
+        i = 1
+        models  = []
+        scores  = []
+        lengths = []
+        # Try to make models from all the loops, or up to the max number specified
+        while i < min((num_results + 1), (int(loop_params[6]) + 1)):
+            print "Attempting to insert loop " + str(i) + "\n"
+            # Make a copy of the scaffold, load the loop
+            temp_pose = pose_from_pdb(pdbfile)
+            loopfile = "loopout_" + str(i) + ".pdb"
+            loop = pose_from_pdb(loopfile)
+
+            # Here's where the actual grafting happens. Graft and add to model list
             # Don't need to repack, AnchoredGraftMover takes care of it
+            graftmover = graft.AnchoredGraftMover(start_residue-1, stop_residue+1)
+            graftmover.set_cycles(500)
+            graftmover.set_piece(loop, 0, 0)
+            graftmover.apply(temp_pose)
 
-            scaffold.dump_pdb("INDELoutput")
-    except:
-        raise Exception("ERROR: The Rosetta AnchoredGraftMover failed!")
+            #Add the model and its score to their respective lists, as well as the length of each insertion
+            scores.append(scorefxn(temp_pose))
+            models.append(temp_pose)
+            lengths.append(loop.total_residue())
+            i += 1
+
+        # Sort models by energy and write them out so we can look at them
+        # Write out a file with info about each loop
+        # TODO is a lower or higher score better? can't remember. Best scores should be first.
+        i = 1
+        f = open("INDELoutputtemp", "w")
+        for score, model, length in sorted(zip(scores, models, lengths)):
+            outname = "INDELmodel_" + str(i) + ".pdb"
+
+            model.dump_pdb(outname)
+            f.write(outname + "\t" + str(score) + "\t" + str(length) + "\n")
+
+            i += 1
+        f.close()
+        os.rename("INDELoutputtemp", "INDELoutput")
+
+
+
+
+    else:
+        raise Exception("ERROR: No results found. Try relaxing search parameters")
+
+
 
 
     #Console output

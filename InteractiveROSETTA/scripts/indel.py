@@ -6,6 +6,7 @@
 import wx
 import wx.grid
 import wx.lib.scrolledpanel
+import wx.lib.intctrl
 import os
 import os.path
 import time
@@ -113,7 +114,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
         # Minimum loop length (in residues)
         # can't get wx.ComboBox to accept a list of integers as choices
-        minmax_length = ['2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19']
+        minmax_length = ['3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19']
 
 
         if (platform.system() == "Windows"):
@@ -152,6 +153,45 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.maxMenu.SetToolTipString("Maximum length of loop in residues")
         self.maxMenu.SetSelection(len(minmax_length)-1)
         self.maxLength = int(self.maxMenu.GetStringSelection())
+
+
+        # Min number of models to evaluate
+
+        if (platform.system() == "Windows"):
+            self.lblResultsMin = wx.StaticText(self, -1, "Minumum results", (10, 240), (140, 20), wx.ALIGN_CENTRE)
+            self.lblResultsMin.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+        elif (platform.system() == "Darwin"):
+            self.lblResultsMin = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/lblEnd.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 240), size=(140, 20))
+        else:
+            self.lblResultsMin = wx.StaticText(self, -1, "Minimum results", (20, 240), style=wx.ALIGN_CENTRE)
+            self.lblResultsMin.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+            resizeTextControlForUNIX(self.lblEnd, 170, 140)
+        self.lblResultsMin.SetForegroundColour("#FFFFFF")
+        self.ResultsMin = wx.lib.intctrl.IntCtrl(self, pos=(10, 260), size=(140, 25))
+        self.ResultsMin.Bind(wx.EVT_COMBOBOX, self.maxMenuSelect)
+        self.ResultsMin.Bind(wx.EVT_RIGHT_DOWN, self.rightClick)
+        self.ResultsMin.SetToolTipString("Minimum number of models to try.")
+        self.ResultsMin.SetValue(10)
+        self.minResultsval = self.ResultsMin.GetValue()
+
+        # Max number of models to evaluate
+
+        if (platform.system() == "Windows"):
+            self.lblResultsMax = wx.StaticText(self, -1, "Maximum results", (170, 240), (140, 20), wx.ALIGN_CENTRE)
+            self.lblResultsMax.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+        elif (platform.system() == "Darwin"):
+            self.lblResultsMax = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/lblEnd.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 240), size=(140, 20))
+        else:
+            self.lblResultsMax = wx.StaticText(self, -1, "Maximum results", (180, 240), style=wx.ALIGN_CENTRE)
+            self.lblResultsMax.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+            resizeTextControlForUNIX(self.lblEnd, 170, 140)
+        self.lblResultsMax.SetForegroundColour("#FFFFFF")
+        self.ResultsMax = wx.lib.intctrl.IntCtrl(self, pos=(170, 260), size=(140, 25))
+        self.ResultsMax.Bind(wx.EVT_COMBOBOX, self.maxMenuSelect)
+        self.ResultsMax.Bind(wx.EVT_RIGHT_DOWN, self.rightClick)
+        self.ResultsMax.SetToolTipString("Maximum number of models to try.")
+        self.ResultsMax.SetValue(25)
+        self.maxResultsval = self.ResultsMax.GetValue()
 
 
 
@@ -210,9 +250,9 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         '''
 
         if (platform.system() == "Darwin"):
-            self.btnClear = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnClear.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(220, 240), size=(90, 25))
+            self.btnClear = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnClear.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(220, 305), size=(90, 25))
         else:
-            self.btnClear = wx.Button(self, id=-1, label="Clear", pos=(220, 290), size=(90, 25))
+            self.btnClear = wx.Button(self, id=-1, label="Clear", pos=(220, 305), size=(90, 25))
             self.btnClear.SetForegroundColour("#000000")
             self.btnClear.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
         self.btnClear.Bind(wx.EVT_BUTTON, self.clear)
@@ -355,7 +395,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         if (platform.system() == "Darwin"):
             self.btnServerToggle = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnServer_Off.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(40, ypos+215), size=(100, 25))
         else:
-            self.btnServerToggle = wx.Button(self, id=-1, label="Server Off", pos=(40, ypos+215), size=(100, 25))
+            self.btnServerToggle = wx.Button(self, id=-1, label="Server Off", pos=(40, ypos), size=(100, 25))
             self.btnServerToggle.SetForegroundColour("#000000")
             self.btnServerToggle.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
         self.btnServerToggle.Bind(wx.EVT_BUTTON, self.serverToggle)
@@ -365,7 +405,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         if (platform.system() == "Darwin"):
             self.btnINDEL = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(180, ypos+215), size=(100, 25))
         else:
-            self.btnINDEL = wx.Button(self, id=-1, label="Model!", pos=(180, ypos+215), size=(100, 25))
+            self.btnINDEL = wx.Button(self, id=-1, label="Model!", pos=(180, ypos), size=(100, 25))
             self.btnINDEL.SetForegroundColour("#000000")
             self.btnINDEL.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
         #TODO wx GridBag auto sizing
@@ -959,7 +999,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.parent.GoBtn.Enable()
         # Get rid of the messages
         for i in range(0, len(self.seqWin.msgQueue)):
-            if (self.seqWin.msgQueue[i].find("Performing INDEL loop modeling") >= 0):
+            if (self.seqWin.msgQueue[i].find("Performing INDEL loop modeling, please be patient...") >= 0):
                 self.seqWin.msgQueue.pop(i)
                 break
         for i in range(0, len(self.seqWin.msgQueue)):
@@ -1045,6 +1085,16 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
                 logInfo("Cancelled Finalize operation")
                 dlg.Destroy()
                 return
+
+            #Try to get rid of working loop files in sandbox
+            temp_loop_files = glob.glob('loopout_*')
+            try:
+                for temp_loop in temp_loop_files:
+                    os.remove(temp_loop)
+            except:
+                pass
+
+
             dlg.Destroy()
             #self.scoretypeMenu.Disable()
             #self.viewMenu.Disable()
@@ -1055,7 +1105,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
             #Pop message out of queue
             for i in range(0, len(self.seqWin.msgQueue)):
-                if (self.seqWin.msgQueue[i].find("Performing INDEL loop modeling") >= 0):
+                if (self.seqWin.msgQueue[i].find("Performing INDEL loop modeling, please be patient...") >= 0):
                     self.seqWin.msgQueue.pop(i)
                     break
 
@@ -1138,7 +1188,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.buttonState = "KIC!"
         # Get rid of the messages
         for i in range(0, len(self.seqWin.msgQueue)):
-            if (self.seqWin.msgQueue[i].find("Performing INDEL loop modeling") >= 0):
+            if (self.seqWin.msgQueue[i].find("Performing INDEL loop modeling, please be patient...") >= 0):
                 self.seqWin.msgQueue.pop(i)
                 break
         for i in range(0, len(self.seqWin.msgQueue)):
@@ -1190,7 +1240,10 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             end_seqpos = self.endMenu.GetStringSelection()[3:]
             begin_index = self.seqWin.getRosettaIndex(self.selectedModel, chain, begin_seqpos)
             end_index = self.seqWin.getRosettaIndex(self.selectedModel, chain, end_seqpos)
-            f.write("LOOP\t" + str(begin_index)  + "\t" + str(end_index) + "\t" + str(self.minLength) + "\t" + str(self.maxLength))
+            self.maxResultsval = self.ResultsMax.GetValue()
+            self.minResultsval = self.ResultsMin.GetValue()
+            f.write("LOOP\t" + str(begin_index)  + "\t" + str(end_index) + "\t" + str(self.minLength) + "\t" + str(self.maxLength) + "\t"
+                + str(self.minResultsval) + "\t" + str(self.maxResultsval) )
             f.close()
 
             #f.write("REMODEL\t" + self.loopType.upper() + "\n")
@@ -1260,7 +1313,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
                     self.parent.GoBtn.Enable()
                     # Pop this message out of the queue
                     for i in range(0, len(self.seqWin.msgQueue)):
-                        if (self.seqWin.msgQueue[i].find("Performing INDEL loop modeling") >= 0):
+                        if (self.seqWin.msgQueue[i].find("Performing INDEL loop modeling, please be patient...") >= 0):
                             self.seqWin.msgQueue.pop(i)
                             break
                     if (len(self.seqWin.msgQueue) > 0):
@@ -1292,9 +1345,25 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
                 self.tmrKIC.Stop()
                 # Pop this message out of the queue
                 for i in range(0, len(self.seqWin.msgQueue)):
-                    if (self.seqWin.msgQueue[i].find("Performing INDEL loop modeling") >= 0):
+                    if (self.seqWin.msgQueue[i].find("Performing INDEL loop modeling, please be patient...") >= 0):
                         self.seqWin.msgQueue.pop(i)
                         break
+
+
+                # Parse output file that gives us the filenames, energies, and insertion lengths of all the results
+                # TODO: Write to table with cool and fun browsing capabilities
+                output = open("INDELoutput")
+                model_names = []
+                scores = []
+                lengths = []
+                for line in output:
+                    tmp = line.split("\t")
+                    model_names.append(tmp[0])
+                    scores.append(tmp[1])
+                    lengths.append(tmp[2])
+
+
+
                 os.rename("INDELoutput" , "INDELoutput.pdb")
                 self.KICView = self.seqWin.pdbreader.get_structure("kic_view", "INDELoutput.pdb")
                 self.btnINDEL.Enable()
@@ -1307,14 +1376,6 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
                 self.buttonState = "Finalize!"
                 self.btnINDEL.SetToolTipString("Accept or reject protocol results")
                 #os.remove("INDELoutput.pdb")
-
-                #Try to get rid of working loop files in sandbox
-                temp_loop_files = glob.glob('loopout_*')
-                try:
-                    for temp_loop in temp_loop_files:
-                        os.remove(temp_loop)
-                except:
-                    pass
 
 
                 # Load the designed pose as the "kic_view" model so the user can look at the results
