@@ -1351,7 +1351,10 @@ def doINDEL():
         lengths = []
         # Try to make models from all the loops, or up to the max number specified
         while i < min((num_results + 1), (int(loop_params[6]) + 1)):
-            print "Attempting to insert loop " + str(i) + "\n"
+            print "\n ==================================================== \n"
+            print "\t \t Attempting to insert loop " + str(i)
+            print "\n ==================================================== \n"
+
             # Make a copy of the scaffold, load the loop
             temp_pose = pose_from_pdb(pdbfile)
             loopfile = "loopout_" + str(i) + ".pdb"

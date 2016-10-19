@@ -1,7 +1,7 @@
 ### AUTHOR: William F. Hooper
 ### Affiliation: Rensselaer Polytechnic Institute
 ### Based off of kic.py, included with InteractiveROSETTA
-### Additional dependencies: LoopHash, available at github.com/willhooper/LoopHash
+### Additional dependencies: LoopHash, available at github.com/willhooper/LoopHash (might be packaged with this install already)
 
 import wx
 import wx.grid
@@ -29,12 +29,12 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.parent = parent
 
         if (platform.system() == "Windows"):
-            self.lblProt = wx.StaticText(self, -1, "INDEL Loop Modeling", (25, 15), (270, 25), wx.ALIGN_CENTRE)
+            self.lblProt = wx.StaticText(self, -1, "INDEL Loop Design", (25, 15), (270, 25), wx.ALIGN_CENTRE)
             self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
         elif (platform.system() == "Darwin"):
             self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/lblKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
         else:
-            self.lblProt = wx.StaticText(self, -1, "INDEL Loop Modeling", (70, 15), style=wx.ALIGN_CENTRE)
+            self.lblProt = wx.StaticText(self, -1, "INDEL Loop Design", (70, 15), style=wx.ALIGN_CENTRE)
             self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
             resizeTextControlForUNIX(self.lblProt, 0, self.GetSize()[0]-20)
         self.lblProt.SetForegroundColour("#FFFFFF")
@@ -49,12 +49,12 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.HelpBtn.SetToolTipString("Display the help file for this window")
 
         if (platform.system() == "Windows"):
-            self.lblInst = wx.StaticText(self, -1, "Insert loops :)", (0, 45), (320, 25), wx.ALIGN_CENTRE)
+            self.lblInst = wx.StaticText(self, -1, "Remodels loops via a \n  fragment database search", (0, 45), (320, 25), wx.ALIGN_CENTRE)
             self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
         elif (platform.system() == "Darwin"):
             self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/lblInstKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 25))
         else:
-            self.lblInst = wx.StaticText(self, -1, "Insert loops :)", (5, 45), style=wx.ALIGN_CENTRE)
+            self.lblInst = wx.StaticText(self, -1, "Remodels loops via a \n  fragment database search", (5, 45), style=wx.ALIGN_CENTRE)
             self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
             resizeTextControlForUNIX(self.lblInst, 0, self.GetSize()[0]-20)
         self.lblInst.SetForegroundColour("#FFFFFF")
@@ -256,28 +256,29 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.btnClear.SetForegroundColour("#000000")
             self.btnClear.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
         self.btnClear.Bind(wx.EVT_BUTTON, self.clear)
-        self.btnClear.SetToolTipString("Clear the list of loops")
+        self.btnClear.SetToolTipString("Clear parameters")
 
         self.grdLoops = wx.grid.Grid(self)
-        self.grdLoops.CreateGrid(0, 4)
+        self.grdLoops.CreateGrid(0, 2)
         self.grdLoops.SetSize((320, 200))
         self.grdLoops.SetPosition((0, 350))
         self.grdLoops.SetLabelFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
         self.grdLoops.DisableDragColSize()
         self.grdLoops.DisableDragRowSize()
-        self.grdLoops.SetColLabelValue(0, "Sequence")
-        self.grdLoops.SetColLabelValue(1, "Start")
-        self.grdLoops.SetColLabelValue(2, "Pivot")
-        self.grdLoops.SetColLabelValue(3, "End")
-        self.grdLoops.SetRowLabelSize(80)
-        self.grdLoops.SetColSize(0, 90)
-        self.grdLoops.SetColSize(1, 50)
-        self.grdLoops.SetColSize(2, 50)
-        self.grdLoops.SetColSize(3, 50)
+        self.grdLoops.SetColLabelValue(0, "Length")
+        self.grdLoops.SetColLabelValue(1, "Score")
+        self.grdLoops.SetRowLabelSize(50)
+        self.grdLoops.SetColSize(0, 70)
+        self.grdLoops.SetColSize(1, 200)
         self.grdLoops.Bind(wx.grid.EVT_GRID_CELL_LEFT_CLICK, self.gridClick)
         self.loops = []
         self.selectedr = -1
         ypos = self.grdLoops.GetPosition()[1] + self.grdLoops.GetSize()[1] + 10
+        self.model_selected = ""
+        self.previous_model_selected = ""
+        self.model_names = []
+        self.scores = []
+        self.lengths = []
 
         '''
         if (platform.system() == "Windows"):
@@ -346,52 +347,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         #    resizeTextControlForUNIX(self.lblDir, 130, 190)
         #self.lblDir.SetForegroundColour("#FFFFFF")
         #self.outputdir = ""
-        '''
-        if (platform.system() == "Windows"):
-            self.lblLine = wx.StaticText(self, -1, "==========================", (0, ypos+90), (320, 20), wx.ALIGN_CENTRE)
-            self.lblLine.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
-        elif (platform.system() == "Darwin"):
-            self.lblLine = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/lblLine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+90), size=(320, 20))
-        else:
-            self.lblLine = wx.StaticText(self, -1, "==========================", (0, ypos+90), style=wx.ALIGN_CENTRE)
-            self.lblLine.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
-            resizeTextControlForUNIX(self.lblLine, 20, 120)
-        self.lblLine.SetForegroundColour("#FFFFFF")
 
-        if (platform.system() == "Windows"):
-            self.lblPostKIC = wx.StaticText(self, -1, "Post-Loop Modeling", (0, ypos+115), (320, 20), wx.ALIGN_CENTRE)
-            self.lblPostKIC.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-        elif (platform.system() == "Darwin"):
-            self.lblPostKIC = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/lblPostKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos+115), size=(320, 20))
-        else:
-            self.lblPostKIC = wx.StaticText(self, -1, "Post-Loop Modeling", (0, ypos+115), style=wx.ALIGN_CENTRE)
-            self.lblPostKIC.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-            resizeTextControlForUNIX(self.lblPostKIC, 0, self.GetSize()[0]-20)
-        self.lblPostKIC.SetForegroundColour("#FFFFFF")
-
-        if (platform.system() == "Darwin"):
-            self.scoretypeMenu = wx.ComboBox(self, pos=(7, ypos+145), size=(305, 25), choices=[], style=wx.CB_READONLY)
-        else:
-            self.scoretypeMenu = wx.ComboBox(self, pos=(7, ypos+145), size=(305, 25), choices=[], style=wx.CB_READONLY | wx.CB_SORT)
-        self.scoretypeMenu.Bind(wx.EVT_COMBOBOX, self.scoretypeMenuSelect)
-        self.scoretypeMenu.Disable() # Is only enabled after a design and before accepting it
-        self.scoretypeMenu.SetToolTipString("Scoretype by which PyMOL residues will be colored")
-
-        if (platform.system() == "Windows"):
-            self.lblModelView = wx.StaticText(self, -1, "View Structure:", (20, ypos+183), (120, 20), wx.ALIGN_CENTRE)
-            self.lblModelView.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-        elif (platform.system() == "Darwin"):
-            self.lblModelView = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/lblModelView.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, ypos+183), size=(120, 20))
-        else:
-            self.lblModelView = wx.StaticText(self, -1, "View Structure:", (20, ypos+183), style=wx.ALIGN_CENTRE)
-            self.lblModelView.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-            resizeTextControlForUNIX(self.lblModelView, 20, 120)
-        self.lblModelView.SetForegroundColour("#FFFFFF")
-        self.viewMenu = wx.ComboBox(self, pos=(175, ypos+180), size=(120, 25), choices=[], style=wx.CB_READONLY)
-        self.viewMenu.Bind(wx.EVT_COMBOBOX, self.viewMenuSelect)
-        self.viewMenu.Disable()
-        self.viewMenu.SetToolTipString("Select loop positions to view in PyMOL")
-        '''
         if (platform.system() == "Darwin"):
             self.btnServerToggle = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnServer_Off.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(40, ypos+215), size=(100, 25))
         else:
@@ -527,11 +483,15 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         except:
             pass
 
+
     def gridClick(self, event):
         # Set the selected residue's row to blue so it is easy to see what the selection is
         self.selectedr = event.GetRow()
         if (self.selectedr >= self.grdLoops.NumberRows):
             self.selectedr = -1
+        if (self.selectedr >= len(self.model_names)):
+            event.Skip()
+            return
         for r in range(0, self.grdLoops.NumberRows):
             if (r == self.selectedr):
                 for c in range(0, self.grdLoops.NumberCols):
@@ -539,25 +499,36 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             else:
                 for c in range(0, self.grdLoops.NumberCols):
                     self.grdLoops.SetCellBackgroundColour(r, c, "white")
+
         self.grdLoops.Refresh()
-        self.loopBegin = self.loops[self.selectedr][3]
-        self.loopEnd = self.loops[self.selectedr][5]
-        self.populatePivots()
-        # Load this loop's data into the controls and focus it
-        self.modelMenu.SetSelection(self.modelMenu.GetItems().index(self.loops[self.selectedr][2]))
-        chainID, resindx = self.seqWin.getResidueInfo(self.loops[self.selectedr][2], self.loops[self.selectedr][3]+1)
-        if (len(chainID.strip()) == 0):
-            chainID = "_"
-        self.beginMenu.SetSelection(self.beginMenu.GetItems().index(chainID + ":" + self.seqWin.getResidueTypeFromRosettaIndx(self.loops[self.selectedr][2], self.loops[self.selectedr][3]+1) + str(resindx)))
-        chainID, resindx = self.seqWin.getResidueInfo(self.loops[self.selectedr][2], self.loops[self.selectedr][4]+1)
-        if (len(chainID.strip()) == 0):
-            chainID = "_"
-        self.menuPivot.SetSelection(self.menuPivot.GetItems().index(chainID + ":" + self.seqWin.getResidueTypeFromRosettaIndx(self.loops[self.selectedr][2], self.loops[self.selectedr][4]+1) + str(resindx)))
-        chainID, resindx = self.seqWin.getResidueInfo(self.loops[self.selectedr][2], self.loops[self.selectedr][5])
-        if (len(chainID.strip()) == 0):
-            chainID = "_"
-        self.endMenu.SetSelection(self.endMenu.GetItems().index(chainID + ":" + self.seqWin.getResidueTypeFromRosettaIndx(self.loops[self.selectedr][2], self.loops[self.selectedr][5]) + str(resindx)))
-        self.focusView(self.endMenu.GetStringSelection(), self.loops[self.selectedr][2])
+
+        # Make sure we're not trying to load an empty row
+        if (self.selectedr < len(self.model_names)):
+            self.loopEnd = self.begin_seqpos + self.lengths[self.selectedr]
+            self.model_selected = self.model_names[self.selectedr]
+        else:
+            self.selectedr = -1
+            event.Skip()
+
+        # Remove the previously selected model from the viewer if it's not the same as the one just selected
+        if (self.previous_model_selected != "" or self.previous_model_selected != self.model_selected):
+            try:
+                self.cmd.remove(self.previous_model_selected)
+                self.cmd.delete(self.previous_model_selected)
+            except:
+                pass
+
+        # Load the model, zoom in on designed loop
+        if (self.model_selected != self.previous_model_selected and self.model_selected != ""):
+            self.cmd.load(self.model_selected, self.model_selected)
+            self.cmd.show()
+            self.cmd.show("cartoon")
+            self.cmd.hide("lines")
+            self.cmd.hide("sticks")
+            self.previous_model_selected = self.model_selected
+            self.cmd.zoom("resi " + str(self.begin_seqpos) + "-" + str(int(self.begin_seqpos) + 3), 2.0)
+            self.cmd.color("blue", self.model_selected)
+
         event.Skip()
 
     def modelMenuSelect(self, event):
@@ -582,6 +553,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         # Update the beginning and ending positions menus with the available sequence positions
         self.beginMenu.Clear()
         self.beginMenu.AppendItems(positions[0:len(positions)-1])
+
         if (platform.system() == "Windows"):
             self.beginMenu.SetSelection(-1)
             self.loopBegin = -1
@@ -707,11 +679,6 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
                     self.endMenu.SetSelection(self.beginMenu.GetSelection()) # This clears the menu, SetStringSelection/SetValue doesn't seem to work
                     self.endMenuSelect(event)
                 wx.MessageBox("Your selected end loop value is no longer valid.  Please choose an ending position after the one you've selected here.", "Loop End No Longer Valid", wx.OK|wx.ICON_EXCLAMATION)
-            if (self.loopBegin >= 0 and self.loopEnd >= 0 and self.loopBegin < self.loopEnd):
-                # Populate the pivot menu
-                self.populatePivots()
-            else:
-                self.menuPivot.Disable()
             self.focusView(self.beginMenu.GetStringSelection(), self.selectedModel)
             logInfo("Selected " + self.beginMenu.GetStringSelection() + " as the beginning of the loop")
         except:
@@ -734,11 +701,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
                     self.beginMenu.SetSelection(self.endMenu.GetSelection()) # This clears the menu, SetStringSelection/SetValue doesn't seem to work
                     self.beginMenuSelect(event)
                 wx.MessageBox("Your selected begin loop value is no longer valid.  Please choose a beginning position before the one you've selected here.", "Loop Begin No Longer Valid", wx.OK|wx.ICON_EXCLAMATION)
-            if (self.loopBegin >= 0 and self.loopEnd >= 0 and self.loopBegin < self.loopEnd):
-                # Populate the pivot menu
-                self.populatePivots()
-            else:
-                self.menuPivot.Disable()
+
             self.focusView(self.endMenu.GetStringSelection(), self.selectedModel)
             logInfo("Selected " + self.endMenu.GetStringSelection() + " as the ending of the loop")
         except:
@@ -1020,9 +983,17 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def INDELClick(self, event):
         # This is also the "Finalize!" button
         if (self.buttonState == "Model!"):
+            # Some checking to make sure input parameters make sense
             if (self.minLength > self.maxLength):
-                wx.MessageBox("Please enter a maximum length that is greater than or equal to the minimum length.", "Invalid loop lengths" , wx.OK|wx.ICON_EXCLAMATION)
+                wx.MessageBox("Please choose a maximum length that is greater than or equal to the minimum length.", "Invalid loop lengths" , wx.OK|wx.ICON_EXCLAMATION)
                 return
+            if (self.maxResultsval < self.minResultsval):
+                wx.MessageBox("Please enter a maximum results value that is higher than the minimum results value.", "Invalid parameter", wx.OK|wx.ICON_EXCLAMATION)
+            if (self.minResultsval <= 0):
+                self.minResultsval = 1
+            if (self.maxResultsval <= 0):
+                wx.MessageBox("Please enter a maximum results value that is greater than or equal to 1.", "Invalid parameter", wx.OK|wx.ICON_EXCLAMATION)
+
 
             '''
             # First we have to make sure that the loops are defined and that the sequence is valid
@@ -1094,8 +1065,17 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             except:
                 pass
 
+            #Clear grid of loops
+            self.grdLoops.ClearGrid()
+            del self.model_names[:]
+            del self.lengths[:]
+            del self.scores[:]
+            self.grdLoops.DeleteRows(0, self.grdLoops.GetNumberRows())
+
+
 
             dlg.Destroy()
+            # TODO: disable and re-enable new controls
             #self.scoretypeMenu.Disable()
             #self.viewMenu.Disable()
             self.modelMenu.Enable()
@@ -1121,30 +1101,31 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.cmd.label("all", "")
             self.seqWin.cannotDelete = False
             if (not(accept)):
-                self.cmd.remove("INDELoutput.pdb")
-                self.cmd.delete("INDELoutput.pdb")
+                try:
+                    self.cmd.remove(self.model_selected)
+                    self.cmd.delete(self.model_selected)
+                except:
+                    pass
                 return
+            if (accept and self.selectedr == -1):
+                return
+
             # Get rid of the original pose, save the designed pose, and reload the structure in PyMOL
             poseindx = -1
             for r in range(0, len(self.seqWin.IDs)):
                 if (self.seqWin.IDs[r].find(self.selectedModel) >= 0):
                     poseindx = r
                     break
+
             try:
+                self.cmd.load(self.model_selected, self.model_selected)
                 self.cmd.remove(self.selectedModel)
                 self.cmd.delete(self.selectedModel)
-                self.cmd.remove("kic_view")
-                self.cmd.delete("kic_view")
-                #self.cmd.remove("INDELoutput.pdb")
-                #self.cmd.delete("INDELoutput.pdb")
-                self.cmd.load("INDELoutput.pdb", self.selectedModel)
-                #self.KICView.pdb_info().name(str(self.selectedModel + ".pdb"))
-                self.seqWin.reloadPose(poseindx, self.selectedModel, "INDELoutput.pdb")
+                self.seqWin.reloadPose(poseindx, self.model_selected, self.model_selected)
                 defaultPyMOLView(self.cmd, self.selectedModel)
-                del self.KICView
                 # IMPORTANT: You have to replace the model in the sandbox with the new designed model
                 os.remove(self.selectedModel + ".pdb")
-                os.rename("INDELoutput", self.selectedModel + ".pdb")
+                os.rename(self.model_selected, self.selectedModel + "_INDEL.pdb")
             except:
                 # Some weird error happened, do nothing instead of crashing
                 print "Bug at accept button click"
@@ -1237,6 +1218,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             #Grab rosetta indices, write indices and length range
             chain = self.endMenu.GetStringSelection()[0]
             begin_seqpos = self.beginMenu.GetStringSelection()[3:]
+            self.begin_seqpos = begin_seqpos
             end_seqpos = self.endMenu.GetStringSelection()[3:]
             begin_index = self.seqWin.getRosettaIndex(self.selectedModel, chain, begin_seqpos)
             end_index = self.seqWin.getRosettaIndex(self.selectedModel, chain, end_seqpos)
@@ -1352,20 +1334,35 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
                 # Parse output file that gives us the filenames, energies, and insertion lengths of all the results
                 # TODO: Write to table with cool and fun browsing capabilities
-                output = open("INDELoutput")
-                model_names = []
-                scores = []
-                lengths = []
-                for line in output:
+                f = open("INDELoutput")
+                self.model_names = []
+                self.scores = []
+                self.lengths = []
+                for line in f:
                     tmp = line.split("\t")
-                    model_names.append(tmp[0])
-                    scores.append(tmp[1])
-                    lengths.append(tmp[2])
+                    self.model_names.append(tmp[0])
+                    self.scores.append(tmp[1])
+                    self.lengths.append(tmp[2])
+                f.close()
+
+                # Clear and populate table
+                self.grdLoops.ClearGrid()
+                self.grdLoops.AppendRows(len(self.model_names))
+
+                row = 0
+                for score, length in zip(self.scores, self.lengths):
+                    self.grdLoops.SetCellValue(row, 0, length)
+                    self.grdLoops.SetCellValue(row, 1, score)
+                    row += 1
+
+                # We can get rid of the top-level output file now
+                try:
+                    os.remove("INDELoutput")
+                except:
+                    pass
 
 
-
-                os.rename("INDELoutput" , "INDELoutput.pdb")
-                self.KICView = self.seqWin.pdbreader.get_structure("kic_view", "INDELoutput.pdb")
+                #self.KICView = self.seqWin.pdbreader.get_structure("kic_view", "INDELoutput.pdb")
                 self.btnINDEL.Enable()
                 #self.enableControls()
                 #self.selectedModel = ""
@@ -1379,7 +1376,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
 
                 # Load the designed pose as the "kic_view" model so the user can look at the results
-                self.cmd.load("INDELoutput.pdb", "kic_view")
+                #self.cmd.load("INDELoutput.pdb", "kic_view")
 
 
 
