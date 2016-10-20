@@ -948,6 +948,10 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.modelMenu.Enable()
         self.beginMenu.Enable()
         self.endMenu.Enable()
+        self.minMenu.Enable()
+        self.maxMenu.Enable()
+        self.ResultsMin.Enable()
+        self.ResultsMax.Enable()
         #self.btnLoopType.Enable()
         #if (self.loopType == "De Novo"):
         #    self.txtSequence.Enable()
@@ -1017,10 +1021,14 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.seqWin.cannotDelete = True
             self.parent.GoBtn.Disable()
             self.modelMenu.Disable()
-            #self.btnLoopType.Disable()
             self.beginMenu.Disable()
             self.endMenu.Disable()
-            #self.txtSequence.Disable()
+            self.minMenu.Disable()
+            self.maxMenu.Disable()
+            self.ResultsMin.Disable()
+            self.ResultsMax.Disable()
+
+
             if (platform.system() == "Darwin"):
                 self.btnINDEL.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnKIC_Cancel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
             else:
@@ -1082,6 +1090,8 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.beginMenu.Enable()
             self.endMenu.Enable()
             self.parent.GoBtn.Enable()
+            self.minMenu.Enable()
+            self.maxMenu.Endable()
 
             #Pop message out of queue
             for i in range(0, len(self.seqWin.msgQueue)):
