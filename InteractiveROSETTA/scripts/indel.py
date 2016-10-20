@@ -195,60 +195,6 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
 
 
-        '''
-        if (platform.system() == "Windows"):
-            self.lblSequence = wx.StaticText(self, -1, "Loop Sequence", (170, 190), (140, 20), wx.ALIGN_CENTRE)
-            self.lblSequence.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-        elif (platform.system() == "Darwin"):
-            self.lblSequence = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/lblSequence.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(170, 190), size=(140, 20))
-        else:
-            self.lblSequence = wx.StaticText(self, -1, "Loop Sequence", (170, 190), style=wx.ALIGN_CENTRE)
-            self.lblSequence.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-            resizeTextControlForUNIX(self.lblSequence, 170, 140)
-        self.lblSequence.SetForegroundColour("#FFFFFF")
-        self.txtSequence = wx.TextCtrl(self, -1, pos=(170, 210), size=(140, 25))
-        self.txtSequence.SetValue("")
-        self.txtSequence.SetToolTipString("Primary sequence for a de novo loop")
-        self.txtSequence.Disable()
-
-        if (platform.system() == "Darwin"):
-            self.btnAdd = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnAdd.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 240), size=(90, 25))
-        else:
-            self.btnAdd = wx.Button(self, id=-1, label="Add", pos=(10, 240), size=(90, 25))
-            self.btnAdd.SetForegroundColour("#000000")
-            self.btnAdd.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-        self.btnAdd.Bind(wx.EVT_BUTTON, self.add)
-        self.btnAdd.SetToolTipString("Add the selected residues to the list of loops")
-
-        if (platform.system() == "Darwin"):
-            self.btnRemove = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnRemove.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(115, 240), size=(90, 25))
-        else:
-            self.btnRemove = wx.Button(self, id=-1, label="Remove", pos=(115, 240), size=(90, 25))
-            self.btnRemove.SetForegroundColour("#000000")
-            self.btnRemove.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-        self.btnRemove.    if (platform.system() == "Windows"):
-            self.lblLoopType = wx.StaticText(self, -1, "Remodel Type", (10, 190), (140, 20), wx.ALIGN_CENTRE)
-            self.lblLoopType.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-        elif (platform.system() == "Darwin"):
-            self.lblLoopType = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/lblRemodelType.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 190), size=(140, 20))
-        else:
-            self.lblLoopType = wx.StaticText(self, -1, "Remodel Type", (10, 190), style=wx.ALIGN_CENTRE)
-            self.lblLoopType.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-            resizeTextControlForUNIX(self.lblLoopType, 10, 140)
-        self.lblLoopType.SetForegroundColour("#FFFFFF")
-        if (platform.system() == "Darwin"):
-            self.btnLoopType = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnLoopType_Refine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 210), size=(140, 25))
-        else:
-            self.btnLoopType = wx.Button(self, id=-1, label="Refine", pos=(10, 210), size=(140, 25))
-            self.btnLoopType.SetForegroundColour("#000000")
-            self.btnLoopType.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-        self.btnLoopType.Bind(wx.EVT_BUTTON, self.changeLoopType)
-        self.loopType = "Refine"
-        self.btnLoopType.SetToolTipString("Refine a pre-existing loop using the high resolution KIC remodeler only")Bind(wx.EVT_BUTTON, self.remove)
-        self.btnRemove.SetToolTipString("Remove the selected residues from the list of loops")
-
-        '''
-
         if (platform.system() == "Darwin"):
             self.btnClear = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnClear.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(220, 305), size=(90, 25))
         else:
@@ -280,73 +226,6 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.scores = []
         self.lengths = []
 
-        '''
-        if (platform.system() == "Windows"):
-            self.lblAdvanced = wx.StaticText(self, -1, "Advanced Options", (0, ypos), (320, 20), wx.ALIGN_CENTRE)
-            self.lblAdvanced.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-        elif (platform.system() == "Darwin"):
-            self.lblAdvanced = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/lblAdvanced.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, ypos), size=(320, 20))
-        else:
-            self.lblAdvanced = wx.StaticText(self, -1, "Advanced Options", (0, ypos), style=wx.ALIGN_CENTRE)
-            self.lblAdvanced.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-            resizeTextControlForUNIX(self.lblAdvanced, 0, 320)
-        self.lblAdvanced.SetForegroundColour("#FFFFFF")
-
-        if (platform.system() == "Windows"):
-            self.lblPerturb = wx.StaticText(self, -1, "KIC Type:", (10, ypos+33), (100, 20), wx.ALIGN_CENTRE)
-            self.lblPerturb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-        elif (platform.system() == "Darwin"):
-            self.lblPerturb = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/lblPerturb.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, ypos+33), size=(100, 20))
-        else:
-            self.lblPerturb = wx.StaticText(self, -1, "KIC Type:", (10, ypos+33), style=wx.ALIGN_CENTRE)
-            self.lblPerturb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-            resizeTextControlForUNIX(self.lblPerturb, 10, 100)
-        self.lblPerturb.SetForegroundColour("#FFFFFF")
-        if (platform.system() == "Darwin"):
-            self.btnPerturb = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnPerturb_Refine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(120, ypos+30), size=(200, 25))
-        else:
-            self.btnPerturb = wx.Button(self, id=-1, label="Perturb+Refine", pos=(120, ypos+30), size=(200, 25))
-            self.btnPerturb.SetForegroundColour("#000000")
-            self.btnPerturb.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-        self.btnPerturb.Bind(wx.EVT_BUTTON, self.changePerturbType)
-        self.perturbType = "Perturb+Refine"
-        self.btnPerturb.SetToolTipString("Perform KIC coarse perturbation followed by high resolution refinement")
-        self.btnPerturb.Disable()
-
-
-        if (platform.system() == "Windows"):
-            self.lblNStruct = wx.StaticText(self, -1, "NStruct:", (20, ypos+63), (100, 20), wx.ALIGN_CENTRE)
-            self.lblNStruct.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-        elif (platform.system() == "Darwin"):
-            self.lblNStruct = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/lblNStruct.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, ypos+63), size=(100, 20))
-        else:
-            self.lblNStruct = wx.StaticText(self, -1, "NStruct:", (20, ypos+63), style=wx.ALIGN_CENTRE)
-            self.lblNStruct.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-            resizeTextControlForUNIX(self.lblNStruct, 20, 100)
-        self.lblNStruct.SetForegroundColour("#FFFFFF")
-        self.txtNStruct = wx.TextCtrl(self, -1, pos=(155, ypos+60), size=(140, 25))
-        self.txtNStruct.SetValue("1")
-        self.txtNStruct.SetToolTipString("Number of models to generate (each KIC simulation typically takes 5-10 minutes)")
-        self.txtNStruct.Disable()
-        '''
-        #if (platform.system() == "Darwin"):
-        #    self.btnOutputDir = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnOutputDir.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(20, 350), size=(100, 25))
-        #else:
-        #    self.btnOutputDir = wx.Button(self, id=-1, label="Output Dir", pos=(20, 350), size=(100, 25))
-        #    self.btnOutputDir.SetForegroundColour("#000000")
-        #    self.btnOutputDir.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-        #self.btnOutputDir.Bind(wx.EVT_BUTTON, self.setOutputDir)
-        #self.btnOutputDir.SetToolTipString("Set the directory to which outputted structures will be written, if NStruct > 1")
-        #self.btnOutputDir.Disable()
-        #if (platform.system() == "Windows"):
-        #    self.lblDir = wx.StaticText(self, -1, "", (130, 355), (190, 20), wx.ALIGN_CENTRE)
-        #    self.lblDir.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
-        #else:
-        #    self.lblDir = wx.StaticText(self, -1, "", (130, 355), style=wx.ALIGN_CENTRE)
-        #    self.lblDir.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
-        #    resizeTextControlForUNIX(self.lblDir, 130, 190)
-        #self.lblDir.SetForegroundColour("#FFFFFF")
-        #self.outputdir = ""
 
         if (platform.system() == "Darwin"):
             self.btnServerToggle = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnServer_Off.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(40, ypos+215), size=(100, 25))
@@ -999,21 +878,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
                 wx.MessageBox("Please enter a maximum results value that is greater than or equal to 1.", "Invalid parameter", wx.OK|wx.ICON_EXCLAMATION)
 
 
-            '''
-            # First we have to make sure that the loops are defined and that the sequence is valid
-            if (len(self.loops) == 0):
-                wx.MessageBox("Please specify at least one valid loop to model", "No Loops Provided", wx.OK|wx.ICON_EXCLAMATION)
-                return
-            try:
-                if (int(self.txtNStruct.GetValue()) <= 0):
-                    raise Exception
-            except:
-                wx.MessageBox("Please enter a positive value for the number of structures.", "Invalid NStruct", wx.OK|wx.ICON_EXCLAMATION)
-                return
-            '''
-            #if (int(self.txtNStruct.GetValue()) > 1 and len(self.outputdir.strip()) == 0):
-                #wx.MessageBox("If you want to generate more than one structure, you need to indicate a directory to which all these structures will be outputted.", "Specify an Output Directory", wx.OK|wx.ICON_EXCLAMATION)
-                #return
+
             self.seqWin.labelMsg.SetLabel("Performing INDEL loop modeling, please be patient...")
             self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
             self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
@@ -1091,7 +956,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.endMenu.Enable()
             self.parent.GoBtn.Enable()
             self.minMenu.Enable()
-            self.maxMenu.Endable()
+            self.maxMenu.Enable()
 
             #Pop message out of queue
             for i in range(0, len(self.seqWin.msgQueue)):
@@ -1238,26 +1103,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
                 + str(self.minResultsval) + "\t" + str(self.maxResultsval) )
             f.close()
 
-            #f.write("REMODEL\t" + self.loopType.upper() + "\n")
-            #chain = self.beginMenu.GetStringSelection()[0]
-            #seqpos = self.beginMenu.GetStringSelection()[3:]
-            #loopBegin = self.seqWin.getRosettaIndex(self.selectedModel, chain, seqpos)
-            #f.write("LOOPBEGIN\t" + str(loopBegin) + "\n")
-            #chain = self.endMenu.GetStringSelection()[0]
-            #seqpos = self.endMenu.GetStringSelection()[3:]
-            #loopEnd = self.seqWin.getRosettaIndex(self.selectedModel, chain, seqpos)
-            #f.write("LOOPEND\t" + str(loopEnd) + "\n")
-            #if (self.loopType == "De Novo"):
-                #f.write("SEQUENCE\t" + self.txtSequence.GetValue().strip().upper() + "\n")
-            #f.write("PIVOT\t" + str(self.menuPivot.GetSelection()) + "\n")
-            # Write the loops information
-            #for [loopType, sequence, model, begin, pivot, end] in self.loops:
-            #    f.write("LOOP\t" + loopType.upper() + "\t" + sequence.strip() + "\t" + str(begin) + "\t" + str(pivot) + "\t" + str(end) + "\n")
-            #f.write("NSTRUCT\t" + str(self.nstruct) + "\n")
-            #f.write("PERTURB\t" + self.perturbType + "\n")
-            #f.write("OUTPUTDIR\t" + self.outputdir + "\n")
 
-            #appendScorefxnParamsInfoToFile("coarsekicinputtemp", self.selectWin.weightsfile)
             if (self.serverOn):
                 try:
                     self.ID = sendToServer("coarsekicinput")
