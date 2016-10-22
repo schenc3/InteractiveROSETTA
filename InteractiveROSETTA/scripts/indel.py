@@ -243,7 +243,8 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.btnINDEL = wx.Button(self, id=-1, label="Model!", pos=(180, ypos), size=(100, 25))
             self.btnINDEL.SetForegroundColour("#000000")
             self.btnINDEL.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-        #TODO wx GridBag auto sizing
+
+        #TODO wx Grid auto sizing
         self.btnINDEL.Bind(wx.EVT_BUTTON, self.INDELClick)
         self.btnINDEL.SetToolTipString("Begin INDEL simulation with selected parameters")
         self.buttonState = "Model!"
@@ -901,14 +902,11 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.buttonState = "Cancel!"
             self.btnINDEL.SetToolTipString("Cancel the INDEL simulation")
             self.stage = 1
-            #thrKIC = Thread(target=self.threadKIC, args=())
-            #thrKIC.start()
             logInfo("Clicked the INDEL button")
-            #if (len(self.txtSequence.GetValue().strip())):
-            #    logInfo("The new loop sequence is " + self.txtSequence.GetValue().strip())
             self.tmrKIC = wx.Timer(self)
-            self.Bind(wx.EVT_TIMER, self.threadKIC, self.tmrKIC)
+            self.Bind(wx.EVT_TIMER, self.threadINDEL, self.tmrKIC)
             self.tmrKIC.Start(1000)
+
         elif (self.buttonState == "Cancel!"):
             dlg = wx.MessageDialog(self, "Are you sure you want to cancel the INDEL simulation?  All progress will be lost.", "Cancel KIC Simulation", wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
             result = dlg.ShowModal()
@@ -916,6 +914,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
                 self.cancelINDEL()
             dlg.Destroy()
         else:
+
             # Finalize button, ask whether the changes will be accepted or rejected
             dlg = wx.MessageDialog(self, "Do you want to accept the results of this loop modeling session?", "Accept/Reject Model", wx.YES_NO | wx.CANCEL | wx.ICON_QUESTION | wx.CENTRE)
             result = dlg.ShowModal()
@@ -930,7 +929,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
                 dlg.Destroy()
                 return
 
-            #Try to get rid of working loop files in sandbox
+            # Try to get rid of working loop files in sandbox
             temp_loop_files = glob.glob('loopout_*')
             try:
                 for temp_loop in temp_loop_files:
@@ -938,19 +937,15 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             except:
                 pass
 
-            #Clear grid of loops
+            # Clear grid of loops
             self.grdLoops.ClearGrid()
             del self.model_names[:]
             del self.lengths[:]
             del self.scores[:]
             self.grdLoops.DeleteRows(0, self.grdLoops.GetNumberRows())
 
-
-
+            # Re-enable controls
             dlg.Destroy()
-            # TODO: disable and re-enable new controls
-            #self.scoretypeMenu.Disable()
-            #self.viewMenu.Disable()
             self.modelMenu.Enable()
             self.beginMenu.Enable()
             self.endMenu.Enable()
@@ -964,9 +959,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
                     self.seqWin.msgQueue.pop(i)
                     break
 
-            #self.btnLoopType.Enable()
-            #if (self.loopType == "De Novo"):
-            #    self.txtSequence.Enable()
+
             if (platform.system() == "Darwin"):
                 self.btnINDEL.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
             else:
@@ -994,6 +987,8 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
             try:
                 self.cmd.load(self.model_selected, self.model_selected)
+                #TODO: Color final model by ss
+                #self.cmd.color('red', 'ss h', self.model_selected)
                 self.cmd.remove(self.selectedModel)
                 self.cmd.delete(self.selectedModel)
                 self.seqWin.reloadPose(poseindx, self.model_selected, self.model_selected)
@@ -1005,6 +1000,8 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
                 # Some weird error happened, do nothing instead of crashing
                 print "Bug at accept button click"
                 pass
+
+
 
     def recoverFromError(self, msg=""):
         # This function tells the user what the error was and tries to revert the protocol
@@ -1029,6 +1026,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         dlg = wx.MessageDialog(self, errmsg, "Error Encountered", wx.OK|wx.ICON_EXCLAMATION)
         dlg.ShowModal()
         dlg.Destroy()
+        # TODO re-enable the rest of the controls
         self.seqWin.cannotDelete = False
         self.parent.GoBtn.Enable()
         self.modelMenu.Enable()
@@ -1047,14 +1045,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             if (self.seqWin.msgQueue[i].find("Performing INDEL loop modeling, please be patient...") >= 0):
                 self.seqWin.msgQueue.pop(i)
                 break
-        for i in range(0, len(self.seqWin.msgQueue)):
-            if (self.seqWin.msgQueue[i].find("Performing rotamer repacking") >= 0):
-                self.seqWin.msgQueue.pop(i)
-                break
-        for i in range(0, len(self.seqWin.msgQueue)):
-            if (self.seqWin.msgQueue[i].find("Performing refined KIC loop modeling") >= 0):
-                self.seqWin.msgQueue.pop(i)
-                break
+    
         if (len(self.seqWin.msgQueue) > 0):
             self.seqWin.labelMsg.SetLabel(self.seqWin.msgQueue[len(self.seqWin.msgQueue)-1])
         else:
@@ -1062,7 +1053,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
         self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
 
-    def threadKIC(self, event):
+    def threadINDEL(self, event):
         # Why am I doing this ridiculous timer thing for this KIC protocol?
         # Because apparently on Linux there's some kind of weird bug that manifests when you
         # attempt to run time.sleep loops looking for files to be generated
@@ -1189,7 +1180,6 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
 
                 # Parse output file that gives us the filenames, energies, and insertion lengths of all the results
-                # TODO: Write to table with cool and fun browsing capabilities
                 f = open("INDELoutput")
                 self.model_names = []
                 self.scores = []
@@ -1231,13 +1221,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
                 #os.remove("INDELoutput.pdb")
 
 
-                # Load the designed pose as the "kic_view" model so the user can look at the results
-                #self.cmd.load("INDELoutput.pdb", "kic_view")
-
-
-
-
-
+            # TODO take advantage of this! Sometimes the stuff on the back end will fail
             elif (os.path.isfile("errreport")):
                 # Something went wrong, tell the user about it (loop sequence probably too short)
                 self.tmrKIC.Stop()

@@ -1311,7 +1311,7 @@ def doINDEL():
 
 
 
-    # Query database
+    # Query database - lookup executable and database files need to be in sandbox
     num_results = 0
     try:
         num_results = int( subprocess.check_output(["./iRosetta_Lookup.exe" , pdbfile , "pdblist.dat", "looplist.dat" , "grid.dat" , loop_params[1] ,
@@ -1321,7 +1321,8 @@ def doINDEL():
 
 
 
-    # If we got results, try to insert them (just one for now)
+    # If we got results, try to build models with them
+    # TODO add timer, sometimes grafting gets stuck. If it times out kill the process and throw out the loop :(
     if (num_results > 0):
         try:
             # Get every component of Rosetta started that we can, try to avoid
@@ -1352,7 +1353,7 @@ def doINDEL():
         # Try to make models from all the loops, or up to the max number specified
         while i < min((num_results + 1), (int(loop_params[6]) + 1)):
             print "\n ==================================================== \n"
-            print "\t \t Attempting to insert loop " + str(i)
+            print "\t \t \t Attempting to insert loop " + str(i)
             print "\n ==================================================== \n"
 
             # Make a copy of the scaffold, load the loop
@@ -1400,6 +1401,7 @@ def doINDEL():
     #Console output
     print "Tried to find loops for anchor residues N-term:" + loop_params[1] + "\t C-term: " + loop_params[2]
     print str(num_results) + " loops found."
+    print str(len(models)) + " models built."
 
 
 
