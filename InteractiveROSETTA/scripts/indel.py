@@ -236,6 +236,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.btnServerToggle.Bind(wx.EVT_BUTTON, self.serverToggle)
         self.btnServerToggle.SetToolTipString("Perform KIC simulations locally")
         self.serverOn = False
+        self.btnServerToggle.Disable()
 
         if (platform.system() == "Darwin"):
             self.btnINDEL = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(180, ypos+215), size=(100, 25))
@@ -1045,7 +1046,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             if (self.seqWin.msgQueue[i].find("Performing INDEL loop modeling, please be patient...") >= 0):
                 self.seqWin.msgQueue.pop(i)
                 break
-    
+
         if (len(self.seqWin.msgQueue) > 0):
             self.seqWin.labelMsg.SetLabel(self.seqWin.msgQueue[len(self.seqWin.msgQueue)-1])
         else:
