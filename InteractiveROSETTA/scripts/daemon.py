@@ -28,6 +28,7 @@ import psutil
 import glob
 import gzip
 import math
+from wx import Timer
 from cStringIO import StringIO
 try:
     # Try to import Rosetta
@@ -1290,16 +1291,13 @@ def doKIC(stage="Coarse"):
         # So the main GUI doesn't attempt to read the file before the daemon finishes writing its contents
         os.rename("kicoutputtemp", "kicoutput")
 
-# TODO figure out the funky bug where only one stupid-big loop is returned (play with cpp code)
-#      change exe output to alanines
-#      actually pass length parameters to exe and do somethig with them
 
 def doINDEL():
     # Parse file, remove input file
     f = open("INDELinput", "r")
     for aline in f:
         if (aline[0:4] == "LOOP"):
-            # [LOOP , N-anchor , C-anchor, min length , max length, min results, max results]
+            # ['LOOP' , N-anchor , C-anchor, min length , max length, min results, max results]
             loop_params = aline.split("\t")
         if (aline[0:7] == "PDBFILE"):
             pdbfile = aline.split("\t")[1].strip()
@@ -1356,27 +1354,31 @@ def doINDEL():
             print "\t \t \t Attempting to insert loop " + str(i)
             print "\n ==================================================== \n"
 
-            # Make a copy of the scaffold, load the loop
-            temp_pose = pose_from_pdb(pdbfile)
-            loopfile = "loopout_" + str(i) + ".pdb"
-            loop = pose_from_pdb(loopfile)
+            try:
+                #timer = wx.Timer()
+                # Make a copy of the scaffold, load the loop
+                temp_pose = pose_from_pdb(pdbfile)
+                loopfile = "loopout_" + str(i) + ".pdb"
+                loop = pose_from_pdb(loopfile)
 
-            # Here's where the actual grafting happens. Graft and add to model list
-            # Don't need to repack, AnchoredGraftMover takes care of it
-            graftmover = graft.AnchoredGraftMover(start_residue-1, stop_residue+1)
-            graftmover.set_cycles(500)
-            graftmover.set_piece(loop, 0, 0)
-            graftmover.apply(temp_pose)
+                # Here's where the actual grafting happens. Graft and add to model list
+                # Don't need to repack, AnchoredGraftMover takes care of it
+                graftmover = graft.AnchoredGraftMover(start_residue-1, stop_residue+1)
+                graftmover.set_cycles(500)
+                graftmover.set_piece(loop, 0, 0)
+                graftmover.apply(temp_pose)
 
-            #Add the model and its score to their respective lists, as well as the length of each insertion
-            scores.append(scorefxn(temp_pose))
-            models.append(temp_pose)
-            lengths.append(loop.total_residue())
+                #Add the model and its score to their respective lists, as well as the length of each insertion
+                scores.append(scorefxn(temp_pose))
+                models.append(temp_pose)
+                lengths.append(loop.total_residue())
+            except:
+                continue
+
             i += 1
 
         # Sort models by energy and write them out so we can look at them
         # Write out a file with info about each loop
-        # TODO is a lower or higher score better? can't remember. Best scores should be first.
         i = 1
         f = open("INDELoutputtemp", "w")
         for score, model, length in sorted(zip(scores, models, lengths)):

@@ -2,6 +2,7 @@
 ### Affiliation: Rensselaer Polytechnic Institute
 ### Based off of kic.py, included with InteractiveROSETTA
 ### Additional dependencies: LoopHash, available at github.com/willhooper/LoopHash (might be packaged with this install already)
+### Database files iRosetta_Lookup.exe, pdbselect.dat, looplist.dat, and grid.dat should be in sandbox
 
 import wx
 import wx.grid
@@ -32,7 +33,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.lblProt = wx.StaticText(self, -1, "INDEL Loop Design", (25, 15), (270, 25), wx.ALIGN_CENTRE)
             self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
         elif (platform.system() == "Darwin"):
-            self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/lblKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
+            self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/indel/label_INDEL.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
         else:
             self.lblProt = wx.StaticText(self, -1, "INDEL Loop Design", (70, 15), style=wx.ALIGN_CENTRE)
             self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -52,7 +53,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.lblInst = wx.StaticText(self, -1, "Remodels loops via a \n  fragment database search", (0, 45), (320, 25), wx.ALIGN_CENTRE)
             self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
         elif (platform.system() == "Darwin"):
-            self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/lblInstKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 25))
+            self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/indel/lbl_description_INDEL.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 25))
         else:
             self.lblInst = wx.StaticText(self, -1, "Remodels loops via a \n  fragment database search", (5, 45), style=wx.ALIGN_CENTRE)
             self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -121,7 +122,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.lblMin = wx.StaticText(self, -1, "Minimum length", (10, 190), (140, 20), wx.ALIGN_CENTRE)
             self.lblMin.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
         elif (platform.system() == "Darwin"):
-            self.lblMin = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/lblEnd.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 140), size=(140, 20))
+            self.lblMin = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/indel/minLength.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 140), size=(140, 20))
         else:
             self.lblMin = wx.StaticText(self, -1, "Minimum length", (20, 190), style=wx.ALIGN_CENTRE)
             self.lblMin.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -141,7 +142,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.lblMax = wx.StaticText(self, -1, "Maximum length", (170, 190), (140, 20), wx.ALIGN_CENTRE)
             self.lblMax.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
         elif (platform.system() == "Darwin"):
-            self.lblMax = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/lblEnd.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 140), size=(140, 20))
+            self.lblMax = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/indel/maxLength.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 140), size=(140, 20))
         else:
             self.lblMax = wx.StaticText(self, -1, "Maximum length", (180, 190), style=wx.ALIGN_CENTRE)
             self.lblMax.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -161,7 +162,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.lblResultsMin = wx.StaticText(self, -1, "Minumum results", (10, 240), (140, 20), wx.ALIGN_CENTRE)
             self.lblResultsMin.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
         elif (platform.system() == "Darwin"):
-            self.lblResultsMin = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/lblEnd.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 240), size=(140, 20))
+            self.lblResultsMin = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/indel/minResults.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 240), size=(140, 20))
         else:
             self.lblResultsMin = wx.StaticText(self, -1, "Minimum results", (20, 240), style=wx.ALIGN_CENTRE)
             self.lblResultsMin.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -180,7 +181,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.lblResultsMax = wx.StaticText(self, -1, "Maximum results", (170, 240), (140, 20), wx.ALIGN_CENTRE)
             self.lblResultsMax.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
         elif (platform.system() == "Darwin"):
-            self.lblResultsMax = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/lblEnd.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 240), size=(140, 20))
+            self.lblResultsMax = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/indel/maxResults.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 240), size=(140, 20))
         else:
             self.lblResultsMax = wx.StaticText(self, -1, "Maximum results", (180, 240), style=wx.ALIGN_CENTRE)
             self.lblResultsMax.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -239,7 +240,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.btnServerToggle.Disable()
 
         if (platform.system() == "Darwin"):
-            self.btnINDEL = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(180, ypos+215), size=(100, 25))
+            self.btnINDEL = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/indel/btnINDEL.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(180, ypos+215), size=(100, 25))
         else:
             self.btnINDEL = wx.Button(self, id=-1, label="Model!", pos=(180, ypos), size=(100, 25))
             self.btnINDEL.SetForegroundColour("#000000")
@@ -869,6 +870,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         # This is also the "Finalize!" button
         if (self.buttonState == "Model!"):
             # Some checking to make sure input parameters make sense
+            # TODO make sure that the two end residues aren't selected. AnchoredGraftMover doesn't like grafting at terminal ends 
             if (self.minLength > self.maxLength):
                 wx.MessageBox("Please choose a maximum length that is greater than or equal to the minimum length.", "Invalid loop lengths" , wx.OK|wx.ICON_EXCLAMATION)
                 return
