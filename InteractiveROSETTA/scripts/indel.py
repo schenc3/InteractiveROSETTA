@@ -246,7 +246,6 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.btnINDEL.SetForegroundColour("#000000")
             self.btnINDEL.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 
-        #TODO wx Grid auto sizing
         self.btnINDEL.Bind(wx.EVT_BUTTON, self.INDELClick)
         self.btnINDEL.SetToolTipString("Begin INDEL simulation with selected parameters")
         self.buttonState = "Model!"
@@ -834,6 +833,8 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.maxMenu.Enable()
         self.ResultsMin.Enable()
         self.ResultsMax.Enable()
+        self.btnClear.Enable()
+
         #self.btnLoopType.Enable()
         #if (self.loopType == "De Novo"):
         #    self.txtSequence.Enable()
@@ -870,7 +871,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         # This is also the "Finalize!" button
         if (self.buttonState == "Model!"):
             # Some checking to make sure input parameters make sense
-            # TODO make sure that the two end residues aren't selected. AnchoredGraftMover doesn't like grafting at terminal ends 
+            # TODO make sure that the two end residues aren't selected. AnchoredGraftMover doesn't like grafting at terminal ends
             if (self.minLength > self.maxLength):
                 wx.MessageBox("Please choose a maximum length that is greater than or equal to the minimum length.", "Invalid loop lengths" , wx.OK|wx.ICON_EXCLAMATION)
                 return
@@ -896,6 +897,8 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.maxMenu.Disable()
             self.ResultsMin.Disable()
             self.ResultsMax.Disable()
+            self.btnClear.Disable()
+
 
 
             if (platform.system() == "Darwin"):
@@ -942,10 +945,25 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
             # Clear grid of loops
             self.grdLoops.ClearGrid()
+            self.grdLoops.DeleteRows(0, self.grdLoops.GetNumberRows())
+
+            # Keep track of the temporary name so we can remove it from the pymol window in a second
+            # Rename the chosen model to its final name
+            pymol_model_selected = self.model_selected
+            os.rename(self.model_selected, self.selectedModel + "_INDEL.pdb")
+            self.model_selected = self.selectedModel + "_INDEL.pdb"
+
+            # Try to get rid of the models not chosen
+            for i in range(len(self.model_names)):
+                try:
+                    os.remove(self.model_names[i])
+                except:
+                    pass
+
+            # Clear internal list of model data
             del self.model_names[:]
             del self.lengths[:]
             del self.scores[:]
-            self.grdLoops.DeleteRows(0, self.grdLoops.GetNumberRows())
 
             # Re-enable controls
             dlg.Destroy()
@@ -955,12 +973,18 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.parent.GoBtn.Enable()
             self.minMenu.Enable()
             self.maxMenu.Enable()
+            self.btnClear.Enable()
+            self.ResultsMin.Enable()
+            self.ResultsMax.Enable()
+
 
             #Pop message out of queue
             for i in range(0, len(self.seqWin.msgQueue)):
                 if (self.seqWin.msgQueue[i].find("Performing INDEL loop modeling, please be patient...") >= 0):
                     self.seqWin.msgQueue.pop(i)
                     break
+            self.seqWin.labelMsg.SetLabel("")
+
 
 
             if (platform.system() == "Darwin"):
@@ -990,15 +1014,26 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
             try:
                 self.cmd.load(self.model_selected, self.model_selected)
-                #TODO: Color final model by ss
-                #self.cmd.color('red', 'ss h', self.model_selected)
+                # Color final model by ss
+                defaultPyMOLView(self.cmd, self.model_selected)
+                self.cmd.color('white')
+                self.cmd.color('red', 'ss h')
+                self.cmd.color('yellow', 'ss s')
+
                 self.cmd.remove(self.selectedModel)
                 self.cmd.delete(self.selectedModel)
+                self.cmd.remove(pymol_model_selected)
+                self.cmd.delete(pymol_model_selected)
+
+
                 self.seqWin.reloadPose(poseindx, self.model_selected, self.model_selected)
-                defaultPyMOLView(self.cmd, self.selectedModel)
                 # IMPORTANT: You have to replace the model in the sandbox with the new designed model
                 os.remove(self.selectedModel + ".pdb")
-                os.rename(self.model_selected, self.selectedModel + "_INDEL.pdb")
+
+
+                self.selectedModel = self.model_selected
+
+
             except:
                 # Some weird error happened, do nothing instead of crashing
                 print "Bug at accept button click"
@@ -1204,6 +1239,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
                     self.grdLoops.SetCellValue(row, 1, score)
                     row += 1
 
+                self.btnClear.Disable()
                 # We can get rid of the top-level output file now
                 try:
                     os.remove("INDELoutput")

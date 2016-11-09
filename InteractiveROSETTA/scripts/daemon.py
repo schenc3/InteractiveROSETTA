@@ -1292,7 +1292,7 @@ def doKIC(stage="Coarse"):
         os.rename("kicoutputtemp", "kicoutput")
 
 
-def doINDEL():
+def doINDEL(scriptdir):
     # Parse file, remove input file
     f = open("INDELinput", "r")
     for aline in f:
@@ -1302,6 +1302,7 @@ def doINDEL():
         if (aline[0:7] == "PDBFILE"):
             pdbfile = aline.split("\t")[1].strip()
     f.close()
+    print loop_params
     try:
         os.remove("INDELinput")
     except:
@@ -1311,16 +1312,23 @@ def doINDEL():
 
     # Query database - lookup executable and database files need to be in sandbox
     num_results = 0
-    try:
-        num_results = int( subprocess.check_output(["./iRosetta_Lookup.exe" , pdbfile , "pdblist.dat", "looplist.dat" , "grid.dat" , loop_params[1] ,
-         loop_params[2], loop_params[3], loop_params[4], loop_params[5], loop_params[6]]) )
-    except:
-        raise Exception("ERROR: The database query failed! Check input pdb and try again")
 
+    if (platform.system() == "Windows"):
+        INDELprogram = scriptdir + "\\bin\\iRosetta_Lookup_Win64.exe"
+    else:
+        INDELprogram = scriptdir + "iRosetta_Lookup.exe"
+
+    runINDEL = "./" + INDELprogram
+    # TODO more sophisticated try/catch for debug
+    #try:
+    num_results = int( subprocess.check_output(["./iRosetta_Lookup.exe" , pdbfile , "pdblist.dat", "looplist.dat" , "grid.dat" , loop_params[1] ,
+    loop_params[2], loop_params[3], loop_params[4], loop_params[5], loop_params[6]]) )
+    #except:
+    #    raise Exception("ERROR: The database query failed! Check input pdb and try again")
+    print "Finished lookup"
 
 
     # If we got results, try to build models with them
-    # TODO add timer, sometimes grafting gets stuck. If it times out kill the process and throw out the loop :(
     if (num_results > 0):
         try:
             # Get every component of Rosetta started that we can, try to avoid
@@ -1363,13 +1371,14 @@ def doINDEL():
 
                 # Here's where the actual grafting happens. Graft and add to model list
                 # Don't need to repack, AnchoredGraftMover takes care of it
-                graftmover = graft.AnchoredGraftMover(start_residue-1, stop_residue+1)
+                graftmover = graft.AnchoredGraftMover(start_residue, stop_residue, loop, 1, 1)
                 graftmover.set_cycles(500)
-                graftmover.set_piece(loop, 0, 0)
+                #graftmover.set_piece(loop, 1, 1)
                 graftmover.apply(temp_pose)
 
                 #Add the model and its score to their respective lists, as well as the length of each insertion
-                scores.append(scorefxn(temp_pose))
+                temp_score = scorefxn(temp_pose)
+                scores.append(temp_score)
                 models.append(temp_pose)
                 lengths.append(loop.total_residue())
             except:
@@ -1990,7 +1999,7 @@ def daemonLoop():
                 writeError(e.message)
         elif (os.path.isfile("INDELinput")):
             print "Daemon starting INDEL loop modeling job..."
-            doINDEL()
+            doINDEL(scriptdir)
             try:
                 os.remove("INDELinput")
             except:
