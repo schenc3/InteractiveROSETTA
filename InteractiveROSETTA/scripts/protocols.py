@@ -340,6 +340,7 @@ from ensemblegen import EnsembleGenPanel
 from flexpepdock import FlexPepDockPanel
 from modulemanager import ModuleManagerPanel
 from biotools import BioToolsPanel
+from indel import INDELmodelPanel
 import glob
 
 class ProtocolsPanel(wx.Panel):
@@ -375,6 +376,7 @@ class ProtocolsPanel(wx.Panel):
                    "Ensemble Browser",
                    "Ensemble Generation",
                    "Flexible Peptide Docking",
+                   "INDEL Loop Modeler",
                    "Loop Modeling (KIC)",
                    "Module Manager",
                    "Molecular Surfaces",
@@ -696,6 +698,9 @@ class ProtocolsPanel(wx.Panel):
                     self.protPanel.setSelectWin(self.selectWin)
                 elif selectedProtocol == "Pathway Visualization (GeoFold)":
                     self.protPanel = DagViewPanel(self,self.W,self.H)
+                elif selectedProtocol == "INDEL Loop Modeler":
+                    self.protPanel = INDELmodelPanel(self, self.W, self.H)
+                    self.protPanel.setSelectWin(self.selectWin)
                 else:
                     # Custom module
                     # Custom modules are aware of PyMOL, the Sequence Window, and the SelectionPanel
