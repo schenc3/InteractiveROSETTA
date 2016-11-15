@@ -415,7 +415,7 @@ if (__name__ == "__main__"):
 
     # Change the directory to the one the InteractiveROSETTA.py script is in
     # It can be annoying because on Windows directories are delimited by \ instead of /
-    # TODO: add INDEL files to sandbox if theyre not there
+    # TODO: Delete non-os exe to save some space
     homedir = os.path.expanduser("~")
     if (platform.system() == "Windows"):
         # Create the sandbox if this is the first time running
@@ -498,6 +498,9 @@ if (__name__ == "__main__"):
                 exe_destination = homedir + "/.InteractiveROSETTA/iRosetta_Lookup.exe"
                 os.rename(exe_source, exe_destination)
 
+                # make sure we have execute permission
+                os.chmod(homedir + "/.InteractiveROSETTA/iRosetta_Lookup.exe", 0111)
+
                 # pdblist.dat
                 pdb_source = os.getcwd() + "/data/pdblist.dat"
                 pdb_destination = homedir + "/.InteractiveROSETTA/pdblist.dat"
@@ -517,6 +520,27 @@ if (__name__ == "__main__"):
                 print "Failed to copy INDEL lookup files"
         else:
             print "Found INDEL executable"
+
+
+    if (platform.system() == "Windows"):
+        try:
+            os.remove(os.getcwd() + "/bin/iRosetta_Lookup_osx.exe")
+            os.remove(os.getcwd() + "/bin/iRosetta_Lookup_Linux.exe")
+        except:
+            pass
+    elif (platform.system() == "Darwin"):
+        try:
+            os.remove(os.getcwd() + "/bin/iRosetta_Lookup_Win64.exe")
+            os.remove(os.getcwd() + "/bin/iRosetta_Lookup_Linux.exe")
+        except:
+            pass
+    else:
+        try:
+            os.remove(os.getcwd() + "/bin/iRosetta_Lookup_osx.exe")
+            os.remove(os.getcwd() + "/bin/iRosetta_Lookup_Win64.exe")
+            os.chmod()
+        except:
+            pass
 
 
     # Figure out the location of this script by reading sys.argv[0]

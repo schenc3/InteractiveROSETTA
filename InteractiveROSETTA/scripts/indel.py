@@ -559,7 +559,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
                 else:
                     self.endMenu.SetSelection(self.beginMenu.GetSelection()) # This clears the menu, SetStringSelection/SetValue doesn't seem to work
                     self.endMenuSelect(event)
-                wx.MessageBox("Your selected end loop value is no longer valid.  Please choose an ending position after the one you've selected here.", "Loop End No Longer Valid", wx.OK|wx.ICON_EXCLAMATION)
+                #wx.MessageBox("Your selected end loop value is no longer valid.  Please choose an ending position after the one you've selected here.", "Loop End No Longer Valid", wx.OK|wx.ICON_EXCLAMATION)
             self.focusView(self.beginMenu.GetStringSelection(), self.selectedModel)
             logInfo("Selected " + self.beginMenu.GetStringSelection() + " as the beginning of the loop")
         except:
@@ -1260,12 +1260,12 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
                 #os.remove("INDELoutput.pdb")
 
 
-            # TODO take advantage of this! Sometimes the stuff on the back end will fail
             elif (os.path.isfile("errreport")):
                 # Something went wrong, tell the user about it (loop sequence probably too short)
                 self.tmrKIC.Stop()
                 self.parent.parent.restartDaemon() # Has to happen because coarse KIC is threaded
                 self.recoverFromError()
+
             self.looptimecount = self.looptimecount + 1
             if (self.looptimecount > self.timeout):
                 # The loop was probably too short and coarse KIC will run forever

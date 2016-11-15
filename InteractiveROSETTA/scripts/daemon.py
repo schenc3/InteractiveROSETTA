@@ -1320,11 +1320,12 @@ def doINDEL(scriptdir):
 
     runINDEL = "./" + INDELprogram
     # TODO more sophisticated try/catch for debug
-    #try:
-    num_results = int( subprocess.check_output(["./iRosetta_Lookup.exe" , pdbfile , "pdblist.dat", "looplist.dat" , "grid.dat" , loop_params[1] ,
-    loop_params[2], loop_params[3], loop_params[4], loop_params[5], loop_params[6]]) )
-    #except:
-    #    raise Exception("ERROR: The database query failed! Check input pdb and try again")
+    try:
+        num_results = int( subprocess.check_output(["./iRosetta_Lookup.exe" , pdbfile , "pdblist.dat", "looplist.dat" , "grid.dat" , loop_params[1] ,
+        loop_params[2], loop_params[3], loop_params[4], loop_params[5], loop_params[6]]) )
+    except:
+       writeError("ERROR: The database query failed! Check input parameters and try again")
+
     print "Finished lookup"
 
 
@@ -1351,6 +1352,7 @@ def doINDEL(scriptdir):
             #graftmover.set_use_smooth_centroid_settings(True)
         except:
             raise Exception("ERROR: Couldn't initialize Rosetta!")
+            writeError("ERROR: Couldn't initialize Rosetta!")
 
         i = 1
         models  = []
@@ -1382,7 +1384,7 @@ def doINDEL(scriptdir):
                 models.append(temp_pose)
                 lengths.append(loop.total_residue())
             except:
-                continue
+                writeError("No results found. Try modifying anchors.")
 
             i += 1
 
@@ -1392,10 +1394,8 @@ def doINDEL(scriptdir):
         f = open("INDELoutputtemp", "w")
         for score, model, length in sorted(zip(scores, models, lengths)):
             outname = "INDELmodel_" + str(i) + ".pdb"
-
             model.dump_pdb(outname)
             f.write(outname + "\t" + str(score) + "\t" + str(length) + "\n")
-
             i += 1
         f.close()
         os.rename("INDELoutputtemp", "INDELoutput")
@@ -1404,7 +1404,7 @@ def doINDEL(scriptdir):
 
 
     else:
-        raise Exception("ERROR: No results found. Try relaxing search parameters")
+        writeError("No results found. Try relaxing search parameters")
 
 
 
