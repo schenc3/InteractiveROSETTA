@@ -32,28 +32,28 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         if (platform.system() == "Windows"):
             self.lblProt = wx.StaticText(self, -1, "INDEL Loop Design", (25, 15), (270, 25), wx.ALIGN_CENTRE)
             self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-        elif (platform.system() == "Darwin"):
-            self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/indel/label_INDEL.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
+        # elif (platform.system() == "Darwin"):
+        #     self.lblProt = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/indel/label_INDEL.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(25, 15), size=(270, 25))
         else:
             self.lblProt = wx.StaticText(self, -1, "INDEL Loop Design", (70, 15), style=wx.ALIGN_CENTRE)
             self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
             resizeTextControlForUNIX(self.lblProt, 0, self.GetSize()[0]-20)
         self.lblProt.SetForegroundColour("#FFFFFF")
 
-        if (platform.system() == "Darwin"):
-            self.HelpBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/HelpBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(295, 10), size=(25, 25))
-        else:
-            self.HelpBtn = wx.Button(self, id=-1, label="?", pos=(295, 10), size=(25, 25))
-            self.HelpBtn.SetForegroundColour("#0000FF")
-            self.HelpBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+        # if (platform.system() == "Darwin"):
+        #     self.HelpBtn = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/HelpBtn.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(295, 10), size=(25, 25))
+        # else:
+        self.HelpBtn = wx.Button(self, id=-1, label="?", pos=(295, 10), size=(25, 25))
+        self.HelpBtn.SetForegroundColour("#0000FF")
+        self.HelpBtn.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
         self.HelpBtn.Bind(wx.EVT_BUTTON, self.showHelp)
         self.HelpBtn.SetToolTipString("Display the help file for this window")
 
         if (platform.system() == "Windows"):
             self.lblInst = wx.StaticText(self, -1, "Remodels loops via a \n  fragment database search", (0, 45), (320, 25), wx.ALIGN_CENTRE)
             self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
-        elif (platform.system() == "Darwin"):
-            self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/indel/lbl_description_INDEL.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 25))
+        # elif (platform.system() == "Darwin"):
+        #     self.lblInst = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/indel/lbl_description_INDEL.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(0, 45), size=(320, 25))
         else:
             self.lblInst = wx.StaticText(self, -1, "Remodels loops via a \n  fragment database search", (5, 45), style=wx.ALIGN_CENTRE)
             self.lblInst.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.NORMAL))
@@ -65,8 +65,8 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         if (platform.system() == "Windows"):
             self.lblModel = wx.StaticText(self, -1, "Model", (10, 90), (140, 20), wx.ALIGN_CENTRE)
             self.lblModel.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-        elif (platform.system() == "Darwin"):
-            self.lblModel = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/lblModelKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 90), size=(140, 20))
+        # elif (platform.system() == "Darwin"):
+        #     self.lblModel = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/lblModelKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 90), size=(140, 20))
         else:
             self.lblModel = wx.StaticText(self, -1, "Model", (10, 90), style=wx.ALIGN_CENTRE)
             self.lblModel.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -82,8 +82,8 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         if (platform.system() == "Windows"):
             self.lblBegin = wx.StaticText(self, -1, "Loop Begin", (10, 140), (120, 20), wx.ALIGN_CENTRE)
             self.lblBegin.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-        elif (platform.system() == "Darwin"):
-            self.lblBegin = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/lblBegin.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 140), size=(140, 20))
+        # elif (platform.system() == "Darwin"):
+        #     self.lblBegin = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/lblBegin.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 140), size=(140, 20))
         else:
             self.lblBegin = wx.StaticText(self, -1, "Loop Begin", (10, 140), style=wx.ALIGN_CENTRE)
             self.lblBegin.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -100,8 +100,8 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         if (platform.system() == "Windows"):
             self.lblEnd = wx.StaticText(self, -1, "Loop End", (170, 140), (140, 20), wx.ALIGN_CENTRE)
             self.lblEnd.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-        elif (platform.system() == "Darwin"):
-            self.lblEnd = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/lblEnd.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(170, 140), size=(140, 20))
+        # elif (platform.system() == "Darwin"):
+        #     self.lblEnd = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/lblEnd.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(170, 140), size=(140, 20))
         else:
             self.lblEnd = wx.StaticText(self, -1, "Loop End", (170, 140), style=wx.ALIGN_CENTRE)
             self.lblEnd.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -121,8 +121,8 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         if (platform.system() == "Windows"):
             self.lblMin = wx.StaticText(self, -1, "Minimum length", (10, 190), (140, 20), wx.ALIGN_CENTRE)
             self.lblMin.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-        elif (platform.system() == "Darwin"):
-            self.lblMin = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/indel/minLength.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 140), size=(140, 20))
+        # elif (platform.system() == "Darwin"):
+        #     self.lblMin = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/indel/minLength.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 140), size=(140, 20))
         else:
             self.lblMin = wx.StaticText(self, -1, "Minimum length", (20, 190), style=wx.ALIGN_CENTRE)
             self.lblMin.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -141,8 +141,8 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         if (platform.system() == "Windows"):
             self.lblMax = wx.StaticText(self, -1, "Maximum length", (170, 190), (140, 20), wx.ALIGN_CENTRE)
             self.lblMax.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-        elif (platform.system() == "Darwin"):
-            self.lblMax = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/indel/maxLength.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 140), size=(140, 20))
+        # elif (platform.system() == "Darwin"):
+        #     self.lblMax = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/indel/maxLength.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 140), size=(140, 20))
         else:
             self.lblMax = wx.StaticText(self, -1, "Maximum length", (180, 190), style=wx.ALIGN_CENTRE)
             self.lblMax.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -161,8 +161,8 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         if (platform.system() == "Windows"):
             self.lblResultsMin = wx.StaticText(self, -1, "Minumum results", (10, 240), (140, 20), wx.ALIGN_CENTRE)
             self.lblResultsMin.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-        elif (platform.system() == "Darwin"):
-            self.lblResultsMin = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/indel/minResults.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 240), size=(140, 20))
+        # elif (platform.system() == "Darwin"):
+        #     self.lblResultsMin = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/indel/minResults.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 240), size=(140, 20))
         else:
             self.lblResultsMin = wx.StaticText(self, -1, "Minimum results", (20, 240), style=wx.ALIGN_CENTRE)
             self.lblResultsMin.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -180,8 +180,8 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         if (platform.system() == "Windows"):
             self.lblResultsMax = wx.StaticText(self, -1, "Maximum results", (170, 240), (140, 20), wx.ALIGN_CENTRE)
             self.lblResultsMax.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-        elif (platform.system() == "Darwin"):
-            self.lblResultsMax = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/indel/maxResults.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 240), size=(140, 20))
+        # elif (platform.system() == "Darwin"):
+        #     self.lblResultsMax = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/indel/maxResults.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 240), size=(140, 20))
         else:
             self.lblResultsMax = wx.StaticText(self, -1, "Maximum results", (180, 240), style=wx.ALIGN_CENTRE)
             self.lblResultsMax.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
@@ -196,12 +196,12 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
 
 
-        if (platform.system() == "Darwin"):
-            self.btnClear = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnClear.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(220, 305), size=(90, 25))
-        else:
-            self.btnClear = wx.Button(self, id=-1, label="Clear", pos=(220, 305), size=(90, 25))
-            self.btnClear.SetForegroundColour("#000000")
-            self.btnClear.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+        # if (platform.system() == "Darwin"):
+        #     self.btnClear = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnClear.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(220, 305), size=(90, 25))
+        # else:
+        self.btnClear = wx.Button(self, id=-1, label="Clear", pos=(220, 305), size=(90, 25))
+        self.btnClear.SetForegroundColour("#000000")
+        self.btnClear.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
         self.btnClear.Bind(wx.EVT_BUTTON, self.clear)
         self.btnClear.SetToolTipString("Clear parameters")
 
@@ -228,23 +228,23 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.lengths = []
 
 
-        if (platform.system() == "Darwin"):
-            self.btnServerToggle = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnServer_Off.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(40, ypos+215), size=(100, 25))
-        else:
-            self.btnServerToggle = wx.Button(self, id=-1, label="Server Off", pos=(40, ypos), size=(100, 25))
-            self.btnServerToggle.SetForegroundColour("#000000")
-            self.btnServerToggle.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+        # if (platform.system() == "Darwin"):
+        #     self.btnServerToggle = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnServer_Off.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(40, ypos+215), size=(100, 25))
+        # else:
+        self.btnServerToggle = wx.Button(self, id=-1, label="Server Off", pos=(40, ypos), size=(100, 25))
+        self.btnServerToggle.SetForegroundColour("#000000")
+        self.btnServerToggle.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
         self.btnServerToggle.Bind(wx.EVT_BUTTON, self.serverToggle)
         self.btnServerToggle.SetToolTipString("Perform KIC simulations locally")
         self.serverOn = False
         self.btnServerToggle.Disable()
 
-        if (platform.system() == "Darwin"):
-            self.btnINDEL = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/indel/btnINDEL.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(180, ypos+215), size=(100, 25))
-        else:
-            self.btnINDEL = wx.Button(self, id=-1, label="Model!", pos=(180, ypos), size=(100, 25))
-            self.btnINDEL.SetForegroundColour("#000000")
-            self.btnINDEL.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+        # if (platform.system() == "Darwin"):
+        #     self.btnINDEL = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/indel/btnINDEL.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(180, ypos+215), size=(100, 25))
+        # else:
+        self.btnINDEL = wx.Button(self, id=-1, label="Model!", pos=(180, ypos), size=(100, 25))
+        self.btnINDEL.SetForegroundColour("#000000")
+        self.btnINDEL.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
 
         self.btnINDEL.Bind(wx.EVT_BUTTON, self.INDELClick)
         self.btnINDEL.SetToolTipString("Begin INDEL simulation with selected parameters")
@@ -455,27 +455,27 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def changeLoopType(self, event):
         if (self.loopType == "Refine"):
             self.loopType = "Reconstruct"
-            if (platform.system() == "Darwin"):
-                self.btnLoopType.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnLoopType_Reconstruct.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-            else:
-                self.btnLoopType.SetLabel(self.loopType)
+            # if (platform.system() == "Darwin"):
+            #     self.btnLoopType.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnLoopType_Reconstruct.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+            # else:
+            self.btnLoopType.SetLabel(self.loopType)
             self.btnLoopType.SetToolTipString("Reconstruct the current loop using the wildtype sequence")
             self.btnPerturb.Enable()
             self.txtNStruct.Enable()
         elif (self.loopType == "Reconstruct"):
             self.loopType = "De Novo"
-            if (platform.system() == "Darwin"):
-                self.btnLoopType.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnLoopType_DeNovo.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-            else:
-                self.btnLoopType.SetLabel(self.loopType)
+            # if (platform.system() == "Darwin"):
+            #     self.btnLoopType.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnLoopType_DeNovo.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+            # else:
+            self.btnLoopType.SetLabel(self.loopType)
             self.btnLoopType.SetToolTipString("Construct a new loop with a new sequence")
             self.txtSequence.Enable()
         else:
             self.loopType = "Refine"
-            if (platform.system() == "Darwin"):
-                self.btnLoopType.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnLoopType_Refine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-            else:
-                self.btnLoopType.SetLabel(self.loopType)
+            # if (platform.system() == "Darwin"):
+            #     self.btnLoopType.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnLoopType_Refine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+            # else:
+            self.btnLoopType.SetLabel(self.loopType)
             self.btnLoopType.SetToolTipString("Refine a pre-existing loop using the high resolution KIC remodeler only")
             self.txtSequence.Disable()
             self.btnPerturb.Disable()
@@ -485,20 +485,20 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def changePerturbType(self, event):
         if (self.perturbType == "Perturb+Refine"):
             self.perturbType = "Perturb Only, Fullatom"
-            if (platform.system() == "Darwin"):
-                self.btnPerturb.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnPerturb_Fullatom.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-            else:
-                self.btnPerturb.SetLabel(self.perturbType)
+            # if (platform.system() == "Darwin"):
+            #     self.btnPerturb.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnPerturb_Fullatom.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+            # else:
+            self.btnPerturb.SetLabel(self.perturbType)
             self.btnPerturb.SetToolTipString("Perform only KIC coarse perturbations but convert outputted models to repacked fullatom PDBs")
         #elif (self.perturbType == "Perturb Only, Fullatom"):
         #    self.perturbType = "Perturb Only, Centroid"
         #    self.btnPerturb.SetToolTipString("Perform only KIC coarse perturbations and leave outputted PDBs in coarse centroid mode")
         else:
             self.perturbType = "Perturb+Refine"
-            if (platform.system() == "Darwin"):
-                self.btnPerturb.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnPerturb_Refine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-            else:
-                self.btnPerturb.SetLabel(self.perturbType)
+            # if (platform.system() == "Darwin"):
+            #     self.btnPerturb.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnPerturb_Refine.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+            # else:
+            self.btnPerturb.SetLabel(self.perturbType)
             self.btnPerturb.SetToolTipString("Perform KIC coarse perturbation followed by high resolution refinement")
         logInfo("Changed perturbation type to " + self.perturbType)
 
@@ -789,18 +789,18 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def serverToggle(self, event):
         if (self.serverOn):
             self.serverOn = False
-            if (platform.system() == "Darwin"):
-                self.btnServerToggle.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnServer_Off.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-            else:
-                self.btnServerToggle.SetLabel("Server Off")
+            # if (platform.system() == "Darwin"):
+            #     self.btnServerToggle.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnServer_Off.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+            # else:
+            self.btnServerToggle.SetLabel("Server Off")
             self.btnServerToggle.SetToolTipString("Perform KIC simulations locally")
             logInfo("Turned off KIC server usage")
         else:
             self.serverOn = True
-            if (platform.system() == "Darwin"):
-                self.btnServerToggle.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnServer_On.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-            else:
-                self.btnServerToggle.SetLabel("Server On")
+            # if (platform.system() == "Darwin"):
+            #     self.btnServerToggle.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnServer_On.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+            # else:
+            self.btnServerToggle.SetLabel("Server On")
             self.btnServerToggle.SetToolTipString("Perform KIC simulations on a remote server")
             logInfo("Turned on KIC server usage")
 
@@ -838,10 +838,10 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         #self.btnLoopType.Enable()
         #if (self.loopType == "De Novo"):
         #    self.txtSequence.Enable()
-        if (platform.system() == "Darwin"):
-            self.btnINDEL.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-        else:
-            self.btnINDEL.SetLabel("Model!")
+        # if (platform.system() == "Darwin"):
+        #     self.btnINDEL.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+        # else:
+        self.btnINDEL.SetLabel("Model!")
         self.buttonState = "Model!"
         self.btnINDEL.SetToolTipString("Perform INDEL simulation with selected parameters")
         deleteInputFiles()
@@ -901,10 +901,10 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
 
 
-            if (platform.system() == "Darwin"):
-                self.btnINDEL.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnKIC_Cancel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-            else:
-                self.btnINDEL.SetLabel("Cancel!")
+            # if (platform.system() == "Darwin"):
+            #     self.btnINDEL.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnKIC_Cancel.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+            # else:
+            self.btnINDEL.SetLabel("Cancel!")
             self.buttonState = "Cancel!"
             self.btnINDEL.SetToolTipString("Cancel the INDEL simulation")
             self.stage = 1
@@ -987,10 +987,10 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
 
 
-            if (platform.system() == "Darwin"):
-                self.btnINDEL.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-            else:
-                self.btnINDEL.SetLabel("Model!")
+            # if (platform.system() == "Darwin"):
+            #     self.btnINDEL.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+            # else:
+            self.btnINDEL.SetLabel("Model!")
             self.buttonState = "Model!"
             self.btnINDEL.SetToolTipString("Perform INDEL simulation with selected parameters")
             self.cmd.label("all", "")
@@ -1073,10 +1073,10 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.endMenu.Enable()
         self.txtSequence.Enable()
         self.btnINDEL.Enable()
-        if (platform.system() == "Darwin"):
-            self.btnINDEL.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-        else:
-            self.btnINDEL.SetLabel("KIC!")
+        # if (platform.system() == "Darwin"):
+        #     self.btnINDEL.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+        # else:
+        self.btnINDEL.SetLabel("KIC!")
         self.buttonState = "KIC!"
         # Get rid of the messages
         for i in range(0, len(self.seqWin.msgQueue)):
@@ -1169,10 +1169,10 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
                     self.btnLoopType.Enable()
                     if (self.loopType == "De Novo"):
                         self.txtSequence.Enable()
-                    if (platform.system() == "Darwin"):
-                        self.btnINDEL.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-                    else:
-                        self.btnINDEL.SetLabel("KIC!")
+                    # if (platform.system() == "Darwin"):
+                    #     self.btnINDEL.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+                    # else:
+                    self.btnINDEL.SetLabel("KIC!")
                     self.buttonState = "KIC!"
                     self.btnINDEL.SetToolTipString("Perform KIC simulation with selected parameters")
                     self.cmd.label("all", "")
@@ -1251,10 +1251,10 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
                 self.btnINDEL.Enable()
                 #self.enableControls()
                 #self.selectedModel = ""
-                if (platform.system() == "Darwin"):
-                    self.btnINDEL.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnKIC_Finalize.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-                else:
-                    self.btnINDEL.SetLabel("Finalize!")
+                # if (platform.system() == "Darwin"):
+                #     self.btnINDEL.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnKIC_Finalize.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+                # else:
+                self.btnINDEL.SetLabel("Finalize!")
                 self.buttonState = "Finalize!"
                 self.btnINDEL.SetToolTipString("Accept or reject protocol results")
                 #os.remove("INDELoutput.pdb")

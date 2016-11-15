@@ -28,6 +28,7 @@ import psutil
 import glob
 import gzip
 import math
+from tools import *
 from wx import Timer
 from cStringIO import StringIO
 try:
@@ -1294,6 +1295,7 @@ def doKIC(stage="Coarse"):
 
 def doINDEL(scriptdir):
     # Parse file, remove input file
+    import commands; commands.getstatusoutput("cp INDELinput ~/Desktop/INDELinput")
     f = open("INDELinput", "r")
     for aline in f:
         if (aline[0:4] == "LOOP"):
@@ -1303,10 +1305,10 @@ def doINDEL(scriptdir):
             pdbfile = aline.split("\t")[1].strip()
     f.close()
     print loop_params
-    try:
-        os.remove("INDELinput")
-    except:
-        pass
+    # try:
+    #     os.remove("INDELinput")
+    # except:
+    #     pass
 
 
 
@@ -1315,13 +1317,22 @@ def doINDEL(scriptdir):
 
     if (platform.system() == "Windows"):
         INDELprogram = scriptdir + "\\bin\\iRosetta_Lookup_Win64.exe"
+    elif (platform.system() == "Darwin"):
+        INDELprogram = scriptdir + "/bin/iRosetta_Lookup_osx.exe"
     else:
-        INDELprogram = scriptdir + "iRosetta_Lookup.exe"
+        INDELprogram = scriptdir + "/bin/iRosetta_Lookup_Linux.exe"
+    logInfo(INDELprogram)
+    print INDELprogram
 
-    runINDEL = "./" + INDELprogram
+    # runINDEL = "./" + INDELprogram
+    runINDEL = INDELprogram
     # TODO more sophisticated try/catch for debug
     try:
-        num_results = int( subprocess.check_output(["./iRosetta_Lookup.exe" , pdbfile , "pdblist.dat", "looplist.dat" , "grid.dat" , loop_params[1] ,
+        if platform.system() == "Windows":
+            dataDir = scriptdir + "\\data\\"
+        else:
+            dataDir = scriptdir + "/data/"
+        num_results = int( subprocess.check_output([runINDEL , pdbfile , "%spdblist.dat"%(dataDir), "%slooplist.dat"%(dataDir) , "%sgrid.dat"%(dataDir) , loop_params[1] ,
         loop_params[2], loop_params[3], loop_params[4], loop_params[5], loop_params[6]]) )
     except:
        writeError("ERROR: The database query failed! Check input parameters and try again")
