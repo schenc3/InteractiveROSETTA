@@ -1326,7 +1326,6 @@ def doINDEL(scriptdir):
 
     # runINDEL = "./" + INDELprogram
     runINDEL = INDELprogram
-    # TODO more sophisticated try/catch for debug
     try:
         if platform.system() == "Windows":
             dataDir = scriptdir + "\\data\\"
