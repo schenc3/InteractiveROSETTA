@@ -34,7 +34,7 @@ find ../InteractiveROSETTA -type d -exec chmod 755 {} \;
 find ../InteractiveROSETTA -type f -exec chmod 755 {} \;
 
 # Have the user unpackage PyRosetta before doing anything else
-'''echo "Searching for PyRosetta installation..."
+echo "Searching for PyRosetta installation..."
 while [ 1 ]; do
     SEARCHDIR="/"
     read -p "Enter a directory to search (default: "$SEARCHDIR", type \"q\" to quit): " input
@@ -71,7 +71,7 @@ while [ 1 ]; do
 	echo "Please try again"
 	echo " "
     fi
-done'''
+done
 
 # Is Python installed? (Probably, but maybe not)
 if hash python 2> /dev/null; then
@@ -187,3 +187,4 @@ echo "Updating MIME database..."
 cd "$SCRIPTDIR"
 sudo python extensions.py "$SCRIPTDIR" > /dev/null 2> /dev/null
 cd "$REALOLDDIR"
+
