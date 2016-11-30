@@ -5,6 +5,7 @@ import platform
 try:
     # Try to import Rosetta
     from rosetta import *
+    from pyrosetta import *
     # Extra imports for KIC
     from rosetta.protocols.loops.loop_mover.perturb import *
     from rosetta.protocols.loops.loop_mover.refine import *
@@ -40,6 +41,7 @@ except:
             os.environ["PYROSETTA_DATABASE"] = rosettadb
             # Try to import Rosetta
             from rosetta import *
+            from pyrosetta import *
             # Extra imports for KIC
             from rosetta.protocols.loops.loop_mover.perturb import *
             from rosetta.protocols.loops.loop_mover.refine import *
@@ -90,6 +92,7 @@ except:
             try:
                 # Try to import Rosetta
                 from rosetta import *
+                from pyrosetta import *
                 # Extra imports for KIC
                 from rosetta.protocols.loops.loop_mover.perturb import *
                 from rosetta.protocols.loops.loop_mover.refine import *
