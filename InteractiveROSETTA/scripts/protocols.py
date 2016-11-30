@@ -287,7 +287,10 @@ if (not(molfile_unpacked)):
         if (platform.system() == "Windows"):
             pythonpaths = os.environ["PYTHONPATH"].split(";")
         else:
-            pythonpaths = os.environ["PYTHONPATH"].split(":")
+            try:
+                pythonpaths = os.environ["PYTHONPATH"].split(":")
+            except KeyError:
+                pythonpaths = []
         for pythonpath in pythonpaths:
             if (os.path.isfile(pythonpath + filetofind)):
                 rosettapath = pythonpath
