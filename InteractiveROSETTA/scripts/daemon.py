@@ -31,7 +31,6 @@ from cStringIO import StringIO
 try:
     # Try to import Rosetta
     from rosetta import *
-    from pyrosetta import *
     # Extra imports for KIC
     from rosetta.protocols.loops.loop_mover.perturb import *
     from rosetta.protocols.loops.loop_mover.refine import *
@@ -75,7 +74,6 @@ except:
             # Try to import Rosetta
         try:
                from rosetta import *
-               from pyrosetta import *
         except:
             # Extra imports for KIC
             from rosetta.protocols.loops.loop_mover.perturb import *
@@ -142,7 +140,6 @@ except:
             try:
                 # Try to import Rosetta
                 from rosetta import *
-                from pyrosetta import *
                 # Extra imports for KIC
                 from rosetta.protocols.loops.loop_mover.perturb import *
                 from rosetta.protocols.loops.loop_mover.refine import *

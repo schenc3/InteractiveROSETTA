@@ -5,7 +5,6 @@ from mpi4py import MPI
 try:
     # Try to import Rosetta
     from rosetta import *
-    from pyrosetta import *
     import rosetta.protocols.backrub
 except:
     # If it failed, then try to find Rosetta
@@ -35,7 +34,6 @@ except:
             os.environ["PYROSETTA_DATABASE"] = rosettadb
             # Try to import Rosetta
             from rosetta import *
-            from pyrosetta import *
             # Extra imports for KIC
             from rosetta.protocols.loops.loop_mover.perturb import *
             from rosetta.protocols.loops.loop_mover.refine import *
