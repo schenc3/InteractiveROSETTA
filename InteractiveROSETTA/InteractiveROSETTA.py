@@ -158,7 +158,6 @@ def importModules(wxpython=False):
                         olddir = os.getcwd()
                         os.chdir(rosettapath)
                     os.environ["PYROSETTA_DATABASE"] = rosettadb
-                    print "PYROSETTA_DATABASE:",os.environ["PYROSETTA_DATABASE"]
                     if (platform.system() == "Windows"):
                         olddir = os.getcwd()
                         os.chdir(olddir)
