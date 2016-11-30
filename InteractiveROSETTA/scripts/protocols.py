@@ -296,18 +296,13 @@ if (not(molfile_unpacked)):
                 rosettapath = pythonpath
                 break
     # Let's copy this package to the sandbox, because then we can unpack it without root access
-    try:
-        if (platform.system() == "Windows"):
-            molfiletgz = rosettapath + "\\toolbox\\molfile2params.tar.gz"
-            localmolfiletgz = os.path.expanduser("~") + "\\InteractiveROSETTA\\molfile.tgz"
-        else:
-            molfiletgz = rosettapath + "/toolbox/molfile2params.tar.gz"
-            localmolfiletgz = os.path.expanduser("~") + "/.InteractiveROSETTA/molfile.tgz"
-        shutil.copy(molfiletgz, localmolfiletgz)
-    except:
-        import urllib
-        localmolfiletgz = os.path.expanduser("~")+"/.InteractiveROSETTA/molfile.tgz"
-        urllib.urlretrieve("http://graylab.jhu.edu/pyrosetta/downloads/scripts/toolbox/molfile2params.tar.gz",localmolfiletgz)
+    if (platform.system() == "Windows"):
+        molfiletgz = rosettapath + "\\toolbox\\molfile2params.tar.gz"
+        localmolfiletgz = os.path.expanduser("~") + "\\InteractiveROSETTA\\molfile.tgz"
+    else:
+        molfiletgz = rosettapath + "/toolbox/molfile2params.tar.gz"
+        localmolfiletgz = os.path.expanduser("~") + "/.InteractiveROSETTA/molfile.tgz"
+    shutil.copy(molfiletgz, localmolfiletgz)
     # Unpack it
     olddir = os.getcwd()
     goToSandbox()
