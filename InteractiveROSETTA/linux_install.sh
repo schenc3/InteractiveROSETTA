@@ -34,44 +34,44 @@ find ../InteractiveROSETTA -type d -exec chmod 755 {} \;
 find ../InteractiveROSETTA -type f -exec chmod 755 {} \;
 
 # Have the user unpackage PyRosetta before doing anything else
-# echo "Searching for PyRosetta installation..."
-# while [ 1 ]; do
-#     SEARCHDIR="/"
-#     read -p "Enter a directory to search (default: "$SEARCHDIR", type \"q\" to quit): " input
-#     if [ $input ]; then
-# 	SEARCHDIR=$input
-#     fi
-#     if [ $SEARCHDIR == "q" ]; then
-# 	echo " "
-# 	echo "Please download the PyRosetta package and unpack it to continue"
-# 	echo "The PyRosetta version you need is "$ROSETTA_VER
-# 	exit
-#     fi
-#     NEWROSETTA=`find $SEARCHDIR -name SetPyRosettaEnvironment* 2> /dev/null | head -n 1 | awk -F "/SetPyRosetta" '{print $1}' `
-#     if [ $NEWROSETTA ]; then
-# 	echo "Looking for PyRosetta in "$NEWROSETTA
-# 	# This is obnoxious...there is a colon in the Ubuntu PyRosetta directory name
-# 	# and it messes up : delimited paths, so create an appropriate symlink
-# 	#if [[ $ROSETTA_VER == "Ubuntu" ]]; then
-# 	    #OLDROSETTA=$NEWROSETTA
-# 	    #NEWROSETTA=`echo $OLDROSETTA | awk -F "/SetPyRosetta" '{print $1}' | awk -F ":" '{print $1}'`
-# 	    #sudo unlink $NEWROSETTA
-# 	    #sudo ln -s $OLDROSETTA $NEWROSETTA
-# 	    # Move the so files to rosetta because it cannot find them in PyRosetta root
-# 	    #sudo mv $NEWROSETTA/*.so* $NEWROSETTA/rosetta
-# 	#fi
-# 	echo "" >> ~/.bashrc
-# 	echo "source $NEWROSETTA/SetPyRosettaEnvironment.sh" >> ~/.bashrc
-# 	OLDDIR=`pwd`
-# 	source ~/.bashrc > /dev/null 2> /dev/null
-# 	cd "$OLDDIR"
-# 	break
-#     else
-# 	echo "A PyRosetta installation was not detected on that path!"
-# 	echo "Please try again"
-# 	echo " "
-#     fi
-# done
+'''echo "Searching for PyRosetta installation..."
+while [ 1 ]; do
+    SEARCHDIR="/"
+    read -p "Enter a directory to search (default: "$SEARCHDIR", type \"q\" to quit): " input
+    if [ $input ]; then
+	SEARCHDIR=$input
+    fi
+    if [ $SEARCHDIR == "q" ]; then
+	echo " "
+	echo "Please download the PyRosetta package and unpack it to continue"
+	echo "The PyRosetta version you need is "$ROSETTA_VER
+	exit
+    fi
+    NEWROSETTA=`find $SEARCHDIR -name SetPyRosettaEnvironment* 2> /dev/null | head -n 1 | awk -F "/SetPyRosetta" '{print $1}' `
+    if [ $NEWROSETTA ]; then
+	echo "Looking for PyRosetta in "$NEWROSETTA
+	# This is obnoxious...there is a colon in the Ubuntu PyRosetta directory name
+	# and it messes up : delimited paths, so create an appropriate symlink
+	#if [[ $ROSETTA_VER == "Ubuntu" ]]; then
+	    #OLDROSETTA=$NEWROSETTA
+	    #NEWROSETTA=`echo $OLDROSETTA | awk -F "/SetPyRosetta" '{print $1}' | awk -F ":" '{print $1}'`
+	    #sudo unlink $NEWROSETTA
+	    #sudo ln -s $OLDROSETTA $NEWROSETTA
+	    # Move the so files to rosetta because it cannot find them in PyRosetta root
+	    #sudo mv $NEWROSETTA/*.so* $NEWROSETTA/rosetta
+	#fi
+	echo "" >> ~/.bashrc
+	echo "source $NEWROSETTA/SetPyRosettaEnvironment.sh" >> ~/.bashrc
+	OLDDIR=`pwd`
+	source ~/.bashrc > /dev/null 2> /dev/null
+	cd "$OLDDIR"
+	break
+    else
+	echo "A PyRosetta installation was not detected on that path!"
+	echo "Please try again"
+	echo " "
+    fi
+done'''
 
 # Is Python installed? (Probably, but maybe not)
 if hash python 2> /dev/null; then
