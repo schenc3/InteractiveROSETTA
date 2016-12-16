@@ -200,16 +200,19 @@ class RamachandranFrame(wx.Frame):
     def __init__(self):
         this_dir = os.path.dirname(__file__)
         print this_dir
+
+
+
         gen_filename = os.path.join(this_dir, '..', 'data', 'RamachandranPlot', 'rama500-general.data')
         gen_file = open(gen_filename, "r")
         #gen_file = open("rama500-general.data", "r")
         pro_filename = os.path.join(this_dir, '..', 'data', 'RamachandranPlot', 'rama500-pro.data')
         pro_file = open(pro_filename, "r")
         #pro_file = open("rama500-pro.data", "r")
-        prepro_filename = os.path.join(this_dir, '..', 'data', 'RamachandranPlot', 'rama500-general.data')
+        prepro_filename = os.path.join(this_dir, '..', 'data', 'RamachandranPlot', 'rama500-prepro.data')
         prepro_file = open(prepro_filename, "r")
         #prepro_file = open("rama500-prepro.data", "r")
-        gly_filename = os.path.join(this_dir, '..', 'data', 'RamachandranPlot', 'rama500-general.data')
+        gly_filename = os.path.join(this_dir, '..', 'data', 'RamachandranPlot', 'rama500-gly-sym.data')
         gly_file = open(gly_filename, "r")
         #gly_file = open("rama500-gly-sym.data", "r")
 
@@ -324,7 +327,7 @@ class RamachandranFrame(wx.Frame):
         self.buttonClearSelection.Bind(wx.EVT_BUTTON, self.on_button_clear_selection)
         self.buttonSelected = "All"
 
-        self.contour_lines = [.01, .1]
+        self.contour_lines = [.01, .5]
 
         self.gen_sele_x = []
         self.gen_sele_y = []
