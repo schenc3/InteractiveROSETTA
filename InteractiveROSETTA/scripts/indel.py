@@ -195,6 +195,21 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.maxResultsval = self.ResultsMax.GetValue()
 
 
+        if (platform.system() == "Windows"):
+            self.lblRendundancy = wx.StaticText(self, -1, "Redundancy Cutoff", (5, 290), (140, 20), wx.ALIGN_CENTRE)
+            self.lblRendundancy.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+        # elif (platform.system() == "Darwin"):
+        #     self.lblResultsMax = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/indel/maxResults.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 240), size=(140, 20))
+        else:
+            self.lblRendundancy = wx.StaticText(self, -1, "Redundancy Cutoff", (15, 290), style=wx.ALIGN_CENTRE)
+            self.lblRendundancy.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+            resizeTextControlForUNIX(self.lblEnd, 170, 140)
+        self.lblRendundancy.SetForegroundColour("#FFFFFF")
+        self.RedundancyCutoff = wx.SpinCtrlDouble(self, min=0.1, max=5,inc=0.1, initial=1.0 , pos=(10, 310), size=(140, 25))
+        #self.RedundancyCutoff.Bind(wx.EVT_COMBOBOX, self.maxMenuSelect)
+        self.RedundancyCutoff.Bind(wx.EVT_RIGHT_DOWN, self.rightClick)
+        self.RedundancyCutoff.SetToolTipString("If the loop search returns many results, try to insert this many.")
+
 
         # if (platform.system() == "Darwin"):
         #     self.btnClear = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnClear.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(220, 305), size=(90, 25))
@@ -205,18 +220,16 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.btnClear.Bind(wx.EVT_BUTTON, self.clear)
         self.btnClear.SetToolTipString("Clear parameters")
 
+
+
         # Checkbox toggles
-        self.preserve_sequence = wx.CheckBox(self, -1, 'Preserve sequence', (10, 305) )
+        self.preserve_sequence = wx.CheckBox(self, -1, 'Preserve indel sequence', (10, 335) )
         self.preserve_sequence.SetToolTipString("Return native loop sequence instead of Alanines")
         self.preserve_sequence.SetForegroundColour("#FFFFFF")
         self.preserve_sequence.SetValue(False)
 
-        self.include_complex = wx.CheckBox(self, -1, 'Include complex', (10, 325) )
-        self.include_complex.SetToolTipString("Check collisions against other loaded macromolecules")
-        self.include_complex.SetForegroundColour("#FFFFFF")
-        self.include_complex.SetValue(False)
 
-        self.symmetric_design = wx.CheckBox(self, -1, 'Symmetric design', (10, 345) )
+        self.symmetric_design = wx.CheckBox(self, -1, 'Symmetric homo-oligomer loop design', (10, 355) )
         self.symmetric_design.SetToolTipString("Attempt to design the same loop onto each monomer")
         self.symmetric_design.SetForegroundColour("#FFFFFF")
         self.symmetric_design.SetValue(False)
@@ -323,7 +336,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.btnClear.Enable()
         self.ResultsMin.Enable()
         self.ResultsMax.Enable()
-        self.include_complex.Enable()
+        self.RedundancyCutoff.Enable()
         self.btnINDEL.Enable()
         self.preserve_sequence.Enable()
         self.seqWin.cannotDelete = False
@@ -344,7 +357,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.ResultsMin.Disable()
         self.ResultsMax.Disable()
         self.btnClear.Disable()
-        self.include_complex.Disable()
+        self.RedundancyCutoff.Disable()
         self.preserve_sequence.Disable()
 
     def isAA(self, residue):
@@ -387,7 +400,6 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
     def activate(self):
         # Get the list of all the PROTEIN models in the sequence viewer
-        # TODO check if we should turn on the symmetry button
         modelList = []
         for r in range(0, self.seqWin.SeqViewer.NumberRows):
             model = self.seqWin.getModelForChain(r)
@@ -437,8 +449,8 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.symmetric_design.SetValue(False)
         else:
             self.enableAll()
-            self.include_complex.Disable()
-            self.include_complex.SetValue(False)
+            #self.include_complex.Disable()
+            #self.include_complex.SetValue(False)
             self.symmetric_design.Disable()
             self.symmetric_design.SetValue(False)
 
@@ -534,8 +546,15 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.cmd.hide("sticks")
             self.previous_indel_model_selected = self.indel_model_selected
             self.cmd.zoom("resi " + str(self.begin_seqpos) + "-" + str(int(self.begin_seqpos) + 3), 2.0)
-            self.cmd.color("blue", self.indel_model_selected)
+            #self.cmd.color("blue", self.indel_model_selected)
+            self.cmd.color('white')
+            self.cmd.color('red', 'ss h')
+            self.cmd.color('yellow', 'ss s')
 
+        # CHANGED
+        self.cmd.select('original', self.selectedModel)
+        self.cmd.hide('everything', 'original')
+        self.cmd.deselect()
         event.Skip()
 
     def modelMenuSelect(self, event):
@@ -1029,16 +1048,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
             self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
             self.seqWin.msgQueue.append("Performing INDEL loop modeling, please be patient...")
-            #self.seqWin.cannotDelete = True
-            #self.parent.GoBtn.Disable()
-            #self.modelMenu.Disable()
-            #self.beginMenu.Disable()
-            #self.endMenu.Disable()
-            #self.minMenu.Disable()
-            #self.maxMenu.Disable()
-            #self.ResultsMin.Disable()
-            #self.ResultsMax.Disable()
-            #self.btnClear.Disable()
+
             self.disableAll(model_menu_disable=True, seq_win_disable=True)
 
 
@@ -1108,15 +1118,6 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
             # Re-enable controls
             dlg.Destroy()
-            #self.modelMenu.Enable()
-            #self.beginMenu.Enable()
-            #self.endMenu.Enable()
-            #self.parent.GoBtn.Enable()
-            #self.minMenu.Enable()
-            #self.maxMenu.Enable()
-            #self.btnClear.Enable()
-            #self.ResultsMin.Enable()
-            #self.ResultsMax.Enable()
             self.enableAll()
 
             #Pop message out of queue
@@ -1140,6 +1141,10 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
                 try:
                     self.cmd.remove(pymol_indel_model_selected)
                     self.cmd.delete(pymol_indel_model_selected)
+                    self.cmd.show()
+                    self.cmd.show("cartoon")
+                    self.cmd.hide("lines")
+                    self.cmd.hide("sticks")
                 except:
                     pass
                 return
@@ -1267,12 +1272,10 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
             # If the user wants to check collisions against other loaded models, get their filenames
             complex_pdbs = []
-            if (self.include_complex.GetValue() == True):
-                #pose_index = self.seqWin.getPoseIndexForModel(self.selectedModel)
-                for i in range(self.seqWin.SeqViewer.NumberRows):
-                    complex_model = self.seqWin.getModelForChain(i)
-                    if self.selectedModel != complex_model:
-                        complex_pdbs.append("COMPLEX\t" + complex_model + ".pdb\t")
+            for i in range(self.seqWin.SeqViewer.NumberRows):
+                complex_model = self.seqWin.getModelForChain(i)
+                if self.selectedModel != complex_model:
+                    complex_pdbs.append("COMPLEX\t" + complex_model + ".pdb\t")
 
             if self.symmetric_design.GetValue() == False:
                 self.symmetry_value = 1
@@ -1287,7 +1290,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             f.write("MAX_RESULTS\t" + str(self.maxResultsval) + "\n")
             f.write("PRESERVE_SEQUENCE\t" + str(self.preserve_sequence.GetValue()).upper() + "\n")
             f.write("SYMMETRY\t" + str(self.symmetry_value) + "\n")
-            f.write("DUPLICATE_CUTOFF\t 1.0 \n")
+            f.write("DUPLICATE_CUTOFF\t" + str(self.RedundancyCutoff.GetValue()) + "\n")
 
             if len(complex_pdbs) > 0:
                 for pdb in complex_pdbs:
