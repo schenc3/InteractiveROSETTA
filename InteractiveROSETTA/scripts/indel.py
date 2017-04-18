@@ -262,8 +262,8 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.save_model = wx.Button(self, id=-1, label="Save", pos=(40, ypos), size=(100, 25))
         self.save_model.SetForegroundColour("#000000")
         self.save_model.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-        self.save_model.Bind(wx.EVT_BUTTON, self.serverToggle)
-        self.save_model.SetToolTipString("Perform KIC simulations locally")
+        self.save_model.Bind(wx.EVT_BUTTON, self.saveClick)
+        self.save_model.SetToolTipString("Save selected model pdb")
         self.save_model.Disable()
 
 
@@ -302,9 +302,9 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             except:
                 print "Could not load Safari!  The help files are located at " + self.scriptdir + "/help"
                 return
-            browser.open(self.parent.parent.scriptdir + "/help/kic.html")
+            browser.open(self.parent.parent.scriptdir + "/help/indel.html")
         else:
-            webbrowser.open(self.parent.parent.scriptdir + "/help/kic.html")
+            webbrowser.open(self.parent.parent.scriptdir + "/help/indel.html")
 
     def setSeqWin(self, seqWin):
         self.seqWin = seqWin
@@ -325,7 +325,11 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         event.Skip()
 
 
-    def enableAll(self):
+    def enableAll(self, save_enable):
+        # Are there results to save?
+        if (save_enable):
+            self.save_model.Enable()
+
         # Enable all controls
         self.modelMenu.Enable()
         self.beginMenu.Enable()
@@ -340,6 +344,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.btnINDEL.Enable()
         self.preserve_sequence.Enable()
         self.seqWin.cannotDelete = False
+
 
 
 
@@ -359,6 +364,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.btnClear.Disable()
         self.RedundancyCutoff.Disable()
         self.preserve_sequence.Disable()
+        self.save_model.Disable()
 
     def isAA(self, residue):
         return residue.resname in "ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR "
@@ -438,7 +444,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         # Check to see if there's more than one model currently open. If so,
         # allow the user to include those in calculations
         if len(self.seqWin.poses) > 1:
-            self.enableAll()
+            self.enableAll(save_enable=False)
             if not self.symmetry():
                 self.symmetric_design.Disable()
                 self.symmetric_design.SetValue(False)
@@ -448,9 +454,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.symmetric_design.Disable()
             self.symmetric_design.SetValue(False)
         else:
-            self.enableAll()
-            #self.include_complex.Disable()
-            #self.include_complex.SetValue(False)
+            self.enableAll(save_enable=False)
             self.symmetric_design.Disable()
             self.symmetric_design.SetValue(False)
 
@@ -507,8 +511,10 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         # Set the selected residue's row to blue so it is easy to see what the selection is
         self.selectedr = event.GetRow()
         if (self.selectedr >= self.grdLoops.NumberRows):
+            self.save_model.Disable()
             self.selectedr = -1
         if (self.selectedr >= len(self.model_names)):
+            self.save_model.Disable()
             event.Skip()
             return
         for r in range(0, self.grdLoops.NumberRows):
@@ -525,9 +531,13 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         if (self.selectedr < len(self.model_names)):
             self.loopEnd = self.begin_seqpos + self.lengths[self.selectedr]
             self.indel_model_selected = self.model_names[self.selectedr]
+            self.save_model.Enable()
+
         else:
+            self.save_model.Disable()
             self.selectedr = -1
             event.Skip()
+
 
         # Remove the previously selected model from the viewer if it's not the same as the one just selected
         if (self.previous_indel_model_selected != "" or self.previous_indel_model_selected != self.indel_model_selected):
@@ -551,7 +561,6 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.cmd.color('red', 'ss h')
             self.cmd.color('yellow', 'ss s')
 
-        # CHANGED
         self.cmd.select('original', self.selectedModel)
         self.cmd.hide('everything', 'original')
         self.cmd.deselect()
@@ -584,7 +593,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.disableAll(model_menu_disable=False, seq_win_disable=False)
             return
         else:
-            self.enableAll()
+            self.enableAll(save_enable=False)
 
 
         # Update the beginning and ending positions menus with the available sequence positions
@@ -785,6 +794,47 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.grdLoops.SetRowAttr(row, readOnly)
             row += 1
         self.grdLoops.Scroll(0, scrollpos)
+
+    def saveClick(self, event):
+        # Borrowed from sequence.py starting at line 2580
+        # self.indel_model_selected is the current model selected
+        while(True):
+            dlg = wx.FileDialog(
+                self, message="Save a PDB File",
+                defaultDir=self.seqWin.cwd,
+                defaultFile=self.indel_model_selected,
+                wildcard="PDB Files (*.pdb)|*.pdb",
+                style=wx.SAVE | wx.CHANGE_DIR)
+
+            if (dlg.ShowModal() == wx.ID_OK):
+                path = dlg.GetPath()
+                # Change cwd to the last opened file
+                if (platform.system() == "Windows"):
+                    lastDirIndx = path.rfind("\\")
+                else:
+                    lastDirIndx = path.rfind("/")
+                self.cwd = str(path[0:lastDirIndx])
+                #self.saveWindowData(None)
+                filename = str(path).split(".pdb")[0] + ".pdb"
+
+                # Does it exist already? If so, ask if user wants to overwrite it
+                if (os.path.isfile(filename)):
+                    dlg2 = wx.MessageDialog(self, "The file " + filename + " already exists.  Overwrite it?", "Filename Already Exists", wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
+                    if (dlg2.ShowModal() == wx.ID_NO):
+                        dlg2.Destroy()
+                        logInfo("Cancelled Indel save operation due to filename already existing")
+                        continue
+                    dlg2.Destroy()
+
+                goToSandbox()
+                logInfo("Saved a PDB to " + filename.strip())
+                self.cmd.save(filename.strip(), self.indel_model_selected)
+                fixPyMOLSave(filename.strip())
+            else:
+                logInfo("Cancelled out of Save PDB (Indel)")
+            break
+        dlg.Destroy()
+
 
     def add(self, event):
         # Is the loop valid?
@@ -1118,7 +1168,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
             # Re-enable controls
             dlg.Destroy()
-            self.enableAll()
+            self.enableAll(save_enable=False)
 
             #Pop message out of queue
             for i in range(0, len(self.seqWin.msgQueue)):
@@ -1139,6 +1189,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.seqWin.cannotDelete = False
             if (not(accept)):
                 try:
+                    self.save_model.Disable()
                     self.cmd.remove(pymol_indel_model_selected)
                     self.cmd.delete(pymol_indel_model_selected)
                     self.cmd.show()
@@ -1417,6 +1468,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
                 #self.KICView = self.seqWin.pdbreader.get_structure("kic_view", "INDELoutput.pdb")
                 self.btnINDEL.Enable()
+                #self.save_model.Enable()
                 #self.enableControls()
                 #self.selectedModel = ""
                 # if (platform.system() == "Darwin"):

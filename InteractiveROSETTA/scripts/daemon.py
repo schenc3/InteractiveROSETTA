@@ -1385,7 +1385,7 @@ def doINDEL(scriptdir):
         lengths = []
         goToSandbox()
         # Try to make models from all the loops, or up to the max number specified
-        while i < min((num_results + 1), max_results):
+        while i < min((num_results + 1), max_results+1):
 
             print "\n ==================================================== \n"
             print "\t \t \t Attempting to insert loop " + str(i)
