@@ -3135,7 +3135,7 @@ class SequenceWin(wx.Frame):
                                 else:
                                     llratio.append(llrt)
                             else:
-                                gamma_seq.append(21)
+                                llratio.append(0.) #gamma_seq.append(21)
                         #Use HMMSTR gamma value to generate a color
                         c = 0
                         for residue in ch:
