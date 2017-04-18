@@ -1,11 +1,12 @@
 from commands import getstatusoutput as run
 import glob
 
+#MUST BE RUN from the scripts directory
 
 def link_lib(lib_file,libs):
     link_libs = [line.split()[0].strip() for line in run('otool -L %s'%(lib_file))[1].split('\n')]
     link_libs.pop(0)
-    print link_libs
+    # print link_libs
 
     lib_libs = {}
     for lib in libs:
@@ -13,14 +14,16 @@ def link_lib(lib_file,libs):
             if lib in llib:
                 lib_libs[lib] = llib
                 break
-    print lib_libs
+    # print lib_libs
 
     for lib in sorted(lib_libs.keys()):
         print lib
         cmd = 'install_name_tool -change %s `pwd`/../lib/%s %s'%(lib_libs[lib], lib,lib_file)
         print cmd
-        print run(cmd)
-    print run('otool -L %s'%(lib_file))[1]
+        s,o = run(cmd)
+        if s: print o
+    s,o = run('otool -L %s'%(lib_file))
+    if s: print o
 
 #relink libraries in lib directory
 
