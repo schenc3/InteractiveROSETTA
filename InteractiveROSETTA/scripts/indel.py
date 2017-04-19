@@ -1288,6 +1288,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             f.write("PRESERVE_SEQUENCE\t" + str(self.preserve_sequence.GetValue()).upper() + "\n")
             f.write("SYMMETRY\t" + str(self.symmetry_value) + "\n")
             f.write("DUPLICATE_CUTOFF\t 1.0 \n")
+            f.write("COLLISION\t 2.0 \n")
 
             if len(complex_pdbs) > 0:
                 for pdb in complex_pdbs:

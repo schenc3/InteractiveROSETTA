@@ -1331,13 +1331,20 @@ def doINDEL(scriptdir):
         dataDir = scriptdir + "\\data\\"
     else:
         dataDir = scriptdir + "/data/"
+        print "dataDir:",dataDir
 
     f = open("INDELinput", "a")
 
     f.write("PDB_DATA\t"  + "%spdblist.dat"%(dataDir)  + "\n")
+    print "PDB_DATA"
     f.write("LOOP_DATA\t" + "%slooplist.dat"%(dataDir) + "\n")
+    print "LOOP_DATA"
     f.write("GRID_DATA\t" + "%sgrid.dat"%(dataDir)     + "\n")
+    print "GRID_DATA"
     f.write("LOG\t" + "indel_log.txt" + "\n")
+    f.flush()
+    f.close()
+    import commands; print commands.getstatusoutput("cp -v INDELinput INDELinput.log")
 
 
     # Run the lookup

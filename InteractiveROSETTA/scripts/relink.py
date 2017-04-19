@@ -28,10 +28,12 @@ def link_lib(lib_file,libs):
     if s: print o
 
 #relink libraries in lib directory
+def main():
+    libs = ['libGLEW.1.11.0.dylib','libfreetype.6.dylib','libgcc_s.1.dylib','libgfortran.3.dylib','libgfortran.dylib','libopenbabel.4.dylib','libpng16.16.dylib','libquadmath.0.dylib']
+    link_lib("hmmstr4py_darwin.so",libs)
+    other_libs = glob.glob("../lib/*.dylib")
+    other_libs += glob.glob("../bin/*darwin*")
+    other_libs += glob.glob("../bin/*osx*")
+    for lib in other_libs: link_lib(lib,libs)
 
-libs = ['libGLEW.1.11.0.dylib','libfreetype.6.dylib','libgcc_s.1.dylib','libgfortran.3.dylib','libgfortran.dylib','libopenbabel.4.dylib','libpng16.16.dylib','libquadmath.0.dylib']
-link_lib("hmmstr4py_darwin.so",libs)
-other_libs = glob.glob("../lib/*.dylib")
-other_libs += glob.glob("../bin/*darwin*")
-other_libs += glob.glob("../bin/*osx*")
-for lib in other_libs: link_lib(lib,libs)
+if __name__ == "__main__": main()
