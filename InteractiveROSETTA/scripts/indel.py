@@ -1319,7 +1319,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             end_index = self.seqWin.getRosettaIndex(self.selectedModel, chain, end_seqpos)
             self.maxResultsval = self.ResultsMax.GetValue()
             self.minResultsval = self.ResultsMin.GetValue()
-
+            self.progress = None
 
             # If the user wants to check collisions against other loaded models, get their filenames
             complex_pdbs = []
@@ -1334,6 +1334,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
 
             # Write out input file that gets picked up by the daemon
+            collision_cutoff = 2.0
             f.write("SCAFFOLD\t" + pdbfile + "\n")
             f.write("ANCHORS\t" + str(begin_index) + "\t" + str(end_index) + "\n")
             f.write("RANGE\t" + str(self.minLength) + "\t" + str(self.maxLength) + "\n")
@@ -1342,6 +1343,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             f.write("PRESERVE_SEQUENCE\t" + str(self.preserve_sequence.GetValue()).upper() + "\n")
             f.write("SYMMETRY\t" + str(self.symmetry_value) + "\n")
             f.write("DUPLICATE_CUTOFF\t" + str(self.RedundancyCutoff.GetValue()) + "\n")
+            f.write("COLLISION\t" + str(collision_cutoff) + "\n")
 
             if len(complex_pdbs) > 0:
                 for pdb in complex_pdbs:
@@ -1462,6 +1464,9 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
                 # We can get rid of the top-level output file now
                 try:
                     os.remove("INDELoutput")
+                    self.progress.Destroy()
+                    os.remove("progress")
+
                 except:
                     pass
 
@@ -1485,6 +1490,40 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
                 self.tmrKIC.Stop()
                 self.parent.parent.restartDaemon() # Has to happen because coarse KIC is threaded
                 self.recoverFromError()
+
+            elif (os.path.isfile("progress")):
+                # The local daemon can output its progress to keep the GUI updated about
+                # how far along it is, along with a message
+                # This is optional
+                # See job/__init__.py for more information
+                if (self.progress is None):
+                    self.progress = wx.ProgressDialog("INDEL Progress", "Performing INDEL design job...", 100, style=wx.PD_CAN_ABORT | wx.PD_APP_MODAL | wx.PD_ELAPSED_TIME | wx.PD_REMAINING_TIME)
+                fin = open("progress", "r")
+                data = fin.readlines()
+                fin.close()
+                # First line should be a fraction
+                try:
+                    num = float(data[0].split("/")[0].strip())
+                    den = float(data[0].split("/")[1].strip())
+                    # Convert to a percentage
+                    percent = int(num / den * 100.0)
+                    if (percent > 99):
+                        # Let's the appearance of the output file kill the progress bar
+                        percent = 100
+                except:
+                    return
+
+                try:
+                    # The optional second line is a new message
+                    newmsg = data[1].strip()
+                    (keepGoing, skip) = self.progress.Update(percent, newmsg)
+                except:
+                    (keepGoing, skip) = self.progress.Update(percent)
+
+                if (not(keepGoing)):
+                    # User clicked "Cancel" on the progress bar
+                    self.cancelINDEL()
+                    self.progress.Destroy()
 
             self.looptimecount = self.looptimecount + 1
             if (self.looptimecount > self.timeout):
