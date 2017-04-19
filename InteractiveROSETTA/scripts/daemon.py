@@ -1417,6 +1417,7 @@ def doINDEL(scriptdir):
                     graftmover.set_cycles(50)
                     #graftmover.set_piece(loop, 1, 1)
                     graftmover.apply(temp_pose)
+                    graftmover.final_repack()
                     print "Grafted at %d and %d"%(startgraft, endgraft)
 
                 #graftmover = graft.AnchoredGraftMover(start_residue + chain_length, stop_residue + chain_length, loop, 1, 1)

@@ -1489,6 +1489,8 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
                 # Something went wrong, tell the user about it (loop sequence probably too short)
                 self.tmrKIC.Stop()
                 self.parent.parent.restartDaemon() # Has to happen because coarse KIC is threaded
+                self.cancelINDEL()
+                self.progress.Destroy()
                 self.recoverFromError()
 
             elif (os.path.isfile("progress")):
