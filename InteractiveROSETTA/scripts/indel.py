@@ -171,7 +171,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.ResultsMin = wx.lib.intctrl.IntCtrl(self, pos=(10, 260), size=(140, 25))
         self.ResultsMin.Bind(wx.EVT_COMBOBOX, self.maxMenuSelect)
         self.ResultsMin.Bind(wx.EVT_RIGHT_DOWN, self.rightClick)
-        self.ResultsMin.SetToolTipString("Minimum number of models to try.")
+        self.ResultsMin.SetToolTipString("Minimum number of loop search results.")
         self.ResultsMin.SetValue(10)
         self.minResultsval = self.ResultsMin.GetValue()
 
@@ -190,7 +190,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.ResultsMax = wx.lib.intctrl.IntCtrl(self, pos=(170, 260), size=(140, 25))
         self.ResultsMax.Bind(wx.EVT_COMBOBOX, self.maxMenuSelect)
         self.ResultsMax.Bind(wx.EVT_RIGHT_DOWN, self.rightClick)
-        self.ResultsMax.SetToolTipString("Maximum number of models to try.")
+        self.ResultsMax.SetToolTipString("If the loop search returns many results, try to insert this many.")
         self.ResultsMax.SetValue(25)
         self.maxResultsval = self.ResultsMax.GetValue()
 
@@ -205,10 +205,28 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.btnClear.Bind(wx.EVT_BUTTON, self.clear)
         self.btnClear.SetToolTipString("Clear parameters")
 
+        # Checkbox toggles
+        self.preserve_sequence = wx.CheckBox(self, -1, 'Preserve sequence', (10, 305) )
+        self.preserve_sequence.SetToolTipString("Return native loop sequence instead of Alanines")
+        self.preserve_sequence.SetForegroundColour("#FFFFFF")
+        self.preserve_sequence.SetValue(False)
+
+        self.include_complex = wx.CheckBox(self, -1, 'Include complex', (10, 325) )
+        self.include_complex.SetToolTipString("Check collisions against other loaded macromolecules")
+        self.include_complex.SetForegroundColour("#FFFFFF")
+        self.include_complex.SetValue(False)
+
+        self.symmetric_design = wx.CheckBox(self, -1, 'Symmetric design', (10, 345) )
+        self.symmetric_design.SetToolTipString("Attempt to design the same loop onto each monomer")
+        self.symmetric_design.SetForegroundColour("#FFFFFF")
+        self.symmetric_design.SetValue(False)
+        self.symmetric_design.Disable()
+
+
         self.grdLoops = wx.grid.Grid(self)
         self.grdLoops.CreateGrid(0, 2)
         self.grdLoops.SetSize((320, 200))
-        self.grdLoops.SetPosition((0, 350))
+        self.grdLoops.SetPosition((0, 385))
         self.grdLoops.SetLabelFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
         self.grdLoops.DisableDragColSize()
         self.grdLoops.DisableDragRowSize()
@@ -228,10 +246,18 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.lengths = []
 
 
+        self.save_model = wx.Button(self, id=-1, label="Save", pos=(40, ypos), size=(100, 25))
+        self.save_model.SetForegroundColour("#000000")
+        self.save_model.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+        self.save_model.Bind(wx.EVT_BUTTON, self.serverToggle)
+        self.save_model.SetToolTipString("Perform KIC simulations locally")
+        self.save_model.Disable()
+
+
         # if (platform.system() == "Darwin"):
         #     self.btnServerToggle = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnServer_Off.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(40, ypos+215), size=(100, 25))
         # else:
-        self.btnServerToggle = wx.Button(self, id=-1, label="Server Off", pos=(40, ypos), size=(100, 25))
+        self.btnServerToggle = wx.Button(self, id=-1, label="Server Off", pos=(40, ypos + 40), size=(100, 25))
         self.btnServerToggle.SetForegroundColour("#000000")
         self.btnServerToggle.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
         self.btnServerToggle.Bind(wx.EVT_BUTTON, self.serverToggle)
@@ -285,11 +311,88 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.winscrollpos = self.GetScrollPos(wx.VERTICAL)
         event.Skip()
 
+
+    def enableAll(self):
+        # Enable all controls
+        self.modelMenu.Enable()
+        self.beginMenu.Enable()
+        self.endMenu.Enable()
+        self.parent.GoBtn.Enable()
+        self.minMenu.Enable()
+        self.maxMenu.Enable()
+        self.btnClear.Enable()
+        self.ResultsMin.Enable()
+        self.ResultsMax.Enable()
+        self.include_complex.Enable()
+        self.btnINDEL.Enable()
+        self.preserve_sequence.Enable()
+        self.seqWin.cannotDelete = False
+
+
+
+    def disableAll(self, model_menu_disable, seq_win_disable):
+        if (model_menu_disable):
+            self.modelMenu.Disable()
+        if (seq_win_disable):
+            self.seqWin.cannotDelete = True
+
+        self.parent.GoBtn.Disable()
+        self.beginMenu.Disable()
+        self.endMenu.Disable()
+        self.minMenu.Disable()
+        self.maxMenu.Disable()
+        self.ResultsMin.Disable()
+        self.ResultsMax.Disable()
+        self.btnClear.Disable()
+        self.include_complex.Disable()
+        self.preserve_sequence.Disable()
+
+    def isAA(self, residue):
+        return residue.resname in "ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR "
+
+    def symmetry(self):
+        # Check to see if we should turn the symmetry button on, and how many symmetric molecules there are
+        poseindex = self.seqWin.getPoseIndexForModel(self.selectedModel)
+        chains = [x for x in self.seqWin.poses[poseindex][0].get_chains()]
+        if len(chains) == 1:
+            self.symmetry_value = 1
+            return False
+
+        # Check if each chain is the same size
+        for i in range(len(chains)):
+            i_chainlength = len([x for x in chains[i].get_residues() if self.isAA(x)])
+            for j in range(i+1, len(chains)):
+                j_chainlength = len([x for x in chains[j].get_residues() if self.isAA(x)])
+                if i_chainlength != j_chainlength:
+                    self.symmetry_value = 1
+                    return False
+        """
+        # Check to make sure that each chain has the same residues
+        for i in range(len(chains)):
+            i_residues = [x for x in chains[i].get_residues() if self.isAA(x)]
+            for j in range(i+1, len(chains)):
+                j_residues = [x for x in chains[j].get_residues() if self.isAA(x)]
+                for k in range(len(j_residues)):
+                    if i_residues[k] != j_residues[k]:
+                        self.symmetry_value = 1
+                        return False
+        """
+
+
+        # We have symmetric chains, allow symmetric design
+        self.symmetry_value = len(chains)
+        return True
+
+
+
     def activate(self):
-        # Get the list of all the models in the sequence viewer
+        # Get the list of all the PROTEIN models in the sequence viewer
+        # TODO check if we should turn on the symmetry button
         modelList = []
         for r in range(0, self.seqWin.SeqViewer.NumberRows):
             model = self.seqWin.getModelForChain(r)
+            poseindx = self.seqWin.getPoseIndexForModel(self.selectedModel)
+
             if (not(model in modelList)):
                 modelList.append(model)
         # Update the combobox list if the list has changed
@@ -319,6 +422,29 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
                 self.selectedModel = ""
                 self.modelMenuSelect(None)
         self.Scroll(0, self.winscrollpos)
+
+        # Check to see if there's more than one model currently open. If so,
+        # allow the user to include those in calculations
+        if len(self.seqWin.poses) > 1:
+            self.enableAll()
+            if not self.symmetry():
+                self.symmetric_design.Disable()
+                self.symmetric_design.SetValue(False)
+        elif len(self.seqWin.poses) == 0:
+            self.disableAll(model_menu_disable=False, seq_win_disable=False)
+            self.btnINDEL.Disable()
+            self.symmetric_design.Disable()
+            self.symmetric_design.SetValue(False)
+        else:
+            self.enableAll()
+            self.include_complex.Disable()
+            self.include_complex.SetValue(False)
+            self.symmetric_design.Disable()
+            self.symmetric_design.SetValue(False)
+
+
+
+
 
     def rightClick(self, event):
         # Attempt to fill in loop values from a selection to bypass having to use the ComboBox
@@ -431,6 +557,17 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
                         chain = "_"
                     label = chain + ":" + AA3to1(residue.resname) + str(residue.id[1])
                     positions.append(label)
+
+
+        # Check to make sure the selected model was a protein by seeing if any amino acids were read in
+        # if not, disable everything except for the model select control
+        if (len(positions) == 0):
+            self.disableAll(model_menu_disable=False, seq_win_disable=False)
+            return
+        else:
+            self.enableAll()
+
+
         # Update the beginning and ending positions menus with the available sequence positions
         self.beginMenu.Clear()
         self.beginMenu.AppendItems(positions[0:len(positions)-1])
@@ -451,6 +588,10 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.loopEnd = 2
         #self.txtNStruct.Enable()
         #self.populatePivots()
+
+        if self.symmetry():
+            self.symmetric_design.Enable()
+
 
     def changeLoopType(self, event):
         if (self.loopType == "Refine"):
@@ -888,17 +1029,17 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
             self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
             self.seqWin.msgQueue.append("Performing INDEL loop modeling, please be patient...")
-            self.seqWin.cannotDelete = True
-            self.parent.GoBtn.Disable()
-            self.modelMenu.Disable()
-            self.beginMenu.Disable()
-            self.endMenu.Disable()
-            self.minMenu.Disable()
-            self.maxMenu.Disable()
-            self.ResultsMin.Disable()
-            self.ResultsMax.Disable()
-            self.btnClear.Disable()
-
+            #self.seqWin.cannotDelete = True
+            #self.parent.GoBtn.Disable()
+            #self.modelMenu.Disable()
+            #self.beginMenu.Disable()
+            #self.endMenu.Disable()
+            #self.minMenu.Disable()
+            #self.maxMenu.Disable()
+            #self.ResultsMin.Disable()
+            #self.ResultsMax.Disable()
+            #self.btnClear.Disable()
+            self.disableAll(model_menu_disable=True, seq_win_disable=True)
 
 
             # if (platform.system() == "Darwin"):
@@ -967,15 +1108,16 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
             # Re-enable controls
             dlg.Destroy()
-            self.modelMenu.Enable()
-            self.beginMenu.Enable()
-            self.endMenu.Enable()
-            self.parent.GoBtn.Enable()
-            self.minMenu.Enable()
-            self.maxMenu.Enable()
-            self.btnClear.Enable()
-            self.ResultsMin.Enable()
-            self.ResultsMax.Enable()
+            #self.modelMenu.Enable()
+            #self.beginMenu.Enable()
+            #self.endMenu.Enable()
+            #self.parent.GoBtn.Enable()
+            #self.minMenu.Enable()
+            #self.maxMenu.Enable()
+            #self.btnClear.Enable()
+            #self.ResultsMin.Enable()
+            #self.ResultsMax.Enable()
+            self.enableAll()
 
             #Pop message out of queue
             for i in range(0, len(self.seqWin.msgQueue)):
@@ -1111,14 +1253,8 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             # Dump the PDB from PyMOL first in case the coordinates were altered by the user
             self.cmd.save(pdbfile.strip(), "model " + self.selectedModel)
             fixPyMOLSave(pdbfile.strip())
-            f.write("PDBFILE\t" + pdbfile.strip() + "\n")
-            f2 = open(pdbfile, "r")
-            f.write("BEGIN PDB DATA\n")
-            for aline in f2:
-                f.write(aline.strip() + "\n")
-            f.write("END PDB DATA\n")
-            f2.close()
-            #Grab rosetta indices, write indices and length range
+
+
             chain = self.endMenu.GetStringSelection()[0]
             begin_seqpos = self.beginMenu.GetStringSelection()[3:]
             self.begin_seqpos = begin_seqpos
@@ -1127,9 +1263,40 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             end_index = self.seqWin.getRosettaIndex(self.selectedModel, chain, end_seqpos)
             self.maxResultsval = self.ResultsMax.GetValue()
             self.minResultsval = self.ResultsMin.GetValue()
-            f.write("LOOP\t" + str(begin_index)  + "\t" + str(end_index) + "\t" + str(self.minLength) + "\t" + str(self.maxLength) + "\t"
-                + str(self.minResultsval) + "\t" + str(self.maxResultsval) )
+
+
+            # If the user wants to check collisions against other loaded models, get their filenames
+            complex_pdbs = []
+            if (self.include_complex.GetValue() == True):
+                #pose_index = self.seqWin.getPoseIndexForModel(self.selectedModel)
+                for i in range(self.seqWin.SeqViewer.NumberRows):
+                    complex_model = self.seqWin.getModelForChain(i)
+                    if self.selectedModel != complex_model:
+                        complex_pdbs.append("COMPLEX\t" + complex_model + ".pdb\t")
+
+            if self.symmetric_design.GetValue() == False:
+                self.symmetry_value = 1
+
+
+
+            # Write out input file that gets picked up by the daemon
+            f.write("SCAFFOLD\t" + pdbfile + "\n")
+            f.write("ANCHORS\t" + str(begin_index) + "\t" + str(end_index) + "\n")
+            f.write("RANGE\t" + str(self.minLength) + "\t" + str(self.maxLength) + "\n")
+            f.write("MIN_RESULTS\t" + str(self.minResultsval) + "\n")
+            f.write("MAX_RESULTS\t" + str(self.maxResultsval) + "\n")
+            f.write("PRESERVE_SEQUENCE\t" + str(self.preserve_sequence.GetValue()).upper() + "\n")
+            f.write("SYMMETRY\t" + str(self.symmetry_value) + "\n")
+            f.write("DUPLICATE_CUTOFF\t 1.0 \n")
+            f.write("COLLISION\t 2.0 \n")
+
+            if len(complex_pdbs) > 0:
+                for pdb in complex_pdbs:
+                    f.write(pdb)
+
             f.close()
+
+
 
 
             if (self.serverOn):

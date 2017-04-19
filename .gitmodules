@@ -1,0 +1,3 @@
+[submodule "LoopHash"]
+	path = LoopHash
+	url = https://github.com/willhooper/LoopHash
