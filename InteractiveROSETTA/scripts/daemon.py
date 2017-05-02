@@ -1391,8 +1391,17 @@ def doINDEL(scriptdir):
         scores  = []
         lengths = []
         goToSandbox()
+
+
+
         # Try to make models from all the loops, or up to the max number specified
-        while i < min((num_results + 1), max_results):
+        while i < min((num_results + 1), max_results+1):
+
+            if i < 97:
+                f = open("progress", 'w')
+                f.write("%d/100"%(i))
+                f.close()
+
 
             print "\n ==================================================== \n"
             print "\t \t \t Attempting to insert loop " + str(i)
@@ -1415,6 +1424,7 @@ def doINDEL(scriptdir):
                     graftmover.set_cycles(50)
                     #graftmover.set_piece(loop, 1, 1)
                     graftmover.apply(temp_pose)
+                    graftmover.final_repack()
                     print "Grafted at %d and %d"%(startgraft, endgraft)
 
                 #graftmover = graft.AnchoredGraftMover(start_residue + chain_length, stop_residue + chain_length, loop, 1, 1)
@@ -1430,12 +1440,17 @@ def doINDEL(scriptdir):
                 models.append(temp_pose)
                 lengths.append(loop.total_residue())
             except:
-                writeError("No results found. Try modifying anchors.")
+                writeError("Something went wrong (could be Pyrosetta).")
                 return
             i += 1
 
         # Sort models by energy and write them out so we can look at them
         # Write out a file with info about each loop
+        #Console output
+        f = open("progress", 'w')
+        f.write("100/100")
+        f.close()
+
         i = 1
         f = open("INDELoutputtemp", "w")
         for score, model, length in sorted(zip(scores, models, lengths)):
@@ -1452,11 +1467,12 @@ def doINDEL(scriptdir):
 
     else:
         writeError("No results found. Try relaxing search parameters")
+        return
 
 
 
 
-    #Console output
+
     print "Tried to find loops for anchor residues N-term:" + anchors[0] + "\t C-term: " + anchors[1]
     print str(num_results) + " loops found."
     print str(len(models)) + " models built."
