@@ -376,7 +376,7 @@ class ProtocolsPanel(wx.Panel):
                    "Ensemble Browser",
                    "Ensemble Generation",
                    "Flexible Peptide Docking",
-                   "INDEL Loop Modeler",
+                   "INDEL Loop Design",
                    "Loop Modeling (KIC)",
                    "Module Manager",
                    "Molecular Surfaces",
@@ -698,7 +698,7 @@ class ProtocolsPanel(wx.Panel):
                     self.protPanel.setSelectWin(self.selectWin)
                 elif selectedProtocol == "Pathway Visualization (GeoFold)":
                     self.protPanel = DagViewPanel(self,self.W,self.H)
-                elif selectedProtocol == "INDEL Loop Modeler":
+                elif selectedProtocol == "INDEL Loop Design":
                     self.protPanel = INDELmodelPanel(self, self.W, self.H)
                     self.protPanel.setSelectWin(self.selectWin)
                 else:

@@ -1294,27 +1294,10 @@ def doKIC(stage="Coarse"):
 
 
 def doINDEL(scriptdir):
-    # Parse file, remove input file
-    import commands; commands.getstatusoutput("cp INDELinput ~/Desktop/INDELinput")
-    f = open("INDELinput", "r")
-    for aline in f:
-        if (aline[0:4] == "LOOP"):
-            # ['LOOP' , N-anchor , C-anchor, min length , max length, min results, max results]
-            loop_params = aline.split("\t")
-        if (aline[0:7] == "PDBFILE"):
-            pdbfile = aline.split("\t")[1].strip()
-    f.close()
-    print loop_params
-    # try:
-    #     os.remove("INDELinput")
-    # except:
-    #     pass
-
-
-
     # Query database - lookup executable and database files need to be in sandbox
     num_results = 0
 
+    # Find the right binary
     if (platform.system() == "Windows"):
         INDELprogram = scriptdir + "\\bin\\iRosetta_Lookup_Win64.exe"
     elif (platform.system() == "Darwin"):
@@ -1324,17 +1307,52 @@ def doINDEL(scriptdir):
     logInfo(INDELprogram)
     print INDELprogram
 
-    # runINDEL = "./" + INDELprogram
     runINDEL = INDELprogram
+
+    # Grab the parameters PyRosetta needs
+    f = open("INDELinput", "r")
+    for line in f:
+        if (line[0:8] == "SCAFFOLD"):
+            scaffold_pdb = line.split('\t')[1]
+        if (line[0:7] == "ANCHORS"):
+            anchors = line.split('\t')
+            anchors.pop(0)
+        if (line[0:8] == "SYMMETRY"):
+            symmetry = int(line.split('\t')[1])
+        if (line[0:11] == "MAX_RESULTS"):
+            max_results = int(line.split('\t')[1])
+        if (line[0:8] == "SCOREFXN"):
+            selected_scorefxn = line.split('\t')[1]
+    f.close()
+
+
+    # Find where the database files are, append to the input file that iRosetta Lookup uses
+    if platform.system() == "Windows":
+        dataDir = scriptdir + "\\data\\"
+    else:
+        dataDir = scriptdir + "/data/"
+        print "dataDir:",dataDir
+
+    f = open("INDELinput", "a")
+
+    f.write("PDB_DATA\t"  + "%spdblist.dat"%(dataDir)  + "\n")
+    print "PDB_DATA"
+    f.write("LOOP_DATA\t" + "%slooplist.dat"%(dataDir) + "\n")
+    print "LOOP_DATA"
+    f.write("GRID_DATA\t" + "%sgrid.dat"%(dataDir)     + "\n")
+    print "GRID_DATA"
+    f.write("LOG\t" + "indel_log.txt" + "\n")
+    f.flush()
+    f.close()
+    import commands; print commands.getstatusoutput("cp -v INDELinput INDELinput.log")
+
+
+    # Run the lookup
     try:
-        if platform.system() == "Windows":
-            dataDir = scriptdir + "\\data\\"
-        else:
-            dataDir = scriptdir + "/data/"
-        num_results = int( subprocess.check_output([runINDEL , pdbfile , "%spdblist.dat"%(dataDir), "%slooplist.dat"%(dataDir) , "%sgrid.dat"%(dataDir) , loop_params[1] ,
-        loop_params[2], loop_params[3], loop_params[4], loop_params[5], loop_params[6]]) )
+        num_results = int( subprocess.check_output([runINDEL, "INDELinput"]) )
     except:
        writeError("ERROR: The database query failed! Check input parameters and try again")
+       return
 
     print "Finished lookup"
 
@@ -1344,49 +1362,67 @@ def doINDEL(scriptdir):
         try:
             # Get every component of Rosetta started that we can, try to avoid
             # initializing for every loop we try to insert
-            print "Found " + str(num_results) + " loops \n"         #debugging
+            print "Found " + str(num_results) + " loops \n"
 
             initializeRosetta()
             import rosetta.protocols.grafting as graft
+
             # Set some parameters
             # Just use default score function for now
+            #try:
+            #    scorefxn = create_score_function(selected_scorefxn)
+            #    print "Set score function to " + selected_scorefxn
+            #except:
+            #    scorefxn = create_score_function("talaris2013")
+            #    print "Set score function to default"
+
             scorefxn = create_score_function("talaris2013")
 
-            # Figure out where we're grafting
-            #scaffold = pose_from_pdb(pdbfile)
-            start_residue = int(loop_params[1])
-            stop_residue = int(loop_params[2])
-
-
-            # the man on the internet said this can improve results
-            #graftmover.set_use_smooth_centroid_settings(True)
         except:
-            raise Exception("ERROR: Couldn't initialize Rosetta!")
             writeError("ERROR: Couldn't initialize Rosetta!")
+            return
+
+        # Figure out where we're grafting
+        start_residue = int(anchors[0])
+        stop_residue = int(anchors[1])
 
         i = 1
         models  = []
         scores  = []
         lengths = []
+        goToSandbox()
         # Try to make models from all the loops, or up to the max number specified
-        while i < min((num_results + 1), (int(loop_params[6]) + 1)):
+        while i < min((num_results + 1), max_results):
+
             print "\n ==================================================== \n"
             print "\t \t \t Attempting to insert loop " + str(i)
             print "\n ==================================================== \n"
 
             try:
-                #timer = wx.Timer()
                 # Make a copy of the scaffold, load the loop
-                temp_pose = pose_from_pdb(pdbfile)
                 loopfile = "loopout_" + str(i) + ".pdb"
                 loop = pose_from_pdb(loopfile)
+                temp_pose = pose_from_pdb(scaffold_pdb.strip())
+                chain_length = temp_pose.total_residue() / symmetry
+
 
                 # Here's where the actual grafting happens. Graft and add to model list
                 # Don't need to repack, AnchoredGraftMover takes care of it
-                graftmover = graft.AnchoredGraftMover(start_residue, stop_residue, loop, 1, 1)
-                graftmover.set_cycles(500)
+                for j in range(0, symmetry):
+                    startgraft = start_residue + (j * chain_length) + (j * (loop.total_residue() - 5 ))
+                    endgraft   = stop_residue +  (j * chain_length) + (j * (loop.total_residue() - 5 ))
+                    graftmover = graft.AnchoredGraftMover(startgraft, endgraft , loop, 1, 1)
+                    graftmover.set_cycles(50)
+                    #graftmover.set_piece(loop, 1, 1)
+                    graftmover.apply(temp_pose)
+                    print "Grafted at %d and %d"%(startgraft, endgraft)
+
+                #graftmover = graft.AnchoredGraftMover(start_residue + chain_length, stop_residue + chain_length, loop, 1, 1)
+                #graftmover.set_cycles(500)
                 #graftmover.set_piece(loop, 1, 1)
-                graftmover.apply(temp_pose)
+                #graftmover.apply(temp_pose)
+
+
 
                 #Add the model and its score to their respective lists, as well as the length of each insertion
                 temp_score = scorefxn(temp_pose)
@@ -1395,7 +1431,7 @@ def doINDEL(scriptdir):
                 lengths.append(loop.total_residue())
             except:
                 writeError("No results found. Try modifying anchors.")
-
+                return
             i += 1
 
         # Sort models by energy and write them out so we can look at them
@@ -1410,6 +1446,7 @@ def doINDEL(scriptdir):
         f.close()
         os.rename("INDELoutputtemp", "INDELoutput")
 
+        print "Chain length: %d"%(chain_length)
 
 
 
@@ -1420,9 +1457,11 @@ def doINDEL(scriptdir):
 
 
     #Console output
-    print "Tried to find loops for anchor residues N-term:" + loop_params[1] + "\t C-term: " + loop_params[2]
+    print "Tried to find loops for anchor residues N-term:" + anchors[0] + "\t C-term: " + anchors[1]
     print str(num_results) + " loops found."
     print str(len(models)) + " models built."
+
+
 
 
 
@@ -2009,12 +2048,16 @@ def daemonLoop():
                 writeError(e.message)
         elif (os.path.isfile("INDELinput")):
             print "Daemon starting INDEL loop modeling job..."
-            doINDEL(scriptdir)
+            try:
+                doINDEL(scriptdir)
+            except Exception as e:
+                print "The daemon crashed while performing the INDEL loop modeling job!"
+                writeError(e.message)
             try:
                 os.remove("INDELinput")
-            except:
-                pass
-
+            except Exception as e:
+                print "The daemon crashed while performing the INDEL loop modeling job!"
+                writeError(e.message)
 
         elif (os.path.isfile("repackme_0.pdb")):
             print "Daemon starting rotamer repacking job..."
