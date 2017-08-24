@@ -376,6 +376,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         # Check to see if we should turn the symmetry button on, and how many symmetric molecules there are
         poseindex = self.seqWin.getPoseIndexForModel(self.selectedModel)
         chains = [x for x in self.seqWin.poses[poseindex][0]]
+        # chains = [x for x in self.seqWin.poses[poseindex][0].get_chains()]
         if len(chains) == 1:
             self.symmetry_value = 1
             return False
@@ -1293,9 +1294,11 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
                 self.selectedModel = self.indel_model_selected
 
 
-            except:
+            except Exception as e:
                 # Some weird error happened, do nothing instead of crashing
                 print "Bug at accept button click"
+                print e.message
+                import traceback; traceback.print_exc()
                 pass
 
 
