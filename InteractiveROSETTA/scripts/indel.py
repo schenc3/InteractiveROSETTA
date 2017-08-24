@@ -375,7 +375,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def symmetry(self):
         # Check to see if we should turn the symmetry button on, and how many symmetric molecules there are
         poseindex = self.seqWin.getPoseIndexForModel(self.selectedModel)
-        chains = [x for x in self.seqWin.poses[poseindex][0].get_chains()]
+        chains = [x for x in self.seqWin.poses[poseindex][0]]
         if len(chains) == 1:
             self.symmetry_value = 1
             return False
@@ -419,6 +419,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         # Update the combobox list if the list has changed
         if (modelList != self.modelMenu.GetItems()):
             self.modelMenu.Clear()
+            if modelList == []: modelList = ['']
             self.modelMenu.AppendItems(modelList)
             self.selectedModel = ""
             if (platform.system() == "Windows"):
