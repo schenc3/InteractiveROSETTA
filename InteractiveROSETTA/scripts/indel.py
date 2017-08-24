@@ -195,6 +195,21 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.maxResultsval = self.ResultsMax.GetValue()
 
 
+        if (platform.system() == "Windows"):
+            self.lblRendundancy = wx.StaticText(self, -1, "Redundancy Cutoff", (5, 290), (140, 20), wx.ALIGN_CENTRE)
+            self.lblRendundancy.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+        # elif (platform.system() == "Darwin"):
+        #     self.lblResultsMax = wx.StaticBitmap(self, -1, wx.Image(self.parent.parent.scriptdir + "/images/osx/indel/maxResults.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(10, 240), size=(140, 20))
+        else:
+            self.lblRendundancy = wx.StaticText(self, -1, "Redundancy Cutoff", (15, 290), style=wx.ALIGN_CENTRE)
+            self.lblRendundancy.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+            resizeTextControlForUNIX(self.lblEnd, 170, 140)
+        self.lblRendundancy.SetForegroundColour("#FFFFFF")
+        self.RedundancyCutoff = wx.SpinCtrlDouble(self, min=0.1, max=5,inc=0.1, initial=1.0 , pos=(10, 310), size=(140, 25))
+        #self.RedundancyCutoff.Bind(wx.EVT_COMBOBOX, self.maxMenuSelect)
+        self.RedundancyCutoff.Bind(wx.EVT_RIGHT_DOWN, self.rightClick)
+        self.RedundancyCutoff.SetToolTipString("If the loop search returns many results, try to insert this many.")
+
 
         # if (platform.system() == "Darwin"):
         #     self.btnClear = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnClear.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(220, 305), size=(90, 25))
@@ -205,18 +220,16 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.btnClear.Bind(wx.EVT_BUTTON, self.clear)
         self.btnClear.SetToolTipString("Clear parameters")
 
+
+
         # Checkbox toggles
-        self.preserve_sequence = wx.CheckBox(self, -1, 'Preserve sequence', (10, 305) )
+        self.preserve_sequence = wx.CheckBox(self, -1, 'Preserve indel sequence', (10, 335) )
         self.preserve_sequence.SetToolTipString("Return native loop sequence instead of Alanines")
         self.preserve_sequence.SetForegroundColour("#FFFFFF")
         self.preserve_sequence.SetValue(False)
 
-        self.include_complex = wx.CheckBox(self, -1, 'Include complex', (10, 325) )
-        self.include_complex.SetToolTipString("Check collisions against other loaded macromolecules")
-        self.include_complex.SetForegroundColour("#FFFFFF")
-        self.include_complex.SetValue(False)
 
-        self.symmetric_design = wx.CheckBox(self, -1, 'Symmetric design', (10, 345) )
+        self.symmetric_design = wx.CheckBox(self, -1, 'Symmetric homo-oligomer loop design', (10, 355) )
         self.symmetric_design.SetToolTipString("Attempt to design the same loop onto each monomer")
         self.symmetric_design.SetForegroundColour("#FFFFFF")
         self.symmetric_design.SetValue(False)
@@ -249,21 +262,22 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.save_model = wx.Button(self, id=-1, label="Save", pos=(40, ypos), size=(100, 25))
         self.save_model.SetForegroundColour("#000000")
         self.save_model.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-        self.save_model.Bind(wx.EVT_BUTTON, self.serverToggle)
-        self.save_model.SetToolTipString("Perform KIC simulations locally")
+        self.save_model.Bind(wx.EVT_BUTTON, self.saveClick)
+        self.save_model.SetToolTipString("Save selected model pdb")
         self.save_model.Disable()
 
 
         # if (platform.system() == "Darwin"):
-        #     self.btnServerToggle = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnServer_Off.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(40, ypos+215), size=(100, 25))
+        #     self.save_all = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnServer_Off.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(40, ypos+215), size=(100, 25))
         # else:
-        self.btnServerToggle = wx.Button(self, id=-1, label="Server Off", pos=(40, ypos + 40), size=(100, 25))
-        self.btnServerToggle.SetForegroundColour("#000000")
-        self.btnServerToggle.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
-        self.btnServerToggle.Bind(wx.EVT_BUTTON, self.serverToggle)
-        self.btnServerToggle.SetToolTipString("Perform KIC simulations locally")
-        self.serverOn = False
-        self.btnServerToggle.Disable()
+
+        self.save_all = wx.Button(self, id=-1, label="Save all", pos=(40, ypos + 40), size=(100, 25))
+        self.save_all.SetForegroundColour("#000000")
+        self.save_all.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
+        self.save_all.Bind(wx.EVT_BUTTON, self.saveAll)
+        self.save_all.SetToolTipString("Save all results at once")
+        self.save_all.Disable()
+
 
         # if (platform.system() == "Darwin"):
         #     self.btnINDEL = wx.BitmapButton(self, id=-1, bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/indel/btnINDEL.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap(), pos=(180, ypos+215), size=(100, 25))
@@ -289,9 +303,9 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             except:
                 print "Could not load Safari!  The help files are located at " + self.scriptdir + "/help"
                 return
-            browser.open(self.parent.parent.scriptdir + "/help/kic.html")
+            browser.open(self.parent.parent.scriptdir + "/help/indel.html")
         else:
-            webbrowser.open(self.parent.parent.scriptdir + "/help/kic.html")
+            webbrowser.open(self.parent.parent.scriptdir + "/help/indel.html")
 
     def setSeqWin(self, seqWin):
         self.seqWin = seqWin
@@ -312,7 +326,12 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         event.Skip()
 
 
-    def enableAll(self):
+    def enableAll(self, save_enable):
+        # Are there results to save?
+        if (save_enable):
+            self.save_model.Enable()
+            self.save_all.Enable()
+
         # Enable all controls
         self.modelMenu.Enable()
         self.beginMenu.Enable()
@@ -323,10 +342,11 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.btnClear.Enable()
         self.ResultsMin.Enable()
         self.ResultsMax.Enable()
-        self.include_complex.Enable()
+        self.RedundancyCutoff.Enable()
         self.btnINDEL.Enable()
         self.preserve_sequence.Enable()
         self.seqWin.cannotDelete = False
+
 
 
 
@@ -344,8 +364,10 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.ResultsMin.Disable()
         self.ResultsMax.Disable()
         self.btnClear.Disable()
-        self.include_complex.Disable()
+        self.RedundancyCutoff.Disable()
         self.preserve_sequence.Disable()
+        self.save_model.Disable()
+        self.save_all.Disable()
 
     def isAA(self, residue):
         return residue.resname in "ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR "
@@ -387,7 +409,6 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
     def activate(self):
         # Get the list of all the PROTEIN models in the sequence viewer
-        # TODO check if we should turn on the symmetry button
         modelList = []
         for r in range(0, self.seqWin.SeqViewer.NumberRows):
             model = self.seqWin.getModelForChain(r)
@@ -426,7 +447,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         # Check to see if there's more than one model currently open. If so,
         # allow the user to include those in calculations
         if len(self.seqWin.poses) > 1:
-            self.enableAll()
+            self.enableAll(save_enable=False)
             if not self.symmetry():
                 self.symmetric_design.Disable()
                 self.symmetric_design.SetValue(False)
@@ -436,9 +457,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.symmetric_design.Disable()
             self.symmetric_design.SetValue(False)
         else:
-            self.enableAll()
-            self.include_complex.Disable()
-            self.include_complex.SetValue(False)
+            self.enableAll(save_enable=False)
             self.symmetric_design.Disable()
             self.symmetric_design.SetValue(False)
 
@@ -495,8 +514,10 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         # Set the selected residue's row to blue so it is easy to see what the selection is
         self.selectedr = event.GetRow()
         if (self.selectedr >= self.grdLoops.NumberRows):
+            self.save_model.Disable()
             self.selectedr = -1
         if (self.selectedr >= len(self.model_names)):
+            self.save_model.Disable()
             event.Skip()
             return
         for r in range(0, self.grdLoops.NumberRows):
@@ -513,9 +534,13 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         if (self.selectedr < len(self.model_names)):
             self.loopEnd = self.begin_seqpos + self.lengths[self.selectedr]
             self.indel_model_selected = self.model_names[self.selectedr]
+            self.save_model.Enable()
+
         else:
+            self.save_model.Disable()
             self.selectedr = -1
             event.Skip()
+
 
         # Remove the previously selected model from the viewer if it's not the same as the one just selected
         if (self.previous_indel_model_selected != "" or self.previous_indel_model_selected != self.indel_model_selected):
@@ -534,8 +559,14 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.cmd.hide("sticks")
             self.previous_indel_model_selected = self.indel_model_selected
             self.cmd.zoom("resi " + str(self.begin_seqpos) + "-" + str(int(self.begin_seqpos) + 3), 2.0)
-            self.cmd.color("blue", self.indel_model_selected)
+            #self.cmd.color("blue", self.indel_model_selected)
+            self.cmd.color('white')
+            self.cmd.color('red', 'ss h')
+            self.cmd.color('yellow', 'ss s')
 
+        self.cmd.select('original', self.selectedModel)
+        self.cmd.hide('everything', 'original')
+        self.cmd.deselect()
         event.Skip()
 
     def modelMenuSelect(self, event):
@@ -565,7 +596,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.disableAll(model_menu_disable=False, seq_win_disable=False)
             return
         else:
-            self.enableAll()
+            self.enableAll(save_enable=False)
 
 
         # Update the beginning and ending positions menus with the available sequence positions
@@ -767,6 +798,104 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             row += 1
         self.grdLoops.Scroll(0, scrollpos)
 
+    def saveClick(self, event):
+        # Borrowed from sequence.py starting at line 2580
+        # self.indel_model_selected is the current model selected
+        while(True):
+            dlg = wx.FileDialog(
+                self, message="Save a PDB File",
+                defaultDir=self.seqWin.cwd,
+                defaultFile=self.indel_model_selected,
+                wildcard="PDB Files (*.pdb)|*.pdb",
+                style=wx.SAVE | wx.CHANGE_DIR)
+
+            if (dlg.ShowModal() == wx.ID_OK):
+                path = dlg.GetPath()
+                # Change cwd to the last opened file
+                if (platform.system() == "Windows"):
+                    lastDirIndx = path.rfind("\\")
+                else:
+                    lastDirIndx = path.rfind("/")
+                self.cwd = str(path[0:lastDirIndx])
+                #self.saveWindowData(None)
+                filename = str(path).split(".pdb")[0] + ".pdb"
+
+                # Does it exist already? If so, ask if user wants to overwrite it
+                if (os.path.isfile(filename)):
+                    dlg2 = wx.MessageDialog(self, "The file " + filename + " already exists.  Overwrite it?", "Filename Already Exists", wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
+                    if (dlg2.ShowModal() == wx.ID_NO):
+                        dlg2.Destroy()
+                        logInfo("Cancelled Indel save operation due to filename already existing")
+                        continue
+                    dlg2.Destroy()
+
+                goToSandbox()
+                logInfo("Saved a PDB to " + filename.strip())
+                self.cmd.save(filename.strip(), self.indel_model_selected)
+                fixPyMOLSave(filename.strip())
+            else:
+                logInfo("Cancelled out of Save PDB (Indel)")
+            break
+        dlg.Destroy()
+
+
+
+    def saveAll(self, event):
+        # Borrowed from sequence.py starting at line 2580
+        # All the models are in the sandbox
+        number_of_models = self.grdLoops.NumberRows
+        while(True):
+            dlg = wx.FileDialog(
+                self, message="Save all PDB files",
+                defaultDir=self.seqWin.cwd,
+                defaultFile=self.indel_model_selected,
+                wildcard="PDB Files (*.pdb)|*.pdb",
+                style=wx.SAVE | wx.CHANGE_DIR)
+
+            if (dlg.ShowModal() == wx.ID_OK):
+                path = dlg.GetPath()
+                # Change cwd to the last opened file
+                if (platform.system() == "Windows"):
+                    lastDirIndx = path.rfind("\\")
+                else:
+                    lastDirIndx = path.rfind("/")
+                self.cwd = str(path[0:lastDirIndx])
+                #self.saveWindowData(None)
+                filename = str(path).split(".pdb")[0] + ".pdb"
+
+                # Does it exist already? If so, ask if user wants to overwrite it
+                if (os.path.isfile(filename)):
+                    dlg2 = wx.MessageDialog(self, "The file " + filename + " already exists.  Overwrite it?", "Filename Already Exists", wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
+                    if (dlg2.ShowModal() == wx.ID_NO):
+                        dlg2.Destroy()
+                        logInfo("Cancelled Indel save operation due to filename already existing")
+                        continue
+                    dlg2.Destroy()
+
+                goToSandbox()
+                logInfo("Saved a PDB to " + filename.strip())
+
+
+                # Copy all of the indel models in the sandbox to the desired directory
+                all_model_files = [x for x in os.listdir(os.getcwd()) if x[:5] == "INDEL"]
+                from shutil import copy2
+                for m in all_model_files:
+                    # pdb = self.selectedModel
+                    q = m.strip(".pdb")
+                    out = q + "_" + self.selectedModel + ".pdb"
+
+                    if (platform.system() == "Windows"):
+                        copy2(m, self.cwd + '\\' + out)
+                    else:
+                        copy2(m, self.cwd + '/' + out)
+
+            else:
+                logInfo("Cancelled out of Save PDB (Indel)")
+            break
+        dlg.Destroy()
+
+
+
     def add(self, event):
         # Is the loop valid?
         if (self.loopBegin < 0 or self.loopBegin < 0 or self.loopBegin >= self.loopEnd):
@@ -931,18 +1060,18 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         if (self.serverOn):
             self.serverOn = False
             # if (platform.system() == "Darwin"):
-            #     self.btnServerToggle.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnServer_Off.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+            #     self.save_all.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnServer_Off.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
             # else:
-            self.btnServerToggle.SetLabel("Server Off")
-            self.btnServerToggle.SetToolTipString("Perform KIC simulations locally")
+            self.save_all.SetLabel("Server Off")
+            self.save_all.SetToolTipString("Perform KIC simulations locally")
             logInfo("Turned off KIC server usage")
         else:
             self.serverOn = True
             # if (platform.system() == "Darwin"):
-            #     self.btnServerToggle.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnServer_On.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+            #     self.save_all.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnServer_On.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
             # else:
-            self.btnServerToggle.SetLabel("Server On")
-            self.btnServerToggle.SetToolTipString("Perform KIC simulations on a remote server")
+            self.save_all.SetLabel("Server On")
+            self.save_all.SetToolTipString("Perform KIC simulations on a remote server")
             logInfo("Turned on KIC server usage")
 
     def cancelINDEL(self):
@@ -1029,16 +1158,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
             self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
             self.seqWin.msgQueue.append("Performing INDEL loop modeling, please be patient...")
-            #self.seqWin.cannotDelete = True
-            #self.parent.GoBtn.Disable()
-            #self.modelMenu.Disable()
-            #self.beginMenu.Disable()
-            #self.endMenu.Disable()
-            #self.minMenu.Disable()
-            #self.maxMenu.Disable()
-            #self.ResultsMin.Disable()
-            #self.ResultsMax.Disable()
-            #self.btnClear.Disable()
+
             self.disableAll(model_menu_disable=True, seq_win_disable=True)
 
 
@@ -1108,16 +1228,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
             # Re-enable controls
             dlg.Destroy()
-            #self.modelMenu.Enable()
-            #self.beginMenu.Enable()
-            #self.endMenu.Enable()
-            #self.parent.GoBtn.Enable()
-            #self.minMenu.Enable()
-            #self.maxMenu.Enable()
-            #self.btnClear.Enable()
-            #self.ResultsMin.Enable()
-            #self.ResultsMax.Enable()
-            self.enableAll()
+            self.enableAll(save_enable=False)
 
             #Pop message out of queue
             for i in range(0, len(self.seqWin.msgQueue)):
@@ -1138,8 +1249,14 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.seqWin.cannotDelete = False
             if (not(accept)):
                 try:
+                    self.save_model.Disable()
+                    self.save_all.Disable()
                     self.cmd.remove(pymol_indel_model_selected)
                     self.cmd.delete(pymol_indel_model_selected)
+                    self.cmd.show()
+                    self.cmd.show("cartoon")
+                    self.cmd.hide("lines")
+                    self.cmd.hide("sticks")
                 except:
                     pass
                 return
@@ -1231,6 +1348,8 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.seqWin.labelMsg.SetLabel("")
         self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
         self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
+        self.cancelINDEL()
+
 
     def threadINDEL(self, event):
         # Why am I doing this ridiculous timer thing for this KIC protocol?
@@ -1263,16 +1382,14 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             end_index = self.seqWin.getRosettaIndex(self.selectedModel, chain, end_seqpos)
             self.maxResultsval = self.ResultsMax.GetValue()
             self.minResultsval = self.ResultsMin.GetValue()
-
+            self.progress = None
 
             # If the user wants to check collisions against other loaded models, get their filenames
             complex_pdbs = []
-            if (self.include_complex.GetValue() == True):
-                #pose_index = self.seqWin.getPoseIndexForModel(self.selectedModel)
-                for i in range(self.seqWin.SeqViewer.NumberRows):
-                    complex_model = self.seqWin.getModelForChain(i)
-                    if self.selectedModel != complex_model:
-                        complex_pdbs.append("COMPLEX\t" + complex_model + ".pdb\t")
+            for i in range(self.seqWin.SeqViewer.NumberRows):
+                complex_model = self.seqWin.getModelForChain(i)
+                if self.selectedModel != complex_model:
+                    complex_pdbs.append("COMPLEX\t" + complex_model + ".pdb\t")
 
             if self.symmetric_design.GetValue() == False:
                 self.symmetry_value = 1
@@ -1280,6 +1397,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
 
             # Write out input file that gets picked up by the daemon
+            collision_cutoff = 2.0
             f.write("SCAFFOLD\t" + pdbfile + "\n")
             f.write("ANCHORS\t" + str(begin_index) + "\t" + str(end_index) + "\n")
             f.write("RANGE\t" + str(self.minLength) + "\t" + str(self.maxLength) + "\n")
@@ -1287,8 +1405,8 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             f.write("MAX_RESULTS\t" + str(self.maxResultsval) + "\n")
             f.write("PRESERVE_SEQUENCE\t" + str(self.preserve_sequence.GetValue()).upper() + "\n")
             f.write("SYMMETRY\t" + str(self.symmetry_value) + "\n")
-            f.write("DUPLICATE_CUTOFF\t 1.0 \n")
-            f.write("COLLISION\t 2.0 \n")
+            f.write("DUPLICATE_CUTOFF\t" + str(self.RedundancyCutoff.GetValue()) + "\n")
+            f.write("COLLISION\t" + str(collision_cutoff) + "\n")
 
             if len(complex_pdbs) > 0:
                 for pdb in complex_pdbs:
@@ -1299,72 +1417,12 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
 
 
-            if (self.serverOn):
-                try:
-                    self.ID = sendToServer("coarsekicinput")
-                    dlg = wx.TextEntryDialog(None, "Enter a description for this submission:", "Job Description", "")
-                    if (dlg.ShowModal() == wx.ID_OK):
-                        desc = dlg.GetValue()
-                        desc = desc.replace("\t", " ").replace("\n", " ").strip()
-                    else:
-                        desc = self.ID
-                    # First make sure this isn't a duplicate
-                    alreadythere = False
-                    try:
-                        f = open("downloadwatch", "r")
-                        for aline in f:
-                            if (len(aline.split("\t")) >= 2 and aline.split("\t")[0] == "KIC" and aline.split("\t")[1] == self.ID.strip()):
-                                alreadythere = True
-                                break
-                        f.close()
-                    except:
-                        pass
-                    if (not(alreadythere)):
-                        f = open("downloadwatch", "a")
-                        f.write("KIC\t" + self.ID.strip() + "\t" + str(datetime.datetime.now().strftime("%A, %B %d - %I:%M:%S %p")) + "\t" + getServerName() + "\t" + desc + "\n")
-                        f.close()
-                    dlg = wx.MessageDialog(self, "InteractiveROSETTA is now watching the server for job ID " + desc.strip() + ".  You will be notified when the package is available for download.", "Listening for Download", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
-                    dlg.ShowModal()
-                    dlg.Destroy()
-                    # Re-enable everything since we're not waiting for the local daemon to do anything
-                    self.scoretypeMenu.Disable()
-                    self.viewMenu.Disable()
-                    self.modelMenu.Enable()
-                    self.beginMenu.Enable()
-                    self.endMenu.Enable()
-                    self.btnLoopType.Enable()
-                    if (self.loopType == "De Novo"):
-                        self.txtSequence.Enable()
-                    # if (platform.system() == "Darwin"):
-                    #     self.btnINDEL.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/kic/btnKIC.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-                    # else:
-                    self.btnINDEL.SetLabel("KIC!")
-                    self.buttonState = "KIC!"
-                    self.btnINDEL.SetToolTipString("Perform KIC simulation with selected parameters")
-                    self.cmd.label("all", "")
-                    self.seqWin.cannotDelete = False
-                    self.parent.GoBtn.Enable()
-                    # Pop this message out of the queue
-                    for i in range(0, len(self.seqWin.msgQueue)):
-                        if (self.seqWin.msgQueue[i].find("Performing INDEL loop modeling, please be patient...") >= 0):
-                            self.seqWin.msgQueue.pop(i)
-                            break
-                    if (len(self.seqWin.msgQueue) > 0):
-                        self.seqWin.labelMsg.SetLabel(self.seqWin.msgQueue[len(self.seqWin.msgQueue)-1])
-                    else:
-                        self.seqWin.labelMsg.SetLabel("")
-                    logInfo("Coarse KIC input sent to server daemon with ID " + self.ID)
-                    return
-                except:
-                    dlg = wx.MessageDialog(self, "The server could not be reached!  Ensure that you have specified a valid server and that you have an network connection.", "Server Could Not Be Reached", wx.OK | wx.ICON_EXCLAMATION | wx.CENTRE)
-                    dlg.ShowModal()
-                    dlg.Destroy()
-                    return
-            else:
-                os.rename("INDELinputtemp", "INDELinput")
-                self.usingServer = False
-                logInfo("INDEL input uploaded locally at INDELinput")
-                self.stage = 2
+
+
+            os.rename("INDELinputtemp", "INDELinput")
+            self.usingServer = False
+            logInfo("INDEL input uploaded locally at INDELinput")
+            self.stage = 2
             #if (self.perturbType == "Perturb Only, Centroid"):# or self.loopType == "Refine"):
             #    self.stage = 4
             self.looptimecount = 0
@@ -1409,12 +1467,17 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
                 # We can get rid of the top-level output file now
                 try:
                     os.remove("INDELoutput")
+                    self.progress.Destroy()
+                    os.remove("progress")
+
                 except:
                     pass
 
 
                 #self.KICView = self.seqWin.pdbreader.get_structure("kic_view", "INDELoutput.pdb")
                 self.btnINDEL.Enable()
+                self.save_all.Enable()
+                #self.save_model.Enable()
                 #self.enableControls()
                 #self.selectedModel = ""
                 # if (platform.system() == "Darwin"):
@@ -1428,9 +1491,44 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
             elif (os.path.isfile("errreport")):
                 # Something went wrong, tell the user about it (loop sequence probably too short)
+                self.progress.Destroy()
                 self.tmrKIC.Stop()
                 self.parent.parent.restartDaemon() # Has to happen because coarse KIC is threaded
                 self.recoverFromError()
+
+            elif (os.path.isfile("progress")):
+                # The local daemon can output its progress to keep the GUI updated about
+                # how far along it is, along with a message
+                # This is optional
+                # See job/__init__.py for more information
+                if (self.progress is None):
+                    self.progress = wx.ProgressDialog("INDEL Progress", "Performing INDEL design job...", 100, style=wx.PD_CAN_ABORT | wx.PD_APP_MODAL | wx.PD_ELAPSED_TIME | wx.PD_REMAINING_TIME)
+                fin = open("progress", "r")
+                data = fin.readlines()
+                fin.close()
+                # First line should be a fraction
+                try:
+                    num = float(data[0].split("/")[0].strip())
+                    den = float(data[0].split("/")[1].strip())
+                    # Convert to a percentage
+                    percent = int(num / den * 100.0)
+                    if (percent > 99):
+                        # Let's the appearance of the output file kill the progress bar
+                        percent = 100
+                except:
+                    return
+
+                try:
+                    # The optional second line is a new message
+                    newmsg = data[1].strip()
+                    (keepGoing, skip) = self.progress.Update(percent, newmsg)
+                except:
+                    (keepGoing, skip) = self.progress.Update(percent)
+
+                if (not(keepGoing)):
+                    # User clicked "Cancel" on the progress bar
+                    self.cancelINDEL()
+                    self.progress.Destroy()
 
             self.looptimecount = self.looptimecount + 1
             if (self.looptimecount > self.timeout):
@@ -1443,4 +1541,4 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
                 except:
                     pass
                 self.parent.parent.restartDaemon() # Has to happen because coarse KIC is threaded
-                self.recoverFromError("ERROR: The loop sequence is too short and cannot bridge the endpoint residues!")
+                #self.recoverFromError("ERROR: The loop sequence is too short and cannot bridge the endpoint residues!")
