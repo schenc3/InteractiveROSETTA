@@ -1375,7 +1375,7 @@ def doINDEL(scriptdir):
             #except:
             #    scorefxn = create_score_function("talaris2013")
             #    print "Set score function to default"
-
+            #Shouldn't this use the score function that the user selected???
             scorefxn = create_score_function("talaris2013")
 
         except:
@@ -1413,13 +1413,13 @@ def doINDEL(scriptdir):
                 loop = pose_from_pdb(loopfile)
                 temp_pose = pose_from_pdb(scaffold_pdb.strip())
                 chain_length = temp_pose.total_residue() / symmetry
-
+                graft_dist = stop_residue - start_residue + 1
 
                 # Here's where the actual grafting happens. Graft and add to model list
                 # Don't need to repack, AnchoredGraftMover takes care of it
                 for j in range(0, symmetry):
-                    startgraft = start_residue + (j * chain_length) + (j * (loop.total_residue() - 5 ))
-                    endgraft   = stop_residue +  (j * chain_length) + (j * (loop.total_residue() - 5 ))
+                    startgraft = start_residue + (j * chain_length) + (j * (loop.total_residue() - graft_dist ))
+                    endgraft   = stop_residue +  (j * chain_length) + (j * (loop.total_residue() - graft_dist ))
                     graftmover = graft.AnchoredGraftMover(startgraft, endgraft , loop, 1, 1)
                     graftmover.set_cycles(50)
                     #graftmover.set_piece(loop, 1, 1)
