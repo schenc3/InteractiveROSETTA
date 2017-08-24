@@ -2488,6 +2488,8 @@ class DockingPanel(wx.lib.scrolledpanel.ScrolledPanel):
             if (not(accept)):
                 self.cmd.remove("dock_view")
                 self.cmd.delete("dock_view")
+                defaultPyMOLView(self.cmd)
+                deleteInputFiles()
                 return
             # Get rid of the original chains, save the docked pose, and reload the structure in PyMOL
             for ID in self.staticChains:

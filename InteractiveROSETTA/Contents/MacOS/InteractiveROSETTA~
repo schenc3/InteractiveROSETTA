@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+SCRIPTDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+# Linking needs to be updated to get the X11 pymol imports
+export DYLD_LIBRARY_PATH=$SCRIPTDIR"/../../osximports:/System/Library/Frameworks/ImageIO.framework/Versions/A/Resources:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries:"$SCRIPTDIR"/../../osximports/X11/lib:"$SCRIPTDIR"/../../osximports/lib"
+echo $DYLD_LIBRARY_PATH
+/usr/bin/python $SCRIPTDIR/../../osx-check-wx-XQuartz.py
+/usr/bin/python $SCRIPTDIR/../../InteractiveROSETTA.py
+exit 0

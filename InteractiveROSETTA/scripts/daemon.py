@@ -33,20 +33,23 @@ from wx import Timer
 from cStringIO import StringIO
 try:
     # Try to import Rosetta
-    from rosetta import *
+    # from rosetta import *
+    from pyrosetta import *
+    from pyrosetta.rosetta import *
     # Extra imports for KIC
-    from rosetta.protocols.loops.loop_mover.perturb import *
-    from rosetta.protocols.loops.loop_mover.refine import *
+    from pyrosetta.rosetta.protocols.loops.loop_mover.perturb import *
+    from pyrosetta.rosetta.protocols.loops.loop_mover.refine import *
     # Extra import for docking
-    import rosetta.protocols.rigid as rigid_moves
+    import pyrosetta.rosetta.protocols.rigid as rigid_moves
     # Extra imports for threading
-    import rosetta.protocols.evaluation
-    import rosetta.protocols.backrub
-    from rosetta.protocols.comparative_modeling import *
-    from rosetta.protocols.jd2 import *
-    from rosetta.core.scoring.constraints import *
-    from rosetta.protocols.pmut_scan import *
+    import pyrosetta.rosetta.protocols.evaluation
+    import pyrosetta.rosetta.protocols.backrub
+    from pyrosetta.rosetta.protocols.comparative_modeling import *
+    from pyrosetta.rosetta.protocols.jd2 import *
+    from pyrosetta.rosetta.core.scoring.constraints import *
+    from pyrosetta.rosetta.protocols.pmut_scan import *
 except:
+    #TODO rewrite this section to prompt the user to properly install PyRosetta 4
     # If it failed, then try to find Rosetta
     # If this already happened once already, then we should have saved the Rosetta path, so let's try to import from there
     print "Rosetta could not be imported.  Attempting to locate the PyRosetta install.  Please be patient..."
@@ -269,36 +272,33 @@ def doMinimization():
     scorefxn = ScoreFunction()
     try:
         scorefxn.add_weights_from_file(weightsfile)
-    except:
+    except Exception as e:
+        print(e.message)
         raise Exception("ERROR: The scoring function weights could not be initialized!")
+    for cst in [core.scoring.atom_pair_constraint, core.scoring.angle_constraint, core.scoring.dihedral_constraint, core.scoring.coordinate_constraint, core.scoring.constant_constraint]:
+      scorefxn.set_weight(cst,1.0)
     f = open("minimizeoutputtemp", "w")
-    pyobs = PyMOL_Observer()
+    
     for [pdbfile, minmapstart, minmapend,constraintFile] in jobs:
         # Get a Rosetta pose of the file
-        minpose = pose_from_pdb(pdbfile)
+        minpose = pose_from_file(pdbfile)
         minpose.pdb_info().name("protocol_view")
-        pyobs.add_observer(minpose)
-        pyobs.pymol.update_energy(True)
+        pyobs = pyrosetta.rosetta.protocols.moves.AddPyMOLObserver(minpose,True,0.0)
+        pyobs.pymol().keep_history(True)
+        # pyobs.add_observer(minpose)
+        # # pyobs.pymol().apply(minpose)
+        # print "PYOBSERVER APPLIED!!!!"
+        pyobs.pymol().update_energy(True)
         areCST = False
         #Configure Constraints
         if constraintFile.strip() != '':
           try:
                 areCST = True
-                # print "THERE ARE CONSTRAINTS"
                 goToSandbox()
-                cstfile = open(constraintFile.strip(),'r')
-                # for line in cstfile:
-                  # print line
-                cstfile.close()
-                cstMover = rosetta.protocols.simple_moves.ConstraintSetMover()
-                # print "cst file is %s!"%(constraintFile.strip())
+                cstMover = protocols.simple_moves.ConstraintSetMover()
                 cstMover.constraint_file(constraintFile.strip())
-                for cst in [atom_pair_constraint, angle_constraint, dihedral_constraint, coordinate_constraint, constant_constraint]:
-                  scorefxn.set_weight(cst,1.0)
           except:
-            # print 'cst failed.'
             areCST = False
-#          cstMover.apply(minpose)
         # Create the minmap
         mm = MoveMap()
         mm.set_bb(False)
@@ -311,13 +311,13 @@ def doMinimization():
                 #mm.set_chi(indx+1, True)
                 mm.set_chi(r_indx,True)
         # Minimize using dfpmin always
-        minmover = MinMover(mm, scorefxn, "dfpmin", 0.01, True)
+        minmover = pyrosetta.rosetta.protocols.simple_moves.MinMover(mm, scorefxn, "dfpmin", 0.01, True)
 #        if constraintFile.strip() != '':
 #          minmover.set_cst_file(constraintFile.strip())
         if (minType == "Cartesian"):
             minmover.cartesian(True)
-            scorefxn.set_weight(cart_bonded, 0.5)
-            scorefxn.set_weight(pro_close, 0)
+            scorefxn.set_weight(core.scoring.cart_bonded, 0.5)
+            scorefxn.set_weight(core.scoring.pro_close, 0)
         try:
             if areCST:
               # print 'areCST!'
@@ -340,7 +340,7 @@ def doMinimization():
         for scoretype in nonzero_scoretypes:
             f.write("\t" + str(scoretype))
         f.write("\n")
-        for res in range(1, minpose.n_residue()+1):
+        for res in range(1, minpose.total_residue()+1):
             f.write("ENERGY\t" + str(minpose.energies().residue_total_energy(res)))
             emap = minpose.energies().residue_total_energies(res)
             for scoretype in nonzero_scoretypes:
@@ -380,10 +380,10 @@ def doFixbb():
         raise Exception("ERROR: The scoring function weights could not be initialized!")
     f = open("designoutputtemp", "w")
     # Perform fixed backbone design
-    pose = pose_from_pdb(pdbfile)
-    design_pack = TaskFactory.create_packer_task(pose)
-    parse_resfile(pose, design_pack, resfile)
-    pack_mover = PackRotamersMover(scorefxn, design_pack)
+    pose = pose_from_file(pdbfile)
+    design_pack = core.pack.task.TaskFactory.create_packer_task(pose)
+    core.pack.task.parse_resfile(pose, design_pack, resfile)
+    pack_mover = protocols.simple_moves.PackRotamersMover(scorefxn, design_pack)
     try:
         pack_mover.apply(pose)
     except:
@@ -404,7 +404,7 @@ def doFixbb():
     f2.close()
     # Now iterate down the residues and change B-factors
     info = pose.pdb_info()
-    for ires in range(1, pose.n_residue()+1):
+    for ires in range(1, pose.total_residue()+1):
         try:
             seqpos = int(info.number(ires))
             chain = info.chain(ires)
@@ -429,7 +429,7 @@ def doFixbb():
     for scoretype in nonzero_scoretypes:
         f.write("\t" + str(scoretype))
     f.write("\n")
-    for res in range(1, pose.n_residue()+1):
+    for res in range(1, pose.total_residue()+1):
         f.write("ENERGY\t" + str(pose.energies().residue_total_energy(res)))
         emap = pose.energies().residue_total_energies(res)
         for scoretype in nonzero_scoretypes:
@@ -473,10 +473,10 @@ def doPMutScan():
     # First repack the structure otherwise we'll get a lot of hits simply because Rosetta liked repacking
     # the residues into its own energy minimum
     # We want real mutants so the structure has to be stabilized by Rosetta first
-    pose = pose_from_pdb(pdbfile)
-    design_pack = TaskFactory.create_packer_task(pose)
+    pose = pose_from_file(pdbfile)
+    design_pack = core.pack.task.TaskFactory.create_packer_task(pose)
     design_pack.restrict_to_repacking()
-    pack_mover = PackRotamersMover(scorefxn, design_pack)
+    pack_mover = protocols.simple_moves.PackRotamersMover(scorefxn, design_pack)
     pack_mover.apply(pose)
     pose.dump_pdb(pdbfile)
     # The point mutant scanner wants the PDB files in a vector1<string> for some reason
@@ -528,8 +528,8 @@ def doRelax():
     except:
         raise Exception("ERROR: The scoring function weights could not be initialized!")
     # Perform FastRelax for each model
-    inputpose = pose_from_pdb(pdbfile)
-    FR = FastRelax(scorefxn)
+    inputpose = pose_from_file(pdbfile)
+    FR = protocols.relax.FastRelax(scorefxn)
     # Write the results in an ensb file (basically a large gzipped PDB file with multiple models)
     archive = gzip.open("resultstemp.ensb", "wb")
     for i in range(0, nmodels):
@@ -600,13 +600,13 @@ def doBackrub():
         RMSDseed = RMSDseed.strip()
         addOn = " -constant_seed -seed_offset 0 -use_bicubic_interpolation "
         initializeRosetta(addOn=addOn)
-        pose = pose_from_pdb(pdbfile)
+        pose = pose_from_file(pdbfile)
         # Allow backrub to potentially pivot all canonical residues
         BM = protocols.backrub.BackrubMover()
         pivot_res = utility.vector1_ulong()
         # Set all canonical AAs to pivot residues
         three = "ALACYSASPGLUPHEGLYHISILELYSLEUMETASNPROGLNARGSERTHRVALTRPTYR"
-        for i in range(0, pose.n_residue()):
+        for i in range(0, pose.total_residue()):
             if (three.find(pose.residue(i+1).name()) >= 0):
                 pivot_res.append(i+1)
         BM.set_pivot_residues(pivot_res)
@@ -615,13 +615,13 @@ def doBackrub():
         mm = MoveMap()
         mm.set_bb(True)
         mm.set_chi(True)
-        for i in range(1, pose.n_residue() + 1):
+        for i in range(1, pose.total_residue() + 1):
             if ("ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR".find(pose.residue(i).name3()) < 0):
                 mm.set_bb(i, False)
                 mm.set_chi(i, False)
         tol = 0.01
         scorefxn_min = create_score_function("talaris2013")
-        minmover = MinMover(mm, scorefxn_min, 'lbfgs_armijo_nonmonotone', tol, True)
+        minmover = protocols.simple_moves.MinMover(mm, scorefxn_min, 'lbfgs_armijo_nonmonotone', tol, True)
         minmover.apply(pose)
         basepose = Pose(pose)
         if (teamrank > 0):
@@ -630,7 +630,7 @@ def doBackrub():
             orig_pose = Pose(basepose)
             addOn = " -constant_seed -seed_offset 0 "
             initializeRosetta(addOn=addOn)
-            minmover = MinMover(mm, scorefxn_min, 'lbfgs_armijo_nonmonotone', tol, True)
+            minmover = protocols.simple_moves.MinMover(mm, scorefxn_min, 'lbfgs_armijo_nonmonotone', tol, True)
             addOn = " -constant_seed -seed_offset " + RMSDseed + " -use_bicubic_interpolation "
             initializeRosetta(addOn=addOn)
             # myRMSD is the target RMSD for this member
@@ -652,7 +652,7 @@ def doBackrub():
                     # If the move is rejected, pose is automatically reverted by this function
                     Metropolis.boltzmann(pose)
                 # Minimize to fix clashes
-                minmover = MinMover(mm, scorefxn_min, 'lbfgs_armijo_nonmonotone', tol, True)
+                minmover = protocols.simple_moves.MinMover(mm, scorefxn_min, 'lbfgs_armijo_nonmonotone', tol, True)
                 minmover.apply(pose)
                 attempts = attempts + 1
                 # If we've been at this backrub temperature for a while, increase it and do more backrub moves
@@ -711,20 +711,20 @@ def doBackrub():
             mm = MoveMap()
             mm.set_bb(True)
             mm.set_chi(True)
-            for i in range(1, pose.n_residue() + 1, 2):
+            for i in range(1, pose.total_residue() + 1, 2):
                 if ("ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR".find(pose.residue(i).name3()) < 0):
                     mm.set_bb(i, False)
                     mm.set_chi(i, False)
-            minmover = MinMover(mm, create_score_function("talaris2013_cart"), 'lbfgs_armijo_nonmonotone', 0.01, True)
+            minmover = protocols.simple_moves.MinMover(mm, create_score_function("talaris2013_cart"), 'lbfgs_armijo_nonmonotone', 0.01, True)
             minmover.cartesian(True)
             minmover.apply(pose)
             mm.set_bb(True)
             mm.set_chi(True)
-            for i in range(2, pose.n_residue() + 1, 2):
+            for i in range(2, pose.total_residue() + 1, 2):
                 if ("ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR".find(pose.residue(i).name3()) < 0):
                     mm.set_bb(i, False)
                     mm.set_chi(i, False)
-            minmover = MinMover(mm, create_score_function("talaris2013_cart"), 'lbfgs_armijo_nonmonotone', 0.01, True)
+            minmover = protocols.simple_moves.MinMover(mm, create_score_function("talaris2013_cart"), 'lbfgs_armijo_nonmonotone', 0.01, True)
             minmover.cartesian(True)
             minmover.apply(pose)
         if (teamrank == 0):
@@ -766,7 +766,7 @@ def doScore():
     except:
         raise Exception("ERROR: The scoring function weights could not be initialized!")
     f = open("scoreoutputtemp", "w")
-    pose = pose_from_pdb(pdbfile)
+    pose = pose_from_file(pdbfile)
     # Calculate energy
     total_E = scorefxn(pose)
     # Dump the output
@@ -775,7 +775,7 @@ def doScore():
     # PyMOL reads that as the "segl" field
     info = pose.pdb_info()
     charges = {}
-    for ires in range(1, pose.n_residue()+1):
+    for ires in range(1, pose.total_residue()+1):
         for iatom in range(1, len(pose.residue(ires).atoms())+1):
             pc = pose.residue(ires).atomic_charge(iatom)
             pc = round(pc * 4.0)
@@ -809,7 +809,7 @@ def doScore():
     for scoretype in nonzero_scoretypes:
         f.write("\t" + str(scoretype))
     f.write("\n")
-    for res in range(1, pose.n_residue()+1):
+    for res in range(1, pose.total_residue()+1):
         # Skip HETATMs/NCAAs
         if (not(pose.residue(res).name1() in "ACDEFGHIKLMNPQRSTVWY")):
             continue
@@ -854,13 +854,13 @@ def doRotamerSearch():
         raise Exception("ERROR: The scoring function weights could not be initialized!")
     f = open("rotameroutputtemp", "w")
     try:
-        rsd_factory = pose_from_pdb("data/residues.pdb")
+        rsd_factory = pose_from_file("data/residues.pdb")
     except:
         raise Exception("ERROR: The file \"data/residues.pdb\" is missing!")
-    pose = pose_from_pdb(pdbfile)
+    pose = pose_from_file(pdbfile)
     info = pose.pdb_info()
     # Find the actual Rosetta residue index
-    for indx in range(1, pose.n_residue()+1):
+    for indx in range(1, pose.total_residue()+1):
         ichain = info.chain(indx)
         iseqpos = int(info.number(indx))
         if (ichain == " " or ichain == ""):
@@ -1008,7 +1008,7 @@ def doRotamerSearch():
 def removeNCAAs(pose):
     # Rosetta throws an error if you try to convert a pose that has HETATMS to centroid mode, so we're doing
     # to have to delete all of those HETATMs first
-    for ires in range(pose.n_residue(), 0, -1):
+    for ires in range(pose.total_residue(), 0, -1):
         if (not(pose.residue(ires).name3() in "ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR")):
             if (ires > 1):
                 pose.delete_polymer_residue(ires)
@@ -1066,14 +1066,14 @@ def doKIC(stage="Coarse"):
     except:
         raise Exception("ERROR: The scoring function weights could not be initialized!")
     if (stage == "Coarse"):
-        pose = pose_from_pdb(pdbfile)
+        pose = pose_from_file(pdbfile)
         # We have to take the HETATMs out otherwise it will crash the centroid mover
         # We could try to make centroid params files, but it seems that they sometimes cause Rosetta to seg fault, which we cannot have
         # Later we'll put them back in
         HETATMs = []
         HETATM_indx = []
         info = pose.pdb_info()
-        for i in range(pose.n_residue(), 0, -1):
+        for i in range(pose.total_residue(), 0, -1):
             if (not(pose.residue(i).name3() in "ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR ")):
                 if (pose.residue(i).is_polymer()):
                     HETATMs.append([i, Residue(pose.residue(i))])
@@ -1119,7 +1119,7 @@ def doKIC(stage="Coarse"):
                 # KIC fixes that and puts them in the right place; they don't need to start out anywhere
                 # near being right
                 try:
-                    rsd_factory = pose_from_pdb("data/residues.pdb")
+                    rsd_factory = pose_from_file("data/residues.pdb")
                 except:
                     raise Exception("ERROR: The file \"data/residues.pdb\" is missing!")
                 offset = 0
@@ -1156,16 +1156,16 @@ def doKIC(stage="Coarse"):
     if (stage == "Coarse"):
         # Low res KIC
         for decoy in range(0, nstruct):
-            sw = SwitchResidueTypeSetMover("centroid")
+            sw = protocols.simple_moves.SwitchResidueTypeSetMover("centroid")
             try:
                 sw.apply(pose)
             except:
                 raise Exception("ERROR: The PDB could not be converted to centroid mode!")
             for loop in loops:
-                loops_set = Loops()
+                loops_set = protocols.loops.Loops()
                 loops_set.add_loop(loop)
-                add_single_cutpoint_variant(pose, loop)
-                set_single_loop_fold_tree(pose, loop)
+                protocols.loops.add_single_cutpoint_variant(pose, loop)
+                protocols.loops.set_single_loop_fold_tree(pose, loop)
                 kic_perturb = LoopMover_Perturb_KIC(loops_set)
                 kic_perturb.set_max_kic_build_attempts(120)
                 try:
@@ -1187,7 +1187,7 @@ def doKIC(stage="Coarse"):
                 for scoretype in nonzero_scoretypes:
                     f.write("\t" + str(scoretype))
                     f.write("\n")
-                for res in range(1, pose.n_residue()+1):
+                for res in range(1, pose.total_residue()+1):
                     f.write("ENERGY\t" + str(pose.energies().residue_total_energy(res)))
                     emap = pose.energies().residue_total_energies(res)
                     for scoretype in nonzero_scoretypes:
@@ -1197,7 +1197,7 @@ def doKIC(stage="Coarse"):
                 # So the main GUI doesn't attempt to read the file before the daemon finishes writing its contents
                 os.rename("kicoutputtemp", "kicoutput")
             else:
-                sw = SwitchResidueTypeSetMover("fa_standard")
+                sw = protocols.simple_moves.SwitchResidueTypeSetMover("fa_standard")
                 try:
                     sw.apply(pose)
                 except:
@@ -1205,7 +1205,7 @@ def doKIC(stage="Coarse"):
                 # Now put the HETATMs back on
                 if (len(HETATMs) > 0):
                     ires = 1
-                    nres = pose.n_residue()
+                    nres = pose.total_residue()
                     [addres, res] = HETATMs.pop()
                     while (ires <= nres):
                         if (ires == addres):
@@ -1252,14 +1252,14 @@ def doKIC(stage="Coarse"):
     else:
         for decoy in range(0, nstruct):
             if (loopType == "REFINE"):
-                pose = pose_from_pdb(pdbfile)
+                pose = pose_from_file(pdbfile)
             else:
-                pose = pose_from_pdb("repacked_" + str(decoy) + ".pdb")
+                pose = pose_from_file("repacked_" + str(decoy) + ".pdb")
             for loop in loops:
-                loops_set = Loops()
+                loops_set = protocols.loops.Loops()
                 loops_set.add_loop(loop)
-                add_single_cutpoint_variant(pose, loop)
-                set_single_loop_fold_tree(pose, loop)
+                protocols.loops.add_single_cutpoint_variant(pose, loop)
+                protocols.loops.set_single_loop_fold_tree(pose, loop)
                 kic_refine = LoopMover_Refine_KIC(loops_set)
                 try:
                     kic_refine.apply(pose)
@@ -1279,7 +1279,7 @@ def doKIC(stage="Coarse"):
                 for scoretype in nonzero_scoretypes:
                     f.write("\t" + str(scoretype))
                 f.write("\n")
-                for res in range(1, pose.n_residue()+1):
+                for res in range(1, pose.total_residue()+1):
                     f.write("ENERGY\t" + str(pose.energies().residue_total_energy(res)))
                     emap = pose.energies().residue_total_energies(res)
                     for scoretype in nonzero_scoretypes:
@@ -1401,8 +1401,8 @@ def doINDEL(scriptdir):
             try:
                 # Make a copy of the scaffold, load the loop
                 loopfile = "loopout_" + str(i) + ".pdb"
-                loop = pose_from_pdb(loopfile)
-                temp_pose = pose_from_pdb(scaffold_pdb.strip())
+                loop = pose_from_file(loopfile)
+                temp_pose = pose_from_file(scaffold_pdb.strip())
                 chain_length = temp_pose.total_residue() / symmetry
 
 
@@ -1490,10 +1490,10 @@ def doRepack(scorefxninput="", pdbfile="repackme.pdb", lastStage=False):
         # Default to Talaris2013
         scorefxn = create_score_function("talaris2013")
     # Repack
-    pose = pose_from_pdb(pdbfile)
+    pose = pose_from_file(pdbfile)
     packtask = standard_packer_task(pose)
     packtask.restrict_to_repacking()
-    packmover = PackRotamersMover(scorefxn, packtask)
+    packmover = protocols.simple_moves.PackRotamersMover(scorefxn, packtask)
     try:
         packmover.apply(pose)
     except:
@@ -1514,7 +1514,7 @@ def doRepack(scorefxninput="", pdbfile="repackme.pdb", lastStage=False):
         for scoretype in nonzero_scoretypes:
             f.write("\t" + str(scoretype))
         f.write("\n")
-        for res in range(1, pose.n_residue()+1):
+        for res in range(1, pose.total_residue()+1):
             f.write("ENERGY\t" + str(pose.energies().residue_total_energy(res)))
             emap = pose.energies().residue_total_energies(res)
             for scoretype in nonzero_scoretypes:
@@ -1570,15 +1570,17 @@ def dockSuperimpose(pose, pose2, root_res1, root_res2):
         rotatePose(pose2, R2)
 
 def doDock(stage="Coarse"):
+    #TODO: Add code to output the scores for each docking output pdb
     #try:
     if (os.path.isfile("constraints.cst")):
         useConstraints = True
     else:
         useConstraints = False
-    if (useConstraints):
-        initializeRosetta("-constraints:cst_file constraints.cst")
-    else:
-        initializeRosetta()
+    # if (useConstraints):
+    #     initializeRosetta("-constraints:cst_file constraints.cst")
+    # else:
+    #     initializeRosetta()
+    initializeRosetta()
     if (stage == "Coarse"):
         try:
             f = open("coarsedockinput", "r")
@@ -1615,12 +1617,14 @@ def doDock(stage="Coarse"):
     except:
         raise Exception("ERROR: The scoring function weights could not be initialized!")
     if (useConstraints):
-        scorefxn.set_weight(atom_pair_constraint, 1)
+        cstMover = protocols.simple_moves.ConstraintSetMover()
+        cstMover.constraint_file("constraints.cst")
+        scorefxn.set_weight(core.scoring.atom_pair_constraint, 1)
     if (stage == "Coarse"):
-        pose = pose_from_pdb(pdbfile)
+        pose = pose_from_file(pdbfile)
         # Low res docking
         best_decoys = []
-        for i in range(0, nrefined):
+        for i in range(nrefined):
             best_decoys.append([None, 9999999999.0])
         # Now let's see if there are polymer HETATMs that will be dropped when converting to centroid mode
         # (I am currently not concerned with losing ligands since I think that docking ligands is a separate Rosetta protocol)
@@ -1632,7 +1636,7 @@ def doDock(stage="Coarse"):
         movingchains = jumpconfig.split("_")[1]
         info = pose.pdb_info()
         PDBnumbering = []
-        for ires in range(1, pose.n_residue()+1):
+        for ires in range(1, pose.total_residue()+1):
             if (not(pose.residue(ires).name3() in "ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR") and pose.residue(ires).is_polymer()):
                 if (info.chain(ires) in staticchains):
                     staticpolymers = True
@@ -1647,10 +1651,10 @@ def doDock(stage="Coarse"):
             posevec = pose.split_by_chain()
             staticpose = Pose(posevec[1])
             for i in range(2, len(staticchains)+1):
-                staticpose.append_pose_by_jump(posevec[i], staticpose.n_residue())
+                staticpose.append_pose_by_jump(posevec[i], staticpose.total_residue())
             static_root_res = []
             offset = 0
-            for i in range(1, staticpose.n_residue()):
+            for i in range(1, staticpose.total_residue()):
                 if (not(staticpose.residue(i).name3() in "ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR")):
                     offset = offset + 1
                 else:
@@ -1660,10 +1664,10 @@ def doDock(stage="Coarse"):
             posevec = pose.split_by_chain()
             movingpose = Pose(posevec[jumpconfig.index("_")+1])
             for i in range(jumpconfig.index("_")+2, len(movingchains)+1):
-                movingpose.append_pose_by_jump(posevec[i], movingpose.n_residue())
+                movingpose.append_pose_by_jump(posevec[i], movingpose.total_residue())
             moving_root_res = []
             offset = 0
-            for i in range(1, movingpose.n_residue()):
+            for i in range(1, movingpose.total_residue()):
                 if (not(movingpose.residue(i).name3() in "ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR")):
                     offset = offset + 1
                 else:
@@ -1673,19 +1677,20 @@ def doDock(stage="Coarse"):
         orig_pose = Pose(pose)
         scorefxn_low = create_score_function("interchain_cen") # This seems to be necessary for lowres docking, so it's hard-coded
         if (useConstraints):
-            scorefxn_low.set_weight(atom_pair_constraint, 1) # To evaluate constraints (NOTE: atom_pair_constraint applies to site_constraints also)
-            add_constraints_from_cmdline_to_pose(pose)
-        sw = SwitchResidueTypeSetMover("centroid")
-        for decoy in range(0, ncoarse):
+            scorefxn_low.set_weight(core.scoring.atom_pair_constraint, 1) # To evaluate constraints (NOTE: atom_pair_constraint applies to site_constraints also)
+            # add_constraints_from_cmdline_to_pose(pose)
+            cstMover.apply(pose)
+        sw = protocols.simple_moves.SwitchResidueTypeSetMover("centroid")
+        for decoy in range(ncoarse):
             pose = Pose(orig_pose)
             try:
                 sw.apply(pose)
             except:
                 raise Exception("ERROR: The PDB could not be converted to centroid mode!")
-            setup_foldtree(pose, jumpconfig, Vector1([1]))
+            protocols.docking.setup_foldtree(pose, jumpconfig, Vector1([1]))
             randomize1 = rigid_moves.RigidBodyRandomizeMover(pose, 1, rigid_moves.partner_upstream)
             randomize2 = rigid_moves.RigidBodyRandomizeMover(pose, 1, rigid_moves.partner_downstream)
-            slide = DockingSlideIntoContact(1)
+            slide = protocols.docking.DockingSlideIntoContact(1)
             try:
                 # Randomize orientations as per the user's instructions
                 if (orient == "Global" or orient == "Fix Mov"):
@@ -1695,7 +1700,7 @@ def doDock(stage="Coarse"):
                 slide.apply(pose)
             except:
                 raise Exception("ERROR: The receptor and ligand chains were not able to be brought into contact!")
-            dock_lowres = DockingLowRes(scorefxn_low, 1)
+            dock_lowres = protocols.docking.DockingLowRes(scorefxn_low, 1)
             try:
                 dock_lowres.apply(pose)
             except:
@@ -1712,7 +1717,7 @@ def doDock(stage="Coarse"):
             f.write(str(decoy+1) + "\n")
             f.close()
         # Convert back to fa for all the best decoys
-        sw = SwitchResidueTypeSetMover("fa_standard")
+        sw = protocols.simple_moves.SwitchResidueTypeSetMover("fa_standard")
         for decoy in range(0, min(ncoarse, nrefined)):
             try:
                 sw.apply(best_decoys[decoy][0])
@@ -1724,9 +1729,9 @@ def doDock(stage="Coarse"):
                 for hetres in staticHETATMs:
                     best_decoys[decoy][0].append_polymer_residue_after_seqpos(Residue(staticpose.residue(hetres)), hetres-1, False)
             if (movingpolymers):
-                dockSuperimpose(best_decoys[decoy][0], movingpose, staticpose.n_residue() + moving_root_res[0], moving_root_res[1])
+                dockSuperimpose(best_decoys[decoy][0], movingpose, staticpose.total_residue() + moving_root_res[0], moving_root_res[1])
                 for hetres in movingHETATMs:
-                    best_decoys[decoy][0].append_polymer_residue_after_seqpos(Residue(movingpose.residue(hetres-staticpose.n_residue())), hetres-1, False)
+                    best_decoys[decoy][0].append_polymer_residue_after_seqpos(Residue(movingpose.residue(hetres-staticpose.total_residue())), hetres-1, False)
             if (staticpolymers or movingpolymers):
                 # Rosetta is annoying, adding those HETATM residues back in renumbered all the PDB numbers, which is going
                 # to screw up high resolution docking if there are constraints because the residue numbers are all different
@@ -1759,13 +1764,14 @@ def doDock(stage="Coarse"):
         f = open("dockoutputtemp", "w")
         for decoy in range(0, nrefined):
             pdbfile = "repackeddock_" + str(decoy) + ".pdb"
-            pose = pose_from_pdb(str(pdbfile))
-            scorefxn_dock = create_score_function_ws_patch("docking", "docking_min")
-            setup_foldtree(pose, jumpconfig, Vector1([1]))
+            pose = pose_from_file(str(pdbfile))
+            scorefxn_dock = create_score_function("docking", "docking_min")
+            protocols.docking.setup_foldtree(pose, jumpconfig, Vector1([1]))
             if (useConstraints):
-                add_constraints_from_cmdline_to_pose(pose)
-                scorefxn_dock.set_weight(atom_pair_constraint, 1)
-            dock_hires = DockMCMProtocol()
+                # add_constraints_from_cmdline_to_pose(pose)
+                cstMover.apply(pose)
+                scorefxn_dock.set_weight(core.scoring.atom_pair_constraint, 1)
+            dock_hires = protocols.docking.DockMCMProtocol()
             dock_hires.set_scorefxn(scorefxn_dock)
             dock_hires.set_scorefxn_pack(scorefxn)
             dock_hires.set_partners(jumpconfig)
@@ -1783,7 +1789,7 @@ def doDock(stage="Coarse"):
             for scoretype in nonzero_scoretypes:
                 f.write("\t" + str(scoretype))
             f.write("\n")
-            for res in range(1, pose.n_residue()+1):
+            for res in range(1, pose.total_residue()+1):
                 f.write("ENERGY\t" + str(pose.energies().residue_total_energy(res)))
                 emap = pose.energies().residue_total_energies(res)
                 for scoretype in nonzero_scoretypes:
@@ -1907,7 +1913,7 @@ def doThread(scriptdir):
     # the exact filename
     pdbfiles = glob.glob("temp/*.pdb")
     outputpdb = "thread_T.pdb"
-    pose = pose_from_pdb(pdbfiles[0])
+    pose = pose_from_file(pdbfiles[0])
     scorefxn(pose)
     pose.dump_pdb(outputpdb)
     for pdbfile in pdbfiles:
@@ -1919,7 +1925,7 @@ def doThread(scriptdir):
     for scoretype in nonzero_scoretypes:
         f.write("\t" + str(scoretype))
     f.write("\n")
-    for res in range(1, pose.n_residue()+1):
+    for res in range(1, pose.total_residue()+1):
         f.write("ENERGY\t" + str(pose.energies().residue_total_energy(res)))
         emap = pose.energies().residue_total_energies(res)
         for scoretype in nonzero_scoretypes:

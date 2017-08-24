@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ATSApplicationFontsPath</key>
+	<string>Fonts/</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>rcproject</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string>project.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>InteractiveROSETTA</string>
+			<key>CFBundleTypeOSTypes</key>
+			<array>
+				<string>rcpj</string>
+			</array>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSTypeIsPackage</key>
+			<true/>
+		</dict>
+	</array>
+	<key>CFBundleIconFile</key>
+	<string>project.icns</string>
+	<key>CFBundleDocumentTypes</key>
+        <array>
+                <dict>
+                        <key>CFBundleTypeExtensions</key>
+                        <array>
+                                <string>pdb</string>
+                        </array>
+                        <key>CFBundleTypeIconFile</key>
+                        <string>PDB.icns</string>
+                        <key>CFBundleTypeMIMETypes</key>
+                        <array>
+                                <string>chemical/x-pdb</string>
+                        </array>
+                        <key>CFBundleTypeName</key>
+                        <string>Protein Data Bank File</string>
+                        <key>CFBundleTypeOSTypes</key>
+                        <array>
+                                <string>TEXT</string>
+                        </array>
+                </dict>
+	</array>
+</dict>
+</plist>

@@ -4,7 +4,6 @@ import os.path
 import platform
 import sys
 from wx.lib.embeddedimage import PyEmbeddedImage
-sys.path.append("/home/balto/VirtualBox VMs/shared/InteractiveROSETTA/dist/InteractiveROSETTA/eggs")
 import poster
 #from poster.encode import multipart_encode
 #from poster.streaminghttp import register_openers

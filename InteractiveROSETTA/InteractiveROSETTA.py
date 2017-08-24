@@ -129,6 +129,7 @@ def importModules(wxpython=False):
             if (len(s) == 0):
                 raise Exception
         except:
+            #TODO rewrite this part for PyRosetta 4
             # Let's find it
             # Did we find it already and save it?
             if (platform.system() == "Windows"):

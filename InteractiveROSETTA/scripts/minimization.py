@@ -938,11 +938,17 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.cmd.label("all", "")
             self.seqWin.cannotDelete = False
             if (not(accept)):
+                # try:
+                #     self.cmd.remove("minimized_view")
+                #     self.cmd.delete("minimized_view")
+                # except: 
+                #     pass
                 try:
-                    self.cmd.remove("minimized_view")
-                    self.cmd.delete("minimized_view")
+                    self.cmd.remove("protocol_view")
+                    self.cmd.delete("protocol_view")
                 except:
                     pass
+                defaultPyMOLView(self.cmd)
                 return
             # Get rid of the original poses, save the minimized poses, and reload their structures in PyMOL
             for i in range(0, len(self.minposes)):
@@ -956,11 +962,11 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
                     self.seqWin.poses[poseindx] = self.seqWin.pdbreader.get_structure(self.minmodels[i], self.minmodels[i] + "_M.pdb")
                     self.cmd.remove(minmodel)
                     self.cmd.delete(minmodel)
-                    try:
-                        self.cmd.remove("minimized_view")
-                        self.cmd.delete("minimized_view")
-                    except:
-                        pass
+                    # try:
+                    #     self.cmd.remove("minimized_view")
+                    #     self.cmd.delete("minimized_view")
+                    # except:
+                    #     pass
                     self.cmd.load(minmodel + "_M.pdb", minmodel)
                     # IMPORTANT: You have to replace the model in the sandbox with the new minimized model
                     os.remove(minmodel + ".pdb")
@@ -972,6 +978,13 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
                     print "Bug at accept button click"
                     pass
             self.seqWin.recolorResidues()
+            try:
+                self.cmd.remove("protocol_view")
+                self.cmd.delete("protocol_view")
+            except:
+                print "Couldn't close protocol_view"
+                pass
+                
 
     def recoverFromError(self):
         # This function tells the user what the error was and tries to revert the protocol
@@ -1008,6 +1021,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.btnChi.Enable()
         self.btnBoth.Enable()
         self.btnMinType.Enable()
+        self.btnCst.Enable()
         if (platform.system() == "Darwin"):
             self.btnMinimize.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnMinimize.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
         else:
@@ -1111,11 +1125,6 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
                     logInfo("Server took too long to respond so the local daemon was used")
                 self.tmrMinimize.Start(1000)
             if (os.path.isfile("minimizeoutput")):
-                try:
-                    self.cmd.copy("minimized_view", "protocol_view")
-                    self.cmd.remove("protocol_view")
-                except:
-                    pass
                 self.tmrMinimize.Stop()
                 # Read the output dumped by the child process
                 self.minposes = []
@@ -1181,6 +1190,7 @@ class MinimizationPanel(wx.lib.scrolledpanel.ScrolledPanel):
                 self.btnChi.Enable()
                 self.btnBoth.Enable()
                 self.btnMinType.Enable()
+                self.btnCst.Enable()
                 self.selectedModel = ""
                 if (platform.system() == "Darwin"):
                     self.btnMinimize.SetBitmapLabel(bitmap=wx.Image(self.parent.parent.scriptdir + "/images/osx/minimization/btnMinimize_Finalize.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())

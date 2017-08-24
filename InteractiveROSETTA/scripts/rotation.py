@@ -4,18 +4,20 @@ import sys
 import platform
 try:
     # Try to import Rosetta
-    from rosetta import *
+    from pyrosetta import *
+    from pyrosetta.rosetta import *
     # Extra imports for KIC
-    from rosetta.protocols.loops.loop_mover.perturb import *
-    from rosetta.protocols.loops.loop_mover.refine import *
+    from pyrosetta.rosetta.protocols.loops.loop_mover.perturb import *
+    from pyrosetta.rosetta.protocols.loops.loop_mover.refine import *
     # Extra import for docking
-    import rosetta.protocols.rigid as rigid_moves
+    import pyrosetta.rosetta.protocols.rigid as rigid_moves
     # Extra imports for threading
-    import rosetta.protocols.evaluation
-    from rosetta.protocols.comparative_modeling import *
-    from rosetta.protocols.jd2 import *
-    from rosetta.core.scoring.constraints import *
+    import pyrosetta.rosetta.protocols.evaluation
+    from pyrosetta.rosetta.protocols.comparative_modeling import *
+    from pyrosetta.rosetta.protocols.jd2 import *
+    from pyrosetta.rosetta.core.scoring.constraints import *
 except:
+    #TODO rewrite to prompt user to properly install PyRosetta 4
     # If it failed, then try to find Rosetta
     # If this already happened once already, then we should have saved the Rosetta path, so let's try to import from there
     print "Rosetta could not be imported.  Attempting to locate the PyRosetta install.  Please be patient..."
