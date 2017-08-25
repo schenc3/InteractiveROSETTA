@@ -1375,7 +1375,7 @@ def doINDEL(scriptdir):
             #except:
             #    scorefxn = create_score_function("talaris2013")
             #    print "Set score function to default"
-
+            #Shouldn't this use the score function that the user selected???
             scorefxn = create_score_function("talaris2013")
 
         except:
@@ -1391,8 +1391,17 @@ def doINDEL(scriptdir):
         scores  = []
         lengths = []
         goToSandbox()
+
+
+
         # Try to make models from all the loops, or up to the max number specified
-        while i < min((num_results + 1), max_results):
+        while i < min((num_results + 1), max_results+1):
+
+            if i < 97:
+                f = open("progress", 'w')
+                f.write("%d/100"%(i))
+                f.close()
+
 
             print "\n ==================================================== \n"
             print "\t \t \t Attempting to insert loop " + str(i)
@@ -1404,17 +1413,18 @@ def doINDEL(scriptdir):
                 loop = pose_from_pdb(loopfile)
                 temp_pose = pose_from_pdb(scaffold_pdb.strip())
                 chain_length = temp_pose.total_residue() / symmetry
-
+                graft_dist = stop_residue - start_residue + 1
 
                 # Here's where the actual grafting happens. Graft and add to model list
                 # Don't need to repack, AnchoredGraftMover takes care of it
                 for j in range(0, symmetry):
-                    startgraft = start_residue + (j * chain_length) + (j * (loop.total_residue() - 5 ))
-                    endgraft   = stop_residue +  (j * chain_length) + (j * (loop.total_residue() - 5 ))
+                    startgraft = start_residue + (j * chain_length) + (j * (loop.total_residue() - graft_dist ))
+                    endgraft   = stop_residue +  (j * chain_length) + (j * (loop.total_residue() - graft_dist ))
                     graftmover = graft.AnchoredGraftMover(startgraft, endgraft , loop, 1, 1)
                     graftmover.set_cycles(50)
                     #graftmover.set_piece(loop, 1, 1)
                     graftmover.apply(temp_pose)
+                    graftmover.final_repack()
                     print "Grafted at %d and %d"%(startgraft, endgraft)
 
                 #graftmover = graft.AnchoredGraftMover(start_residue + chain_length, stop_residue + chain_length, loop, 1, 1)
@@ -1430,12 +1440,17 @@ def doINDEL(scriptdir):
                 models.append(temp_pose)
                 lengths.append(loop.total_residue())
             except:
-                writeError("No results found. Try modifying anchors.")
+                writeError("Something went wrong (could be Pyrosetta).")
                 return
             i += 1
 
         # Sort models by energy and write them out so we can look at them
         # Write out a file with info about each loop
+        #Console output
+        f = open("progress", 'w')
+        f.write("100/100")
+        f.close()
+
         i = 1
         f = open("INDELoutputtemp", "w")
         for score, model, length in sorted(zip(scores, models, lengths)):
@@ -1452,11 +1467,12 @@ def doINDEL(scriptdir):
 
     else:
         writeError("No results found. Try relaxing search parameters")
+        return
 
 
 
 
-    #Console output
+
     print "Tried to find loops for anchor residues N-term:" + anchors[0] + "\t C-term: " + anchors[1]
     print str(num_results) + " loops found."
     print str(len(models)) + " models built."
