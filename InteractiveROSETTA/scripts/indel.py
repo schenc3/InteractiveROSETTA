@@ -376,19 +376,26 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         # Check to see if we should turn the symmetry button on, and how many symmetric molecules there are
         poseindex = self.seqWin.getPoseIndexForModel(self.selectedModel)
         chains = [x for x in self.seqWin.poses[poseindex][0]]
+        self.symmetry_value = 1
+        print self.symmetry_value
         # chains = [x for x in self.seqWin.poses[poseindex][0].get_chains()]
         if len(chains) == 1:
-            self.symmetry_value = 1
-            return False
+            # self.symmetry_value = 1
+            return self.symmetry_value != 1
 
         # Check if each chain is the same size
         for i in range(len(chains)):
-            i_chainlength = len([x for x in chains[i].get_residues() if self.isAA(x)])
+            print 'chain i:',sorted(chains)[i]
+            i_chainlength = len([x for x in sorted(chains)[i].get_residues() if self.isAA(x)])
             for j in range(i+1, len(chains)):
-                j_chainlength = len([x for x in chains[j].get_residues() if self.isAA(x)])
+                print 'chain j:',sorted(chains)[j]
+                j_chainlength = len([x for x in sorted(chains)[j].get_residues() if self.isAA(x)])
                 if i_chainlength != j_chainlength:
-                    self.symmetry_value = 1
-                    return False
+                    return self.symmetry_value != 1
+                    # self.symmetry_value = 1
+                    # return False
+                self.symmetry_value += 1
+                print self.symmetry_value
         """
         # Check to make sure that each chain has the same residues
         for i in range(len(chains)):
@@ -403,8 +410,9 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
 
         # We have symmetric chains, allow symmetric design
-        self.symmetry_value = len(chains)
-        return True
+        # self.symmetry_value = len(chains)
+        # return True
+        return self.symmetry_value != 1
 
 
 

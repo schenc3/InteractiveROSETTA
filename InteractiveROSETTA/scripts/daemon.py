@@ -2069,6 +2069,7 @@ def daemonLoop():
             except Exception as e:
                 print "The daemon crashed while performing the INDEL loop modeling job!"
                 writeError(e.message)
+                raise(e)
             try:
                 os.remove("INDELinput")
             except Exception as e:
