@@ -141,7 +141,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def addConstraint(self,event):
       '''Adds a new constraint to the set of constraints'''
       logInfo('Add Constraint button clicked!')
-      constraintTypes = ['Constraint Type','AtomPair','Angle','Dihedral','CoordinateConstraint']
+      constraintTypes = ['Constraint Type','AtomPair','Angle','Dihedral','CoordinateConstraint','Freeze Residues']
       self.constraintTypeMenu = wx.ComboBox(self,choices=constraintTypes,style=wx.CB_READONLY)
       self.constraintTypeMenu.SetSelection(0)
 #      self.constraintTypeMenu.Bind(wx.EVT_COMBOBOX,self.setConstraintType)
@@ -150,24 +150,29 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       #PDB MENU
       pdbs = ['Choose PDB']
       # print pdbs
-      for [indx, r, seqpos, poseindx, chainoffset, minType,r_indx] in self.minPanel.minmap:
-        # print "poseindx",poseindx
-        if len(pdbs) == 0:
-          # print 'appending',poseindx
-          pdbs.append(poseindx)
-        isThere = False
-        for i in range(0,len(pdbs)):
-          if poseindx == pdbs[i]:
-            # print("%i = %i"%(poseindx,pdbs[i]))
-            isThere = True
-            break
-        if not isThere:
-          # print 'appending',poseindx
-          pdbs.append(poseindx)
-      # print pdbs
-      for i in range(1,len(pdbs)):
-        pdbs[i] = str(self.seqWin.poses[pdbs[i]].get_id())
-        # print pdbs[i]
+      if self.minPanel.GetName() == "ProtMinimization": 
+          for [indx, r, seqpos, poseindx, chainoffset, minType,r_indx] in self.minPanel.minmap:
+            # print "poseindx",poseindx
+            if len(pdbs) == 0:
+              # print 'appending',poseindx
+              pdbs.append(poseindx)
+            isThere = False
+            for i in range(0,len(pdbs)):
+              if poseindx == pdbs[i]:
+                # print("%i = %i"%(poseindx,pdbs[i]))
+                isThere = True
+                break
+            if not isThere:
+              # print 'appending',poseindx
+              pdbs.append(poseindx)
+          # print pdbs
+          for i in range(1,len(pdbs)):
+            pdbs[i] = str(self.seqWin.poses[pdbs[i]].get_id())
+            # print pdbs[i]
+    
+      #INDEL
+      if self.minPanel.GetName() == "INDEL":
+        pdbs.append(self.minPanel.selectedModel)
       # print pdbs
       self.PdbMenu = wx.ComboBox(self,choices=pdbs,style=wx.CB_READONLY)
       self.PdbMenu.SetSelection(0)
@@ -210,7 +215,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.CurrentConstraint['PDB'] = self.PdbMenu.GetStringSelection()
       self.CurrentConstraint['ConstraintType'] = self.constraintTypeMenu.GetStringSelection()
       self.CurrentConstraint['FuncType'] = self.FuncMenu.GetStringSelection()
-      if self.CurrentConstraint['PDB'] == 'Choose PDB' or self.CurrentConstraint['ConstraintType'] == 'Constraint Type' or self.CurrentConstraint['FuncType']=='Select Constraint Function':
+      if self.CurrentConstraint['PDB'] == 'Choose PDB' or self.CurrentConstraint['PDB'] == '' or self.CurrentConstraint['ConstraintType'] == 'Constraint Type' or self.CurrentConstraint['FuncType']=='Select Constraint Function':
         self.CurrentConstraint = {}
         event.skip()
       else:
@@ -231,17 +236,65 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.Cancelables = [self.ConstraintTxt,self.PdbTxt,self.FuncTxt,self.CancelBtn]
 
         #set poseindx
-        for [indx, r, seqpos, poseindx, chainoffset, minType,r_indx] in self.minPanel.minmap:
-          if str(self.seqWin.poses[poseindx].get_id())==self.CurrentConstraint['PDB']:
-            self.CurrentConstraint['poseindx']=poseindx
-            break
+        if self.minPanel.GetName() == "ProtMinimization":
+            for [indx, r, seqpos, poseindx, chainoffset, minType,r_indx] in self.minPanel.minmap:
+              if str(self.seqWin.poses[poseindx].get_id())==self.CurrentConstraint['PDB']:
+                self.CurrentConstraint['poseindx']=poseindx
+                break
+        if self.minPanel.GetName() == "INDEL":
+            for i in range(len(self.seqWin.poses)):
+                if str(self.seqWin.poses[i].get_id()) == self.CurrentConstraint['PDB']:
+                    self.CurrentConstraint['poseindx'] = i
+                    break
 
         #check which constraint method was selected and behave accordingly
         method = self.CurrentConstraint['ConstraintType']
         #AtomPair
-        if method not in ['AtomPair','Angle','Dihedral','CoordinateConstraint']:
+        if method not in ['AtomPair','Angle','Dihedral','CoordinateConstraint','Freeze Residues']:
           self.cancel()
           return
+        #Freeze Residues
+        elif method == 'Freeze Residues':  
+            #residue items
+            resItems = self.getResidues()
+            res1items = ['Select residue']+resItems
+            res2items = ['Select residue']+resItems
+            res3items = ['Select residue']+resItems
+            #"Freeze residues""
+            self.freezeTxt = wx.StaticText(self,-1,label="Freeze residues")
+            self.Sizer.Add(self.freezeTxt,(2,0),(1,1))
+            self.Layout()
+            #Residue one dropdown
+            self.Residue1Menu = wx.ComboBox(self,-1,choices=res1items,style=wx.CB_READONLY)
+            self.Residue1Menu.SetSelection(0)
+            self.Sizer.Add(self.Residue1Menu,(2,1),(1,1))
+            self.Layout()
+            #"through"
+            self.throughTxt = wx.StaticText(self,-1,label="through residues")
+            self.Sizer.Add(self.throughTxt,(2,2),(1,1))
+            self.Layout()
+            #Residue two dropdown
+            self.Residue2Menu = wx.ComboBox(self,-1,choices=res2items,style=wx.CB_READONLY)
+            self.Residue2Menu.SetSelection(0)
+            self.Sizer.Add(self.Residue2Menu,(2,3),(1,1))
+            self.Layout()
+            #"Relative to"
+            self.relativeTxt = wx.StaticText(self,-1,label="relative to residue")
+            self.Sizer.Add(self.relativeTxt,(3,0),(1,1))
+            #Residue 3, atom 3 dropdowns
+            self.Residue3Menu = wx.ComboBox(self,-1,choices=res3items,style=wx.CB_READONLY)
+            self.Residue3Menu.Bind(wx.EVT_COMBOBOX,self.setAtom3Items)
+            self.Residue3Menu.SetSelection(0)
+            self.Sizer.Add(self.Residue3Menu,(3,1),(1,1))
+            self.Layout()
+            
+            self.Atom3Menu = wx.ComboBox(self,-1,choices=['Select Atom'],style=wx.CB_READONLY)
+            self.Atom3Menu.SetSelection(0)
+            self.Sizer.Add(self.Atom3Menu,(3,2),(1,1))
+            self.Layout()
+            
+            self.Cancelables = self.Cancelables+[self.freezeTxt,self.Residue1Menu,self.throughTxt,self.Residue2Menu,self.relativeTxt,self.Residue3Menu,self.Atom3Menu]
+            
         else:
           #Residue 1
           res1items = ['Select Residue 1']+self.getResidues()
@@ -335,7 +388,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.Cancelables+=[self.xText,self.xEntry,self.yText,self.yEntry,self.zText,self.zEntry]
         #Function type stuff
         if self.CurrentConstraint['FuncType'] in ['Harmonic','Circular Harmonic']:
-          if method in ['AtomPair','CoordinateConstraint']:
+          if method in ['AtomPair','CoordinateConstraint','Freeze Residues']:
             self.x0Text = wx.StaticText(self,-1,"Cut-off Distance")
           else:
             self.x0Text = wx.StaticText(self,-1,"Cut-off Angle")
@@ -372,28 +425,52 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
 
     def getResidues(self):
-      minmap = self.minPanel.minmap
+      validResidues = "ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR DG DA DT DC"
       residues = []
-      poseindx = self.CurrentConstraint['poseindx']
-      for [indx, r, seqpos, p, chainoffset, minType,r_indx] in minmap:
-        if p == poseindx:
-          # print indx, r, seqpos, p, chainoffset, r_indx
-          chain = self.seqWin.IDs[r][len(self.seqWin.IDs[r])-1]
-          if chain == '_':
-            chain = ' '
-          # print self.seqWin.poses[poseindx][0]
-          # print chain
-          chain_structure = self.seqWin.poses[poseindx][0][chain]
-          # print chain_structure.get_id()
-          residue = str(r_indx)+":"
-          residue += chain_structure[int(seqpos)].resname+":"
-          # print residue
-          #Only considering standard amino acids for the moment
-          if residue.split(":")[1] in "ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR":
-            residue += str(seqpos)+":"
-            residue += chain
-            # print residue
-            residues.append(residue)
+      if self.minPanel.GetName() == "ProtMinimization":
+          minmap = self.minPanel.minmap
+        #   residues = []
+          poseindx = self.CurrentConstraint['poseindx']
+          for [indx, r, seqpos, p, chainoffset, minType,r_indx] in minmap:
+            if p == poseindx:
+              # print indx, r, seqpos, p, chainoffset, r_indx
+              chain = self.seqWin.IDs[r][len(self.seqWin.IDs[r])-1]
+              if chain == '_':
+                chain = ' '
+              # print self.seqWin.poses[poseindx][0]
+              # print chain
+              chain_structure = self.seqWin.poses[poseindx][0][chain]
+              # print chain_structure.get_id()
+              residue = str(r_indx)+":"
+              residue += chain_structure[int(seqpos)].resname+":"
+              # print residue
+              #Only considering standard amino acids for the moment
+              if residue.split(":")[1] in validResidues:
+                residue += str(seqpos)+":"
+                residue += chain
+                # print residue
+                residues.append(residue)
+      if self.minPanel.GetName() == "INDEL":
+          poseindx = self.CurrentConstraint['poseindx']
+          print self.seqWin.IDs
+          for ch in self.seqWin.IDs:
+              if self.CurrentConstraint['PDB'] in ch:
+                  print ch
+                  chain = ch[-1]
+                  model = self.CurrentConstraint['PDB']
+                #   for seqpos in self.seqWin.poses[poseindx][0][chain]:
+                      
+                  print chain
+                  if chain == '_': chain = ' '
+              chain_structure = self.seqWin.poses[poseindx][0][chain]
+              for res in chain_structure:
+                  resid = res.get_id()[1]
+                  RosettaID = self.seqWin.getRosettaIndex(model,chain,resid)
+                  residue = "%i:%s:%i:%s"%(RosettaID,res.get_resname(),resid,chain)
+                  residues.append(residue)
+                  print residue
+              print residues
+              
       return residues
 
     def setConstraintPDB(self,event):
@@ -464,41 +541,96 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.Atom4Menu.Clear()
       self.Atom4Menu.AppendItems(atoms)
       self.Atom4Menu.SetSelection(0)
+      
+    def getCoordinates(self,residue,atom,poseindx):
+        '''get the spacial coordinates of the specified atom'''
+        print "getCoordinates"
+        [r_indx,resname,seqpos,chain] = residue.split(":")
+        print residue,atom,poseindx
+        #self.seqWin.poses[poseindx][0][chain]
+        atoms = self.seqWin.poses[poseindx][0][chain][int(seqpos)].get_atoms()
+        print "atoms:",atoms
+        for atom_ in atoms:
+            print atom_.get_id().strip(),atom.strip()
+            if atom_.get_id().strip() == atom.strip():
+                print "hoooray!"
+                coord = atom_.get_coord()
+                print "coord:",coord
+                x,y,z = coord
+                return x,y,z
 
-
+    def FinalFreeze(self,pdb,residue1,residue2,residue3,atom3,func,x0,sd):
+        func = ''.join(func.upper().split(' '))
+        constraintStem = "%s %s %s %s %s"%(atom3, residue3.split(":")[0],func,x0,sd)
+        residueList = self.getResidues()
+        indx1 = residueList.index(residue1)
+        indx2 = residueList.index(residue2)
+        poseindx = self.CurrentConstraint['poseindx']
+        if indx1 <= indx2:
+            for i in range(indx1,indx2+1):
+                residue = residueList[i]
+                [r_indx,resname,seqpos,chain] = residue.split(":")
+                for atom in self.getAtoms(residue):
+                    if atom.strip()[0] == 'H': continue
+                    print residue,atom,poseindx
+                    x,y,z = self.getCoordinates(residue,atom,poseindx)
+                    constraintString = "CoordinateConstraint %s %s %s %s %s %s"%(atom,r_indx,x,y,z,constraintStem)
+                    self.minPanel.ConstraintSet.append([pdb,self.CurrentConstraint['poseindx'],constraintString])
+                    self.addToGrid("%s: %s"%(pdb,constraintString))
+        else:
+            for i in range(indx2,indx1+1):
+                residue = residueList[i]
+                [r_indx,resname,seqpos,chain] = residue.split(":")
+                for atom in self.getAtoms(residue):
+                    if atom.strip()[0] == 'H': continue
+                    print residue,atom,poseindx
+                    x,y,z = self.getCoordinates(residue,atom,poseindx)
+                    constraintString = "CoordinateConstraint %s %s %s %s %s %s"%(atom,r_indx,x,y,z,constraintStem)
+                    self.minPanel.ConstraintSet.append([pdb,self.CurrentConstraint['poseindx'],constraintString])
+                    self.addToGrid("%s: %s"%(pdb,constraintString))
 
     def FinalizeConstraint(self,event):
       pdb = self.CurrentConstraint["PDB"]
       method = self.CurrentConstraint['ConstraintType']
-      constraintString = method+' '
-      #Atom1 and Atom2
-      constraintString += "%s %s %s %s"%(self.Atom1Menu.GetStringSelection().strip(),self.CurrentConstraint['Atom1_ResNum'].strip(),self.Atom2Menu.GetStringSelection().strip(),self.CurrentConstraint['Atom2_ResNum'].strip())
-      #Atom3
-      if method in ['Angle','Dihedral']:
-        constraintString += " %s %s"%(self.Atom3Menu.GetStringSelection().strip(),self.CurrentConstraint['Atom3_ResNum'].strip())
-      #Atom4
-      if method == 'Dihedral':
-        constraintString += " %s %s"%(self.Atom4Menu.GetStringSelection().strip(),self.CurrentConstraint['Atom4_ResNum'].strip())
-      #CoordinateConstraint
-      if method == 'CoordinateConstraint':
-        #self.xEntry.SelectAll()
-        #self.yEntry.SelectAll()
-        #self.zEntry.SelectAll()
-        constraintString += " %s %s %s"%(self.xEntry.GetValue().strip(),self.yEntry.GetValue().strip(),self.zEntry.GetValue().strip())
+      if method == "Freeze Residues":
+          residue1 = self.Residue1Menu.GetStringSelection()
+          residue2 = self.Residue2Menu.GetStringSelection()
+          residue3 = self.Residue3Menu.GetStringSelection()
+          atom3 = self.Atom3Menu.GetStringSelection()
+          func = self.CurrentConstraint['FuncType']
+          x0 = self.x0Entry.GetValue().strip()
+          sd = self.sdEntry.GetValue().strip()
+          self.FinalFreeze(pdb,residue1,residue2,residue3,atom3,func,x0,sd)
+      else:
+          constraintString = method+' '
+          #Atom1 and Atom2
+          constraintString += "%s %s %s %s"%(self.Atom1Menu.GetStringSelection().strip(),self.CurrentConstraint['Atom1_ResNum'].strip(),self.Atom2Menu.GetStringSelection().strip(),self.CurrentConstraint['Atom2_ResNum'].strip())
+          #Atom3
+          if method in ['Angle','Dihedral']:
+            constraintString += " %s %s"%(self.Atom3Menu.GetStringSelection().strip(),self.CurrentConstraint['Atom3_ResNum'].strip())
+          #Atom4
+          if method == 'Dihedral':
+            constraintString += " %s %s"%(self.Atom4Menu.GetStringSelection().strip(),self.CurrentConstraint['Atom4_ResNum'].strip())
+          #CoordinateConstraint
+          if method == 'CoordinateConstraint':
+            #self.xEntry.SelectAll()
+            #self.yEntry.SelectAll()
+            #self.zEntry.SelectAll()
+            constraintString += " %s %s %s"%(self.xEntry.GetValue().strip(),self.yEntry.GetValue().strip(),self.zEntry.GetValue().strip())
 
-      #Function Types
-      functions = {'Harmonic':"HARMONIC",'Circular Harmonic':'CIRCULARHARMONIC'}
-      if self.CurrentConstraint['FuncType'] in ['Harmonic','Circular Harmonic']:
-        #self.x0Entry.SelectAll()
-        #self.sdEntry.SelectAll()
-        # print 'self.x0Entry: ',self.x0Entry.GetValue().strip()," unstripped: ",self.x0Entry.GetValue()
-        # print 'self.sdEntry: ',self.sdEntry.GetValue().strip()
-        constraintString += ' %s %s %s'%(functions[self.CurrentConstraint['FuncType']].strip(),self.x0Entry.GetValue().strip(),self.sdEntry.GetValue().strip())
-      # print constraintString
-      logInfo(constraintString)
-    #   self.ConstraintSet.append([self.CurrentConstraint['PDB'],self.CurrentConstraint['poseindx'],constraintString])
-      self.minPanel.ConstraintSet.append([self.CurrentConstraint['PDB'],self.CurrentConstraint['poseindx'],constraintString])
-      self.addToGrid("%s: %s"%(self.CurrentConstraint['PDB'],constraintString))
+          #Function Types
+          functions = {'Harmonic':"HARMONIC",'Circular Harmonic':'CIRCULARHARMONIC'}
+          if self.CurrentConstraint['FuncType'] in ['Harmonic','Circular Harmonic']:
+            #self.x0Entry.SelectAll()
+            #self.sdEntry.SelectAll()
+            # print 'self.x0Entry: ',self.x0Entry.GetValue().strip()," unstripped: ",self.x0Entry.GetValue()
+            # print 'self.sdEntry: ',self.sdEntry.GetValue().strip()
+            constraintString += ' %s %s %s'%(functions[self.CurrentConstraint['FuncType']].strip(),self.x0Entry.GetValue().strip(),self.sdEntry.GetValue().strip())
+          # print constraintString
+          logInfo(constraintString)
+        #   self.ConstraintSet.append([self.CurrentConstraint['PDB'],self.CurrentConstraint['poseindx'],constraintString])
+          self.minPanel.ConstraintSet.append([pdb,self.CurrentConstraint['poseindx'],constraintString])
+          self.addToGrid("%s: %s"%(pdb,constraintString))
       self.cancel()
 
     def addToGrid(self,constraintString):
@@ -512,3 +644,9 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       logInfo('Constraints Grid Clicked!')
       self.selectdr = event.GetRow()
       # print self.selectdr
+      
+    def loadFile(self,cstFile):
+        None
+        
+    def saveFile(self,cstFile):
+        None

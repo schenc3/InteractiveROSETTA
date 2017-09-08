@@ -1296,6 +1296,7 @@ def doKIC(stage="Coarse"):
 def doINDEL(scriptdir):
     # Query database - lookup executable and database files need to be in sandbox
     num_results = 0
+    areCST = False
 
     # Find the right binary
     if (platform.system() == "Windows"):
@@ -1323,6 +1324,9 @@ def doINDEL(scriptdir):
             max_results = int(line.split('\t')[1])
         if (line[0:8] == "SCOREFXN"):
             selected_scorefxn = line.split('\t')[1]
+        if line[:11] == "CONSTRAINTS":
+            cstFile = line.split('\t')[1]
+            areCST = True
     f.close()
 
 
@@ -1376,7 +1380,7 @@ def doINDEL(scriptdir):
             #    scorefxn = create_score_function("talaris2013")
             #    print "Set score function to default"
             #Shouldn't this use the score function that the user selected???
-            scorefxn = create_score_function("talaris2013")
+            scorefxn = create_score_function(selected_scorefxn.strip()) #talaris2013
 
         except:
             writeError("ERROR: Couldn't initialize Rosetta!")
@@ -1414,6 +1418,15 @@ def doINDEL(scriptdir):
                 temp_pose = pose_from_pdb(scaffold_pdb.strip())
                 chain_length = temp_pose.total_residue() / symmetry
                 graft_dist = stop_residue - start_residue + 1
+                
+                #Constraints
+                if areCST:
+                    cstMover = rosetta.protocols.simple_moves.ConstraintSetMover()
+                    cstMover.constraint_file(cstFile.strip())
+                    for cst in [atom_pair_constraint, angle_constraint, dihedral_constraint, coordinate_constraint, constant_constraint]:
+                      scorefxn.set_weight(cst,1.0)
+                    cstMover.apply(temp_pose)
+                    
 
                 # Here's where the actual grafting happens. Graft and add to model list
                 # Don't need to repack, AnchoredGraftMover takes care of it

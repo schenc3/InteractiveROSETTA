@@ -21,7 +21,7 @@ from tools import *
 class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
     def __init__(self, parent, W, H):
         #if (platform.system() == "Windows"):
-        wx.lib.scrolledpanel.ScrolledPanel.__init__(self, parent, id=-1, pos=(10, 60), size=(340, H-330), name="ProtFixbb")
+        wx.lib.scrolledpanel.ScrolledPanel.__init__(self, parent, id=-1, pos=(10, 60), size=(340, H-330), name="INDEL")
         winh = H-330
         #else:
             #wx.lib.scrolledpanel.ScrolledPanel.__init__(self, parent, id=-1, pos=(10, 60), size=(340, H-330), name="ProtMinimization")
@@ -29,6 +29,8 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.SetBackgroundColour("#333333")
         self.parent = parent
 
+        self.areCST = False
+        
         if (platform.system() == "Windows"):
             self.lblProt = wx.StaticText(self, -1, "INDEL Loop Design", (25, 15), (270, 25), wx.ALIGN_CENTRE)
             self.lblProt.SetFont(wx.Font(12, wx.DEFAULT, wx.ITALIC, wx.BOLD))
@@ -76,6 +78,14 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.modelMenu.Bind(wx.EVT_COMBOBOX, self.modelMenuSelect)
         self.modelMenu.SetToolTipString("Model on which to perform loop modeling")
         self.selectedModel = ""
+        
+        #Constraints button
+        
+        self.btnCst = wx.Button(self,-1,"Constraints",(170,110),(140,20))
+        self.btnCst.SetFont(wx.Font(10,wx.DEFAULT,wx.NORMAL,wx.BOLD))
+        self.btnCst.SetForegroundColour("#000000")
+        self.btnCst.Bind(wx.EVT_BUTTON,self.open_csts)
+        self.ConstraintSet = []
 
         # N-term anchor selection
 
@@ -295,6 +305,30 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.winscrollpos = 0
         self.Bind(wx.EVT_SCROLLWIN, self.scrolled)
 
+    def open_csts(self,event):
+        '''Creates the Constraints menu and allows constraints to be added.
+        Each time a constraint is added, it is put in the local constraints set,
+        so constraints are maintained as the menu is destroyed and recreated'''
+        try:
+         import constraints
+         # print 'constraints imported'
+         self.frame = wx.Frame(None,-1,title="Constraints Menu")
+         # print 'frame generated'
+         self.ConstraintPanel=constraints.ConstraintPanel(self.frame,self)
+         self.frame.Fit()
+         # print 'constraintpanel created'
+         self.frame.Show()
+         # print 'showing frame'
+
+         self.ConstraintPanel.setSelectWin(self.selectWin)
+         self.ConstraintPanel.setSeqWin(self.seqWin)
+         self.ConstraintPanel.setPyMOL(self.pymol)
+        except Exception as e:
+         import traceback
+         # print 'Error importing constraints',e.message
+         traceback.print_tb(sys.exc_info()[2])
+         pass
+
     def showHelp(self, event):
         # Open the help page
         if (platform.system() == "Darwin"):
@@ -345,6 +379,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.RedundancyCutoff.Enable()
         self.btnINDEL.Enable()
         self.preserve_sequence.Enable()
+        self.btnCst.Enable()
         self.seqWin.cannotDelete = False
 
 
@@ -368,6 +403,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.preserve_sequence.Disable()
         self.save_model.Disable()
         self.save_all.Disable()
+        self.btnCst.Disable()
 
     def isAA(self, residue):
         return residue.resname in "ALA CYS ASP GLU PHE GLY HIS ILE LYS LEU MET ASN PRO GLN ARG SER THR VAL TRP TYR "
@@ -1114,6 +1150,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.ResultsMin.Enable()
         self.ResultsMax.Enable()
         self.btnClear.Enable()
+        self.btnCst.Enable()
 
         #self.btnLoopType.Enable()
         #if (self.loopType == "De Novo"):
@@ -1146,6 +1183,16 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.seqWin.labelMsg.SetLabel("")
         self.seqWin.labelMsg.SetFont(wx.Font(10, wx.DEFAULT, wx.ITALIC, wx.BOLD))
         self.seqWin.labelMsg.SetForegroundColour("#FFFFFF")
+
+    def save_constraints(self):
+      constraints = self.ConstraintSet
+      if len(constraints) != 0:
+          self.areCST = True
+          goToSandbox()
+          output = open("indel.cst",'w+')
+          for [pdb,poseindx,constraint] in constraints:
+            output.write('%s\n'%(constraint))
+          output.close()
 
     def INDELClick(self, event):
         # This is also the "Finalize!" button
@@ -1180,6 +1227,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             self.btnINDEL.SetToolTipString("Cancel the INDEL simulation")
             self.stage = 1
             logInfo("Clicked the INDEL button")
+            self.save_constraints()
             self.tmrKIC = wx.Timer(self)
             self.Bind(wx.EVT_TIMER, self.threadINDEL, self.tmrKIC)
             self.tmrKIC.Start(1000)
@@ -1419,6 +1467,8 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             f.write("SYMMETRY\t" + str(self.symmetry_value) + "\n")
             f.write("DUPLICATE_CUTOFF\t" + str(self.RedundancyCutoff.GetValue()) + "\n")
             f.write("COLLISION\t" + str(collision_cutoff) + "\n")
+            if self.areCST: f.write("CONSTRAINTS\tindel.cst\n")
+            f.write("SCOREFXN\t%s\n"%(self.selectWin.SelectScorefxnBtn.GetLabel()))
 
             if len(complex_pdbs) > 0:
                 for pdb in complex_pdbs:
