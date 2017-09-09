@@ -561,7 +561,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
     def FinalFreeze(self,pdb,residue1,residue2,residue3,atom3,func,x0,sd):
         func = ''.join(func.upper().split(' '))
-        constraintStem = "%s %s %s %s %s"%(atom3, residue3.split(":")[0],func,x0,sd)
+        constraintStem = "%s %s %s"%(func,x0,sd)
         residueList = self.getResidues()
         indx1 = residueList.index(residue1)
         indx2 = residueList.index(residue2)
@@ -574,7 +574,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
                     if atom.strip()[0] == 'H': continue
                     print residue,atom,poseindx
                     x,y,z = self.getCoordinates(residue,atom,poseindx)
-                    constraintString = "CoordinateConstraint %s %s %s %s %s %s"%(atom,r_indx,x,y,z,constraintStem)
+                    constraintString = "CoordinateConstraint %s %s %s %s %s %s %s %s"%(atom,r_indx,atom3,residue3.split(":")[0],x,y,z,constraintStem)
                     self.minPanel.ConstraintSet.append([pdb,self.CurrentConstraint['poseindx'],constraintString])
                     self.addToGrid("%s: %s"%(pdb,constraintString))
         else:

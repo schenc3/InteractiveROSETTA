@@ -1421,11 +1421,18 @@ def doINDEL(scriptdir):
                 
                 #Constraints
                 if areCST:
+                    print "areCST",cstFile
                     cstMover = rosetta.protocols.simple_moves.ConstraintSetMover()
                     cstMover.constraint_file(cstFile.strip())
                     for cst in [atom_pair_constraint, angle_constraint, dihedral_constraint, coordinate_constraint, constant_constraint]:
                       scorefxn.set_weight(cst,1.0)
-                    cstMover.apply(temp_pose)
+                    try:
+                        cstMover.apply(temp_pose)
+                    except Exception as e:
+                        info = sys.exc_info()
+                        print e.message
+                        import traceback
+                        traceback.print_exception(*info)
                     
 
                 # Here's where the actual grafting happens. Graft and add to model list
