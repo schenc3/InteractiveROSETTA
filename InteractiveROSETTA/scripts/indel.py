@@ -1221,8 +1221,11 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             # Keep track of the temporary name so we can remove it from the pymol window in a second
             # Rename the chosen model pdb file to its final name
             pymol_indel_model_selected = self.indel_model_selected
-            os.rename(self.indel_model_selected, self.selectedModel + "_INDEL.pdb")
-            self.indel_model_selected = self.selectedModel + "_INDEL.pdb"
+            try:
+                os.rename(self.indel_model_selected, self.selectedModel + "_INDEL.pdb")
+                self.indel_model_selected = self.selectedModel + "_INDEL.pdb"
+            except:
+                pass
 
             # Try to get rid of the models not chosen
             for i in range(len(self.model_names)):
