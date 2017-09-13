@@ -420,7 +420,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             return self.symmetry_value != 1
 
         # Check if each chain is the same size
-        for i in range(len(chains)):
+        for i in range(0,1): #len(chains)
             print 'chain i:',sorted(chains)[i]
             i_chainlength = len([x for x in sorted(chains)[i].get_residues() if self.isAA(x)])
             for j in range(i+1, len(chains)):
@@ -1389,7 +1389,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.seqWin.cannotDelete = False
         self.parent.GoBtn.Enable()
         self.modelMenu.Enable()
-        self.btnLoopType.Enable()
+        # self.btnLoopType.Enable()
         self.beginMenu.Enable()
         self.endMenu.Enable()
         self.txtSequence.Enable()

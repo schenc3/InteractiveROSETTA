@@ -1403,7 +1403,7 @@ def doINDEL(scriptdir):
 
             if i < 97:
                 f = open("progress", 'w')
-                f.write("%d/100"%(i))
+                f.write("%d/%d"%(i,min((num_results+1),(max_results+1))))
                 f.close()
 
 
@@ -1426,18 +1426,13 @@ def doINDEL(scriptdir):
                     cstMover.constraint_file(cstFile.strip())
                     for cst in [atom_pair_constraint, angle_constraint, dihedral_constraint, coordinate_constraint, constant_constraint]:
                       scorefxn.set_weight(cst,1.0)
-                    try:
-                        cstMover.apply(temp_pose)
-                    except Exception as e:
-                        info = sys.exc_info()
-                        print e.message
-                        import traceback
-                        traceback.print_exception(*info)
+                    cstMover.apply(temp_pose)
                     
 
                 # Here's where the actual grafting happens. Graft and add to model list
                 # Don't need to repack, AnchoredGraftMover takes care of it
                 for j in range(0, symmetry):
+                    print "Grafting symmetric unit %i of %i"%(j+1,symmetry)
                     startgraft = start_residue + (j * chain_length) + (j * (loop.total_residue() - graft_dist ))
                     endgraft   = stop_residue +  (j * chain_length) + (j * (loop.total_residue() - graft_dist ))
                     graftmover = graft.AnchoredGraftMover(startgraft, endgraft , loop, 1, 1)
