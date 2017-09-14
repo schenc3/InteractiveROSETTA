@@ -1416,7 +1416,10 @@ def doINDEL(scriptdir):
                 loopfile = "loopout_" + str(i) + ".pdb"
                 loop = pose_from_pdb(loopfile)
                 temp_pose = pose_from_pdb(scaffold_pdb.strip())
-                chain_length = temp_pose.total_residue() / symmetry
+                # chain_length = temp_pose.total_residue() / symmetry
+                # print type(temp_pose.split_by_chain())
+                # print temp_pose.split_by_chain()[1].total_residue()
+                chain_length = temp_pose.split_by_chain()[1].total_residue()
                 graft_dist = stop_residue - start_residue + 1
                 
                 #Constraints
