@@ -549,13 +549,13 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
         print residue,atom,poseindx
         #self.seqWin.poses[poseindx][0][chain]
         atoms = self.seqWin.poses[poseindx][0][chain][int(seqpos)].get_atoms()
-        print "atoms:",atoms
+        # print "atoms:",atoms
         for atom_ in atoms:
             print atom_.get_id().strip(),atom.strip()
             if atom_.get_id().strip() == atom.strip():
-                print "hoooray!"
+                # print "hoooray!"
                 coord = atom_.get_coord()
-                print "coord:",coord
+                # print "coord:",coord
                 x,y,z = coord
                 return x,y,z
 
