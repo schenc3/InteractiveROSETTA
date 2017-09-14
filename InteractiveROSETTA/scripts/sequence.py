@@ -3031,7 +3031,10 @@ class SequenceWin(wx.Frame):
                     resi = int(code.split("|")[0])
                     ss = code.split("|")[1].upper()
                     print "ss",ss
-                    (color, tcolor) = self.sscolormap[ss]
+                    try:
+                        (color, tcolor) = self.sscolormap[ss]
+                    except:
+                        (color, tcolor) = ("white","black")
                     for x in range(0, len(self.indxToSeqPos[r])):
                         if (self.indxToSeqPos[r][x] != "-" and self.indxToSeqPos[r][x][1] == int(resi)):
                             c = x
