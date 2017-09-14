@@ -1380,7 +1380,12 @@ def doINDEL(scriptdir):
             #    scorefxn = create_score_function("talaris2013")
             #    print "Set score function to default"
             #Shouldn't this use the score function that the user selected???
-            scorefxn = create_score_function(selected_scorefxn.strip()) #talaris2013
+            # scorefxn = create_score_function(selected_scorefxn.strip()) #talaris2013
+            scorefxn = ScoreFunction()
+            try:
+                scorefxn.add_weights_from_file(selected_scorefxn.strip())
+            except:
+                raise Exception("ERROR: The scoring function weights could not be initialized")
 
         except:
             writeError("ERROR: Couldn't initialize Rosetta!")
