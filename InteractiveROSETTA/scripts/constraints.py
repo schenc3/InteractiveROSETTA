@@ -52,6 +52,19 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.ClearBtn.SetFont(wx.Font(10,wx.DEFAULT,wx.ITALIC,wx.BOLD))
       self.ClearBtn.Bind(wx.EVT_BUTTON,self.ClearConstraints)
       self.Sizer.Add(self.ClearBtn,(0,2),(1,1))
+      #Save Constraints Button
+      self.SaveBtn = wx.Button(self,-1,label="Save Constraints")
+      self.SaveBtn.SetForegroundColour("#000000")
+      self.SaveBtn.SetFont(wx.Font(10,wx.DEFAULT,wx.ITALIC,wx.BOLD))
+      self.SaveBtn.Bind(wx.EVT_BUTTON,self.saveCST)
+      self.Sizer.Add(self.SaveBtn,(0,3),(1,1))
+      #Load Constraints Button
+      self.LoadBtn = wx.Button(self,-1,label="Load Constraints")
+      self.LoadBtn.SetForegroundColour("#000000")
+      self.LoadBtn.SetFont(wx.Font(10,wx.DEFAULT,wx.ITALIC,wx.BOLD))
+      self.LoadBtn.Bind(wx.EVT_BUTTON,self.loadCST)
+      self.Sizer.Add(self.LoadBtn,(0,4),(1,1))
+      
       '''
       #Help Button
         if platform.system() == 'Darwin':
@@ -71,7 +84,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.HelpBtn.Bind(wx.EVT_BUTTON,self.showHelp)
       self.HelpBtn.SetToolTipString("Display the help file for this window")
       logInfo('408: Help button set')
-      self.Sizer.Add(self.HelpBtn,(0,3),(1,1))
+      self.Sizer.Add(self.HelpBtn,(0,5),(1,1))
 
       #Constraints Grid
       # print 'starting constraints grid'
@@ -94,7 +107,56 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       self.SetupScrolling()
       # print 'scrolling'
 
-
+    def saveCST(self,event):
+        if len(self.minPanel.ConstraintSet) == 0:
+            wx.MessageBox("There's nothing to save to a constraints file!","No Constraints",wx.OK|wx.ICON_EXCLAMATION)
+            return
+        logInfo("Clicked the Save CST button")
+        dlg = wx.FileDialog(self,message="Save Constraint File",defaultDir=self.seqWin.cwd,defaultFile="",wildcard="Constraints (*.cst)|*.cst",style=wx.SAVE | wx.CHANGE_DIR)
+        if dlg.ShowModal() == wx.ID_OK:
+            filename = dlg.GetPath()
+            if platform.system() == "Windows":
+                self.seqWin.cwd = "\\".join(filename.strip().split("\\")[:-1])
+            else:
+                self.seqWin.cwd = "/".join(filename.strip().split("/")[:-1])
+            self.seqWin.saveWindowData(None)
+            #check if file already exists and ask about overwriting
+            if os.path.isfile(filename):
+                dlg2 = wx.MessageDialog(self,"The file %s already exists.  Overwrite it?"%(filename),"Filename Already Exists",wx.YES_NO | wx.ICON_QUESTION | wx.CENTRE)
+                if dlg2.ShowModal() == wx.ID_NO:
+                    dlg2.Destroy()
+                    logInfo("Canceled save operation due to filename already existing")
+            output = open(filename,"w+")
+            for [pdb,poseindx,constraint] in self.minPanel.ConstraintSet:
+                output.write("%s\n"%(constraint))
+            output.close()
+        else:
+            logInfo("Canceled save constraints operation")
+        
+    def loadCST(self,event):
+        logInfo("Load CST button clicked")
+        dlg = wx.FileDialog(self,message="Choose a File",defaultDir=self.seqWin.cwd,defaultFile="",wildcard="Constraints (*.cst)|*.cst",style=wx.OPEN | wx.CHANGE_DIR)
+        if dlg.ShowModal() == wx.ID_OK:
+            filename = dlg.GetPath()
+            if platform.system() == "Windows":
+                self.seqWin.cwd = "\\".join(filename.strip().split("\\")[:-1])
+            else:
+                self.seqWin.cwd = "/".join(filename.strip().split("/")[:-1])
+            self.seqWin.saveWindowData(None)
+            try:
+                f = open(filename.strip())
+            except:
+                wx.MessageBox("The file %s cannot be opened!","File Cannot Be Read",wx.OK|wx.ICON_EXCLAMATION)
+                return
+        logInfo("Loaded data from a constraints file", filename)
+        print self.getPDBs()
+        dlg2 = wx.SingleChoiceDialog(self,message="Loading constraints for what pdb?",caption="Select PDB",choices=self.getPDBs(),style=wx.OK | wx.CANCEL)
+        if dlg2.ShowModal() == wx.ID_OK:
+            pdb = dlg2.GetStringSelection()
+            for line in f:
+                self.minPanel.ConstraintSet.append([pdb,-1,line.strip()])
+                self.addToGrid("%s: %s"%(pdb,line.strip()))
+        
     def showHelp(self, event):
         '''Open the help page'''
         if platform.system() == 'Darwin':
@@ -138,6 +200,34 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
 
     #Event Listeners
 
+    def getPDBs(self):
+        pdbs = []
+        if self.minPanel.GetName() == "ProtMinimization": 
+            for [indx, r, seqpos, poseindx, chainoffset, minType,r_indx] in self.minPanel.minmap:
+              # print "poseindx",poseindx
+              if len(pdbs) == 0:
+                # print 'appending',poseindx
+                pdbs.append(poseindx)
+              isThere = False
+              for i in range(0,len(pdbs)):
+                if poseindx == pdbs[i]:
+                  # print("%i = %i"%(poseindx,pdbs[i]))
+                  isThere = True
+                  break
+              if not isThere:
+                # print 'appending',poseindx
+                pdbs.append(poseindx)
+            # print pdbs
+            for i in range(1,len(pdbs)):
+              pdbs[i] = str(self.seqWin.poses[pdbs[i]].get_id())
+              # print pdbs[i]
+      
+        #INDEL
+        if self.minPanel.GetName() == "INDEL":
+          pdbs.append(str(self.minPanel.selectedModel))
+        return pdbs
+        
+
     def addConstraint(self,event):
       '''Adds a new constraint to the set of constraints'''
       logInfo('Add Constraint button clicked!')
@@ -150,29 +240,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       #PDB MENU
       pdbs = ['Choose PDB']
       # print pdbs
-      if self.minPanel.GetName() == "ProtMinimization": 
-          for [indx, r, seqpos, poseindx, chainoffset, minType,r_indx] in self.minPanel.minmap:
-            # print "poseindx",poseindx
-            if len(pdbs) == 0:
-              # print 'appending',poseindx
-              pdbs.append(poseindx)
-            isThere = False
-            for i in range(0,len(pdbs)):
-              if poseindx == pdbs[i]:
-                # print("%i = %i"%(poseindx,pdbs[i]))
-                isThere = True
-                break
-            if not isThere:
-              # print 'appending',poseindx
-              pdbs.append(poseindx)
-          # print pdbs
-          for i in range(1,len(pdbs)):
-            pdbs[i] = str(self.seqWin.poses[pdbs[i]].get_id())
-            # print pdbs[i]
-    
-      #INDEL
-      if self.minPanel.GetName() == "INDEL":
-        pdbs.append(self.minPanel.selectedModel)
+      pdbs.append(self.getPDBs)
       # print pdbs
       self.PdbMenu = wx.ComboBox(self,choices=pdbs,style=wx.CB_READONLY)
       self.PdbMenu.SetSelection(0)
