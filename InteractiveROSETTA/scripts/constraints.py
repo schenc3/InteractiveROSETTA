@@ -204,23 +204,23 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
         pdbs = []
         if self.minPanel.GetName() == "ProtMinimization": 
             for [indx, r, seqpos, poseindx, chainoffset, minType,r_indx] in self.minPanel.minmap:
-              # print "poseindx",poseindx
+            #   print "poseindx",poseindx
               if len(pdbs) == 0:
                 # print 'appending',poseindx
                 pdbs.append(poseindx)
               isThere = False
               for i in range(0,len(pdbs)):
                 if poseindx == pdbs[i]:
-                  # print("%i = %i"%(poseindx,pdbs[i]))
+                #   print("%i = %i"%(poseindx,pdbs[i]))
                   isThere = True
                   break
               if not isThere:
                 # print 'appending',poseindx
                 pdbs.append(poseindx)
             # print pdbs
-            for i in range(1,len(pdbs)):
+            for i in range(len(pdbs)):
               pdbs[i] = str(self.seqWin.poses[pdbs[i]].get_id())
-              # print pdbs[i]
+            #   print pdbs[i]
       
         #INDEL
         if self.minPanel.GetName() == "INDEL":
@@ -240,7 +240,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       #PDB MENU
       pdbs = ['Choose PDB']
       # print pdbs
-      pdbs = pdbs + self.getPDBs()
+      pdbs += self.getPDBs()
       # print pdbs
       self.PdbMenu = wx.ComboBox(self,choices=pdbs,style=wx.CB_READONLY)
       self.PdbMenu.SetSelection(0)
