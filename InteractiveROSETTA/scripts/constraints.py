@@ -240,7 +240,7 @@ class ConstraintPanel(wx.lib.scrolledpanel.ScrolledPanel):
       #PDB MENU
       pdbs = ['Choose PDB']
       # print pdbs
-      pdbs.append(self.getPDBs)
+      pdbs = pdbs + self.getPDBs()
       # print pdbs
       self.PdbMenu = wx.ComboBox(self,choices=pdbs,style=wx.CB_READONLY)
       self.PdbMenu.SetSelection(0)

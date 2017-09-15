@@ -925,15 +925,19 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
                 # Copy all of the indel models in the sandbox to the desired directory
                 all_model_files = [x for x in os.listdir(os.getcwd()) if x[:5] == "INDEL"]
                 from shutil import copy2
+                n = 1
                 for m in all_model_files:
+                    if ".log" in m: continue
                     # pdb = self.selectedModel
-                    q = m.strip(".pdb")
-                    out = q + "_" + self.selectedModel + ".pdb"
+                    # q = m.strip(".pdb")
+                    q = filename.strip(".pdb")
+                    # out = q + "_" + self.selectedModel + ".pdb"
+                    out = "%s_%i.pdb"%(q,n)
+                    print m,q, out
+                    print self.cwd+'/'+out
 
-                    if (platform.system() == "Windows"):
-                        copy2(m, self.cwd + '\\' + out)
-                    else:
-                        copy2(m, self.cwd + '/' + out)
+                    copy2(m,out)
+                    n += 1
 
             else:
                 logInfo("Cancelled out of Save PDB (Indel)")
