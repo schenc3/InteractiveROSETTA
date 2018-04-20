@@ -25,6 +25,7 @@ class GFIntermediate:
             self.iflag = ""
             #self.state = 0
             self.sym = 0
+            self.Gsolv = 0.
             self.sas = 0.
             self.entropy = 0.
             self.voids = 0
@@ -57,18 +58,19 @@ class GFIntermediate:
                     iseg_num = int(line[6:14])
                     if iseg_num == self.number:
                         #Read in remaining information
-                        line
+                        # line
                         self.iflag = readDAG.readline().split()[0]
                         line = line.split()
                         self.sym = int(line[3])
-                        self.sas = float(line[4])
-                        self.entropy = float(line[5])
-                        self.voids = int(line[6])
-                        self.hbonds = int(line[7])
-                        self.concentration = float(line[8])
+                        self.Gsolv = float(line[4])
+                        self.sas = float(line[5])
+                        self.entropy = float(line[6])
+                        self.voids = int(line[7])
+                        self.hbonds = int(line[8])
+                        self.concentration = float(line[9])
                         self.barrels = []
                         self.barrelflags = []
-                        for i in range(9,17):
+                        for i in range(10,18):
                             self.barrels.append(int(line[i]))
                         for barrel in self.barrels:
                             if barrel != 0:
@@ -78,6 +80,7 @@ class GFIntermediate:
                         return True
                 except Exception as e:
                     sys.stderr.write("Error: "+e.message)
+                    import traceback; traceback.print_exc()
                     sys.stderr.flush()
                     return False
         readDAG.close()
