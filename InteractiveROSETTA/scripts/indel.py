@@ -1474,6 +1474,7 @@ class INDELmodelPanel(wx.lib.scrolledpanel.ScrolledPanel):
             f.write("SYMMETRY\t" + str(self.symmetry_value) + "\n")
             f.write("DUPLICATE_CUTOFF\t" + str(self.RedundancyCutoff.GetValue()) + "\n")
             f.write("COLLISION\t" + str(collision_cutoff) + "\n")
+            f.write("FILEEXTENSION\t%s_\n"%(pdbfile))
             if self.areCST: f.write("CONSTRAINTS\tindel.cst\n")
             # f.write("SCOREFXN\t%s\n"%(self.selectWin.SelectScorefxnBtn.GetLabel()))
             f.write("SCOREFXN\t%s\n"%(self.selectWin.weightsfile))

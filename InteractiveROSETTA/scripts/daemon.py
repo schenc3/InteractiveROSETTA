@@ -331,7 +331,7 @@ def doMinimization():
             raise Exception("ERROR: The Rosetta minimizer failed!")
         # Dump the pdbfile
         outputpdb = pdbfile.split(".pdb")[0] + "_M.pdb"
-        minpose.dump_pdb(outputpdb)
+        minpose.dump_scored_pdb(outputpdb,scorefxn)
         # Update the output file telling the GUI the name of the minimized file and a list of all the energies
         # for display by color in PyMOL
         f.write("OUTPUT\t" + outputpdb + "\n")
@@ -1314,19 +1314,21 @@ def doINDEL(scriptdir):
     f = open("INDELinput", "r")
     for line in f:
         if (line[0:8] == "SCAFFOLD"):
-            scaffold_pdb = line.split('\t')[1]
+            scaffold_pdb = line.split('\t')[1].strip()
         if (line[0:7] == "ANCHORS"):
-            anchors = line.split('\t')
-            anchors.pop(0)
+            anchors = line.split('\t')[1:]
+            # anchors.pop(0)
         if (line[0:8] == "SYMMETRY"):
             symmetry = int(line.split('\t')[1])
         if (line[0:11] == "MAX_RESULTS"):
             max_results = int(line.split('\t')[1])
         if (line[0:8] == "SCOREFXN"):
-            selected_scorefxn = line.split('\t')[1]
+            selected_scorefxn = line.split('\t')[1].strip()
         if line[:11] == "CONSTRAINTS":
-            cstFile = line.split('\t')[1]
+            cstFile = line.split('\t')[1].strip()
             areCST = True
+        if line[:13] == "FILEEXTENSION":
+            fileExtension = line.split('\t')[1].strip()
     f.close()
 
 
@@ -1357,8 +1359,9 @@ def doINDEL(scriptdir):
     except:
        writeError("ERROR: The database query failed! Check input parameters and try again")
        return
-
+    print num_results
     print "Finished lookup"
+    # return
 
 
     # If we got results, try to build models with them
@@ -1415,10 +1418,10 @@ def doINDEL(scriptdir):
             print "\n ==================================================== \n"
             print "\t \t \t Attempting to insert loop " + str(i)
             print "\n ==================================================== \n"
-
+            
             try:
                 # Make a copy of the scaffold, load the loop
-                loopfile = "loopout_" + str(i) + ".pdb"
+                loopfile = "%sloopout_%i.pdb"%(fileExtension,i)
                 loop = pose_from_pdb(loopfile)
                 temp_pose = pose_from_pdb(scaffold_pdb.strip())
                 # chain_length = temp_pose.total_residue() / symmetry
@@ -1436,6 +1439,9 @@ def doINDEL(scriptdir):
                       scorefxn.set_weight(cst,1.0)
                     cstMover.apply(temp_pose)
                     
+                #set chainbreak score terms
+                scorefxn.set_weight(chainbreak,20.0)
+                scorefxn.set_weight(linear_chainbreak,20.0)
 
                 # Here's where the actual grafting happens. Graft and add to model list
                 # Don't need to repack, AnchoredGraftMover takes care of it
@@ -1478,7 +1484,7 @@ def doINDEL(scriptdir):
         f = open("INDELoutputtemp", "w")
         for score, model, length in sorted(zip(scores, models, lengths)):
             outname = "INDELmodel_" + str(i) + ".pdb"
-            model.dump_pdb(outname)
+            model.dump_scored_pdb(outname,scorefxn)
             f.write(outname + "\t" + str(score) + "\t" + str(length) + "\n")
             i += 1
         f.close()
